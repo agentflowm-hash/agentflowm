@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'referralId und status erforderlich' }, { status: 400 });
     }
 
-    const referral = getReferralById(referralId);
+    const referral = await getReferralById(referralId);
     if (!referral) {
       return NextResponse.json({ error: 'Empfehlung nicht gefunden' }, { status: 404 });
     }
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update Status in DB
-    updateReferralStatus(referralId, status, message);
+    await updateReferralStatus(referralId, status, message);
 
     // Erstelle Nachricht basierend auf Status
     let notificationText = '';
@@ -53,30 +53,30 @@ export async function POST(request: NextRequest) {
     switch (status) {
       case 'contacted':
         notificationText =
-          `📞 *Update zu deiner Empfehlung*\n\n` +
+          `*Update zu deiner Empfehlung*\n\n` +
           `Wir haben *${referral.referred_name}* kontaktiert!\n\n` +
           `Wir halten dich über den weiteren Verlauf auf dem Laufenden.`;
         break;
 
       case 'converted':
         notificationText =
-          `🎉 *Tolle Neuigkeiten!*\n\n` +
+          `*Tolle Neuigkeiten!*\n\n` +
           `Deine Empfehlung *${referral.referred_name}* ist jetzt Kunde!\n\n` +
-          `${commission ? `💰 Deine Provision: *${commission}€*\n\n` : ''}` +
-          `Vielen Dank für deine Empfehlung! 🙏`;
+          `${commission ? `Deine Provision: *${commission}€*\n\n` : ''}` +
+          `Vielen Dank für deine Empfehlung!`;
         break;
 
       case 'rejected':
         notificationText =
-          `ℹ️ *Update zu deiner Empfehlung*\n\n` +
+          `*Update zu deiner Empfehlung*\n\n` +
           `Leider hat sich *${referral.referred_name}* gegen eine Zusammenarbeit entschieden.\n\n` +
           `${message ? `Grund: ${message}\n\n` : ''}` +
-          `Danke trotzdem für deine Empfehlung! Jede Empfehlung zählt. 💪`;
+          `Danke trotzdem für deine Empfehlung! Jede Empfehlung zählt.`;
         break;
 
       default:
         notificationText =
-          `ℹ️ *Update zu deiner Empfehlung*\n\n` +
+          `*Update zu deiner Empfehlung*\n\n` +
           `Status für *${referral.referred_name}*: ${status}\n` +
           `${message ? `\n${message}` : ''}`;
     }
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const sent = await sendMessage(referral.referrer_chat_id, notificationText);
 
     if (sent) {
-      console.log(`✅ Notification sent for referral #${referralId} to chat ${referral.referrer_chat_id}`);
+      console.log(`Notification sent for referral #${referralId} to chat ${referral.referrer_chat_id}`);
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json({ error: 'Nachricht konnte nicht gesendet werden' }, { status: 500 });
