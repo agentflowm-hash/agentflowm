@@ -279,7 +279,7 @@ function HeroSection() {
                 Termin buchen
               </Link>
               <Link
-                href="/webseitencheck"
+                href="/website-check"
                 className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg border border-white/20 text-white text-xs sm:text-sm font-semibold hover:bg-white/5 transition-all text-center"
               >
                 Kostenloser Check
@@ -1296,7 +1296,7 @@ function FinalCTA() {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
-              href="/webseitencheck"
+              href="/website-check"
               className="px-5 py-3 rounded-lg bg-gradient-to-r from-[#FC682C] to-[#e55a1f] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FC682C]/25 text-center"
             >
               Kostenloser Webseitencheck
