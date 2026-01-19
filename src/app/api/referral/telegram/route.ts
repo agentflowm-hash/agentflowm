@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nicht eingeloggt' }, { status: 401 });
     }
 
-    const client = validateSession(token);
+    const client = await validateSession(token);
     if (!client || !client.telegram_username) {
       return NextResponse.json({ error: 'Ungültige Session' }, { status: 401 });
     }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hole Chat ID für Telegram
-    const fullClient = getClientByTelegram(client.telegram_username);
+    const fullClient = await getClientByTelegram(client.telegram_username);
     const chatId = fullClient?.telegram_id || client.telegram_id;
 
     if (!chatId) {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Erstelle Empfehlung
-    const referral = createReferralFromTelegram({
+    const referral = await createReferralFromTelegram({
       referrerTelegram: client.telegram_username,
       referrerChatId: chatId,
       referrerName: client.name,
@@ -67,31 +67,31 @@ export async function POST(request: NextRequest) {
       context,
     });
 
-    console.log(`✅ Referral #${referral.id} created via website by @${client.telegram_username}`);
+    console.log(`Referral #${referral.id} created via website by @${client.telegram_username}`);
 
     // Bestätigung an User per Telegram
     await sendTelegramMessage(chatId,
-      `🎉 *Empfehlung erfolgreich!*\n\n` +
+      `*Empfehlung erfolgreich!*\n\n` +
       `Deine Empfehlung wurde über die Website eingereicht.\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `👤 *${referral.referred_name}*\n` +
-      `📱 ${referral.referred_phone}\n` +
-      `${referral.referred_company ? `🏢 ${referral.referred_company}\n` : ''}` +
-      `💬 ${referral.context}\n\n` +
+      `*${referral.referred_name}*\n` +
+      `${referral.referred_phone}\n` +
+      `${referral.referred_company ? `${referral.referred_company}\n` : ''}` +
+      `${referral.context}\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n\n` +
       `Wir halten dich über den Status auf dem Laufenden!`
     );
 
     // Benachrichtige Admin
     await sendTelegramMessage(parseInt(ADMIN_CHAT_ID),
-      `🎁 *Neue Empfehlung (Website)*\n\n` +
+      `*Neue Empfehlung (Website)*\n\n` +
       `Von: @${client.telegram_username} (${client.name})\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `👤 *${referral.referred_name}*\n` +
-      `📱 ${referral.referred_phone}\n` +
-      `${referral.referred_email ? `📧 ${referral.referred_email}\n` : ''}` +
-      `${referral.referred_company ? `🏢 ${referral.referred_company}\n` : ''}` +
-      `💬 ${referral.context}\n\n` +
+      `*${referral.referred_name}*\n` +
+      `${referral.referred_phone}\n` +
+      `${referral.referred_email ? `${referral.referred_email}\n` : ''}` +
+      `${referral.referred_company ? `${referral.referred_company}\n` : ''}` +
+      `${referral.context}\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n\n` +
       `ID: #${referral.id}`
     );

@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verifiziere Code in DB
-    const loginCode = verifyLoginCode(cleanCode);
+    const loginCode = await verifyLoginCode(cleanCode);
 
     if (!loginCode) {
       return NextResponse.json(
@@ -39,16 +39,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Erstelle/Update Portal Client
-    const client = upsertClientByTelegram({
+    const client = await upsertClientByTelegram({
       telegramUsername: loginCode.telegram_username,
       telegramId: loginCode.telegram_id,
       firstName: loginCode.first_name || loginCode.telegram_username,
     });
 
     // Erstelle Session
-    const sessionToken = createPortalSession(client.id);
+    const sessionToken = await createPortalSession(client.id);
 
-    console.log(`✅ Login successful: @${loginCode.telegram_username} (Client #${client.id})`);
+    console.log(`Login successful: @${loginCode.telegram_username} (Client #${client.id})`);
 
     // Response mit Cookie
     const response = NextResponse.json({

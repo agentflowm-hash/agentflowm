@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ authenticated: false });
     }
 
-    const client = validateSession(token);
+    const client = await validateSession(token);
 
     if (!client) {
       // Session ungültig - Cookie löschen
