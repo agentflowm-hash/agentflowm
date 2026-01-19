@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // ═══════════════════════════════════════════════════════════════
 //                    SEND ACCESS CODE VIA TELEGRAM
@@ -50,18 +50,14 @@ export async function POST(
       return NextResponse.json({ error: "Invalid client ID" }, { status: 400 });
     }
 
-    const db = getSqliteDb();
-
     // Hole Kunden-Daten
-    const client = db
-      .prepare(
-        `
-      SELECT * FROM portal_clients WHERE id = ?
-    `,
-      )
-      .get(clientId) as any;
+    const { data: client, error: clientError } = await db
+      .from("portal_clients")
+      .select("*")
+      .eq("id", clientId)
+      .single();
 
-    if (!client) {
+    if (clientError || !client) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
 

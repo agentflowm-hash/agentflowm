@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 export async function GET() {
   const authenticated = await isAuthenticated();
@@ -9,23 +9,18 @@ export async function GET() {
   }
 
   try {
-    const db = getSqliteDb();
     const notifications: any[] = [];
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
     // Neue Leads (letzte 24 Stunden)
-    const recentLeads = db
-      .prepare(
-        `
-      SELECT id, name, email, created_at
-      FROM leads
-      WHERE created_at > datetime('now', '-24 hours')
-      ORDER BY created_at DESC
-      LIMIT 10
-    `,
-      )
-      .all() as any[];
+    const { data: recentLeads } = await db
+      .from('leads')
+      .select('id, name, email, created_at')
+      .gte('created_at', yesterday)
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-    for (const lead of recentLeads) {
+    for (const lead of recentLeads || []) {
       notifications.push({
         id: `lead-${lead.id}`,
         type: "lead",
@@ -38,19 +33,14 @@ export async function GET() {
     }
 
     // Neue Website-Checks (letzte 24 Stunden)
-    const recentChecks = db
-      .prepare(
-        `
-      SELECT id, url, score_overall, created_at
-      FROM website_checks
-      WHERE created_at > datetime('now', '-24 hours')
-      ORDER BY created_at DESC
-      LIMIT 10
-    `,
-      )
-      .all() as any[];
+    const { data: recentChecks } = await db
+      .from('website_checks')
+      .select('id, url, score_overall, created_at')
+      .gte('created_at', yesterday)
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-    for (const check of recentChecks) {
+    for (const check of recentChecks || []) {
       const domain = check.url.replace(/^https?:\/\//, "").split("/")[0];
       notifications.push({
         id: `check-${check.id}`,
@@ -64,19 +54,14 @@ export async function GET() {
     }
 
     // Neue Empfehlungen (letzte 24 Stunden)
-    const recentReferrals = db
-      .prepare(
-        `
-      SELECT id, referrer_name, referred_name, created_at
-      FROM referrals
-      WHERE created_at > datetime('now', '-24 hours')
-      ORDER BY created_at DESC
-      LIMIT 10
-    `,
-      )
-      .all() as any[];
+    const { data: recentReferrals } = await db
+      .from('referrals')
+      .select('id, referrer_name, referred_name, created_at')
+      .gte('created_at', yesterday)
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-    for (const referral of recentReferrals) {
+    for (const referral of recentReferrals || []) {
       notifications.push({
         id: `referral-${referral.id}`,
         type: "referral",
@@ -89,20 +74,26 @@ export async function GET() {
     }
 
     // Ungelesene Kundennachrichten
-    const unreadMessages = db
-      .prepare(
-        `
-      SELECT pm.id, pm.message, pm.sender_name, pm.created_at, pp.name as project_name, pp.id as project_id
-      FROM portal_messages pm
-      JOIN portal_projects pp ON pm.project_id = pp.id
-      WHERE pm.sender_type = 'client' AND pm.is_read = 0
-      ORDER BY pm.created_at DESC
-      LIMIT 10
-    `,
-      )
-      .all() as any[];
+    const { data: unreadMessages } = await db
+      .from('portal_messages')
+      .select(`
+        id,
+        message,
+        sender_name,
+        created_at,
+        project_id,
+        portal_projects (
+          id,
+          name
+        )
+      `)
+      .eq('sender_type', 'client')
+      .eq('is_read', false)
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-    for (const msg of unreadMessages) {
+    for (const msg of unreadMessages || []) {
+      const project = (msg as any).portal_projects;
       notifications.push({
         id: `message-${msg.id}`,
         type: "message",
@@ -122,7 +113,7 @@ export async function GET() {
     );
 
     // Zähle ungelesene Nachrichten
-    const unreadCount = unreadMessages.length;
+    const unreadCount = (unreadMessages || []).length;
 
     return NextResponse.json({
       notifications: notifications.slice(0, 20),

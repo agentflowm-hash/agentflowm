@@ -1,68 +1,141 @@
-import Database from 'better-sqlite3';
-import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import * as schema from './schema';
-import path from 'path';
-import fs from 'fs';
+import { supabaseAdmin } from '../supabase';
 
 // ═══════════════════════════════════════════════════════════════
 //                    DATABASE CONNECTION
-// Shared database with main app - path relative to project root
+// Supabase client for Admin Portal
 // ═══════════════════════════════════════════════════════════════
 
-// Database path - shared with main app (one level up from admin folder)
-// Admin runs from /admin folder, so we need to go up one level to reach /data
-function getDbPath(): string {
-  if (process.env.DATABASE_PATH) {
-    return process.env.DATABASE_PATH;
-  }
+export const db = supabaseAdmin;
 
-  const cwd = process.cwd();
-  // If running from admin folder, go up to parent
-  if (cwd.endsWith('/admin') || cwd.endsWith('\\admin')) {
-    return path.join(cwd, '..', 'data', 'agentflow.db');
-  }
-  // If running from project root
-  return path.join(cwd, 'data', 'agentflow.db');
-}
-const DB_PATH = getDbPath();
-
-let sqliteInstance: Database.Database | null = null;
-let drizzleDb: BetterSQLite3Database<typeof schema> | null = null;
-
-function getSqlite(): Database.Database {
-  if (!sqliteInstance) {
-    const dataDir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    
-    sqliteInstance = new Database(DB_PATH);
-    sqliteInstance.pragma('journal_mode = WAL');
-    sqliteInstance.pragma('foreign_keys = ON');
-  }
-  return sqliteInstance;
+// Type definitions
+export interface Lead {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  source: string;
+  package_interest?: string;
+  message?: string;
+  budget?: string;
+  status: string;
+  priority?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  contacted_at?: string;
 }
 
-function getDrizzle(): BetterSQLite3Database<typeof schema> {
-  if (!drizzleDb) {
-    drizzleDb = drizzle(getSqlite(), { schema });
-  }
-  return drizzleDb;
+export interface WebsiteCheck {
+  id: number;
+  url: string;
+  email?: string;
+  score_overall?: number;
+  score_security?: number;
+  score_seo?: number;
+  score_accessibility?: number;
+  score_performance?: number;
+  score_structure?: number;
+  load_time?: number;
+  https_enabled?: boolean;
+  result_json?: string;
+  ip_hash?: string;
+  user_agent?: string;
+  created_at: string;
 }
 
-// Export database instance
-export const db = {
-  insert: <T extends Parameters<BetterSQLite3Database<typeof schema>['insert']>[0]>(table: T) => 
-    getDrizzle().insert(table),
-  select: () => getDrizzle().select(),
-  update: <T extends Parameters<BetterSQLite3Database<typeof schema>['update']>[0]>(table: T) => 
-    getDrizzle().update(table),
-  delete: <T extends Parameters<BetterSQLite3Database<typeof schema>['delete']>[0]>(table: T) => 
-    getDrizzle().delete(table),
-};
-
-export function getSqliteDb(): Database.Database {
-  return getSqlite();
+export interface Referral {
+  id: number;
+  referrer_name: string;
+  referrer_email?: string;
+  referrer_phone?: string;
+  referrer_telegram?: string;
+  referrer_chat_id?: number;
+  referred_name: string;
+  referred_email?: string;
+  referred_phone?: string;
+  referred_company?: string;
+  context?: string;
+  notes?: string;
+  status: string;
+  converted_lead_id?: number;
+  commission_status?: string;
+  commission_amount?: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export { schema };
+export interface Subscriber {
+  id: number;
+  email: string;
+  name?: string;
+  topics?: string;
+  frequency?: string;
+  status: string;
+  confirm_token?: string;
+  created_at: string;
+  confirmed_at?: string;
+  unsubscribed_at?: string;
+}
+
+export interface PortalClient {
+  id: number;
+  name: string;
+  email?: string;
+  company?: string;
+  phone?: string;
+  telegram_username?: string;
+  telegram_id?: number;
+  access_code: string;
+  status: string;
+  last_login?: string;
+  created_at: string;
+}
+
+export interface PortalProject {
+  id: number;
+  client_id: number;
+  name: string;
+  package?: string;
+  status: string;
+  status_label?: string;
+  progress: number;
+  manager?: string;
+  start_date?: string;
+  deadline?: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PortalMilestone {
+  id: number;
+  project_id: number;
+  title: string;
+  status: string;
+  due_date?: string;
+  completed_at?: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface PortalMessage {
+  id: number;
+  project_id: number;
+  sender_type: string;
+  sender_name?: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface PortalFile {
+  id: number;
+  project_id: number;
+  name: string;
+  url: string;
+  type?: string;
+  size?: number;
+  uploaded_by?: string;
+  created_at: string;
+}

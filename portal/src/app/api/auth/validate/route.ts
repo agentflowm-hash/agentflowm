@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ valid: false }, { status: 400 });
     }
 
-    const client = validateAccessCode(code);
+    const client = await validateAccessCode(code);
 
     if (!client) {
       return NextResponse.json({ valid: false }, { status: 404 });

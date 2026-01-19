@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // Erlaubte Status-Werte für Meilensteine
 const ALLOWED_MILESTONE_STATUS = ["pending", "current", "done"] as const;
@@ -26,17 +26,17 @@ export async function GET(
       );
     }
 
-    const db = getSqliteDb();
+    const { data: milestones, error } = await db
+      .from("portal_milestones")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("sort_order", { ascending: true });
 
-    const milestones = db
-      .prepare(
-        `
-      SELECT * FROM portal_milestones WHERE project_id = ? ORDER BY sort_order ASC
-    `,
-      )
-      .all(projectId);
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
-    return NextResponse.json({ milestones });
+    return NextResponse.json({ milestones: milestones || [] });
   } catch (error) {
     console.error("Milestones GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
@@ -91,59 +91,55 @@ export async function PATCH(
       );
     }
 
-    const db = getSqliteDb();
-
     // Prüfen ob Meilenstein existiert und zum Projekt gehört
-    const milestone = db
-      .prepare(
-        `
-      SELECT * FROM portal_milestones WHERE id = ? AND project_id = ?
-    `,
-      )
-      .get(msId, projectId);
+    const { data: milestone, error: fetchError } = await db
+      .from("portal_milestones")
+      .select("*")
+      .eq("id", msId)
+      .eq("project_id", projectId)
+      .single();
 
-    if (!milestone) {
+    if (fetchError || !milestone) {
       return NextResponse.json(
         { error: "Milestone not found" },
         { status: 404 },
       );
     }
 
-    const updates: string[] = [];
-    const values: (string | number)[] = [];
+    const updateData: Record<string, string | number> = {};
 
     if (status !== undefined) {
-      updates.push("status = ?");
-      values.push(status);
+      updateData.status = status;
     }
     if (date !== undefined) {
-      updates.push("date = ?");
-      values.push(date || "");
+      updateData.date = date || "";
     }
     if (title !== undefined) {
-      updates.push("title = ?");
-      values.push(title);
+      updateData.title = title;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No fields to update" },
         { status: 400 },
       );
     }
 
-    values.push(msId);
-    const query = `UPDATE portal_milestones SET ${updates.join(", ")} WHERE id = ?`;
-    db.prepare(query).run(...values);
+    const { data: updated, error: updateError } = await db
+      .from("portal_milestones")
+      .update(updateData)
+      .eq("id", msId)
+      .select()
+      .single();
+
+    if (updateError) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     // Bei Status-Änderung: Projekt-Progress aktualisieren
     if (status !== undefined) {
-      updateProjectProgress(db, projectId);
+      await updateProjectProgress(projectId);
     }
-
-    const updated = db
-      .prepare("SELECT * FROM portal_milestones WHERE id = ?")
-      .get(msId);
 
     return NextResponse.json({ success: true, milestone: updated });
   } catch (error) {
@@ -187,45 +183,43 @@ export async function POST(
       );
     }
 
-    const db = getSqliteDb();
-
     // Prüfen ob Projekt existiert
-    const project = db
-      .prepare("SELECT * FROM portal_projects WHERE id = ?")
-      .get(projectId);
-    if (!project) {
+    const { data: project, error: projectError } = await db
+      .from("portal_projects")
+      .select("*")
+      .eq("id", projectId)
+      .single();
+
+    if (projectError || !project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     // Höchste sort_order finden
-    const maxSort = db
-      .prepare(
-        `
-      SELECT MAX(sort_order) as max FROM portal_milestones WHERE project_id = ?
-    `,
-      )
-      .get(projectId) as { max: number | null };
+    const { data: maxSortData } = await db
+      .from("portal_milestones")
+      .select("sort_order")
+      .eq("project_id", projectId)
+      .order("sort_order", { ascending: false })
+      .limit(1)
+      .single();
 
-    const sortOrder = (maxSort?.max || 0) + 1;
+    const sortOrder = (maxSortData?.sort_order || 0) + 1;
 
-    const result = db
-      .prepare(
-        `
-      INSERT INTO portal_milestones (project_id, title, status, date, sort_order)
-      VALUES (?, ?, ?, ?, ?)
-    `,
-      )
-      .run(
-        projectId,
-        title.trim(),
-        status || "pending",
-        date || null,
-        sortOrder,
-      );
+    const { data: newMilestone, error: insertError } = await db
+      .from("portal_milestones")
+      .insert({
+        project_id: projectId,
+        title: title.trim(),
+        status: status || "pending",
+        date: date || null,
+        sort_order: sortOrder,
+      })
+      .select()
+      .single();
 
-    const newMilestone = db
-      .prepare("SELECT * FROM portal_milestones WHERE id = ?")
-      .get(result.lastInsertRowid);
+    if (insertError) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
@@ -238,19 +232,13 @@ export async function POST(
 }
 
 // Hilfsfunktion: Projekt-Progress basierend auf Meilensteinen berechnen
-function updateProjectProgress(
-  db: ReturnType<typeof getSqliteDb>,
-  projectId: number,
-) {
-  const milestones = db
-    .prepare(
-      `
-    SELECT status FROM portal_milestones WHERE project_id = ?
-  `,
-    )
-    .all(projectId) as { status: string }[];
+async function updateProjectProgress(projectId: number) {
+  const { data: milestones } = await db
+    .from("portal_milestones")
+    .select("status")
+    .eq("project_id", projectId);
 
-  if (milestones.length === 0) return;
+  if (!milestones || milestones.length === 0) return;
 
   const completed = milestones.filter((m) => m.status === "done").length;
   const current = milestones.filter((m) => m.status === "current").length;
@@ -272,9 +260,13 @@ function updateProjectProgress(
     status = "entwicklung";
   }
 
-  db.prepare(
-    `
-    UPDATE portal_projects SET progress = ?, status = ?, status_label = ?, updated_at = datetime('now') WHERE id = ?
-  `,
-  ).run(progress, status, statusLabel, projectId);
+  await db
+    .from("portal_projects")
+    .update({
+      progress,
+      status,
+      status_label: statusLabel,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", projectId);
 }

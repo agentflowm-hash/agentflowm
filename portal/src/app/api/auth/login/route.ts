@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate access code against database
-    const client = validateAccessCode(code);
+    const client = await validateAccessCode(code);
 
     if (!client) {
       // Delay to prevent brute force
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session in database
-    const token = createSession(client.id);
+    const token = await createSession(client.id);
 
     // Set cookie
     const cookieStore = await cookies();

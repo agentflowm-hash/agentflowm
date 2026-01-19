@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // Erlaubte Status-Werte
 const ALLOWED_CLIENT_STATUS = ["active", "inactive", "suspended"] as const;
@@ -23,58 +23,52 @@ export async function GET(
       return NextResponse.json({ error: "Invalid client ID" }, { status: 400 });
     }
 
-    const db = getSqliteDb();
+    const { data: client, error: clientError } = await db
+      .from("portal_clients")
+      .select("*")
+      .eq("id", clientId)
+      .single();
 
-    const client = db
-      .prepare("SELECT * FROM portal_clients WHERE id = ?")
-      .get(clientId);
-
-    if (!client) {
+    if (clientError || !client) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
 
     // Projekte abrufen
-    const projects = db
-      .prepare(
-        `
-      SELECT * FROM portal_projects WHERE client_id = ? ORDER BY created_at DESC
-    `,
-      )
-      .all(clientId);
+    const { data: projects } = await db
+      .from("portal_projects")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false });
 
     // Für jedes Projekt: Meilensteine, Nachrichten, Dateien
-    const projectsWithDetails = (projects as any[]).map((project) => {
-      const milestones = db
-        .prepare(
-          `
-        SELECT * FROM portal_milestones WHERE project_id = ? ORDER BY sort_order ASC
-      `,
-        )
-        .all(project.id);
+    const projectsWithDetails = await Promise.all(
+      (projects || []).map(async (project) => {
+        const { data: milestones } = await db
+          .from("portal_milestones")
+          .select("*")
+          .eq("project_id", project.id)
+          .order("sort_order", { ascending: true });
 
-      const messages = db
-        .prepare(
-          `
-        SELECT * FROM portal_messages WHERE project_id = ? ORDER BY created_at DESC
-      `,
-        )
-        .all(project.id);
+        const { data: messages } = await db
+          .from("portal_messages")
+          .select("*")
+          .eq("project_id", project.id)
+          .order("created_at", { ascending: false });
 
-      const files = db
-        .prepare(
-          `
-        SELECT * FROM portal_files WHERE project_id = ? ORDER BY created_at DESC
-      `,
-        )
-        .all(project.id);
+        const { data: files } = await db
+          .from("portal_files")
+          .select("*")
+          .eq("project_id", project.id)
+          .order("created_at", { ascending: false });
 
-      return {
-        ...project,
-        milestones,
-        messages,
-        files,
-      };
-    });
+        return {
+          ...project,
+          milestones: milestones || [],
+          messages: messages || [],
+          files: files || [],
+        };
+      }),
+    );
 
     return NextResponse.json({
       client,
@@ -130,54 +124,52 @@ export async function PATCH(
       );
     }
 
-    const db = getSqliteDb();
+    const { data: existing, error: fetchError } = await db
+      .from("portal_clients")
+      .select("*")
+      .eq("id", clientId)
+      .single();
 
-    const existing = db
-      .prepare("SELECT * FROM portal_clients WHERE id = ?")
-      .get(clientId);
-    if (!existing) {
+    if (fetchError || !existing) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
 
-    // Build update query
-    const updates: string[] = [];
-    const values: (string | number)[] = [];
+    // Build update object
+    const updateData: Record<string, string | number> = {};
 
     if (name !== undefined) {
-      updates.push("name = ?");
-      values.push(name);
+      updateData.name = name;
     }
     if (email !== undefined) {
-      updates.push("email = ?");
-      values.push(email);
+      updateData.email = email;
     }
     if (company !== undefined) {
-      updates.push("company = ?");
-      values.push(company || "");
+      updateData.company = company || "";
     }
     if (phone !== undefined) {
-      updates.push("phone = ?");
-      values.push(phone || "");
+      updateData.phone = phone || "";
     }
     if (status !== undefined) {
-      updates.push("status = ?");
-      values.push(status);
+      updateData.status = status;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No fields to update" },
         { status: 400 },
       );
     }
 
-    values.push(clientId);
-    const query = `UPDATE portal_clients SET ${updates.join(", ")} WHERE id = ?`;
-    db.prepare(query).run(...values);
+    const { data: updated, error: updateError } = await db
+      .from("portal_clients")
+      .update(updateData)
+      .eq("id", clientId)
+      .select()
+      .single();
 
-    const updated = db
-      .prepare("SELECT * FROM portal_clients WHERE id = ?")
-      .get(clientId);
+    if (updateError) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, client: updated });
   } catch (error) {
@@ -204,46 +196,32 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid client ID" }, { status: 400 });
     }
 
-    const db = getSqliteDb();
+    const { data: client, error: fetchError } = await db
+      .from("portal_clients")
+      .select("*")
+      .eq("id", clientId)
+      .single();
 
-    const client = db
-      .prepare("SELECT * FROM portal_clients WHERE id = ?")
-      .get(clientId);
-    if (!client) {
+    if (fetchError || !client) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
 
-    // Alle zugehörigen Daten löschen (in Transaktion für Konsistenz)
-    const deleteClient = db.transaction(() => {
-      const projects = db
-        .prepare("SELECT id FROM portal_projects WHERE client_id = ?")
-        .all(clientId) as { id: number }[];
+    // Alle zugehörigen Daten löschen
+    const { data: projects } = await db
+      .from("portal_projects")
+      .select("id")
+      .eq("client_id", clientId);
 
-      for (const project of projects) {
-        db.prepare("DELETE FROM portal_milestones WHERE project_id = ?").run(
-          project.id,
-        );
-        db.prepare("DELETE FROM portal_messages WHERE project_id = ?").run(
-          project.id,
-        );
-        db.prepare("DELETE FROM portal_files WHERE project_id = ?").run(
-          project.id,
-        );
-        db.prepare("DELETE FROM portal_approvals WHERE project_id = ?").run(
-          project.id,
-        );
-      }
+    for (const project of projects || []) {
+      await db.from("portal_milestones").delete().eq("project_id", project.id);
+      await db.from("portal_messages").delete().eq("project_id", project.id);
+      await db.from("portal_files").delete().eq("project_id", project.id);
+      await db.from("portal_approvals").delete().eq("project_id", project.id);
+    }
 
-      db.prepare("DELETE FROM portal_projects WHERE client_id = ?").run(
-        clientId,
-      );
-      db.prepare("DELETE FROM portal_sessions WHERE client_id = ?").run(
-        clientId,
-      );
-      db.prepare("DELETE FROM portal_clients WHERE id = ?").run(clientId);
-    });
-
-    deleteClient();
+    await db.from("portal_projects").delete().eq("client_id", clientId);
+    await db.from("portal_sessions").delete().eq("client_id", clientId);
+    await db.from("portal_clients").delete().eq("id", clientId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

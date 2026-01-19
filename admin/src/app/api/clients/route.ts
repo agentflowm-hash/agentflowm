@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // GET - Alle Portal-Clients abrufen
 export async function GET() {
@@ -10,27 +10,51 @@ export async function GET() {
   }
 
   try {
-    const db = getSqliteDb();
+    // Get clients with their projects
+    const { data: clients, error } = await db
+      .from('portal_clients')
+      .select(`
+        *,
+        portal_projects (
+          id,
+          name,
+          package,
+          status,
+          progress
+        )
+      `)
+      .order('created_at', { ascending: false });
 
-    const clients = db
-      .prepare(
-        `
-      SELECT
-        c.*,
-        p.id as project_id,
-        p.name as project_name,
-        p.package,
-        p.status as project_status,
-        p.progress,
-        (SELECT COUNT(*) FROM portal_messages WHERE project_id = p.id AND is_read = 0 AND sender_type = 'client') as unread_messages
-      FROM portal_clients c
-      LEFT JOIN portal_projects p ON p.client_id = c.id
-      ORDER BY c.created_at DESC
-    `,
-      )
-      .all();
+    if (error) throw error;
 
-    return NextResponse.json({ clients });
+    // Transform to include project info and unread messages
+    const clientsWithInfo = await Promise.all((clients || []).map(async (c: any) => {
+      const project = c.portal_projects?.[0];
+      let unread_messages = 0;
+
+      if (project) {
+        const { count } = await db
+          .from('portal_messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .eq('is_read', false)
+          .eq('sender_type', 'client');
+        unread_messages = count || 0;
+      }
+
+      return {
+        ...c,
+        project_id: project?.id,
+        project_name: project?.name,
+        package: project?.package,
+        project_status: project?.status,
+        progress: project?.progress,
+        unread_messages,
+        portal_projects: undefined,
+      };
+    }));
+
+    return NextResponse.json({ clients: clientsWithInfo });
   } catch (error) {
     console.error("Clients GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
@@ -55,12 +79,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = getSqliteDb();
-
     // Prüfen ob E-Mail bereits existiert
-    const existing = db
-      .prepare("SELECT id FROM portal_clients WHERE email = ?")
-      .get(email);
+    const { data: existing } = await db
+      .from('portal_clients')
+      .select('id')
+      .eq('email', email)
+      .single();
+
     if (existing) {
       return NextResponse.json(
         { error: "A client with this email already exists" },
@@ -70,99 +95,99 @@ export async function POST(request: NextRequest) {
 
     // Zugangscode generieren im Format XXXX-0000 (Name-Ziffern)
     const prefix = name.split(" ")[0].toUpperCase().slice(0, 4);
-
-    // Use transaction to prevent race condition
-    let clientId: number | null = null;
     let accessCode = "";
+    let attempts = 0;
 
-    const insertClient = db.transaction(() => {
-      let attempts = 0;
-      while (attempts < 20) {
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        accessCode = `${prefix}-${randomNum}`;
+    while (attempts < 20) {
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      accessCode = `${prefix}-${randomNum}`;
 
-        try {
-          const result = db
-            .prepare(
-              `INSERT INTO portal_clients (name, email, company, phone, access_code, status)
-               VALUES (?, ?, ?, ?, ?, 'active')`,
-            )
-            .run(name, email, company || null, phone || null, accessCode);
-          clientId = Number(result.lastInsertRowid);
-          return; // Success
-        } catch (e: any) {
-          // If UNIQUE constraint failed on access_code, retry with new code
-          if (
-            e.code === "SQLITE_CONSTRAINT_UNIQUE" &&
-            e.message.includes("access_code")
-          ) {
-            attempts++;
-            continue;
-          }
-          throw e; // Re-throw other errors
-        }
-      }
-      throw new Error(
-        "Could not generate unique access code after 20 attempts",
-      );
-    });
+      const { data: existingCode } = await db
+        .from('portal_clients')
+        .select('id')
+        .eq('access_code', accessCode)
+        .single();
 
-    insertClient();
+      if (!existingCode) break;
+      attempts++;
+    }
 
-    if (!clientId) {
+    if (attempts >= 20) {
       return NextResponse.json(
-        { error: "Failed to create client" },
+        { error: "Could not generate unique access code" },
         { status: 500 },
       );
     }
 
-    // Projekt erstellen
-    const projectResult = db
-      .prepare(
-        `
-      INSERT INTO portal_projects (client_id, name, package, status, status_label, progress, manager)
-      VALUES (?, ?, ?, 'planung', 'In Planung', 0, 'Alex Shaer')
-    `,
-      )
-      .run(clientId, `Projekt ${name}`, packageType || "Starter");
+    // Create client
+    const { data: client, error: clientError } = await db
+      .from('portal_clients')
+      .insert({
+        name,
+        email,
+        company: company || null,
+        phone: phone || null,
+        access_code: accessCode,
+        status: 'active',
+      })
+      .select()
+      .single();
 
-    const projectId = Number(projectResult.lastInsertRowid);
+    if (clientError) throw clientError;
+
+    // Projekt erstellen
+    const { data: project, error: projectError } = await db
+      .from('portal_projects')
+      .insert({
+        client_id: client.id,
+        name: `Projekt ${name}`,
+        package: packageType || 'Starter',
+        status: 'planung',
+        status_label: 'In Planung',
+        progress: 0,
+        manager: 'Alex Shaer',
+      })
+      .select()
+      .single();
+
+    if (projectError) throw projectError;
 
     // Willkommensnachricht
-    db.prepare(
-      `
-      INSERT INTO portal_messages (project_id, sender_type, sender_name, message, is_read)
-      VALUES (?, 'admin', 'AgentFlow Team', 'Willkommen im Kundenportal! Hier können Sie den Fortschritt Ihres Projekts verfolgen.', 0)
-    `,
-    ).run(projectId);
+    await db.from('portal_messages').insert({
+      project_id: project.id,
+      sender_type: 'admin',
+      sender_name: 'AgentFlow Team',
+      message: 'Willkommen im Kundenportal! Hier können Sie den Fortschritt Ihres Projekts verfolgen.',
+      is_read: false,
+    });
 
     // Standard-Meilensteine
     const milestones = [
-      { title: "Erstgespräch & Briefing", sort: 1 },
-      { title: "Konzept & Planung", sort: 2 },
-      { title: "Design-Entwurf", sort: 3 },
-      { title: "Entwicklung", sort: 4 },
-      { title: "Testing & Review", sort: 5 },
-      { title: "Go-Live", sort: 6 },
+      { title: "Erstgespräch & Briefing", sort_order: 1 },
+      { title: "Konzept & Planung", sort_order: 2 },
+      { title: "Design-Entwurf", sort_order: 3 },
+      { title: "Entwicklung", sort_order: 4 },
+      { title: "Testing & Review", sort_order: 5 },
+      { title: "Go-Live", sort_order: 6 },
     ];
 
-    for (const m of milestones) {
-      db.prepare(
-        `
-        INSERT INTO portal_milestones (project_id, title, status, sort_order)
-        VALUES (?, ?, 'pending', ?)
-      `,
-      ).run(projectId, m.title, m.sort);
-    }
+    await db.from('portal_milestones').insert(
+      milestones.map(m => ({
+        project_id: project.id,
+        title: m.title,
+        status: 'pending',
+        sort_order: m.sort_order,
+      }))
+    );
 
     return NextResponse.json({
       success: true,
       client: {
-        id: clientId,
+        id: client.id,
         name,
         email,
         accessCode,
-        projectId,
+        projectId: project.id,
       },
     });
   } catch (error) {

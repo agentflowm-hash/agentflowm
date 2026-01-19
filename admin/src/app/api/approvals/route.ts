@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 const ALLOWED_APPROVAL_TYPES = [
   "design",
@@ -22,26 +22,116 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get("project_id");
 
-    const db = getSqliteDb();
-
-    let query = `
-      SELECT a.*, p.name as project_name, c.name as client_name, m.title as milestone_title
-      FROM portal_approvals a
-      JOIN portal_projects p ON p.id = a.project_id
-      JOIN portal_clients c ON c.id = p.client_id
-      LEFT JOIN portal_milestones m ON m.id = a.milestone_id
-    `;
-
     if (projectId) {
-      query += ` WHERE a.project_id = ? ORDER BY a.created_at DESC`;
-      const approvals = db.prepare(query).all(projectId);
-      return NextResponse.json({ approvals });
+      // Get approvals for specific project
+      const { data: approvals, error } = await db
+        .from("portal_approvals")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        return NextResponse.json({ error: "Database error" }, { status: 500 });
+      }
+
+      // Enrich with project, client, and milestone info
+      const enrichedApprovals = await Promise.all(
+        (approvals || []).map(async (approval) => {
+          const { data: project } = await db
+            .from("portal_projects")
+            .select("name, client_id")
+            .eq("id", approval.project_id)
+            .single();
+
+          let clientName = null;
+          if (project) {
+            const { data: client } = await db
+              .from("portal_clients")
+              .select("name")
+              .eq("id", project.client_id)
+              .single();
+            clientName = client?.name;
+          }
+
+          let milestoneTitle = null;
+          if (approval.milestone_id) {
+            const { data: milestone } = await db
+              .from("portal_milestones")
+              .select("title")
+              .eq("id", approval.milestone_id)
+              .single();
+            milestoneTitle = milestone?.title;
+          }
+
+          return {
+            ...approval,
+            project_name: project?.name,
+            client_name: clientName,
+            milestone_title: milestoneTitle,
+          };
+        }),
+      );
+
+      return NextResponse.json({ approvals: enrichedApprovals });
     } else {
-      query += ` ORDER BY
-        CASE a.status WHEN 'pending' THEN 0 ELSE 1 END,
-        a.created_at DESC`;
-      const approvals = db.prepare(query).all();
-      return NextResponse.json({ approvals });
+      // Get all approvals, ordered by status (pending first) then by created_at
+      const { data: approvals, error } = await db
+        .from("portal_approvals")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        return NextResponse.json({ error: "Database error" }, { status: 500 });
+      }
+
+      // Enrich with project, client, and milestone info
+      const enrichedApprovals = await Promise.all(
+        (approvals || []).map(async (approval) => {
+          const { data: project } = await db
+            .from("portal_projects")
+            .select("name, client_id")
+            .eq("id", approval.project_id)
+            .single();
+
+          let clientName = null;
+          if (project) {
+            const { data: client } = await db
+              .from("portal_clients")
+              .select("name")
+              .eq("id", project.client_id)
+              .single();
+            clientName = client?.name;
+          }
+
+          let milestoneTitle = null;
+          if (approval.milestone_id) {
+            const { data: milestone } = await db
+              .from("portal_milestones")
+              .select("title")
+              .eq("id", approval.milestone_id)
+              .single();
+            milestoneTitle = milestone?.title;
+          }
+
+          return {
+            ...approval,
+            project_name: project?.name,
+            client_name: clientName,
+            milestone_title: milestoneTitle,
+          };
+        }),
+      );
+
+      // Sort: pending first, then by created_at desc
+      enrichedApprovals.sort((a, b) => {
+        if (a.status === "pending" && b.status !== "pending") return -1;
+        if (a.status !== "pending" && b.status === "pending") return 1;
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      });
+
+      return NextResponse.json({ approvals: enrichedApprovals });
     }
   } catch (error) {
     console.error("Approvals GET error:", error);
@@ -118,26 +208,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const db = getSqliteDb();
+    const { data: approval, error: insertError } = await db
+      .from("portal_approvals")
+      .insert({
+        project_id: numericProjectId,
+        milestone_id: numericMilestoneId,
+        title: title.trim(),
+        description: description?.trim() || null,
+        type: approvalType,
+      })
+      .select()
+      .single();
 
-    const result = db
-      .prepare(
-        `
-      INSERT INTO portal_approvals (project_id, milestone_id, title, description, type)
-      VALUES (?, ?, ?, ?, ?)
-    `,
-      )
-      .run(
-        numericProjectId,
-        numericMilestoneId,
-        title.trim(),
-        description?.trim() || null,
-        approvalType,
-      );
-
-    const approval = db
-      .prepare("SELECT * FROM portal_approvals WHERE id = ?")
-      .get(result.lastInsertRowid);
+    if (insertError) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, approval });
   } catch (error) {
@@ -166,16 +251,27 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
 
-    const db = getSqliteDb();
-    const result = db
-      .prepare("DELETE FROM portal_approvals WHERE id = ?")
-      .run(numericId);
+    // First check if the approval exists
+    const { data: existing } = await db
+      .from("portal_approvals")
+      .select("id")
+      .eq("id", numericId)
+      .single();
 
-    if (result.changes === 0) {
+    if (!existing) {
       return NextResponse.json(
         { error: "Approval not found" },
         { status: 404 },
       );
+    }
+
+    const { error } = await db
+      .from("portal_approvals")
+      .delete()
+      .eq("id", numericId);
+
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // Erlaubte Status-Werte
 const ALLOWED_PROJECT_STATUS = [
@@ -38,52 +38,54 @@ export async function GET(
       );
     }
 
-    const db = getSqliteDb();
+    // Get project with client info using separate queries
+    const { data: project, error: projectError } = await db
+      .from("portal_projects")
+      .select("*")
+      .eq("id", projectId)
+      .single();
 
-    const project = db
-      .prepare(
-        `
-      SELECT p.*, c.name as client_name, c.email as client_email, c.company as client_company
-      FROM portal_projects p
-      JOIN portal_clients c ON c.id = p.client_id
-      WHERE p.id = ?
-    `,
-      )
-      .get(projectId);
-
-    if (!project) {
+    if (projectError || !project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const milestones = db
-      .prepare(
-        `
-      SELECT * FROM portal_milestones WHERE project_id = ? ORDER BY sort_order ASC
-    `,
-      )
-      .all(projectId);
+    // Get client info
+    const { data: client } = await db
+      .from("portal_clients")
+      .select("name, email, company")
+      .eq("id", project.client_id)
+      .single();
 
-    const messages = db
-      .prepare(
-        `
-      SELECT * FROM portal_messages WHERE project_id = ? ORDER BY created_at DESC
-    `,
-      )
-      .all(projectId);
+    const projectWithClient = {
+      ...project,
+      client_name: client?.name,
+      client_email: client?.email,
+      client_company: client?.company,
+    };
 
-    const files = db
-      .prepare(
-        `
-      SELECT * FROM portal_files WHERE project_id = ? ORDER BY created_at DESC
-    `,
-      )
-      .all(projectId);
+    const { data: milestones } = await db
+      .from("portal_milestones")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("sort_order", { ascending: true });
+
+    const { data: messages } = await db
+      .from("portal_messages")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false });
+
+    const { data: files } = await db
+      .from("portal_files")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false });
 
     return NextResponse.json({
-      project,
-      milestones,
-      messages,
-      files,
+      project: projectWithClient,
+      milestones: milestones || [],
+      messages: messages || [],
+      files: files || [],
     });
   } catch (error) {
     console.error("Project GET error:", error);
@@ -160,79 +162,71 @@ export async function PATCH(
       );
     }
 
-    const db = getSqliteDb();
+    const { data: existing, error: fetchError } = await db
+      .from("portal_projects")
+      .select("*")
+      .eq("id", projectId)
+      .single();
 
-    const existing = db
-      .prepare("SELECT * FROM portal_projects WHERE id = ?")
-      .get(projectId);
-    if (!existing) {
+    if (fetchError || !existing) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const updates: string[] = [];
-    const values: (string | number | null)[] = [];
+    const updateData: Record<string, string | number | boolean | null> = {};
 
     if (name !== undefined) {
-      updates.push("name = ?");
-      values.push(name);
+      updateData.name = name;
     }
     if (pkg !== undefined) {
-      updates.push("package = ?");
-      values.push(pkg);
+      updateData.package = pkg;
     }
     if (status !== undefined) {
-      updates.push("status = ?");
-      values.push(status);
+      updateData.status = status;
     }
     if (status_label !== undefined) {
-      updates.push("status_label = ?");
-      values.push(status_label);
+      updateData.status_label = status_label;
     }
     if (progress !== undefined) {
-      updates.push("progress = ?");
-      values.push(progress);
+      updateData.progress = progress;
     }
     if (start_date !== undefined) {
-      updates.push("start_date = ?");
-      values.push(start_date);
+      updateData.start_date = start_date;
     }
     if (estimated_end !== undefined) {
-      updates.push("estimated_end = ?");
-      values.push(estimated_end);
+      updateData.estimated_end = estimated_end;
     }
     if (manager !== undefined) {
-      updates.push("manager = ?");
-      values.push(manager);
+      updateData.manager = manager;
     }
     if (description !== undefined) {
-      updates.push("description = ?");
-      values.push(description);
+      updateData.description = description;
     }
     if (preview_url !== undefined) {
-      updates.push("preview_url = ?");
-      values.push(preview_url);
+      updateData.preview_url = preview_url;
     }
     if (preview_enabled !== undefined) {
-      updates.push("preview_enabled = ?");
-      values.push(preview_enabled ? 1 : 0);
+      updateData.preview_enabled = preview_enabled;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No fields to update" },
         { status: 400 },
       );
     }
 
-    updates.push("updated_at = datetime('now')");
-    values.push(projectId);
+    updateData.updated_at = new Date().toISOString();
 
-    const query = `UPDATE portal_projects SET ${updates.join(", ")} WHERE id = ?`;
-    db.prepare(query).run(...values);
+    const { data: updated, error: updateError } = await db
+      .from("portal_projects")
+      .update(updateData)
+      .eq("id", projectId)
+      .select()
+      .single();
 
-    const updated = db
-      .prepare("SELECT * FROM portal_projects WHERE id = ?")
-      .get(projectId);
+    if (updateError) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, project: updated });
   } catch (error) {

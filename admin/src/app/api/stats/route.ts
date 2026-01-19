@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 export async function GET() {
   const authenticated = await isAuthenticated();
@@ -9,183 +9,109 @@ export async function GET() {
   }
 
   try {
-    const db = getSqliteDb();
     const today = new Date().toISOString().split("T")[0];
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0];
 
-    // Leads stats
-    const leadsTotal = db
-      .prepare("SELECT COUNT(*) as count FROM leads")
-      .get() as { count: number };
-    const leadsNew = db
-      .prepare("SELECT COUNT(*) as count FROM leads WHERE status = 'new'")
-      .get() as { count: number };
-    const leadsContacted = db
-      .prepare("SELECT COUNT(*) as count FROM leads WHERE status = 'contacted'")
-      .get() as { count: number };
-    const leadsQualified = db
-      .prepare("SELECT COUNT(*) as count FROM leads WHERE status = 'qualified'")
-      .get() as { count: number };
-    const leadsProposal = db
-      .prepare("SELECT COUNT(*) as count FROM leads WHERE status = 'proposal'")
-      .get() as { count: number };
-    const leadsWon = db
-      .prepare("SELECT COUNT(*) as count FROM leads WHERE status = 'won'")
-      .get() as { count: number };
-    const leadsLost = db
-      .prepare("SELECT COUNT(*) as count FROM leads WHERE status = 'lost'")
-      .get() as { count: number };
-    const leadsThisWeek = db
-      .prepare(
-        "SELECT COUNT(*) as count FROM leads WHERE date(created_at) >= ?",
-      )
-      .get(weekAgo) as { count: number };
+    // Leads stats - multiple queries
+    const { count: leadsTotal } = await db.from('leads').select('*', { count: 'exact', head: true });
+    const { count: leadsNew } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'new');
+    const { count: leadsContacted } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'contacted');
+    const { count: leadsQualified } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'qualified');
+    const { count: leadsProposal } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'proposal');
+    const { count: leadsWon } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'won');
+    const { count: leadsLost } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'lost');
+    const { count: leadsThisWeek } = await db.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo);
 
     // Website checks stats
-    const checksTotal = db
-      .prepare("SELECT COUNT(*) as count FROM website_checks")
-      .get() as { count: number };
-    const checksToday = db
-      .prepare(
-        "SELECT COUNT(*) as count FROM website_checks WHERE date(created_at) = ?",
-      )
-      .get(today) as { count: number };
-    const checksThisWeek = db
-      .prepare(
-        "SELECT COUNT(*) as count FROM website_checks WHERE date(created_at) >= ?",
-      )
-      .get(weekAgo) as { count: number };
-    const avgScoreResult = db
-      .prepare("SELECT AVG(score_overall) as avg FROM website_checks")
-      .get() as { avg: number | null };
-    const avgScore = Math.round(avgScoreResult?.avg || 0);
-    const topScoreResult = db
-      .prepare("SELECT MAX(score_overall) as max FROM website_checks")
-      .get() as { max: number | null };
-    const topScore = topScoreResult?.max || 0;
+    const { count: checksTotal } = await db.from('website_checks').select('*', { count: 'exact', head: true });
+    const { count: checksToday } = await db.from('website_checks').select('*', { count: 'exact', head: true }).gte('created_at', today);
+    const { count: checksThisWeek } = await db.from('website_checks').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo);
+
+    // Average score
+    const { data: scoreData } = await db.from('website_checks').select('score_overall');
+    const avgScore = scoreData && scoreData.length > 0
+      ? Math.round(scoreData.reduce((sum, r) => sum + (r.score_overall || 0), 0) / scoreData.length)
+      : 0;
+    const topScore = scoreData && scoreData.length > 0
+      ? Math.max(...scoreData.map(r => r.score_overall || 0))
+      : 0;
 
     // Referrals stats
-    const referralsTotal = db
-      .prepare("SELECT COUNT(*) as count FROM referrals")
-      .get() as { count: number };
-    const referralsPending = db
-      .prepare(
-        "SELECT COUNT(*) as count FROM referrals WHERE status = 'pending'",
-      )
-      .get() as { count: number };
-    const referralsConverted = db
-      .prepare(
-        "SELECT COUNT(*) as count FROM referrals WHERE status = 'converted'",
-      )
-      .get() as { count: number };
+    const { count: referralsTotal } = await db.from('referrals').select('*', { count: 'exact', head: true });
+    const { count: referralsPending } = await db.from('referrals').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+    const { count: referralsConverted } = await db.from('referrals').select('*', { count: 'exact', head: true }).eq('status', 'converted');
 
     // Subscribers stats
-    const subscribersTotal = db
-      .prepare("SELECT COUNT(*) as count FROM subscribers")
-      .get() as { count: number };
-    const subscribersConfirmed = db
-      .prepare(
-        "SELECT COUNT(*) as count FROM subscribers WHERE status = 'confirmed'",
-      )
-      .get() as { count: number };
-    const subscribersThisWeek = db
-      .prepare(
-        "SELECT COUNT(*) as count FROM subscribers WHERE date(created_at) >= ?",
-      )
-      .get(weekAgo) as { count: number };
+    const { count: subscribersTotal } = await db.from('subscribers').select('*', { count: 'exact', head: true });
+    const { count: subscribersConfirmed } = await db.from('subscribers').select('*', { count: 'exact', head: true }).eq('status', 'confirmed');
+    const { count: subscribersThisWeek } = await db.from('subscribers').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo);
 
     // Recent leads (last 5)
-    const recentLeads = db
-      .prepare(
-        `
-      SELECT id, name, email, company, package_interest, status, priority, created_at
-      FROM leads
-      ORDER BY created_at DESC
-      LIMIT 5
-    `,
-      )
-      .all() as any[];
+    const { data: recentLeadsRaw } = await db
+      .from('leads')
+      .select('id, name, email, company, package_interest, status, priority, created_at')
+      .order('created_at', { ascending: false })
+      .limit(5);
 
-    // Recent activity (combining leads, checks, referrals)
-    const recentActivity: any[] = [];
+    // Recent activity
+    const { data: latestLeads } = await db
+      .from('leads')
+      .select('id, name, email, created_at')
+      .order('created_at', { ascending: false })
+      .limit(3);
 
-    // Add recent leads to activity
-    const latestLeads = db
-      .prepare(
-        `
-      SELECT 'lead' as type, id, name as title, email as subtitle, created_at
-      FROM leads
-      ORDER BY created_at DESC
-      LIMIT 3
-    `,
-      )
-      .all() as any[];
-    recentActivity.push(...latestLeads);
+    const { data: latestChecks } = await db
+      .from('website_checks')
+      .select('id, url, score_overall, created_at')
+      .order('created_at', { ascending: false })
+      .limit(3);
 
-    // Add recent checks to activity
-    const latestChecks = db
-      .prepare(
-        `
-      SELECT 'check' as type, id, url as title, score_overall as subtitle, created_at
-      FROM website_checks
-      ORDER BY created_at DESC
-      LIMIT 3
-    `,
-      )
-      .all() as any[];
-    recentActivity.push(...latestChecks);
-
-    // Sort by date
-    recentActivity.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
+    const recentActivity: any[] = [
+      ...(latestLeads || []).map(l => ({ type: 'lead', id: l.id, title: l.name, subtitle: l.email, created_at: l.created_at })),
+      ...(latestChecks || []).map(c => ({ type: 'check', id: c.id, title: c.url, subtitle: c.score_overall, created_at: c.created_at })),
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
 
     // Calculate conversion rate
-    const conversionRate =
-      leadsTotal.count > 0
-        ? Math.round((leadsWon.count / leadsTotal.count) * 100)
-        : 0;
+    const totalLeads = leadsTotal || 0;
+    const wonLeads = leadsWon || 0;
+    const conversionRate = totalLeads > 0 ? Math.round((wonLeads / totalLeads) * 100) : 0;
 
     return NextResponse.json({
       leads: {
-        total: leadsTotal.count,
-        new: leadsNew.count,
-        contacted: leadsContacted.count,
-        qualified: leadsQualified.count,
-        proposal: leadsProposal.count,
-        won: leadsWon.count,
-        lost: leadsLost.count,
-        thisWeek: leadsThisWeek.count,
-        conversionRate: conversionRate,
+        total: leadsTotal || 0,
+        new: leadsNew || 0,
+        contacted: leadsContacted || 0,
+        qualified: leadsQualified || 0,
+        proposal: leadsProposal || 0,
+        won: leadsWon || 0,
+        lost: leadsLost || 0,
+        thisWeek: leadsThisWeek || 0,
+        conversionRate,
       },
       checks: {
-        total: checksTotal.count,
-        today: checksToday.count,
-        thisWeek: checksThisWeek.count,
-        avgScore: avgScore,
-        topScore: topScore,
+        total: checksTotal || 0,
+        today: checksToday || 0,
+        thisWeek: checksThisWeek || 0,
+        avgScore,
+        topScore,
       },
       referrals: {
-        total: referralsTotal.count,
-        pending: referralsPending.count,
-        converted: referralsConverted.count,
-        conversionRate:
-          referralsTotal.count > 0
-            ? Math.round(
-                (referralsConverted.count / referralsTotal.count) * 100,
-              )
-            : 0,
+        total: referralsTotal || 0,
+        pending: referralsPending || 0,
+        converted: referralsConverted || 0,
+        conversionRate: (referralsTotal || 0) > 0
+          ? Math.round(((referralsConverted || 0) / (referralsTotal || 0)) * 100)
+          : 0,
       },
       subscribers: {
-        total: subscribersTotal.count,
-        confirmed: subscribersConfirmed.count,
-        thisWeek: subscribersThisWeek.count,
+        total: subscribersTotal || 0,
+        confirmed: subscribersConfirmed || 0,
+        thisWeek: subscribersThisWeek || 0,
         growthRate: 0,
       },
-      recentLeads: recentLeads.map((lead) => ({
+      recentLeads: (recentLeadsRaw || []).map((lead: any) => ({
         id: lead.id,
         name: lead.name,
         email: lead.email,
@@ -195,7 +121,7 @@ export async function GET() {
         priority: lead.priority || "medium",
         createdAt: lead.created_at,
       })),
-      recentActivity: recentActivity.slice(0, 5),
+      recentActivity,
     });
   } catch (error) {
     console.error("Stats error:", error);

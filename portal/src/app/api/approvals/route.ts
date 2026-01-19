@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import Database from 'better-sqlite3';
-import path from 'path';
+import { supabaseAdmin } from '@/lib/supabase';
 
-function getDb() {
-  const cwd = process.cwd();
-  const dbPath = cwd.endsWith('/portal') || cwd.endsWith('\\portal')
-    ? path.join(cwd, '..', 'data', 'agentflow.db')
-    : path.join(cwd, 'data', 'agentflow.db');
-  const db = new Database(dbPath);
-  db.pragma('journal_mode = WAL');
-  return db;
-}
+const db = supabaseAdmin;
 
 // GET - Alle Freigaben für das Projekt des Kunden abrufen
 export async function GET() {
@@ -21,31 +12,43 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const db = getDb();
-
     // Get client's project
-    const project = db.prepare(`
-      SELECT id FROM portal_projects WHERE client_id = ? ORDER BY created_at DESC LIMIT 1
-    `).get(client.id) as { id: number } | undefined;
+    const { data: project, error: projectError } = await db
+      .from('portal_projects')
+      .select('id')
+      .eq('client_id', client.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
 
-    if (!project) {
-      db.close();
+    if (projectError || !project) {
       return NextResponse.json({ approvals: [] });
     }
 
-    const approvals = db.prepare(`
-      SELECT a.*, m.title as milestone_title
-      FROM portal_approvals a
-      LEFT JOIN portal_milestones m ON m.id = a.milestone_id
-      WHERE a.project_id = ?
-      ORDER BY
-        CASE a.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END,
-        a.created_at DESC
-    `).all(project.id);
+    // Get approvals with milestone title
+    const { data: approvals, error: approvalsError } = await db
+      .from('portal_approvals')
+      .select(`
+        *,
+        portal_milestones (title)
+      `)
+      .eq('project_id', project.id)
+      .order('status', { ascending: true })
+      .order('created_at', { ascending: false });
 
-    db.close();
+    if (approvalsError) {
+      console.error('Approvals fetch error:', approvalsError);
+      return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    }
 
-    return NextResponse.json({ approvals });
+    // Map to include milestone_title at the top level
+    const formattedApprovals = (approvals || []).map(approval => ({
+      ...approval,
+      milestone_title: approval.portal_milestones?.title || null,
+      portal_milestones: undefined
+    }));
+
+    return NextResponse.json({ approvals: formattedApprovals });
   } catch (error) {
     console.error('Approvals GET error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
@@ -66,41 +69,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
-    const db = getDb();
-
     // Verify approval belongs to client's project
-    const approval = db.prepare(`
-      SELECT a.*, p.client_id
-      FROM portal_approvals a
-      JOIN portal_projects p ON p.id = a.project_id
-      WHERE a.id = ?
-    `).get(approvalId) as any;
+    const { data: approval, error: approvalError } = await db
+      .from('portal_approvals')
+      .select(`
+        *,
+        portal_projects!inner (client_id)
+      `)
+      .eq('id', approvalId)
+      .single();
 
-    if (!approval || approval.client_id !== client.id) {
-      db.close();
+    if (approvalError || !approval || approval.portal_projects?.client_id !== client.id) {
       return NextResponse.json({ error: 'Approval not found' }, { status: 404 });
     }
 
     if (action === 'approve') {
-      db.prepare(`
-        UPDATE portal_approvals
-        SET status = 'approved',
-            approved_at = datetime('now'),
-            approved_by = ?,
-            feedback = ?
-        WHERE id = ?
-      `).run(client.name, feedback || null, approvalId);
+      await db
+        .from('portal_approvals')
+        .update({
+          status: 'approved',
+          approved_at: new Date().toISOString(),
+          approved_by: client.name,
+          feedback: feedback || null
+        })
+        .eq('id', approvalId);
     } else if (action === 'request_changes') {
-      db.prepare(`
-        UPDATE portal_approvals
-        SET status = 'changes_requested',
-            feedback = ?
-        WHERE id = ?
-      `).run(feedback || 'Änderungen gewünscht', approvalId);
+      await db
+        .from('portal_approvals')
+        .update({
+          status: 'changes_requested',
+          feedback: feedback || 'Änderungen gewünscht'
+        })
+        .eq('id', approvalId);
     }
 
-    const updated = db.prepare('SELECT * FROM portal_approvals WHERE id = ?').get(approvalId);
-    db.close();
+    const { data: updated, error: updateError } = await db
+      .from('portal_approvals')
+      .select('*')
+      .eq('id', approvalId)
+      .single();
+
+    if (updateError) {
+      return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, approval: updated });
   } catch (error) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // Erlaubte Werte für Validierung
 const ALLOWED_STATUS = [
@@ -32,10 +32,13 @@ export async function GET(
       return NextResponse.json({ error: "Invalid lead ID" }, { status: 400 });
     }
 
-    const db = getSqliteDb();
-    const lead = db.prepare("SELECT * FROM leads WHERE id = ?").get(leadId);
+    const { data: lead, error } = await db
+      .from("leads")
+      .select("*")
+      .eq("id", leadId)
+      .single();
 
-    if (!lead) {
+    if (error || !lead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
 
@@ -87,40 +90,38 @@ export async function PATCH(
       );
     }
 
-    const db = getSqliteDb();
-
-    // Build update query dynamically
-    const updates: string[] = [];
-    const values: (string | number)[] = [];
+    // Build update object dynamically
+    const updateData: Record<string, string | number> = {};
 
     if (status !== undefined) {
-      updates.push("status = ?");
-      values.push(status);
+      updateData.status = status;
     }
     if (notes !== undefined) {
-      updates.push("notes = ?");
-      values.push(notes);
+      updateData.notes = notes;
     }
     if (priority !== undefined) {
-      updates.push("priority = ?");
-      values.push(priority);
+      updateData.priority = priority;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No fields to update" },
         { status: 400 },
       );
     }
 
-    updates.push("updated_at = ?");
-    values.push(new Date().toISOString());
-    values.push(leadId);
+    updateData.updated_at = new Date().toISOString();
 
-    const query = `UPDATE leads SET ${updates.join(", ")} WHERE id = ?`;
-    db.prepare(query).run(...values);
+    const { data: updated, error } = await db
+      .from("leads")
+      .update(updateData)
+      .eq("id", leadId)
+      .select()
+      .single();
 
-    const updated = db.prepare("SELECT * FROM leads WHERE id = ?").get(leadId);
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, lead: updated });
   } catch (error) {
@@ -147,14 +148,24 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid lead ID" }, { status: 400 });
     }
 
-    const db = getSqliteDb();
+    const { data: lead, error: fetchError } = await db
+      .from("leads")
+      .select("*")
+      .eq("id", leadId)
+      .single();
 
-    const lead = db.prepare("SELECT * FROM leads WHERE id = ?").get(leadId);
-    if (!lead) {
+    if (fetchError || !lead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
 
-    db.prepare("DELETE FROM leads WHERE id = ?").run(leadId);
+    const { error: deleteError } = await db
+      .from("leads")
+      .delete()
+      .eq("id", leadId);
+
+    if (deleteError) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

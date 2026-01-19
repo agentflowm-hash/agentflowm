@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 const ALLOWED_STATUS = [
   "pending",
@@ -30,10 +30,7 @@ export async function PATCH(
     const body = await request.json();
     const { status, notes } = body;
 
-    const db = getSqliteDb();
-
-    const updates: string[] = [];
-    const values: (string | number)[] = [];
+    const updateData: Record<string, string> = {};
 
     if (status !== undefined) {
       if (!ALLOWED_STATUS.includes(status)) {
@@ -42,8 +39,7 @@ export async function PATCH(
           { status: 400 },
         );
       }
-      updates.push("status = ?");
-      values.push(status);
+      updateData.status = status;
     }
     if (notes !== undefined) {
       if (typeof notes !== "string" || notes.length > MAX_NOTES_LENGTH) {
@@ -54,23 +50,27 @@ export async function PATCH(
           { status: 400 },
         );
       }
-      updates.push("notes = ?");
-      values.push(notes);
+      updateData.notes = notes;
     }
 
-    if (updates.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { error: "No fields to update" },
         { status: 400 },
       );
     }
 
-    values.push(numericId);
+    const { data, error } = await db
+      .from("referrals")
+      .update(updateData)
+      .eq("id", numericId)
+      .select();
 
-    const query = `UPDATE referrals SET ${updates.join(", ")} WHERE id = ?`;
-    const result = db.prepare(query).run(...values);
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
-    if (result.changes === 0) {
+    if (!data || data.length === 0) {
       return NextResponse.json(
         { error: "Referral not found" },
         { status: 404 },
@@ -101,16 +101,24 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
 
-    const db = getSqliteDb();
-    const result = db
-      .prepare("DELETE FROM referrals WHERE id = ?")
-      .run(numericId);
+    // First check if the referral exists
+    const { data: existing } = await db
+      .from("referrals")
+      .select("id")
+      .eq("id", numericId)
+      .single();
 
-    if (result.changes === 0) {
+    if (!existing) {
       return NextResponse.json(
         { error: "Referral not found" },
         { status: 404 },
       );
+    }
+
+    const { error } = await db.from("referrals").delete().eq("id", numericId);
+
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

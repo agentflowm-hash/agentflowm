@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { subscribers } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 import { isAuthenticated } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 const ALLOWED_STATUS = ["active", "unsubscribed"] as const;
 const MAX_NAME_LENGTH = 200;
@@ -23,21 +21,20 @@ export async function GET(
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
 
-    const subscriber = db
-      .select()
-      .from(subscribers)
-      .where(eq(subscribers.id, numericId))
-      .limit(1)
-      .all();
+    const { data: subscriber, error } = await db
+      .from("subscribers")
+      .select("*")
+      .eq("id", numericId)
+      .single();
 
-    if (subscriber.length === 0) {
+    if (error || !subscriber) {
       return NextResponse.json(
         { error: "Subscriber not found" },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ subscriber: subscriber[0] });
+    return NextResponse.json({ subscriber });
   } catch (error) {
     console.error("Error fetching subscriber:", error);
     return NextResponse.json(
@@ -96,10 +93,25 @@ export async function PATCH(
       );
     }
 
-    db.update(subscribers)
-      .set(updateData)
-      .where(eq(subscribers.id, numericId))
-      .run();
+    const { data, error } = await db
+      .from("subscribers")
+      .update(updateData)
+      .eq("id", numericId)
+      .select();
+
+    if (error) {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json(
+        { error: "Subscriber not found" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -127,7 +139,31 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
 
-    db.delete(subscribers).where(eq(subscribers.id, numericId)).run();
+    // First check if the subscriber exists
+    const { data: existing } = await db
+      .from("subscribers")
+      .select("id")
+      .eq("id", numericId)
+      .single();
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: "Subscriber not found" },
+        { status: 404 },
+      );
+    }
+
+    const { error } = await db
+      .from("subscribers")
+      .delete()
+      .eq("id", numericId);
+
+    if (error) {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

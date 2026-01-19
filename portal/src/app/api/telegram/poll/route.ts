@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import Database from "better-sqlite3";
-import path from "path";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // ═══════════════════════════════════════════════════════════════
 //                    TELEGRAM POLLING (PORTAL)
@@ -14,14 +13,9 @@ if (!BOT_TOKEN) {
 }
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-let lastUpdateId = 0;
+const db = supabaseAdmin;
 
-function getDb() {
-  const dbPath = path.join(process.cwd(), "..", "data", "agentflow.db");
-  const db = new Database(dbPath);
-  db.pragma("journal_mode = WAL");
-  return db;
-}
+let lastUpdateId = 0;
 
 function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -66,29 +60,29 @@ async function processMessage(message: any): Promise<void> {
       return;
     }
 
-    const db = getDb();
     const code = generateCode();
 
-    // Lösche alte Codes
-    db.prepare(
-      `DELETE FROM login_codes WHERE telegram_username = ? OR expires_at < datetime('now')`,
-    ).run(from.username.toLowerCase());
+    // Lösche alte Codes für diesen User und abgelaufene Codes
+    await db
+      .from("login_codes")
+      .delete()
+      .or(`telegram_username.ilike.${from.username.toLowerCase()},expires_at.lt.${new Date().toISOString()}`);
 
-    // Neuer Code
-    db.prepare(
-      `
-      INSERT INTO login_codes (code, telegram_id, telegram_username, first_name, chat_id, expires_at)
-      VALUES (?, ?, ?, ?, ?, datetime('now', '+5 minutes'))
-    `,
-    ).run(
-      code,
-      from.id,
-      from.username.toLowerCase(),
-      from.first_name || null,
-      chatId,
-    );
+    // Neuer Code - 5 minutes from now
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 5);
 
-    db.close();
+    await db
+      .from("login_codes")
+      .insert({
+        code: code,
+        telegram_id: from.id.toString(),
+        telegram_username: from.username.toLowerCase(),
+        first_name: from.first_name || null,
+        chat_id: chatId.toString(),
+        expires_at: expiresAt.toISOString(),
+        used: false,
+      });
 
     await sendMessage(
       chatId,

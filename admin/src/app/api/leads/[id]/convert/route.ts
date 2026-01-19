@@ -1,121 +1,159 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated } from '@/lib/auth';
-import { getSqliteDb } from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { isAuthenticated } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 // POST - Lead zu Portal-Client konvertieren
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const authenticated = await isAuthenticated();
   if (!authenticated) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const db = getSqliteDb();
+    const { id } = await params;
 
     // Lead abrufen
-    const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(params.id) as {
-      id: number;
-      name: string;
-      email: string;
-      phone: string | null;
-      company: string | null;
-      package_interest: string | null;
-    } | undefined;
+    const { data: lead, error: leadError } = await db
+      .from("leads")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-    if (!lead) {
-      return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
+    if (leadError || !lead) {
+      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
 
     // Prüfen ob bereits ein Portal-Client mit dieser E-Mail existiert
-    const existingClient = db.prepare(`
-      SELECT id FROM portal_clients WHERE email = ?
-    `).get(lead.email);
+    const { data: existingClient } = await db
+      .from("portal_clients")
+      .select("id")
+      .eq("email", lead.email)
+      .single();
 
     if (existingClient) {
-      return NextResponse.json({
-        error: 'A portal client with this email already exists',
-        existingClientId: (existingClient as { id: number }).id
-      }, { status: 409 });
+      return NextResponse.json(
+        {
+          error: "A portal client with this email already exists",
+          existingClientId: existingClient.id,
+        },
+        { status: 409 },
+      );
     }
 
     // Zugangscode generieren
-    const prefix = lead.name.split(' ')[0].toUpperCase().slice(0, 4);
+    const prefix = lead.name.split(" ")[0].toUpperCase().slice(0, 4);
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     let accessCode = `${prefix}-${random}`;
 
     // Sicherstellen dass Code unique ist
     let attempts = 0;
     while (attempts < 10) {
-      const existingCode = db.prepare('SELECT id FROM portal_clients WHERE access_code = ?').get(accessCode);
+      const { data: existingCode } = await db
+        .from("portal_clients")
+        .select("id")
+        .eq("access_code", accessCode)
+        .single();
+
       if (!existingCode) break;
       accessCode = `${prefix}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
       attempts++;
     }
 
     // Portal-Client erstellen
-    const clientResult = db.prepare(`
-      INSERT INTO portal_clients (name, email, company, phone, access_code, lead_id, status)
-      VALUES (?, ?, ?, ?, ?, ?, 'active')
-    `).run(
-      lead.name,
-      lead.email,
-      lead.company,
-      lead.phone,
-      accessCode,
-      lead.id
-    );
+    const { data: newClient, error: clientError } = await db
+      .from("portal_clients")
+      .insert({
+        name: lead.name,
+        email: lead.email,
+        company: lead.company,
+        phone: lead.phone,
+        access_code: accessCode,
+        lead_id: lead.id,
+        status: "active",
+      })
+      .select()
+      .single();
 
-    const clientId = Number(clientResult.lastInsertRowid);
+    if (clientError || !newClient) {
+      console.error("Client insert error:", clientError);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
+
+    const clientId = newClient.id;
 
     // Bestimme Paket aus Lead-Interesse
-    let packageType = 'Starter';
+    let packageType = "Starter";
     if (lead.package_interest) {
       const interest = lead.package_interest.toLowerCase();
-      if (interest.includes('premium') || interest.includes('enterprise')) {
-        packageType = 'Premium';
-      } else if (interest.includes('business') || interest.includes('professional')) {
-        packageType = 'Business';
+      if (interest.includes("premium") || interest.includes("enterprise")) {
+        packageType = "Premium";
+      } else if (
+        interest.includes("business") ||
+        interest.includes("professional")
+      ) {
+        packageType = "Business";
       }
     }
 
     // Standard-Projekt erstellen
-    const projectResult = db.prepare(`
-      INSERT INTO portal_projects (client_id, name, package, status, status_label, progress, manager)
-      VALUES (?, ?, ?, 'planung', 'In Planung', 0, 'Alex Shaer')
-    `).run(clientId, `Projekt ${lead.name}`, packageType);
+    const { data: newProject, error: projectError } = await db
+      .from("portal_projects")
+      .insert({
+        client_id: clientId,
+        name: `Projekt ${lead.name}`,
+        package: packageType,
+        status: "planung",
+        status_label: "In Planung",
+        progress: 0,
+        manager: "Alex Shaer",
+      })
+      .select()
+      .single();
 
-    const projectId = Number(projectResult.lastInsertRowid);
+    if (projectError || !newProject) {
+      console.error("Project insert error:", projectError);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
+
+    const projectId = newProject.id;
 
     // Willkommensnachricht erstellen
-    db.prepare(`
-      INSERT INTO portal_messages (project_id, sender_type, sender_name, message, is_read)
-      VALUES (?, 'admin', 'AgentFlow Team', 'Willkommen im Kundenportal! Hier können Sie den Fortschritt Ihres Projekts verfolgen und direkt mit uns kommunizieren.', 0)
-    `).run(projectId);
+    await db.from("portal_messages").insert({
+      project_id: projectId,
+      sender_type: "admin",
+      sender_name: "AgentFlow Team",
+      message:
+        "Willkommen im Kundenportal! Hier können Sie den Fortschritt Ihres Projekts verfolgen und direkt mit uns kommunizieren.",
+      is_read: false,
+    });
 
     // Standard-Meilensteine erstellen
     const milestones = [
-      { title: 'Erstgespräch & Briefing', status: 'pending', sort: 1 },
-      { title: 'Konzept & Planung', status: 'pending', sort: 2 },
-      { title: 'Design-Entwurf', status: 'pending', sort: 3 },
-      { title: 'Entwicklung', status: 'pending', sort: 4 },
-      { title: 'Testing & Review', status: 'pending', sort: 5 },
-      { title: 'Go-Live', status: 'pending', sort: 6 },
+      { title: "Erstgespräch & Briefing", status: "pending", sort_order: 1 },
+      { title: "Konzept & Planung", status: "pending", sort_order: 2 },
+      { title: "Design-Entwurf", status: "pending", sort_order: 3 },
+      { title: "Entwicklung", status: "pending", sort_order: 4 },
+      { title: "Testing & Review", status: "pending", sort_order: 5 },
+      { title: "Go-Live", status: "pending", sort_order: 6 },
     ];
 
     for (const m of milestones) {
-      db.prepare(`
-        INSERT INTO portal_milestones (project_id, title, status, sort_order)
-        VALUES (?, ?, ?, ?)
-      `).run(projectId, m.title, m.status, m.sort);
+      await db.from("portal_milestones").insert({
+        project_id: projectId,
+        title: m.title,
+        status: m.status,
+        sort_order: m.sort_order,
+      });
     }
 
     // Lead-Status auf "converted" setzen
-    db.prepare(`
-      UPDATE leads SET status = 'converted', updated_at = datetime('now') WHERE id = ?
-    `).run(lead.id);
+    await db
+      .from("leads")
+      .update({ status: "converted", updated_at: new Date().toISOString() })
+      .eq("id", lead.id);
 
     return NextResponse.json({
       success: true,
@@ -126,11 +164,10 @@ export async function POST(
         accessCode,
         projectId,
       },
-      message: `Portal-Client erfolgreich erstellt. Zugangscode: ${accessCode}`
+      message: `Portal-Client erfolgreich erstellt. Zugangscode: ${accessCode}`,
     });
-
   } catch (error) {
-    console.error('Lead convert error:', error);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    console.error("Lead convert error:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

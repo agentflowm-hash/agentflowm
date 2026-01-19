@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
-import { getSqliteDb } from "@/lib/db";
+import { db } from "@/lib/db";
 
 // Maximale Nachrichtenlänge
 const MAX_MESSAGE_LENGTH = 5000;
@@ -26,17 +26,17 @@ export async function GET(
       );
     }
 
-    const db = getSqliteDb();
+    const { data: messages, error } = await db
+      .from("portal_messages")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false });
 
-    const messages = db
-      .prepare(
-        `
-      SELECT * FROM portal_messages WHERE project_id = ? ORDER BY created_at DESC
-    `,
-      )
-      .all(projectId);
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
-    return NextResponse.json({ messages });
+    return NextResponse.json({ messages: messages || [] });
   } catch (error) {
     console.error("Messages GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
@@ -94,29 +94,33 @@ export async function POST(
         ? sender_name.trim().slice(0, 100)
         : "Alex Shaer";
 
-    const db = getSqliteDb();
-
     // Prüfen ob Projekt existiert
-    const project = db
-      .prepare("SELECT * FROM portal_projects WHERE id = ?")
-      .get(projectId);
-    if (!project) {
+    const { data: project, error: projectError } = await db
+      .from("portal_projects")
+      .select("*")
+      .eq("id", projectId)
+      .single();
+
+    if (projectError || !project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     // Nachricht erstellen
-    const result = db
-      .prepare(
-        `
-      INSERT INTO portal_messages (project_id, sender_type, sender_name, message, is_read)
-      VALUES (?, 'admin', ?, ?, 0)
-    `,
-      )
-      .run(projectId, senderName, trimmedMessage);
+    const { data: newMessage, error: insertError } = await db
+      .from("portal_messages")
+      .insert({
+        project_id: projectId,
+        sender_type: "admin",
+        sender_name: senderName,
+        message: trimmedMessage,
+        is_read: false,
+      })
+      .select()
+      .single();
 
-    const newMessage = db
-      .prepare("SELECT * FROM portal_messages WHERE id = ?")
-      .get(result.lastInsertRowid);
+    if (insertError) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,

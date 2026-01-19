@@ -8,7 +8,7 @@ export async function POST() {
     const token = cookieStore.get('portal_session')?.value;
 
     if (token) {
-      deleteSession(token);
+      await deleteSession(token);
     }
 
     cookieStore.delete('portal_session');

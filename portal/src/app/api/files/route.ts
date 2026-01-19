@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { getClientProject, getProjectFiles } from '@/lib/db';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
+import { getClientProject, getProjectFiles, addFile, formatFileSize } from '@/lib/db';
 
 // GET - Get files for client's project
 export async function GET() {
@@ -14,23 +11,24 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Kein Projekt gefunden' }, { status: 404 });
     }
 
-    const files = getProjectFiles(project.id);
+    const files = await getProjectFiles(project.id);
 
     return NextResponse.json({
       files: files.map(f => ({
         id: f.id,
-        name: f.original_name,
-        size: formatFileSize(f.size),
-        sizeBytes: f.size,
+        name: f.name,
+        size: formatFileSize(f.size || 0),
+        sizeBytes: f.size || 0,
         date: new Date(f.created_at).toLocaleDateString('de-DE'),
-        type: getFileType(f.mime_type),
+        type: getFileType(f.type),
         uploadedBy: f.uploaded_by,
+        url: f.url,
       })),
     });
   } catch (error) {
@@ -39,7 +37,7 @@ export async function GET() {
   }
 }
 
-// POST - Upload file
+// POST - Upload file (placeholder - actual upload would need storage service)
 export async function POST(request: NextRequest) {
   try {
     const client = await getSession();
@@ -48,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Kein Projekt gefunden' }, { status: 404 });
@@ -67,27 +65,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Datei zu groß (max. 10MB)' }, { status: 400 });
     }
 
-    // Generate unique filename
-    const ext = path.extname(file.name);
-    const uniqueName = `${crypto.randomBytes(8).toString('hex')}${ext}`;
-
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), '..', 'uploads', `project_${project.id}`);
-    await mkdir(uploadsDir, { recursive: true });
-
-    // Save file
-    const filePath = path.join(uploadsDir, uniqueName);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
-
-    // Import db function here to avoid circular deps
-    const { addFile } = await import('@/lib/db');
+    // In production, this would upload to Supabase Storage or similar
+    // For now, just record the file info
+    const fileUrl = `/uploads/${file.name}`; // Placeholder URL
 
     // Save to database
-    const newFile = addFile(
+    const newFile = await addFile(
       project.id,
-      uniqueName,
       file.name,
+      fileUrl,
       file.size,
       file.type || 'application/octet-stream',
       'client'
@@ -97,22 +83,17 @@ export async function POST(request: NextRequest) {
       success: true,
       file: {
         id: newFile.id,
-        name: file.name,
+        name: newFile.name,
         size: formatFileSize(file.size),
         date: 'Gerade eben',
         type: getFileType(file.type),
+        url: newFile.url,
       },
     });
   } catch (error) {
     console.error('File upload error:', error);
     return NextResponse.json({ error: 'Upload fehlgeschlagen' }, { status: 500 });
   }
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
 function getFileType(mimeType: string | null): string {

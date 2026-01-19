@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import Database from "better-sqlite3";
-import path from "path";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // ═══════════════════════════════════════════════════════════════
 //                    TELEGRAM LOGIN FOR PORTAL
 // Nur für bestehende Kunden - keine neuen Accounts!
 // ═══════════════════════════════════════════════════════════════
 
-// Verbindung zur Haupt-DB
-function getMainDb() {
-  const dbPath = path.join(process.cwd(), "..", "data", "agentflow.db");
-  const db = new Database(dbPath);
-  db.pragma("journal_mode = WAL");
-  return db;
-}
+const db = supabaseAdmin;
 
 // Generiere Session Token
 function generateToken(): string {
@@ -44,20 +37,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = getMainDb();
-
     // Prüfe Login-Code
-    const loginCode = db
-      .prepare(
-        `
-      SELECT * FROM login_codes
-      WHERE code = ? AND used = 0 AND expires_at > datetime('now')
-    `,
-      )
-      .get(cleanCode) as any;
+    const { data: loginCode, error: loginCodeError } = await db
+      .from("login_codes")
+      .select("*")
+      .eq("code", cleanCode)
+      .eq("used", false)
+      .gt("expires_at", new Date().toISOString())
+      .single();
 
-    if (!loginCode) {
-      db.close();
+    if (loginCodeError || !loginCode) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       return NextResponse.json(
         { error: "Code ungültig oder abgelaufen" },
@@ -66,21 +55,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Markiere als verwendet
-    db.prepare(`UPDATE login_codes SET used = 1 WHERE id = ?`).run(
-      loginCode.id,
-    );
+    await db
+      .from("login_codes")
+      .update({ used: true })
+      .eq("id", loginCode.id);
 
     // Prüfe ob Client existiert - NUR bestehende Kunden erlaubt!
-    const client = db
-      .prepare(
-        `
-      SELECT * FROM portal_clients WHERE LOWER(telegram_username) = LOWER(?)
-    `,
-      )
-      .get(loginCode.telegram_username) as any;
+    const { data: client, error: clientError } = await db
+      .from("portal_clients")
+      .select("*")
+      .ilike("telegram_username", loginCode.telegram_username)
+      .single();
 
-    if (!client) {
-      db.close();
+    if (clientError || !client) {
       // Kein Account gefunden - Fehlermeldung
       return NextResponse.json(
         {
@@ -94,16 +81,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Prüfe ob Client ein Projekt hat
-    const project = db
-      .prepare(
-        `
-      SELECT id FROM portal_projects WHERE client_id = ?
-    `,
-      )
-      .get(client.id) as any;
+    const { data: project, error: projectError } = await db
+      .from("portal_projects")
+      .select("id")
+      .eq("client_id", client.id)
+      .single();
 
-    if (!project) {
-      db.close();
+    if (projectError || !project) {
       return NextResponse.json(
         {
           error: "Kein aktives Projekt",
@@ -116,32 +100,34 @@ export async function POST(request: NextRequest) {
     }
 
     // Update last_login und Telegram-Daten
-    db.prepare(
-      `
-      UPDATE portal_clients
-      SET last_login = datetime('now'),
-          telegram_id = COALESCE(telegram_id, ?)
-      WHERE id = ?
-    `,
-    ).run(loginCode.telegram_id, client.id);
+    await db
+      .from("portal_clients")
+      .update({
+        last_login: new Date().toISOString(),
+        telegram_id: client.telegram_id || loginCode.telegram_id,
+      })
+      .eq("id", client.id);
 
     // Erstelle Session
     const token = generateToken();
 
     // Lösche alte Sessions
-    db.prepare(`DELETE FROM portal_sessions WHERE client_id = ?`).run(
-      client.id,
-    );
+    await db
+      .from("portal_sessions")
+      .delete()
+      .eq("client_id", client.id);
 
-    // Neue Session
-    db.prepare(
-      `
-      INSERT INTO portal_sessions (client_id, token, expires_at)
-      VALUES (?, ?, datetime('now', '+30 days'))
-    `,
-    ).run(client.id, token);
+    // Neue Session - 30 days from now
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
 
-    db.close();
+    await db
+      .from("portal_sessions")
+      .insert({
+        client_id: client.id,
+        token: token,
+        expires_at: expiresAt.toISOString(),
+      });
 
     console.log(
       `✅ Portal login via Telegram: @${loginCode.telegram_username} (Client: ${client.name})`,

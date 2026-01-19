@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
-import { getSqliteDb } from '@/lib/db';
+import { db } from '@/lib/db';
 
 export async function GET() {
   const authenticated = await isAuthenticated();
@@ -9,8 +9,14 @@ export async function GET() {
   }
 
   try {
-    const db = getSqliteDb();
-    const subscribers = db.prepare('SELECT * FROM subscribers ORDER BY created_at DESC LIMIT 100').all();
+    const { data: subscribers, error } = await db
+      .from('subscribers')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+
     return NextResponse.json({ subscribers });
   } catch (error) {
     console.error('Subscribers error:', error);

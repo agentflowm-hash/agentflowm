@@ -19,7 +19,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json(
@@ -28,11 +28,11 @@ export async function GET() {
       );
     }
 
-    const milestones = getProjectMilestones(project.id);
-    const messages = getProjectMessages(project.id);
-    const files = getProjectFiles(project.id);
-    const unreadCount = getUnreadMessageCount(project.id);
-    const approvals = getProjectApprovals(project.id);
+    const milestones = await getProjectMilestones(project.id);
+    const messages = await getProjectMessages(project.id);
+    const files = await getProjectFiles(project.id);
+    const unreadCount = await getUnreadMessageCount(project.id);
+    const approvals = await getProjectApprovals(project.id);
 
     return NextResponse.json({
       client: {
@@ -49,17 +49,17 @@ export async function GET() {
         statusLabel: project.status_label,
         progress: project.progress,
         startDate: formatDate(project.start_date),
-        estimatedEnd: formatDate(project.estimated_end),
+        estimatedEnd: formatDate(project.deadline),
         manager: project.manager,
         description: project.description,
         previewUrl: project.preview_url || null,
-        previewEnabled: project.preview_enabled === 1,
+        previewEnabled: !!project.preview_enabled,
       },
       milestones: milestones.map((m) => ({
         id: m.id,
         title: m.title,
         status: m.status,
-        date: m.date,
+        date: m.due_date,
       })),
       messages: messages.map((m) => ({
         id: m.id,
@@ -67,14 +67,15 @@ export async function GET() {
         senderType: m.sender_type,
         text: m.message,
         time: formatMessageTime(m.created_at),
-        unread: m.is_read === 0,
+        unread: !m.is_read,
       })),
       files: files.map((f) => ({
         id: f.id,
-        name: f.original_name,
-        size: formatFileSize(f.size),
+        name: f.name,
+        size: formatFileSize(f.size || 0),
         date: formatDate(f.created_at),
-        type: getFileType(f.mime_type),
+        type: getFileType(f.type),
+        url: f.url,
       })),
       unreadCount,
       approvals: approvals.map((a) => ({
