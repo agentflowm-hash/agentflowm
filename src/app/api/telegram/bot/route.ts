@@ -436,11 +436,118 @@ async function processMessage(message: any): Promise<void> {
     return;
   }
 
+  // ════════════════════════════════════════════════════════════
+  //              REPLY KEYBOARD BUTTONS (Text-basiert)
+  // ════════════════════════════════════════════════════════════
+
+  // Portal-Zugang Button
+  if (text.includes("Portal-Zugang") || text.includes("Portal")) {
+    await sendMessage(
+      chatId,
+      `🔐 *Portal-Zugang*\n\n` +
+        `Dein Kundenportal: https://portal-agentflowm.de\n\n` +
+        `Tippe /code um einen Login-Code zu erhalten.`,
+    );
+    return;
+  }
+
+  // Pakete ansehen Button
+  if (text.includes("Pakete ansehen") || text.includes("Pakete")) {
+    await sendMessage(
+      chatId,
+      `📦 *Unsere Pakete*\n\n` +
+        `Entdecke unsere Automatisierungs-Pakete:\n` +
+        `👉 https://agentflowm.de/pakete\n\n` +
+        `• *Starter* - Für den Einstieg\n` +
+        `• *Professional* - Für wachsende Unternehmen\n` +
+        `• *Enterprise* - Für maximale Automatisierung`,
+    );
+    return;
+  }
+
+  // Website-Check Button
+  if (text.includes("Website-Check") || text.includes("Websitecheck")) {
+    await sendMessage(
+      chatId,
+      `🔍 *Kostenloser Website-Check*\n\n` +
+        `Lass deine Website analysieren:\n` +
+        `👉 https://agentflowm.de/website-check\n\n` +
+        `Du erhältst einen detaillierten Bericht über:\n` +
+        `• Performance\n` +
+        `• SEO-Optimierung\n` +
+        `• Verbesserungspotential`,
+    );
+    return;
+  }
+
+  // Termin buchen Button
+  if (text.includes("Termin buchen") || text.includes("Termin")) {
+    await sendMessage(
+      chatId,
+      `📅 *Termin buchen*\n\n` +
+        `Buche ein kostenloses Beratungsgespräch:\n` +
+        `👉 https://calendly.com/agentflowm/30min\n\n` +
+        `Wir besprechen deine Anforderungen und zeigen dir, wie Automatisierung dein Business voranbringt.`,
+    );
+    return;
+  }
+
+  // Kontakt Button
+  if (text.includes("Kontakt")) {
+    await sendMessage(
+      chatId,
+      `📞 *Kontakt*\n\n` +
+        `*E-Mail:* kontakt@agentflowm.com\n` +
+        `*Termin:* https://calendly.com/agentflowm/30min\n` +
+        `*Website:* https://agentflowm.de\n\n` +
+        `Oder schreib einfach hier im Chat!`,
+    );
+    return;
+  }
+
+  // FAQ Button
+  if (text.includes("FAQ")) {
+    await sendMessage(
+      chatId,
+      `❓ *Häufige Fragen*\n\n` +
+        `*Was ist AgentFlow?*\n` +
+        `Wir automatisieren Geschäftsprozesse mit KI und n8n Workflows.\n\n` +
+        `*Was kostet es?*\n` +
+        `Pakete ab 499€/Monat. Details: https://agentflowm.de/pakete\n\n` +
+        `*Wie lange dauert die Umsetzung?*\n` +
+        `Je nach Projekt 1-4 Wochen.\n\n` +
+        `*Kann ich vorher testen?*\n` +
+        `Ja! Buche ein kostenloses Beratungsgespräch.`,
+    );
+    return;
+  }
+
+  // Hilfe Button
+  if (text.includes("Hilfe") && !text.startsWith("/")) {
+    await sendMessage(
+      chatId,
+      `ℹ️ *AgentFlow Bot - Hilfe*\n\n` +
+        `*Login:*\n` +
+        `/start - Willkommen & Login-Code\n` +
+        `/code - Neuer Login-Code\n\n` +
+        `*Empfehlungen:*\n` +
+        `/empfehlen - Neue Empfehlung abgeben\n` +
+        `/status - Deine Empfehlungen anzeigen\n\n` +
+        `*Buttons unten nutzen für:*\n` +
+        `🔐 Portal-Zugang\n` +
+        `📦 Pakete ansehen\n` +
+        `🔍 Website-Check\n` +
+        `📅 Termin buchen\n\n` +
+        `Bei Fragen: kontakt@agentflowm.com`,
+    );
+    return;
+  }
+
   // Unbekannte Nachricht
   await sendMessage(
     chatId,
     `👋 Hallo ${from.first_name || "dort"}!\n\n` +
-      `Tippe /hilfe für alle Befehle.`,
+      `Tippe /hilfe für alle Befehle oder nutze die Buttons unten.`,
   );
 }
 
