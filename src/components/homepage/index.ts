@@ -1,0 +1,10 @@
+export { HeroSection } from './HeroSection';
+export { ProblemSection } from './ProblemSection';
+export { AuswirkungSection } from './AuswirkungSection';
+export { ZielgruppeSection } from './ZielgruppeSection';
+export { LoesungSection } from './LoesungSection';
+export { SystemablaufSection } from './SystemablaufSection';
+export { PaketeSection } from './PaketeSection';
+export { WebAppsSection } from './WebAppsSection';
+export { KostenlosSection } from './KostenlosSection';
+export { FinalCTASection } from './FinalCTASection';

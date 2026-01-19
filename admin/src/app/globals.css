@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --color-bg: #0a0a0a;
+    --color-bg-secondary: #111111;
+    --color-accent: #fc682c;
+    --color-accent-dark: #e55a1f;
+    --color-text: #ffffff;
+    --color-text-muted: rgba(255, 255, 255, 0.7);
+    --color-text-muted2: rgba(255, 255, 255, 0.4);
+    --color-border: rgba(255, 255, 255, 0.1);
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-left: env(safe-area-inset-left, 0px);
+    --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    touch-action: manipulation;
+}
+
+html {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+    padding-top: var(--safe-area-top);
+    padding-bottom: var(--safe-area-bottom);
+    padding-left: var(--safe-area-left);
+    padding-right: var(--safe-area-right);
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Table styles */
+.admin-table {
+    @apply w-full text-sm;
+}
+
+.admin-table th {
+    @apply text-left text-xs text-white/40 uppercase tracking-wider font-medium py-3 px-4 border-b border-white/10;
+}
+
+.admin-table td {
+    @apply py-3 px-4 text-white/70;
+}
+
+.admin-table tr {
+    @apply border-b border-white/5 hover:bg-white/[0.02] transition-colors;
+}
+
+/* Status badges */
+.badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-new {
+    @apply bg-blue-500/20 text-blue-400;
+}
+
+.badge-contacted {
+    @apply bg-yellow-500/20 text-yellow-400;
+}
+
+.badge-qualified {
+    @apply bg-green-500/20 text-green-400;
+}
+
+.badge-closed {
+    @apply bg-white/10 text-white/50;
+}
+
+.badge-pending {
+    @apply bg-yellow-500/20 text-yellow-400;
+}
+
+.badge-paid {
+    @apply bg-green-500/20 text-green-400;
+}
+
+/* Card styles */
+.admin-card {
+    @apply bg-white/[0.03] border border-white/10 rounded-xl p-6;
+}
+
+/* Input styles */
+.admin-input {
+    @apply w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all;
+}
+
+.admin-select {
+    @apply px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent/50 transition-all cursor-pointer;
+}
+
+/* Button styles */
+.admin-btn {
+    @apply px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200;
+}
+
+.admin-btn-primary {
+    @apply bg-accent text-white hover:bg-accent-dark;
+}
+
+.admin-btn-secondary {
+    @apply bg-white/10 text-white hover:bg-white/20;
+}
+
+.admin-btn-ghost {
+    @apply text-white/60 hover:text-white hover:bg-white/5;
+}
+
+/* Safe area for bottom navigation */
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+
+/* Mobile optimizations */
+@media (max-width: 1023px) {
+    /* Larger touch targets */
+    button,
+    a,
+    [role="button"] {
+        min-height: 44px;
+    }
+
+    /* Better tap feedback */
+    button:active,
+    a:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    /* Prevent text selection on buttons */
+    button {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Smoother scrolling */
+    .overflow-y-auto,
+    .overflow-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hide scrollbars on mobile */
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Full width inputs */
+    .admin-input,
+    .admin-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}

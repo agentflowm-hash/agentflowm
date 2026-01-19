@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(sqlite3:*)",
+      "Bash(python3:*)",
+      "Bash(# Test projects API echo \"\"=== Test Project API ===\"\" curl -s -b /tmp/admin_cookies.txt http://localhost:3001/api/projects/1 | python3 -m json.tool)",
+      "Bash(# Test Portal flow echo \"\"=== Portal Login ===\"\" curl -s -c /tmp/portal_cookies.txt -X POST http://localhost:3002/api/auth/login \\\\ -H \"\"Content-Type: application/json\"\" \\\\ --data-raw ''{\"\"code\"\":\"\"DEMO-2026\"\"}'' echo \"\"\"\" echo \"\"=== Portal Project Data ===\"\" curl -s -b /tmp/portal_cookies.txt http://localhost:3002/api/project | python3 -m json.tool)",
+      "Bash(# Final summary echo \"\"========================================\"\" echo \"\" SYSTEM TEST ZUSAMMENFASSUNG\"\" echo \"\"========================================\"\" echo \"\"\"\" echo \"\"Server Status:\"\" lsof -i :3000 -i :3001 -i :3002)",
+      "mcp__acp__Bash",
+      "mcp__acp__Edit",
+      "mcp__acp__Write"
+    ]
+  }
+}

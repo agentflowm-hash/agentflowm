@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AgentFlow Kundenportal</string>
+    <string name="title_activity_main">AgentFlow Kundenportal</string>
+    <string name="package_name">de.agentflow.portal</string>
+    <string name="custom_url_scheme">de.agentflow.portal</string>
+</resources>
