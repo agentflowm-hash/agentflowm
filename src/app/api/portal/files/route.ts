@@ -13,13 +13,13 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Kein Projekt gefunden' }, { status: 404 });
     }
 
-    const files = getProjectFiles(project.id);
+    const files = await getProjectFiles(project.id);
 
     return NextResponse.json({
       files: files.map(f => ({
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Kein Projekt gefunden' }, { status: 404 });
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(filePath, buffer);
 
-    const newFile = addFile(
+    const newFile = await addFile(
       project.id,
       uniqueName,
       file.name,

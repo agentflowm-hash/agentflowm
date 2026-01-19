@@ -10,14 +10,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Code erforderlich' }, { status: 400 });
     }
 
-    const client = validateAccessCode(code);
+    const client = await validateAccessCode(code);
 
     if (!client) {
       await new Promise(resolve => setTimeout(resolve, 500));
       return NextResponse.json({ error: 'Ungültiger Code' }, { status: 401 });
     }
 
-    const token = createSession(client.id);
+    const token = await createSession(client.id);
 
     const cookieStore = await cookies();
     cookieStore.set('portal_session', token, {

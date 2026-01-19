@@ -16,7 +16,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json(
@@ -25,7 +25,7 @@ export async function GET() {
       );
     }
 
-    const messages = getProjectMessages(project.id);
+    const messages = await getProjectMessages(project.id);
 
     // Format messages for frontend
     const formattedMessages = messages.map((msg) => ({
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json(
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newMessage = addMessage(
+    const newMessage = await addMessage(
       project.id,
       "client",
       client.name,
@@ -121,7 +121,7 @@ export async function PATCH() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json(
@@ -130,7 +130,7 @@ export async function PATCH() {
       );
     }
 
-    markMessagesAsRead(project.id);
+    await markMessagesAsRead(project.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -18,16 +18,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const project = getClientProject(client.id);
+    const project = await getClientProject(client.id);
 
     if (!project) {
       return NextResponse.json({ error: 'Kein Projekt gefunden' }, { status: 404 });
     }
 
-    const milestones = getProjectMilestones(project.id);
-    const messages = getProjectMessages(project.id);
-    const files = getProjectFiles(project.id);
-    const unreadCount = getUnreadMessageCount(project.id);
+    const milestones = await getProjectMilestones(project.id);
+    const messages = await getProjectMessages(project.id);
+    const files = await getProjectFiles(project.id);
+    const unreadCount = await getUnreadMessageCount(project.id);
 
     return NextResponse.json({
       client: {
