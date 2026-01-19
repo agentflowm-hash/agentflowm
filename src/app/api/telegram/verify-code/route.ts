@@ -42,11 +42,11 @@ export async function POST(request: NextRequest) {
     // Portal-Client erstellen oder abrufen
     let portalAccessCode: string | undefined;
     try {
-      const existingClient = getPortalClientByTelegram(loginData.username);
+      const existingClient = await getPortalClientByTelegram(loginData.username);
       if (existingClient) {
         portalAccessCode = existingClient.access_code;
       } else {
-        const newClient = createPortalClient({
+        const newClient = await createPortalClient({
           name: loginData.firstName || loginData.username,
           telegramUsername: loginData.username,
           firstName: loginData.firstName,
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
-    console.log(`✅ Login successful for @${loginData.username} with code ${code}`);
+    console.log(`Login successful for @${loginData.username} with code ${code}`);
 
     return response;
   } catch (error) {

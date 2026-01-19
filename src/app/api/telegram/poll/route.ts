@@ -71,13 +71,13 @@ async function processUpdate(update: any) {
         isNew: false,
       };
       try {
-        const existingClient = getPortalClientByTelegram(
+        const existingClient = await getPortalClientByTelegram(
           from.username.toLowerCase(),
         );
         if (existingClient) {
           portalInfo = { accessCode: existingClient.access_code, isNew: false };
         } else {
-          const newClient = createPortalClient({
+          const newClient = await createPortalClient({
             name: from.first_name || from.username,
             telegramUsername: from.username.toLowerCase(),
             firstName: from.first_name,
@@ -91,18 +91,18 @@ async function processUpdate(update: any) {
 
       const portalMessage = portalInfo.accessCode
         ? portalInfo.isNew
-          ? `\n\n🎉 *Dein Kundenportal wurde erstellt!*\n` +
+          ? `\n\n*Dein Kundenportal wurde erstellt!*\n` +
             `Portal: portal.agentflowm.com\n` +
             `Zugangscode: \`${portalInfo.accessCode}\`\n\n` +
             `Speichere diesen Code sicher!`
-          : `\n\n📋 *Dein Kundenportal*\n` +
+          : `\n\n*Dein Kundenportal*\n` +
             `Portal: portal.agentflowm.com\n` +
             `Zugangscode: \`${portalInfo.accessCode}\``
         : "";
 
       await sendTelegramMessage(
         chatId,
-        `✅ *Anmeldung erfolgreich!*\n\n` +
+        `*Anmeldung erfolgreich!*\n\n` +
           `Hallo ${from.first_name || from.username}! Du bist jetzt angemeldet.\n\n` +
           `Du erhältst hier Updates zu:\n` +
           `• Neuen Projekten\n` +
@@ -112,11 +112,11 @@ async function processUpdate(update: any) {
           `\n\nKehre jetzt zur Website zurück.`,
       );
 
-      console.log(`✅ Login verified for @${from.username}`);
+      console.log(`Login verified for @${from.username}`);
     } else {
       await sendTelegramMessage(
         chatId,
-        `❌ *Anmeldung fehlgeschlagen*\n\n` +
+        `*Anmeldung fehlgeschlagen*\n\n` +
           `Der angeforderte Username (@${requestedUsername}) stimmt nicht mit deinem Telegram-Account überein.\n\n` +
           `Dein Telegram-Username: @${from.username || "nicht gesetzt"}\n\n` +
           `Bitte versuche es erneut mit dem korrekten Username.`,
@@ -128,7 +128,7 @@ async function processUpdate(update: any) {
     if (!from.username) {
       await sendTelegramMessage(
         chatId,
-        `❌ *Telegram-Username fehlt*\n\n` +
+        `*Telegram-Username fehlt*\n\n` +
           `Du benötigst einen Telegram-Username um dich anzumelden.\n\n` +
           `Gehe zu: Einstellungen → Benutzername\n` +
           `Lege einen Username fest und versuche es erneut.`,
@@ -149,21 +149,21 @@ async function processUpdate(update: any) {
 
     await sendTelegramMessage(
       chatId,
-      `🔐 *Dein Login-Code*\n\n` +
+      `*Dein Login-Code*\n\n` +
         `\`${code}\`\n\n` +
         `Gib diesen Code auf der Website ein.\n` +
         `Der Code ist 5 Minuten gültig.\n\n` +
-        `🔗 agentflowm.com/anmelden`,
+        `agentflowm.com/anmelden`,
     );
 
-    console.log(`📱 Login code ${code} generated for @${from.username}`);
+    console.log(`Login code ${code} generated for @${from.username}`);
   }
   // /login oder /code - Auch Code generieren
   else if (text === "/login" || text === "/code") {
     if (!from.username) {
       await sendTelegramMessage(
         chatId,
-        `❌ *Telegram-Username fehlt*\n\n` +
+        `*Telegram-Username fehlt*\n\n` +
           `Du benötigst einen Telegram-Username.`,
       );
       return;
@@ -179,7 +179,7 @@ async function processUpdate(update: any) {
 
     await sendTelegramMessage(
       chatId,
-      `🔐 *Neuer Login-Code*\n\n` +
+      `*Neuer Login-Code*\n\n` +
         `\`${code}\`\n\n` +
         `Gib diesen Code auf der Website ein.\n` +
         `Der Code ist 5 Minuten gültig.`,
@@ -194,14 +194,14 @@ async function processUpdate(update: any) {
     if (user) {
       await sendTelegramMessage(
         chatId,
-        `✅ *Du bist angemeldet*\n\n` +
+        `*Du bist angemeldet*\n\n` +
           `Username: @${user.username}\n` +
           `Angemeldet seit: ${user.authDate.toLocaleDateString("de-DE")}`,
       );
     } else {
       await sendTelegramMessage(
         chatId,
-        `❌ *Du bist nicht angemeldet*\n\n` +
+        `*Du bist nicht angemeldet*\n\n` +
           `Gehe auf agentflowm.com/anmelden um dich anzumelden.`,
       );
     }
@@ -210,7 +210,7 @@ async function processUpdate(update: any) {
   else if (text === "/hilfe" || text === "/help") {
     await sendTelegramMessage(
       chatId,
-      `ℹ️ *Hilfe*\n\n` +
+      `*Hilfe*\n\n` +
         `Verfügbare Befehle:\n\n` +
         `/start - Willkommensnachricht\n` +
         `/status - Anmeldestatus prüfen\n` +

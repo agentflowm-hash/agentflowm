@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
         // Portal-Client erstellen oder abrufen
         let portalInfo: { accessCode: string; isNew: boolean } = { accessCode: '', isNew: false };
         try {
-          const existingClient = getPortalClientByTelegram(from.username.toLowerCase());
+          const existingClient = await getPortalClientByTelegram(from.username.toLowerCase());
           if (existingClient) {
             portalInfo = { accessCode: existingClient.access_code, isNew: false };
           } else {
-            const newClient = createPortalClient({
+            const newClient = await createPortalClient({
               name: from.first_name || from.username,
               telegramUsername: from.username.toLowerCase(),
               firstName: from.first_name,
