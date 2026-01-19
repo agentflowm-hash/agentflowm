@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, initializeDatabase } from "@/lib/db";
-import { websiteChecks } from "@/lib/db/schema";
+import { supabaseAdmin } from "@/lib/supabase";
 import { isAuthenticated } from "@/lib/auth";
-import { desc } from "drizzle-orm";
-
-let dbInitialized = false;
 
 // ═══════════════════════════════════════════════════════════════
 //                    GET /api/admin/website-checks
@@ -17,31 +13,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
     }
 
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    const allChecks = db
-      .select()
-      .from(websiteChecks)
-      .orderBy(desc(websiteChecks.createdAt))
-      .limit(limit)
-      .offset(offset)
-      .all();
+    const { data: allChecks, error } = await supabaseAdmin
+      .from("website_checks")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("Supabase query error:", error);
+      throw error;
+    }
 
     // Parse JSON results with error handling
-    const checksWithParsedResults = allChecks.map((check) => {
+    const checksWithParsedResults = (allChecks || []).map((check) => {
       let parsedResults = null;
-      if (check.resultJson) {
+      if (check.result_json) {
         try {
-          parsedResults = JSON.parse(check.resultJson);
+          parsedResults = JSON.parse(check.result_json);
         } catch (e) {
-          console.error(`Failed to parse resultJson for check ${check.id}:`, e);
+          console.error(`Failed to parse result_json for check ${check.id}:`, e);
         }
       }
       return {
@@ -51,9 +45,12 @@ export async function GET(request: NextRequest) {
     });
 
     // Statistiken
-    const allChecksForStats = db.select().from(websiteChecks).all();
-    const scores = allChecksForStats
-      .map((c) => c.scoreOverall)
+    const { data: allChecksForStats } = await supabaseAdmin
+      .from("website_checks")
+      .select("score_overall");
+
+    const scores = (allChecksForStats || [])
+      .map((c) => c.score_overall)
       .filter((s): s is number => s !== null);
 
     const avgScore =
@@ -62,15 +59,15 @@ export async function GET(request: NextRequest) {
         : 0;
 
     const stats = {
-      total: allChecksForStats.length,
+      total: allChecksForStats?.length || 0,
       avgScore,
-      highScore: allChecksForStats.filter((c) => (c.scoreOverall || 0) >= 80)
+      highScore: (allChecksForStats || []).filter((c) => (c.score_overall || 0) >= 80)
         .length,
-      mediumScore: allChecksForStats.filter(
-        (c) => (c.scoreOverall || 0) >= 50 && (c.scoreOverall || 0) < 80,
+      mediumScore: (allChecksForStats || []).filter(
+        (c) => (c.score_overall || 0) >= 50 && (c.score_overall || 0) < 80,
       ).length,
-      lowScore: allChecksForStats.filter(
-        (c) => (c.scoreOverall || 0) < 50 && c.scoreOverall !== null,
+      lowScore: (allChecksForStats || []).filter(
+        (c) => (c.score_overall || 0) < 50 && c.score_overall !== null,
       ).length,
     };
 

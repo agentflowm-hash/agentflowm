@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, initializeDatabase, checkRateLimit, hashIP } from '@/lib/db';
-import { subscribers } from '@/lib/db/schema';
+import { supabaseAdmin } from '@/lib/supabase';
+import { checkRateLimit, hashIP } from '@/lib/db';
 import { subscriberSchema, validateInput } from '@/lib/validations';
 import { sendEmail } from '@/lib/email';
 import { newsletterWelcomeTemplate, newsletterAdminTemplate } from '@/lib/email/templates';
 import { sendNotification } from '@/lib/notifications';
-import { eq } from 'drizzle-orm';
 import crypto from 'crypto';
-
-let dbInitialized = false;
 
 // ═══════════════════════════════════════════════════════════════
 //                    POST /api/subscribe
@@ -17,19 +14,14 @@ let dbInitialized = false;
 
 export async function POST(request: NextRequest) {
   try {
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     // Rate Limiting
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-               request.headers.get('x-real-ip') || 
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
                'unknown';
     const ipHash = hashIP(ip);
-    
+
     const rateLimit = await checkRateLimit(ipHash, '/api/subscribe', 5, 60);
-    
+
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: 'Zu viele Anfragen.' },
@@ -51,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Validierung
     const validation = validateInput(subscriberSchema, body);
-    
+
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Validierungsfehler', details: validation.errors },
@@ -63,10 +55,11 @@ export async function POST(request: NextRequest) {
     const createdAt = new Date().toISOString();
 
     // Prüfen ob E-Mail schon existiert
-    const existing = db.select()
-      .from(subscribers)
-      .where(eq(subscribers.email, data.email))
-      .get();
+    const { data: existing } = await supabaseAdmin
+      .from('subscribers')
+      .select('*')
+      .eq('email', data.email)
+      .single();
 
     if (existing) {
       if (existing.status === 'confirmed') {
@@ -92,19 +85,26 @@ export async function POST(request: NextRequest) {
     const confirmToken = crypto.randomBytes(32).toString('hex');
 
     // Subscriber speichern
-    db.insert(subscribers).values({
-      email: data.email,
-      name: data.name || null,
-      topics: data.topics ? JSON.stringify(data.topics) : null,
-      status: 'pending',
-      confirmToken,
-      createdAt,
-    }).run();
+    const { error } = await supabaseAdmin
+      .from('subscribers')
+      .insert({
+        email: data.email,
+        name: data.name || null,
+        topics: data.topics ? JSON.stringify(data.topics) : null,
+        status: 'pending',
+        confirm_token: confirmToken,
+        created_at: createdAt,
+      });
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      throw error;
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // E-Mail-Benachrichtigungen senden
     // ═══════════════════════════════════════════════════════════════
-    
+
     const emailData = { email: data.email, createdAt };
 
     // Welcome-Email an Subscriber
@@ -150,22 +150,18 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     const token = request.nextUrl.searchParams.get('token');
-    
+
     if (!token) {
       return NextResponse.json({ error: 'Token fehlt' }, { status: 400 });
     }
 
     // Subscriber mit Token finden
-    const subscriber = db.select()
-      .from(subscribers)
-      .where(eq(subscribers.confirmToken, token))
-      .get();
+    const { data: subscriber } = await supabaseAdmin
+      .from('subscribers')
+      .select('*')
+      .eq('confirm_token', token)
+      .single();
 
     if (!subscriber) {
       return NextResponse.json({ error: 'Ungültiger Token' }, { status: 404 });
@@ -176,14 +172,19 @@ export async function GET(request: NextRequest) {
     }
 
     // Bestätigen
-    db.update(subscribers)
-      .set({
+    const { error } = await supabaseAdmin
+      .from('subscribers')
+      .update({
         status: 'confirmed',
-        confirmToken: null,
-        confirmedAt: new Date().toISOString(),
+        confirm_token: null,
+        confirmed_at: new Date().toISOString(),
       })
-      .where(eq(subscribers.id, subscriber.id))
-      .run();
+      .eq('id', subscriber.id);
+
+    if (error) {
+      console.error('Supabase update error:', error);
+      throw error;
+    }
 
     return NextResponse.json({
       success: true,

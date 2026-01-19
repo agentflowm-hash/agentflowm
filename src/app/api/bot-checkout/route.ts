@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { initializeDatabase, getSqliteDb } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // Bot-Preisberechnung basierend auf Typ (Miete/Kauf)
 function calculateBotPrice(
@@ -61,34 +61,38 @@ export async function POST(request: NextRequest) {
         ? `${finalPrice} € / Monat`
         : `${finalPrice} € einmalig`;
 
-    // Initialisiere Datenbank
-    initializeDatabase();
-    const db = getSqliteDb();
-
-    // Erstelle Lead in der Datenbank
+    // Erstelle Lead in Supabase
     const purchaseTypeLabel = purchaseType === "rent" ? "Miete" : "Kauf";
     const integrationsText = integrations?.length
       ? `\nIntegrationen: ${integrations.join(", ")}`
       : "";
 
-    const result = db
-      .prepare(
-        `
-      INSERT INTO leads (name, email, phone, company, source, package_interest, message, status, priority)
-      VALUES (?, ?, ?, ?, 'bot-shop', ?, ?, 'new', 'high')
-    `
-      )
-      .run(
-        customerName,
-        customerEmail,
-        customerPhone || null,
-        customerCompany || null,
-        `Bot: ${botName} (${purchaseTypeLabel})`,
-        message ||
-          `Bot-Bestellung: ${botName}\nTyp: ${purchaseTypeLabel}\nPreis: ${priceLabel}${integrationsText}`
-      );
+    const { data: result, error } = await supabaseAdmin
+      .from("leads")
+      .insert({
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone || null,
+        company: customerCompany || null,
+        source: "bot-shop",
+        package_interest: `Bot: ${botName} (${purchaseTypeLabel})`,
+        message:
+          message ||
+          `Bot-Bestellung: ${botName}\nTyp: ${purchaseTypeLabel}\nPreis: ${priceLabel}${integrationsText}`,
+        status: "new",
+        priority: "high",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-    const leadId = result.lastInsertRowid;
+    if (error) {
+      console.error("Supabase insert error:", error);
+      throw error;
+    }
+
+    const leadId = result.id;
 
     // Optional: Benachrichtigung senden (Telegram/Discord)
     try {

@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, initializeDatabase } from '@/lib/db';
-import { leads } from '@/lib/db/schema';
+import { supabaseAdmin } from '@/lib/supabase';
 import { isAuthenticated } from '@/lib/auth';
-import { desc, eq } from 'drizzle-orm';
-
-let dbInitialized = false;
 
 // ═══════════════════════════════════════════════════════════════
 //                    GET /api/admin/leads
@@ -18,11 +14,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     // Query-Parameter
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
@@ -30,38 +21,39 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Leads abrufen
-    let allLeads;
-    
+    let query = supabaseAdmin
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
     if (status && status !== 'all') {
-      allLeads = db.select()
-        .from(leads)
-        .where(eq(leads.status, status))
-        .orderBy(desc(leads.createdAt))
-        .limit(limit)
-        .offset(offset)
-        .all();
-    } else {
-      allLeads = db.select()
-        .from(leads)
-        .orderBy(desc(leads.createdAt))
-        .limit(limit)
-        .offset(offset)
-        .all();
+      query = query.eq('status', status);
     }
 
-    // Statistiken
-    const allLeadsForStats = db.select().from(leads).all();
+    const { data: allLeads, error } = await query;
+
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
+
+    // Statistiken - alle Leads für Stats holen
+    const { data: allLeadsForStats } = await supabaseAdmin
+      .from('leads')
+      .select('status');
+
     const stats = {
-      total: allLeadsForStats.length,
-      new: allLeadsForStats.filter(l => l.status === 'new').length,
-      contacted: allLeadsForStats.filter(l => l.status === 'contacted').length,
-      qualified: allLeadsForStats.filter(l => l.status === 'qualified').length,
-      converted: allLeadsForStats.filter(l => l.status === 'converted').length,
-      lost: allLeadsForStats.filter(l => l.status === 'lost').length,
+      total: allLeadsForStats?.length || 0,
+      new: allLeadsForStats?.filter(l => l.status === 'new').length || 0,
+      contacted: allLeadsForStats?.filter(l => l.status === 'contacted').length || 0,
+      qualified: allLeadsForStats?.filter(l => l.status === 'qualified').length || 0,
+      converted: allLeadsForStats?.filter(l => l.status === 'converted').length || 0,
+      lost: allLeadsForStats?.filter(l => l.status === 'lost').length || 0,
     };
 
     return NextResponse.json({
-      leads: allLeads,
+      leads: allLeads || [],
       stats,
       pagination: {
         limit,
@@ -90,11 +82,6 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     const body = await request.json();
     const { id, status, notes } = body;
 
@@ -103,7 +90,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updateData: Record<string, string> = {
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     if (status) {
@@ -113,10 +100,15 @@ export async function PATCH(request: NextRequest) {
       updateData.notes = notes;
     }
 
-    db.update(leads)
-      .set(updateData)
-      .where(eq(leads.id, id))
-      .run();
+    const { error } = await supabaseAdmin
+      .from('leads')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase update error:', error);
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
 

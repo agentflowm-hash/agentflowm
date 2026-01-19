@@ -12,7 +12,13 @@ export { schema };
 
 // Initialize (no-op for Supabase - tables are created via migrations)
 export function initializeDatabase() {
-  console.log('✅ Using Supabase database');
+  console.log('Using Supabase database');
+}
+
+// Legacy function for compatibility
+export function getSqliteDb() {
+  console.warn('getSqliteDb() is deprecated - use supabaseAdmin directly');
+  return null;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -163,7 +169,7 @@ export async function createPortalClient(data: {
     });
   }
 
-  console.log(`✅ Portal client created: ${data.telegramUsername} -> ${accessCode}`);
+  console.log(`Portal client created: ${data.telegramUsername} -> ${accessCode}`);
 
   return {
     clientId: newClient.id,
@@ -188,6 +194,14 @@ export async function getPortalClientByCode(accessCode: string): Promise<{
 
   return data || null;
 }
+
+// ═══════════════════════════════════════════════════════════════
+//                    LEGACY COMPATIBILITY LAYER
+// Provides a db-like interface for gradual migration
+// ═══════════════════════════════════════════════════════════════
+
+// Re-export supabaseAdmin as db for compatibility
+export const db = supabaseAdmin;
 
 // Re-export supabaseAdmin for direct queries
 export { supabaseAdmin };

@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, initializeDatabase, checkRateLimit, hashIP } from '@/lib/db';
-import { leads } from '@/lib/db/schema';
+import { supabaseAdmin } from '@/lib/supabase';
+import { checkRateLimit, hashIP } from '@/lib/db';
 import { leadSchema, validateInput } from '@/lib/validations';
 import { sendEmail } from '@/lib/email';
 import { contactAdminTemplate, contactConfirmationTemplate } from '@/lib/email/templates';
 import { sendNotification } from '@/lib/notifications';
-
-// Initialisiere DB beim ersten Request
-let dbInitialized = false;
 
 // ═══════════════════════════════════════════════════════════════
 //                    POST /api/contact
@@ -16,27 +13,21 @@ let dbInitialized = false;
 
 export async function POST(request: NextRequest) {
   try {
-    // DB initialisieren
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     // Rate Limiting (10 Requests pro Stunde pro IP)
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-               request.headers.get('x-real-ip') || 
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
                'unknown';
     const ipHash = hashIP(ip);
-    
+
     const rateLimit = await checkRateLimit(ipHash, '/api/contact', 10, 60);
-    
+
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.',
           retryAfter: rateLimit.resetAt.toISOString(),
         },
-        { 
+        {
           status: 429,
           headers: {
             'Retry-After': String(Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 1000)),
@@ -65,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Validierung
     const validation = validateInput(leadSchema, body);
-    
+
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Validierungsfehler', details: validation.errors },
@@ -76,26 +67,35 @@ export async function POST(request: NextRequest) {
     const data = validation.data;
     const createdAt = new Date().toISOString();
 
-    // Lead in Datenbank speichern
-    const result = db.insert(leads).values({
-      name: data.name,
-      email: data.email,
-      phone: data.phone || null,
-      company: data.company || null,
-      source: data.source,
-      packageInterest: data.packageInterest || null,
-      message: data.message,
-      budget: data.budget || null,
-      status: 'new',
-      priority: determinePriority(data),
-      createdAt,
-      updatedAt: createdAt,
-    }).returning().get();
+    // Lead in Supabase speichern
+    const { data: result, error } = await supabaseAdmin
+      .from('leads')
+      .insert({
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        company: data.company || null,
+        source: data.source,
+        package_interest: data.packageInterest || null,
+        message: data.message,
+        budget: data.budget || null,
+        status: 'new',
+        priority: determinePriority(data),
+        created_at: createdAt,
+        updated_at: createdAt,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      throw error;
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // E-Mail-Benachrichtigungen senden
     // ═══════════════════════════════════════════════════════════════
-    
+
     const emailData = {
       name: data.name,
       email: data.email,
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Contact API Error:', error);
-    
+
     return NextResponse.json(
       { error: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { initializeDatabase, getSqliteDb } from "@/lib/db";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // Paket-Preise (netto)
 const PACKAGES: Record<
@@ -48,29 +48,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialisiere Datenbank
-    initializeDatabase();
-    const db = getSqliteDb();
-
-    // Erstelle Lead in der Datenbank
-    const result = db
-      .prepare(
-        `
-      INSERT INTO leads (name, email, phone, company, source, package_interest, message, status, priority)
-      VALUES (?, ?, ?, ?, 'checkout', ?, ?, 'new', 'high')
-    `,
-      )
-      .run(
-        customerName,
-        customerEmail,
-        customerPhone || null,
-        customerCompany || null,
-        pkg.name,
-        message ||
+    // Erstelle Lead in Supabase
+    const { data: result, error } = await supabaseAdmin
+      .from("leads")
+      .insert({
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone || null,
+        company: customerCompany || null,
+        source: "checkout",
+        package_interest: pkg.name,
+        message:
+          message ||
           `Interesse an ${pkg.name} (${pkg.price.toLocaleString("de-DE")} € netto)`,
-      );
+        status: "new",
+        priority: "high",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-    const leadId = result.lastInsertRowid;
+    if (error) {
+      console.error("Supabase insert error:", error);
+      throw error;
+    }
+
+    const leadId = result.id;
 
     // Optional: Benachrichtigung senden (Telegram/Discord)
     try {

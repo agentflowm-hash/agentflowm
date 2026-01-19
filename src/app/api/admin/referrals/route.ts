@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, initializeDatabase } from '@/lib/db';
-import { referrals } from '@/lib/db/schema';
+import { supabaseAdmin } from '@/lib/supabase';
 import { isAuthenticated } from '@/lib/auth';
-import { desc, eq } from 'drizzle-orm';
-
-let dbInitialized = false;
 
 // ═══════════════════════════════════════════════════════════════
 //                    GET /api/admin/referrals
@@ -17,48 +13,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let allReferrals;
-    
+    let query = supabaseAdmin
+      .from('referrals')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
     if (status && status !== 'all') {
-      allReferrals = db.select()
-        .from(referrals)
-        .where(eq(referrals.status, status))
-        .orderBy(desc(referrals.createdAt))
-        .limit(limit)
-        .offset(offset)
-        .all();
-    } else {
-      allReferrals = db.select()
-        .from(referrals)
-        .orderBy(desc(referrals.createdAt))
-        .limit(limit)
-        .offset(offset)
-        .all();
+      query = query.eq('status', status);
+    }
+
+    const { data: allReferrals, error } = await query;
+
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
     }
 
     // Statistiken
-    const allReferralsForStats = db.select().from(referrals).all();
+    const { data: allReferralsForStats } = await supabaseAdmin
+      .from('referrals')
+      .select('status');
+
     const stats = {
-      total: allReferralsForStats.length,
-      pending: allReferralsForStats.filter(r => r.status === 'pending').length,
-      contacted: allReferralsForStats.filter(r => r.status === 'contacted').length,
-      converted: allReferralsForStats.filter(r => r.status === 'converted').length,
-      paid: allReferralsForStats.filter(r => r.status === 'paid').length,
-      rejected: allReferralsForStats.filter(r => r.status === 'rejected').length,
+      total: allReferralsForStats?.length || 0,
+      pending: allReferralsForStats?.filter(r => r.status === 'pending').length || 0,
+      contacted: allReferralsForStats?.filter(r => r.status === 'contacted').length || 0,
+      converted: allReferralsForStats?.filter(r => r.status === 'converted').length || 0,
+      paid: allReferralsForStats?.filter(r => r.status === 'paid').length || 0,
+      rejected: allReferralsForStats?.filter(r => r.status === 'rejected').length || 0,
     };
 
     return NextResponse.json({
-      referrals: allReferrals,
+      referrals: allReferrals || [],
       stats,
       pagination: {
         limit,
@@ -87,11 +79,6 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
     }
 
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     const body = await request.json();
     const { id, status, commission, notes } = body;
 
@@ -100,7 +87,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updateData: Record<string, string | number | null> = {
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     if (status) {
@@ -113,10 +100,15 @@ export async function PATCH(request: NextRequest) {
       updateData.notes = notes;
     }
 
-    db.update(referrals)
-      .set(updateData)
-      .where(eq(referrals.id, id))
-      .run();
+    const { error } = await supabaseAdmin
+      .from('referrals')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase update error:', error);
+      throw error;
+    }
 
     return NextResponse.json({ success: true });
 

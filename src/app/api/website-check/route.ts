@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
-import { db, initializeDatabase, checkRateLimit, hashIP } from '@/lib/db';
-import { websiteChecks } from '@/lib/db/schema';
+import { supabaseAdmin } from '@/lib/supabase';
+import { checkRateLimit, hashIP } from '@/lib/db';
 import { websiteCheckSchema, validateInput } from '@/lib/validations';
-
-let dbInitialized = false;
 
 // ═══════════════════════════════════════════════════════════════
 //                    TYPES
@@ -244,7 +242,7 @@ function analyzeAccessibility($: cheerio.CheerioAPI): { score: number; findings:
   // Images without alt
   const images = $('img');
   const imagesWithoutAlt = images.filter((_, el) => !$(el).attr('alt'));
-  
+
   if (images.length > 0) {
     if (imagesWithoutAlt.length === 0) {
       findings.push({ type: 'success', category: 'Accessibility', message: `Alle ${images.length} Bilder haben Alt-Texte` });
@@ -308,7 +306,7 @@ function analyzeAccessibility($: cheerio.CheerioAPI): { score: number; findings:
   const headings = $('h1, h2, h3, h4, h5, h6');
   let lastLevel = 0;
   let hierarchyOk = true;
-  
+
   headings.each((_, el) => {
     const level = parseInt(el.tagName.replace('h', ''));
     if (level > lastLevel + 1 && lastLevel !== 0) {
@@ -446,27 +444,21 @@ function analyzePerformance($: cheerio.CheerioAPI, loadTime: number, contentLeng
 
 export async function POST(request: NextRequest) {
   try {
-    // DB initialisieren
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     // Rate Limiting (20 Checks pro Stunde pro IP)
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-               request.headers.get('x-real-ip') || 
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
                'unknown';
     const ipHash = hashIP(ip);
-    
+
     const rateLimit = await checkRateLimit(ipHash, '/api/website-check', 20, 60);
-    
+
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.',
           retryAfter: rateLimit.resetAt.toISOString(),
         },
-        { 
+        {
           status: 429,
           headers: {
             'Retry-After': String(Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 1000)),
@@ -484,7 +476,7 @@ export async function POST(request: NextRequest) {
 
     // Validierung mit Zod
     const validation = validateInput(websiteCheckSchema, body);
-    
+
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Validierungsfehler', details: validation.errors },
@@ -508,7 +500,7 @@ export async function POST(request: NextRequest) {
     // Fetch the website
     const startTime = Date.now();
     let response: Response;
-    
+
     try {
       response = await fetch(parsedUrl.toString(), {
         headers: {
@@ -519,8 +511,8 @@ export async function POST(request: NextRequest) {
         redirect: 'follow',
       });
     } catch (fetchError) {
-      return NextResponse.json({ 
-        error: 'Website konnte nicht erreicht werden. Bitte URL prüfen.' 
+      return NextResponse.json({
+        error: 'Website konnte nicht erreicht werden. Bitte URL prüfen.'
       }, { status: 400 });
     }
 
@@ -569,7 +561,7 @@ export async function POST(request: NextRequest) {
     });
 
     const overallScore = Math.round(
-      (securityAnalysis.score + seoAnalysis.score + accessibilityAnalysis.score + 
+      (securityAnalysis.score + seoAnalysis.score + accessibilityAnalysis.score +
        performanceAnalysis.score + structureAnalysis.score) / 5
     );
 
@@ -596,30 +588,37 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // In Datenbank speichern
-    db.insert(websiteChecks).values({
-      url: parsedUrl.toString(),
-      email: email || null,
-      scoreOverall: overallScore,
-      scoreSecurity: securityAnalysis.score,
-      scoreSeo: seoAnalysis.score,
-      scoreAccessibility: accessibilityAnalysis.score,
-      scorePerformance: performanceAnalysis.score,
-      scoreStructure: structureAnalysis.score,
-      loadTime,
-      httpsEnabled: isHttps,
-      resultJson: JSON.stringify(result),
-      ipHash,
-      userAgent: request.headers.get('user-agent') || null,
-      createdAt: new Date().toISOString(),
-    }).run();
+    // In Supabase speichern
+    const { error } = await supabaseAdmin
+      .from('website_checks')
+      .insert({
+        url: parsedUrl.toString(),
+        email: email || null,
+        score_overall: overallScore,
+        score_security: securityAnalysis.score,
+        score_seo: seoAnalysis.score,
+        score_accessibility: accessibilityAnalysis.score,
+        score_performance: performanceAnalysis.score,
+        score_structure: structureAnalysis.score,
+        load_time: loadTime,
+        https_enabled: isHttps,
+        result_json: JSON.stringify(result),
+        ip_hash: ipHash,
+        user_agent: request.headers.get('user-agent') || null,
+        created_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      // Don't throw - still return results to user
+    }
 
     return NextResponse.json(result);
 
   } catch (error) {
     console.error('Website check error:', error);
-    return NextResponse.json({ 
-      error: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' 
+    return NextResponse.json({
+      error: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'
     }, { status: 500 });
   }
 }

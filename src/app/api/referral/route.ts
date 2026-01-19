@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, initializeDatabase, checkRateLimit, hashIP } from '@/lib/db';
-import { referrals } from '@/lib/db/schema';
+import { supabaseAdmin } from '@/lib/supabase';
+import { checkRateLimit, hashIP } from '@/lib/db';
 import { referralSchema, validateInput } from '@/lib/validations';
 import { sendEmail } from '@/lib/email';
 import { referralAdminTemplate, referralConfirmationTemplate } from '@/lib/email/templates';
 import { sendNotification } from '@/lib/notifications';
-
-let dbInitialized = false;
 
 // ═══════════════════════════════════════════════════════════════
 //                    POST /api/referral
@@ -15,19 +13,14 @@ let dbInitialized = false;
 
 export async function POST(request: NextRequest) {
   try {
-    if (!dbInitialized) {
-      initializeDatabase();
-      dbInitialized = true;
-    }
-
     // Rate Limiting
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-               request.headers.get('x-real-ip') || 
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
                'unknown';
     const ipHash = hashIP(ip);
-    
+
     const rateLimit = await checkRateLimit(ipHash, '/api/referral', 5, 60);
-    
+
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.' },
@@ -49,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Validierung
     const validation = validateInput(referralSchema, body);
-    
+
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Validierungsfehler', details: validation.errors },
@@ -60,25 +53,34 @@ export async function POST(request: NextRequest) {
     const data = validation.data;
     const createdAt = new Date().toISOString();
 
-    // Referral speichern
-    const result = db.insert(referrals).values({
-      referrerName: data.referrerName,
-      referrerEmail: data.referrerEmail,
-      referrerPhone: data.referrerPhone || null,
-      referredName: data.referredName,
-      referredEmail: data.referredEmail || null,
-      referredPhone: data.referredPhone || null,
-      referredCompany: data.referredCompany || null,
-      context: data.context || null,
-      status: 'pending',
-      createdAt,
-      updatedAt: createdAt,
-    }).returning().get();
+    // Referral in Supabase speichern
+    const { data: result, error } = await supabaseAdmin
+      .from('referrals')
+      .insert({
+        referrer_name: data.referrerName,
+        referrer_email: data.referrerEmail,
+        referrer_phone: data.referrerPhone || null,
+        referred_name: data.referredName,
+        referred_email: data.referredEmail || null,
+        referred_phone: data.referredPhone || null,
+        referred_company: data.referredCompany || null,
+        context: data.context || null,
+        status: 'pending',
+        created_at: createdAt,
+        updated_at: createdAt,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      throw error;
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // E-Mail-Benachrichtigungen senden
     // ═══════════════════════════════════════════════════════════════
-    
+
     const emailData = {
       referrerName: data.referrerName,
       referrerEmail: data.referrerEmail,
