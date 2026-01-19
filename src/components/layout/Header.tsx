@@ -14,6 +14,7 @@ const navigation = [
   { label: "Home", href: "/" },
   { label: "Leistungen", href: "/loesung" },
   { label: "Workflows", href: "/workflows" },
+  { label: "Projekte", href: "/projekte" },
   { label: "Pakete", href: "/pakete", highlight: true },
   { label: "Tools", href: "/tools" },
 ];
