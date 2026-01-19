@@ -58,6 +58,145 @@ async function sendMessage(
   }
 }
 
+// Beantworte Callback Query (Button-Klick)
+async function answerCallbackQuery(
+  callbackQueryId: string,
+  text?: string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${TELEGRAM_API}/answerCallbackQuery`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        callback_query_id: callbackQueryId,
+        text: text,
+        show_alert: false,
+      }),
+    });
+    const data = await res.json();
+    return data.ok === true;
+  } catch (error) {
+    console.error("Telegram answerCallbackQuery error:", error);
+    return false;
+  }
+}
+
+// Verarbeite Button-Klicks (Callback Queries)
+async function processCallbackQuery(callbackQuery: any): Promise<void> {
+  const chatId = callbackQuery.message?.chat?.id;
+  const callbackId = callbackQuery.id;
+  const data = callbackQuery.data;
+  const from = callbackQuery.from;
+
+  if (!chatId || !data) return;
+
+  console.log(`🔘 Button click from @${from?.username || "unknown"}: ${data}`);
+
+  // Beantworte den Callback sofort
+  await answerCallbackQuery(callbackId);
+
+  // Handle verschiedene Button-Aktionen
+  switch (data) {
+    case "portal":
+    case "portal_zugang":
+      await sendMessage(
+        chatId,
+        `🔐 *Portal-Zugang*\n\n` +
+          `Dein Kundenportal: https://portal-agentflowm.de\n\n` +
+          `Tippe /code um einen Login-Code zu erhalten.`,
+      );
+      break;
+
+    case "pakete":
+    case "pakete_ansehen":
+      await sendMessage(
+        chatId,
+        `📦 *Unsere Pakete*\n\n` +
+          `Entdecke unsere Automatisierungs-Pakete:\n` +
+          `👉 https://agentflowm.de/pakete\n\n` +
+          `• *Starter* - Für den Einstieg\n` +
+          `• *Professional* - Für wachsende Unternehmen\n` +
+          `• *Enterprise* - Für maximale Automatisierung`,
+      );
+      break;
+
+    case "website_check":
+    case "websitecheck":
+      await sendMessage(
+        chatId,
+        `🔍 *Kostenloser Website-Check*\n\n` +
+          `Lass deine Website analysieren:\n` +
+          `👉 https://agentflowm.de/website-check\n\n` +
+          `Du erhältst einen detaillierten Bericht über:\n` +
+          `• Performance\n` +
+          `• SEO-Optimierung\n` +
+          `• Verbesserungspotential`,
+      );
+      break;
+
+    case "termin":
+    case "termin_buchen":
+      await sendMessage(
+        chatId,
+        `📅 *Termin buchen*\n\n` +
+          `Buche ein kostenloses Beratungsgespräch:\n` +
+          `👉 https://calendly.com/agentflowm/30min\n\n` +
+          `Wir besprechen deine Anforderungen und zeigen dir, wie Automatisierung dein Business voranbringt.`,
+      );
+      break;
+
+    case "hilfe":
+    case "help":
+      await sendMessage(
+        chatId,
+        `ℹ️ *AgentFlow Bot - Hilfe*\n\n` +
+          `*Login:*\n` +
+          `/start - Willkommen & Login-Code\n` +
+          `/code - Neuer Login-Code\n\n` +
+          `*Empfehlungen:*\n` +
+          `/empfehlen - Neue Empfehlung abgeben\n` +
+          `/status - Deine Empfehlungen anzeigen\n\n` +
+          `*Sonstiges:*\n` +
+          `/hilfe - Diese Hilfe\n\n` +
+          `Bei Fragen: kontakt@agentflowm.com`,
+      );
+      break;
+
+    case "faq":
+      await sendMessage(
+        chatId,
+        `❓ *Häufige Fragen*\n\n` +
+          `*Was ist AgentFlow?*\n` +
+          `Wir automatisieren Geschäftsprozesse mit KI und n8n Workflows.\n\n` +
+          `*Was kostet es?*\n` +
+          `Pakete ab 499€/Monat. Details: /pakete\n\n` +
+          `*Wie lange dauert die Umsetzung?*\n` +
+          `Je nach Projekt 1-4 Wochen.\n\n` +
+          `*Kann ich vorher testen?*\n` +
+          `Ja! Buche ein kostenloses Beratungsgespräch.`,
+      );
+      break;
+
+    case "kontakt":
+    case "contact":
+      await sendMessage(
+        chatId,
+        `📞 *Kontakt*\n\n` +
+          `*E-Mail:* kontakt@agentflowm.com\n` +
+          `*Termin:* https://calendly.com/agentflowm/30min\n` +
+          `*Website:* https://agentflowm.de\n\n` +
+          `Oder schreib einfach hier im Chat!`,
+      );
+      break;
+
+    default:
+      await sendMessage(
+        chatId,
+        `👋 Tippe /hilfe für alle Befehle.`,
+      );
+  }
+}
+
 // Sende Nachricht an Admin
 async function notifyAdmin(text: string): Promise<void> {
   if (ADMIN_CHAT_ID) {
@@ -455,9 +594,17 @@ export async function POST(request: Request) {
 
   try {
     const update = await request.json();
+
+    // Verarbeite Nachrichten
     if (update.message) {
       await processMessage(update.message);
     }
+
+    // Verarbeite Button-Klicks (Callback Queries)
+    if (update.callback_query) {
+      await processCallbackQuery(update.callback_query);
+    }
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Webhook error:", error);
