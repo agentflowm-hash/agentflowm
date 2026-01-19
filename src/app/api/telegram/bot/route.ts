@@ -137,7 +137,7 @@ async function processMessage(message: any): Promise<void> {
     }
 
     const code = generateLoginCode();
-    const saved = saveLoginCode({
+    const saved = await saveLoginCode({
       code,
       telegramId: from.id,
       telegramUsername: from.username,
@@ -170,7 +170,7 @@ async function processMessage(message: any): Promise<void> {
     }
 
     const code = generateLoginCode();
-    const saved = saveLoginCode({
+    const saved = await saveLoginCode({
       code,
       telegramId: from.id,
       telegramUsername: from.username,
@@ -226,8 +226,8 @@ async function processMessage(message: any): Promise<void> {
       return;
     }
 
-    const referrals = getReferralsByTelegram(from.username);
-    const stats = getReferralStats(from.username);
+    const referrals = await getReferralsByTelegram(from.username);
+    const stats = await getReferralStats(from.username);
 
     if (referrals.length === 0) {
       await sendMessage(
@@ -350,7 +350,7 @@ async function handleReferralSession(
 
       // Erstelle Empfehlung in DB
       try {
-        const referral = createReferralFromTelegram({
+        const referral = await createReferralFromTelegram({
           referrerTelegram: session.data.referrerUsername,
           referrerChatId: chatId,
           referrerName: session.data.referrerName,
