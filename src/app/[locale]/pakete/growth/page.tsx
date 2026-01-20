@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui';
 import { CTASection } from '@/components/sections';
-import Link from 'next/link';
 
 // ═══════════════════════════════════════════════════════════════
 //                    ANIMATED BACKGROUND
@@ -20,128 +21,13 @@ function AnimatedBackground() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//                    PACKAGE DATA
-// ═══════════════════════════════════════════════════════════════
-
-const packageData = {
-  name: 'Growth',
-  icon: '💎',
-  color: '#9D65C9',
-  price: 'ab 10.990',
-  billing: 'einmalig',
-  timeline: '4-6 Wochen',
-  badge: 'Premium',
-  tagline: 'Das komplette System für maximales Wachstum',
-  description: 'Bis zu 13 Seiten plus Landingpages, Publishing-Agent, Leads-Generator-Agent und Priority Support. Für Unternehmen, die keine Kompromisse machen und mit System wachsen wollen.',
-  
-  idealFor: [
-    'Wachstumsorientierte Unternehmen',
-    'B2B mit komplexen Sales-Prozessen',
-    'Unternehmen mit hohem Lead-Volumen',
-    'Teams die maximale Effizienz brauchen',
-    'Langfristige Partnerschaften',
-  ],
-  
-  features: [
-    {
-      title: 'Bis zu 13+ Seiten',
-      desc: 'Umfangreicher Webauftritt mit allen wichtigen Seiten plus dedizierte Landingpages.',
-      icon: '📑',
-      highlight: false,
-    },
-    {
-      title: 'Publishing-Agent',
-      desc: 'Automatisierter Content-Workflow: Planung → Freigabe → Veröffentlichung.',
-      icon: '🤖',
-      highlight: false,
-    },
-    {
-      title: 'Leads-Generator-Agent',
-      desc: 'Automatische Lead-Erfassung, Kategorisierung und Follow-up. Kein Lead geht verloren.',
-      icon: '🎯',
-      highlight: true,
-    },
-    {
-      title: 'Priority Support',
-      desc: 'Schnelle Reaktionszeiten und direkter Draht zu uns.',
-      icon: '⚡',
-      highlight: true,
-    },
-    {
-      title: 'Vollständige Übergabe',
-      desc: 'Detaillierte Dokumentation und ausführliche Schulung für Ihr Team.',
-      icon: '📚',
-      highlight: false,
-    },
-    {
-      title: 'Quartals-Reviews',
-      desc: 'Regelmäßige Analyse und Optimierungsvorschläge.',
-      icon: '📊',
-      highlight: true,
-    },
-    {
-      title: 'Erweiterbar',
-      desc: 'Jederzeit weitere Seiten, Workflows oder Features hinzufügbar.',
-      icon: '🔧',
-      highlight: false,
-    },
-    {
-      title: 'Alles aus Business',
-      desc: 'CMS, Tracking, SEO, Responsive Design und mehr.',
-      icon: '✨',
-      highlight: false,
-    },
-  ],
-  
-  leadsAgent: {
-    title: 'Der Leads-Generator-Agent erklärt',
-    description: 'Ihr automatisiertes Lead-Management-System',
-    steps: [
-      { icon: '📥', title: 'Erfassung', desc: 'Leads werden automatisch erfasst und kategorisiert' },
-      { icon: '🏷️', title: 'Scoring', desc: 'Automatische Bewertung nach Ihren Kriterien' },
-      { icon: '📋', title: 'Pipeline', desc: 'Übersichtliches Kanban-Board für alle Leads' },
-      { icon: '⏰', title: 'Follow-up', desc: 'Automatische Erinnerungen und Aufgaben' },
-      { icon: '📈', title: 'Reporting', desc: 'Übersicht über Conversion-Raten und Performance' },
-    ],
-    benefits: [
-      'Kein Lead geht mehr verloren',
-      '30% mehr Abschlüsse durch systematisches Follow-up',
-      'Volle Transparenz über Ihre Pipeline',
-      'Zeitersparnis durch Automatisierung',
-    ],
-  },
-  
-  process: [
-    { step: 1, title: 'Strategy Session', desc: 'Tiefgehende Analyse Ihrer Ziele, Prozesse und Anforderungen.' },
-    { step: 2, title: 'Systemarchitektur', desc: 'Planung der kompletten Infrastruktur und Workflows.' },
-    { step: 3, title: 'Design & Branding', desc: 'Premium-Design das Ihre Marke perfekt repräsentiert.' },
-    { step: 4, title: 'Entwicklung', desc: 'Umsetzung mit modernsten Technologien.' },
-    { step: 5, title: 'Workflow-Setup', desc: 'Einrichtung beider Agents und aller Automationen.' },
-    { step: 6, title: 'Integration', desc: 'Anbindung an Ihre bestehenden Tools (CRM, E-Mail, etc.).' },
-    { step: 7, title: 'Testing', desc: 'Umfassende Tests aller Funktionen und Workflows.' },
-    { step: 8, title: 'Launch & Training', desc: 'Go-Live mit ausführlicher Schulung für Ihr Team.' },
-  ],
-  
-  comparison: {
-    title: 'Growth vs. Business',
-    items: [
-      { feature: 'Seitenanzahl', business: 'bis 10', growth: 'bis 13+' },
-      { feature: 'Publishing-Agent', business: '✓', growth: '✓' },
-      { feature: 'Leads-Generator', business: '—', growth: '✓' },
-      { feature: 'Priority Support', business: '—', growth: '✓' },
-      { feature: 'Quartals-Reviews', business: '—', growth: '✓' },
-      { feature: 'Landingpages', business: '—', growth: '✓' },
-    ],
-  },
-};
-
-// ═══════════════════════════════════════════════════════════════
 //                    COMPONENTS
 // ═══════════════════════════════════════════════════════════════
 
-function PageHero() {
+function PageHero({ t }: { t: (key: string) => string }) {
   const [isVisible, setIsVisible] = useState(false);
-  
+  const packageColor = '#9D65C9';
+
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -149,90 +35,90 @@ function PageHero() {
   return (
     <section className="relative pt-32 pb-16 overflow-hidden">
       <AnimatedBackground />
-      
+
       <div className="container relative z-10">
         {/* Breadcrumb */}
         <div className={`flex items-center gap-2 text-sm text-[var(--color-text-muted)] mb-8 transition-all duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           <Link href="/pakete" className="hover:text-[var(--color-accent)] transition-colors">
-            Pakete
+            {t("backLink")}
           </Link>
           <span>/</span>
-          <span style={{ color: packageData.color }}>{packageData.name}</span>
+          <span style={{ color: packageColor }}>{t("name")}</span>
         </div>
 
         <div className="max-w-4xl">
           {/* Badge */}
           <div className={`flex items-center gap-3 mb-6 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <div 
+            <div
               className="inline-flex items-center gap-3 px-4 py-2 rounded-full"
-              style={{ 
-                background: `${packageData.color}15`,
-                border: `1px solid ${packageData.color}30`,
+              style={{
+                background: `${packageColor}15`,
+                border: `1px solid ${packageColor}30`,
               }}
             >
-              <span className="text-2xl">{packageData.icon}</span>
-              <span className="font-semibold" style={{ color: packageData.color }}>
-                {packageData.name}
+              <span className="text-2xl">{"\uD83D\uDC8E"}</span>
+              <span className="font-semibold" style={{ color: packageColor }}>
+                {t("name")}
               </span>
             </div>
-            <span 
+            <span
               className="px-3 py-1 rounded-full text-xs font-bold text-white"
-              style={{ background: `linear-gradient(135deg, ${packageData.color} 0%, #7C3AED 100%)` }}
+              style={{ background: `linear-gradient(135deg, ${packageColor} 0%, #7C3AED 100%)` }}
             >
-              {packageData.badge}
+              {t("badge")}
             </span>
           </div>
-          
+
           {/* Headline */}
-          <h1 
+          <h1
             className={`text-h1 font-bold mb-6 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           >
-            {packageData.tagline}
+            {t("tagline")}
           </h1>
-          
+
           {/* Description */}
-          <p 
+          <p
             className={`text-xl text-[var(--color-text-muted)] mb-8 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           >
-            {packageData.description}
+            {t("description")}
           </p>
 
           {/* Price & CTA */}
-          <div 
+          <div
             className={`flex flex-wrap items-center gap-6 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           >
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold" style={{ color: packageData.color }}>
-                  {packageData.price}
+                <span className="text-5xl font-bold" style={{ color: packageColor }}>
+                  {t("price")}
                 </span>
-                <span className="text-xl text-[var(--color-text-muted)]">€</span>
+                <span className="text-xl text-[var(--color-text-muted)]">{"\u20AC"}</span>
               </div>
-              <p className="text-sm text-[var(--color-text-muted)]">{packageData.billing}</p>
+              <p className="text-sm text-[var(--color-text-muted)]">{t("priceUnit")}</p>
             </div>
-            
+
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 className="px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ 
-                  background: `linear-gradient(135deg, ${packageData.color} 0%, #7C3AED 100%)`,
-                  boxShadow: `0 4px 20px ${packageData.color}40`,
+                style={{
+                  background: `linear-gradient(135deg, ${packageColor} 0%, #7C3AED 100%)`,
+                  boxShadow: `0 4px 20px ${packageColor}40`,
                 }}
                 onClick={() => window.location.href = '/termin'}
               >
-                Premium starten
+                {t("ctaPrimary")}
               </button>
-              <span 
+              <span
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm"
-                style={{ 
-                  background: `${packageData.color}15`,
-                  color: packageData.color,
+                style={{
+                  background: `${packageColor}15`,
+                  color: packageColor,
                 }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                {packageData.timeline}
+                {t("timeline")}
               </span>
             </div>
           </div>
@@ -242,42 +128,65 @@ function PageHero() {
   );
 }
 
-function FeaturesSection() {
+function FeaturesSection({ t }: { t: (key: string) => string }) {
+  const packageColor = '#9D65C9';
+  const featureIcons: Record<string, string> = {
+    pages: "\uD83D\uDCD1",
+    robot: "\uD83E\uDD16",
+    target: "\uD83C\uDFAF",
+    zap: "\u26A1",
+    book: "\uD83D\uDCDA",
+    chart: "\uD83D\uDCC8",
+    tool: "\uD83D\uDD27",
+    star: "\u2728",
+  };
+
+  const features = [
+    { titleKey: "features.0.title", descKey: "features.0.desc", icon: "pages", highlight: false },
+    { titleKey: "features.1.title", descKey: "features.1.desc", icon: "robot", highlight: false },
+    { titleKey: "features.2.title", descKey: "features.2.desc", icon: "target", highlight: true },
+    { titleKey: "features.3.title", descKey: "features.3.desc", icon: "zap", highlight: true },
+    { titleKey: "features.4.title", descKey: "features.4.desc", icon: "book", highlight: false },
+    { titleKey: "features.5.title", descKey: "features.5.desc", icon: "chart", highlight: true },
+    { titleKey: "features.6.title", descKey: "features.6.desc", icon: "tool", highlight: false },
+    { titleKey: "features.7.title", descKey: "features.7.desc", icon: "star", highlight: false },
+  ];
+
   return (
     <section className="section bg-[var(--color-surface)]">
       <div className="container">
-        <h2 className="text-h2 font-bold text-center mb-4">Das komplette Paket</h2>
+        <h2 className="text-h2 font-bold text-center mb-4">{t("featuresTitle")}</h2>
         <p className="text-center text-[var(--color-text-muted)] mb-12 max-w-2xl mx-auto">
-          Alles was Sie für systematisches Wachstum brauchen
+          {t("featuresSubtitle")}
         </p>
-        
+
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
-          {packageData.features.map((feature, i) => (
-            <div 
+          {features.map((feature, i) => (
+            <div
               key={i}
               className={`p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 ${feature.highlight ? 'bg-gradient-to-br from-[#9D65C9]/10 to-transparent' : 'bg-[var(--color-surface-elevated)]'}`}
               style={{
-                borderColor: feature.highlight ? `${packageData.color}40` : 'var(--color-border)',
+                borderColor: feature.highlight ? `${packageColor}40` : 'var(--color-border)',
               }}
             >
-              <div 
+              <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3"
-                style={{ 
-                  background: feature.highlight ? packageData.color : `${packageData.color}15`,
+                style={{
+                  background: feature.highlight ? packageColor : `${packageColor}15`,
                   color: feature.highlight ? 'white' : undefined,
                 }}
               >
-                {feature.icon}
+                {featureIcons[feature.icon]}
               </div>
               <h3 className="font-semibold mb-1 text-sm">
-                {feature.title}
+                {t(feature.titleKey)}
                 {feature.highlight && (
                   <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold uppercase rounded bg-[#9D65C9]/20 text-[#9D65C9]">
-                    Exklusiv
+                    {t("exclusive")}
                   </span>
                 )}
               </h3>
-              <p className="text-xs text-[var(--color-text-muted)]">{feature.desc}</p>
+              <p className="text-xs text-[var(--color-text-muted)]">{t(feature.descKey)}</p>
             </div>
           ))}
         </div>
@@ -286,67 +195,86 @@ function FeaturesSection() {
   );
 }
 
-function LeadsAgentSection() {
+function LeadsAgentSection({ t }: { t: (key: string) => string }) {
+  const packageColor = '#9D65C9';
+  const stepIcons: Record<string, string> = {
+    inbox: "\uD83D\uDCE5",
+    tag: "\uD83C\uDFF7\uFE0F",
+    list: "\uD83D\uDCCB",
+    clock: "\u23F0",
+    trending: "\uD83D\uDCC8",
+  };
+
+  const steps = [
+    { icon: "inbox", titleKey: "leadsAgentSteps.0.title", descKey: "leadsAgentSteps.0.desc" },
+    { icon: "tag", titleKey: "leadsAgentSteps.1.title", descKey: "leadsAgentSteps.1.desc" },
+    { icon: "list", titleKey: "leadsAgentSteps.2.title", descKey: "leadsAgentSteps.2.desc" },
+    { icon: "clock", titleKey: "leadsAgentSteps.3.title", descKey: "leadsAgentSteps.3.desc" },
+    { icon: "trending", titleKey: "leadsAgentSteps.4.title", descKey: "leadsAgentSteps.4.desc" },
+  ];
+
+  const benefitKeys = ["leadsAgentBenefits.0", "leadsAgentBenefits.1", "leadsAgentBenefits.2", "leadsAgentBenefits.3"];
+
   return (
     <section className="section">
       <div className="container">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <span 
+            <span
               className="inline-block px-3 py-1 rounded-full text-sm font-medium mb-4"
-              style={{ background: `${packageData.color}15`, color: packageData.color }}
+              style={{ background: `${packageColor}15`, color: packageColor }}
             >
-              🎯 Exklusiv im Growth-Paket
+              {"\uD83C\uDFAF"} {t("exclusive")}
             </span>
-            <h2 className="text-h2 font-bold mb-4">{packageData.leadsAgent.title}</h2>
+            <h2 className="text-h2 font-bold mb-4">{t("leadsAgentTitle")}</h2>
             <p className="text-[var(--color-text-muted)]">
-              {packageData.leadsAgent.description}
+              {t("leadsAgentSubtitle")}
             </p>
           </div>
-          
-          <div 
+
+          <div
             className="p-8 rounded-2xl mb-8"
-            style={{ 
-              background: `linear-gradient(135deg, ${packageData.color}08 0%, transparent 50%, ${packageData.color}05 100%)`,
-              border: `1px solid ${packageData.color}20`,
+            style={{
+              background: `linear-gradient(135deg, ${packageColor}08 0%, transparent 50%, ${packageColor}05 100%)`,
+              border: `1px solid ${packageColor}20`,
             }}
           >
             <div className="grid md:grid-cols-5 gap-4 mb-8">
-              {packageData.leadsAgent.steps.map((step, i) => (
+              {steps.map((step, i) => (
                 <div key={i} className="text-center relative">
-                  {i < packageData.leadsAgent.steps.length - 1 && (
+                  {i < steps.length - 1 && (
                     <div className="hidden md:block absolute top-6 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#9D65C9]/30 to-[#9D65C9]/10" />
                   )}
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3 relative z-10"
-                    style={{ 
-                      background: `${packageData.color}15`,
-                      border: `1px solid ${packageData.color}25`,
+                    style={{
+                      background: `${packageColor}15`,
+                      border: `1px solid ${packageColor}25`,
                     }}
                   >
-                    {step.icon}
+                    {stepIcons[step.icon]}
                   </div>
-                  <h4 className="font-semibold text-sm mb-1">{step.title}</h4>
-                  <p className="text-xs text-[var(--color-text-muted)]">{step.desc}</p>
+                  <h4 className="font-semibold text-sm mb-1">{t(step.titleKey)}</h4>
+                  <p className="text-xs text-[var(--color-text-muted)]">{t(step.descKey)}</p>
                 </div>
               ))}
             </div>
-            
+
             {/* Benefits */}
             <div className="border-t border-[var(--color-border)] pt-6">
-              <h4 className="font-semibold text-center mb-4">Ihre Vorteile:</h4>
+              <h4 className="font-semibold text-center mb-4">{t("leadsAgentBenefitsTitle")}</h4>
               <div className="grid md:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                {packageData.leadsAgent.benefits.map((benefit, i) => (
+                {benefitKeys.map((key, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: packageData.color }}
+                      style={{ background: packageColor }}
                     >
                       <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="text-sm">{benefit}</span>
+                    <span className="text-sm">{t(key)}</span>
                   </div>
                 ))}
               </div>
@@ -358,13 +286,22 @@ function LeadsAgentSection() {
   );
 }
 
-function ComparisonSection() {
+function ComparisonSection({ t }: { t: (key: string) => string }) {
+  const comparisonKeys = [
+    { featureKey: "comparison.0.feature", businessKey: "comparison.0.business", growthKey: "comparison.0.growth" },
+    { featureKey: "comparison.1.feature", businessKey: "comparison.1.business", growthKey: "comparison.1.growth" },
+    { featureKey: "comparison.2.feature", businessKey: "comparison.2.business", growthKey: "comparison.2.growth" },
+    { featureKey: "comparison.3.feature", businessKey: "comparison.3.business", growthKey: "comparison.3.growth" },
+    { featureKey: "comparison.4.feature", businessKey: "comparison.4.business", growthKey: "comparison.4.growth" },
+    { featureKey: "comparison.5.feature", businessKey: "comparison.5.business", growthKey: "comparison.5.growth" },
+  ];
+
   return (
     <section className="section bg-[var(--color-surface)]">
       <div className="container">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-h2 font-bold text-center mb-8">{packageData.comparison.title}</h2>
-          
+          <h2 className="text-h2 font-bold text-center mb-8">{t("comparisonTitle")}</h2>
+
           <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden">
             <table className="w-full">
               <thead>
@@ -375,35 +312,39 @@ function ComparisonSection() {
                 </tr>
               </thead>
               <tbody>
-                {packageData.comparison.items.map((item, i) => (
-                  <tr key={i} className="border-t border-[var(--color-border)]">
-                    <td className="p-4 text-sm">{item.feature}</td>
-                    <td className="p-4 text-center text-sm">
-                      {item.business === '✓' ? (
-                        <span className="inline-flex w-5 h-5 rounded-full bg-[var(--color-success)] items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </span>
-                      ) : item.business === '—' ? (
-                        <span className="text-[var(--color-text-muted)]">—</span>
-                      ) : (
-                        item.business
-                      )}
-                    </td>
-                    <td className="p-4 text-center text-sm bg-[#9D65C9]/5">
-                      {item.growth === '✓' ? (
-                        <span className="inline-flex w-5 h-5 rounded-full bg-[#9D65C9] items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </span>
-                      ) : (
-                        <span className="font-medium">{item.growth}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {comparisonKeys.map((item, i) => {
+                  const businessValue = t(item.businessKey);
+                  const growthValue = t(item.growthKey);
+                  return (
+                    <tr key={i} className="border-t border-[var(--color-border)]">
+                      <td className="p-4 text-sm">{t(item.featureKey)}</td>
+                      <td className="p-4 text-center text-sm">
+                        {businessValue === 'yes' ? (
+                          <span className="inline-flex w-5 h-5 rounded-full bg-[var(--color-success)] items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </span>
+                        ) : businessValue === 'no' ? (
+                          <span className="text-[var(--color-text-muted)]">{"\u2014"}</span>
+                        ) : (
+                          businessValue
+                        )}
+                      </td>
+                      <td className="p-4 text-center text-sm bg-[#9D65C9]/5">
+                        {growthValue === 'yes' ? (
+                          <span className="inline-flex w-5 h-5 rounded-full bg-[#9D65C9] items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </span>
+                        ) : (
+                          <span className="font-medium">{growthValue}</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -413,28 +354,31 @@ function ComparisonSection() {
   );
 }
 
-function IdealForSection() {
+function IdealForSection({ t }: { t: (key: string) => string }) {
+  const packageColor = '#9D65C9';
+  const idealForKeys = ["idealFor.0", "idealFor.1", "idealFor.2", "idealFor.3", "idealFor.4"];
+
   return (
     <section className="section">
       <div className="container">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-h2 font-bold text-center mb-8">Ideal für Unternehmen die...</h2>
-          
+          <h2 className="text-h2 font-bold text-center mb-8">{t("idealForTitle")}</h2>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {packageData.idealFor.map((item, i) => (
-              <div 
-                key={i} 
+            {idealForKeys.map((key, i) => (
+              <div
+                key={i}
                 className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-surface-elevated)] border border-[var(--color-border)]"
               >
-                <div 
+                <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: packageData.color }}
+                  style={{ background: packageColor }}
                 >
                   <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-sm">{item}</span>
+                <span className="text-sm">{t(key)}</span>
               </div>
             ))}
           </div>
@@ -444,27 +388,39 @@ function IdealForSection() {
   );
 }
 
-function ProcessSection() {
+function ProcessSection({ t }: { t: (key: string) => string }) {
+  const packageColor = '#9D65C9';
+  const processSteps = [
+    { stepKey: "process.0.step", titleKey: "process.0.title", descKey: "process.0.desc" },
+    { stepKey: "process.1.step", titleKey: "process.1.title", descKey: "process.1.desc" },
+    { stepKey: "process.2.step", titleKey: "process.2.title", descKey: "process.2.desc" },
+    { stepKey: "process.3.step", titleKey: "process.3.title", descKey: "process.3.desc" },
+    { stepKey: "process.4.step", titleKey: "process.4.title", descKey: "process.4.desc" },
+    { stepKey: "process.5.step", titleKey: "process.5.title", descKey: "process.5.desc" },
+    { stepKey: "process.6.step", titleKey: "process.6.title", descKey: "process.6.desc" },
+    { stepKey: "process.7.step", titleKey: "process.7.title", descKey: "process.7.desc" },
+  ];
+
   return (
     <section className="section bg-[var(--color-surface)]">
       <div className="container">
-        <h2 className="text-h2 font-bold text-center mb-4">Der Premium-Prozess</h2>
+        <h2 className="text-h2 font-bold text-center mb-4">{t("processTitle")}</h2>
         <p className="text-center text-[var(--color-text-muted)] mb-12">
-          Gründlich, strukturiert und auf Ihre Bedürfnisse zugeschnitten
+          {t("processSubtitle")}
         </p>
-        
+
         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-x-12 gap-y-6">
-          {packageData.process.map((step, i) => (
+          {processSteps.map((step, i) => (
             <div key={i} className="flex gap-4">
-              <div 
+              <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                style={{ background: packageData.color }}
+                style={{ background: packageColor }}
               >
-                {step.step}
+                {i + 1}
               </div>
               <div>
-                <h3 className="font-semibold mb-1">{step.title}</h3>
-                <p className="text-sm text-[var(--color-text-muted)]">{step.desc}</p>
+                <h3 className="font-semibold mb-1">{t(step.titleKey)}</h3>
+                <p className="text-sm text-[var(--color-text-muted)]">{t(step.descKey)}</p>
               </div>
             </div>
           ))}
@@ -474,34 +430,34 @@ function ProcessSection() {
   );
 }
 
-function OtherPackagesSection() {
+function OtherPackagesSection({ t }: { t: (key: string) => string }) {
   return (
     <section className="section">
       <div className="container">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-h2 font-bold mb-4">Vielleicht doch ein anderes Paket?</h2>
+          <h2 className="text-h2 font-bold mb-4">{t("otherPackagesTitle")}</h2>
           <p className="text-[var(--color-text-muted)] mb-8">
-            Kein Problem - wir haben für jeden das Richtige
+            {t("otherPackagesSubtitle")}
           </p>
-          
+
           <div className="flex flex-wrap justify-center gap-4">
-            <Link 
+            <Link
               href="/pakete/one-page"
               className="px-6 py-3 rounded-xl bg-[#FFB347]/10 border border-[#FFB347]/20 hover:border-[#FFB347]/50 transition-all duration-300"
             >
-              <span className="text-[#FFB347] font-semibold">← One Page (ab 1.390€)</span>
+              <span className="text-[#FFB347] font-semibold">{"\u2190"} {t("otherPackageOnePage")}{"\u20AC"}</span>
             </Link>
-            <Link 
+            <Link
               href="/pakete/business"
               className="px-6 py-3 rounded-xl bg-[#FC682C]/10 border border-[#FC682C]/20 hover:border-[#FC682C]/50 transition-all duration-300"
             >
-              <span className="text-[#FC682C] font-semibold">← Business (6.990€)</span>
+              <span className="text-[#FC682C] font-semibold">{"\u2190"} {t("otherPackageBusiness")}{"\u20AC"}</span>
             </Link>
-            <Link 
+            <Link
               href="/pakete"
               className="px-6 py-3 rounded-xl bg-[var(--color-surface-elevated)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-all duration-300"
             >
-              <span className="font-semibold">Alle vergleichen →</span>
+              <span className="font-semibold">{t("otherPackageCompare")} {"\u2192"}</span>
             </Link>
           </div>
         </div>
@@ -515,6 +471,8 @@ function OtherPackagesSection() {
 // ═══════════════════════════════════════════════════════════════
 
 export default function GrowthPackagePage() {
+  const t = useTranslations("pages.pakete.growth");
+
   return (
     <>
       <style jsx global>{`
@@ -534,17 +492,17 @@ export default function GrowthPackagePage() {
         }
       `}</style>
 
-      <PageHero />
-      <FeaturesSection />
-      <LeadsAgentSection />
-      <ComparisonSection />
-      <IdealForSection />
-      <ProcessSection />
-      <OtherPackagesSection />
-      
+      <PageHero t={t} />
+      <FeaturesSection t={t} />
+      <LeadsAgentSection t={t} />
+      <ComparisonSection t={t} />
+      <IdealForSection t={t} />
+      <ProcessSection t={t} />
+      <OtherPackagesSection t={t} />
+
       <CTASection
-        headline="Bereit für maximales Wachstum?"
-        subheadline="Starten Sie mit dem Growth-Paket und lassen Sie uns Ihr System aufbauen."
+        headline={t("finalCtaTitle")}
+        subheadline={t("finalCtaSubtitle")}
       />
     </>
   );

@@ -492,6 +492,217 @@
         "subheadline": "Start free with the website check or book an appointment. After that, you will know clearly which package fits - and what makes sense next.",
         "ctaPrimary": "Free Website Check",
         "ctaSecondary": "Book Appointment"
+      },
+      "start": {
+        "backLink": "All Packages",
+        "badge": "Quick Start",
+        "title": "START",
+        "titleSuffix": " Package",
+        "subtitle": "Website + Admin Portal",
+        "description": "For whom: Quick, professional start - immediately professional, immediately strong in contact. Ideal when you want to go live fast - without having to rebuild later.",
+        "price": "5,390",
+        "priceUnit": "one-time",
+        "timeline": "Implementation Time",
+        "timelineValue": "1-2 Weeks",
+        "ctaPrimary": "Choose Start",
+        "ctaSecondary": "Free Consultation",
+        "featuresTitle": "What's included?",
+        "features": [
+          { "icon": "globe", "title": "Landing page + 2 Subpages", "desc": "3 perfectly optimized pages for your professional web presence" },
+          { "icon": "search", "title": "High-Quality SEO", "desc": "Search engine optimization for better visibility from the start" },
+          { "icon": "phone", "title": "Contact & Appointment Flow", "desc": "Clear guidance for your visitors to contact you" },
+          { "icon": "rocket", "title": "Live-ready Setup", "desc": "Technically clean, ready to use immediately" },
+          { "icon": "settings", "title": "Admin Portal (Basic)", "desc": "Manage and maintain content yourself" },
+          { "icon": "mobile", "title": "Responsive Design", "desc": "Perfect display on all devices" }
+        ],
+        "processTitle": "How the project works",
+        "process": [
+          { "step": "1", "title": "Kickoff Call", "desc": "We discuss your goals and requirements" },
+          { "step": "2", "title": "Design & Concept", "desc": "We create your individual design" },
+          { "step": "3", "title": "Development", "desc": "Implementation with the latest technologies" },
+          { "step": "4", "title": "Go-Live", "desc": "Your website goes online" }
+        ],
+        "idealForTitle": "Perfect for you if...",
+        "idealFor": [
+          "You need a professional web presence quickly",
+          "You are just starting out or want to replace your old website",
+          "You want a clear, focused presence without frills",
+          "You have a limited budget but expect quality"
+        ],
+        "ctaTitle": "Ready for your start?",
+        "ctaDescription": "In 1-2 weeks, your new website will be online.",
+        "ctaPrimaryFinal": "Start now - 5,390",
+        "ctaSecondaryFinal": "View other packages"
+      },
+      "business": {
+        "backLink": "All Packages",
+        "badge": "Recommended",
+        "title": "BUSINESS",
+        "titleSuffix": " Package",
+        "subtitle": "Website + Admin + Portals",
+        "description": "For companies that want growth - with control, overview, and internal areas. This is the package for companies that don't just want to be online, but need internal structure.",
+        "price": "11,990",
+        "priceUnit": "one-time",
+        "timeline": "Implementation Time",
+        "timelineValue": "3-4 Weeks",
+        "ctaPrimary": "Choose Business",
+        "ctaSecondary": "Free Consultation",
+        "featuresTitle": "What's included?",
+        "features": [
+          { "icon": "globe", "title": "Landing page + 8 Subpages", "desc": "Up to 9 perfectly optimized pages for your comprehensive web presence" },
+          { "icon": "search", "title": "High-Quality SEO + Performance", "desc": "Extended search engine optimization for maximum visibility" },
+          { "icon": "rocket", "title": "Live-ready Setup + Operational Start", "desc": "Technically clean with complete operational readiness" },
+          { "icon": "settings", "title": "Admin Portal (Extended)", "desc": "Comprehensive management options for content and inquiries" },
+          { "icon": "user", "title": "Customer Portal", "desc": "Approvals, uploads, status, documents - project-dependent" },
+          { "icon": "users", "title": "Employee Portal", "desc": "Tasks, responsibilities, internal areas - project-dependent" }
+        ],
+        "benefitsTitle": "Your benefits with portals",
+        "benefits": [
+          { "icon": "chart", "title": "Overview", "desc": "All inquiries and leads at a glance" },
+          { "icon": "lock", "title": "Control", "desc": "Roles and permissions cleanly organized" },
+          { "icon": "trending", "title": "Scalable", "desc": "Grows with your company" },
+          { "icon": "zap", "title": "Efficient", "desc": "Internal processes run smoothly" }
+        ],
+        "processTitle": "How the project works",
+        "process": [
+          { "step": "1", "title": "Strategy Call", "desc": "In-depth analysis of your requirements" },
+          { "step": "2", "title": "Conception", "desc": "Define portal structure and user flows" },
+          { "step": "3", "title": "Design", "desc": "Modern UI/UX for all areas" },
+          { "step": "4", "title": "Development", "desc": "Website + portals are built" },
+          { "step": "5", "title": "Testing", "desc": "Quality check of all functions" },
+          { "step": "6", "title": "Go-Live", "desc": "Launch with training" }
+        ],
+        "idealForTitle": "Perfect for you if...",
+        "idealFor": [
+          "You run a growing company",
+          "You want to digitize internal processes",
+          "Your customers or employees need access to areas",
+          "You want to manage inquiries and leads in a structured way",
+          "You want to scale long-term"
+        ],
+        "ctaTitle": "Ready for your system?",
+        "ctaDescription": "In 3-4 weeks, you'll have website + portals - all from one source.",
+        "ctaPrimaryFinal": "Start now - 11,990",
+        "ctaSecondaryFinal": "View other packages"
+      },
+      "growth": {
+        "backLink": "Packages",
+        "breadcrumb": "Growth",
+        "badge": "Premium",
+        "name": "Growth",
+        "tagline": "The complete system for maximum growth",
+        "description": "Up to 13 pages plus landing pages, publishing agent, leads generator agent, and priority support. For companies that don't compromise and want to grow with a system.",
+        "price": "from 10,990",
+        "priceUnit": "one-time",
+        "timeline": "4-6 Weeks",
+        "ctaPrimary": "Start Premium",
+        "featuresTitle": "The complete package",
+        "featuresSubtitle": "Everything you need for systematic growth",
+        "features": [
+          { "title": "Up to 13+ Pages", "desc": "Comprehensive web presence with all important pages plus dedicated landing pages.", "icon": "pages", "highlight": false },
+          { "title": "Publishing Agent", "desc": "Automated content workflow: Planning -> Approval -> Publication.", "icon": "robot", "highlight": false },
+          { "title": "Leads Generator Agent", "desc": "Automatic lead capture, categorization, and follow-up. No lead gets lost.", "icon": "target", "highlight": true },
+          { "title": "Priority Support", "desc": "Fast response times and direct line to us.", "icon": "zap", "highlight": true },
+          { "title": "Complete Handover", "desc": "Detailed documentation and comprehensive training for your team.", "icon": "book", "highlight": false },
+          { "title": "Quarterly Reviews", "desc": "Regular analysis and optimization suggestions.", "icon": "chart", "highlight": true },
+          { "title": "Expandable", "desc": "Additional pages, workflows, or features can be added anytime.", "icon": "tool", "highlight": false },
+          { "title": "Everything from Business", "desc": "CMS, tracking, SEO, responsive design, and more.", "icon": "star", "highlight": false }
+        ],
+        "exclusive": "Exclusive",
+        "leadsAgentTitle": "The Leads Generator Agent explained",
+        "leadsAgentSubtitle": "Your automated lead management system",
+        "leadsAgentSteps": [
+          { "icon": "inbox", "title": "Capture", "desc": "Leads are automatically captured and categorized" },
+          { "icon": "tag", "title": "Scoring", "desc": "Automatic evaluation according to your criteria" },
+          { "icon": "list", "title": "Pipeline", "desc": "Clear Kanban board for all leads" },
+          { "icon": "clock", "title": "Follow-up", "desc": "Automatic reminders and tasks" },
+          { "icon": "trending", "title": "Reporting", "desc": "Overview of conversion rates and performance" }
+        ],
+        "leadsAgentBenefitsTitle": "Your benefits:",
+        "leadsAgentBenefits": [
+          "No lead gets lost anymore",
+          "30% more closes through systematic follow-up",
+          "Full transparency over your pipeline",
+          "Time savings through automation"
+        ],
+        "comparisonTitle": "Growth vs. Business",
+        "comparison": [
+          { "feature": "Number of pages", "business": "up to 10", "growth": "up to 13+" },
+          { "feature": "Publishing Agent", "business": "yes", "growth": "yes" },
+          { "feature": "Leads Generator", "business": "no", "growth": "yes" },
+          { "feature": "Priority Support", "business": "no", "growth": "yes" },
+          { "feature": "Quarterly Reviews", "business": "no", "growth": "yes" },
+          { "feature": "Landing pages", "business": "no", "growth": "yes" }
+        ],
+        "idealForTitle": "Ideal for companies that...",
+        "idealFor": [
+          "Growth-oriented companies",
+          "B2B with complex sales processes",
+          "Companies with high lead volume",
+          "Teams that need maximum efficiency",
+          "Long-term partnerships"
+        ],
+        "processTitle": "The Premium Process",
+        "processSubtitle": "Thorough, structured, and tailored to your needs",
+        "process": [
+          { "step": 1, "title": "Strategy Session", "desc": "In-depth analysis of your goals, processes, and requirements." },
+          { "step": 2, "title": "System Architecture", "desc": "Planning the complete infrastructure and workflows." },
+          { "step": 3, "title": "Design & Branding", "desc": "Premium design that perfectly represents your brand." },
+          { "step": 4, "title": "Development", "desc": "Implementation with the latest technologies." },
+          { "step": 5, "title": "Workflow Setup", "desc": "Setting up both agents and all automations." },
+          { "step": 6, "title": "Integration", "desc": "Connection to your existing tools (CRM, email, etc.)." },
+          { "step": 7, "title": "Testing", "desc": "Comprehensive testing of all functions and workflows." },
+          { "step": 8, "title": "Launch & Training", "desc": "Go-live with comprehensive training for your team." }
+        ],
+        "otherPackagesTitle": "Maybe a different package?",
+        "otherPackagesSubtitle": "No problem - we have the right one for everyone",
+        "otherPackageOnePage": "One Page (from 1,390)",
+        "otherPackageBusiness": "Business (6,990)",
+        "otherPackageCompare": "Compare all",
+        "finalCtaTitle": "Ready for maximum growth?",
+        "finalCtaSubtitle": "Start with the Growth package and let us build your system."
+      },
+      "konfigurator": {
+        "backLink": "All Packages",
+        "badge": "Individual",
+        "title": "CONFIGURATOR",
+        "subtitle": "Your individual system - exactly according to your requirements",
+        "description": "When scope, pages, portals, or system areas need to be planned individually. We only accept projects that we can deliver with quality.",
+        "price": "on request",
+        "priceSubtext": "individual quote",
+        "capacityLabel": "Capacity Check",
+        "capacityValue": "before project start",
+        "ctaPrimary": "Request Quote",
+        "ctaSecondary": "Free Consultation",
+        "optionsTitle": "Possible Extensions",
+        "options": [
+          { "icon": "page", "title": "More Pages", "desc": "Any number of pages and areas according to your needs" },
+          { "icon": "lock", "title": "Additional Portals", "desc": "Customer, employee, partner portals with roles & permissions" },
+          { "icon": "calendar", "title": "Booking Systems", "desc": "Appointments, reservations, calendar integrations" },
+          { "icon": "chart", "title": "Dashboards", "desc": "Individual overviews and evaluations" },
+          { "icon": "tool", "title": "Internal Tools", "desc": "Custom tools for your processes" },
+          { "icon": "link", "title": "Integrations", "desc": "Connection to your existing systems" }
+        ],
+        "processTitle": "How it works",
+        "process": [
+          { "step": "1", "title": "Request", "desc": "You describe your project" },
+          { "step": "2", "title": "Analysis", "desc": "We check feasibility" },
+          { "step": "3", "title": "Quote", "desc": "Transparent quote with milestones" },
+          { "step": "4", "title": "Implementation", "desc": "Step by step to the finished system" }
+        ],
+        "idealForTitle": "Perfect for you if...",
+        "idealFor": [
+          "Your requirements go beyond the standard packages",
+          "You need a complex system with multiple areas",
+          "You need special integrations or functions",
+          "You want a long-term project with clear milestones"
+        ],
+        "noticeTitle": "Quality Assurance",
+        "noticeText": "We only accept projects that we can deliver with quality. Before project start, we check our capacities so that speed and quality remain stable for you.",
+        "ctaTitle": "Do you have an individual project?",
+        "ctaDescription": "Let's check together what you need - and what we can deliver.",
+        "ctaPrimaryFinal": "Request Quote",
+        "ctaSecondaryFinal": "View other packages"
       }
     },
     "portal": {
@@ -1636,6 +1847,186 @@
         "createLink": "Create referral link",
         "bookAppointment": "Book appointment",
         "tagline": "Share link. Create clarity. Start systems."
+      }
+    },
+    "webapp": {
+      "hero": {
+        "backLink": "All Packages",
+        "badge": "Software",
+        "title": "Web App",
+        "subtitle": "Browser-based system - production-ready implementation",
+        "description": "A complete browser-based system with logins, roles, and areas. No installation required - your users simply access it via the browser.",
+        "price": "26,990",
+        "priceLabel": "Fixed Price",
+        "included": "Included",
+        "codeHandover": "Code Handover",
+        "ctaPrimary": "Request Web App",
+        "ctaSecondary": "Free Consultation"
+      },
+      "features": {
+        "title": "What's included?",
+        "items": [
+          { "icon": "clipboard", "title": "Concept & Structure", "desc": "Screens, roles, logic - all thought through and documented" },
+          { "icon": "palette", "title": "UI/UX Design", "desc": "Modern, responsive design for all devices" },
+          { "icon": "settings", "title": "Feature Development", "desc": "Implementation of all features in agreed scope" },
+          { "icon": "flask", "title": "Testing & Quality Check", "desc": "Comprehensive tests for stable performance" },
+          { "icon": "rocket", "title": "Go-Live Preparation", "desc": "Everything ready for production use" },
+          { "icon": "package", "title": "Handover", "desc": "Complete handover, optionally as code" }
+        ]
+      },
+      "useCases": {
+        "title": "Typical Use Cases",
+        "items": [
+          { "icon": "chart", "title": "Dashboards", "desc": "Overviews and analytics" },
+          { "icon": "form", "title": "Forms", "desc": "Complex data capture" },
+          { "icon": "users", "title": "User Management", "desc": "Roles and permissions" },
+          { "icon": "folder", "title": "Document Management", "desc": "Upload and management" },
+          { "icon": "calendar", "title": "Booking Systems", "desc": "Appointments and reservations" },
+          { "icon": "chat", "title": "Communication", "desc": "Internal messaging" }
+        ]
+      },
+      "advantages": {
+        "title": "Advantages of a Web App",
+        "items": [
+          "No app store needed - immediately usable",
+          "Works on any device with a browser",
+          "Easy updates without user action",
+          "Full control over your data",
+          "Scales with your growth"
+        ]
+      },
+      "cta": {
+        "title": "Ready for your Web App?",
+        "description": "Let's discuss your project - fixed price, clear milestones.",
+        "ctaPrimary": "Request now - 26,990 EUR",
+        "ctaSecondary": "View other packages"
+      }
+    },
+    "mobile": {
+      "hero": {
+        "backLink": "All Packages",
+        "badge": "Mobile App",
+        "title": "Mobile App",
+        "titleSuffix": "iOS & Android",
+        "subtitle": "Complete app implementation - scalable and cleanly handed over",
+        "description": "A complete native app for iOS and Android. Professionally developed, tested, and ready for publication in the app stores.",
+        "price": "51,490",
+        "priceLabel": "Fixed Price",
+        "included": "Included",
+        "platforms": "iOS + Android",
+        "ctaPrimary": "Request App",
+        "ctaSecondary": "Free Consultation"
+      },
+      "platformsList": [
+        { "icon": "apple", "title": "iOS", "desc": "iPhone & iPad" },
+        { "icon": "android", "title": "Android", "desc": "Smartphones & Tablets" }
+      ],
+      "features": {
+        "title": "What's included?",
+        "items": [
+          { "icon": "clipboard", "title": "Concept & Structure", "desc": "User flows, screens, roles - thought through and documented" },
+          { "icon": "mobile", "title": "Mobile-first UI/UX", "desc": "Optimal design for smartphones and tablets" },
+          { "icon": "settings", "title": "Feature Development", "desc": "Implementation of all features in agreed scope" },
+          { "icon": "flask", "title": "Tests & Stability Check", "desc": "Intensive tests on various devices" },
+          { "icon": "rocket", "title": "Publication Preparation", "desc": "App Store & Google Play ready" },
+          { "icon": "package", "title": "Handover", "desc": "Complete handover, optionally as code" }
+        ]
+      },
+      "storeReady": {
+        "title": "Store-Ready Delivery",
+        "description": "Your app is fully prepared for publication",
+        "appStore": {
+          "title": "App Store",
+          "desc": "Ready for iPhone and iPad"
+        },
+        "googlePlay": {
+          "title": "Google Play",
+          "desc": "Ready for Android devices"
+        }
+      },
+      "advantages": {
+        "title": "Advantages of a Native App",
+        "items": [
+          "Optimal performance on mobile devices",
+          "Access to device features (camera, GPS, etc.)",
+          "Push notifications for user engagement",
+          "Offline capability possible",
+          "Presence in the app stores"
+        ]
+      },
+      "cta": {
+        "title": "Ready for your App?",
+        "description": "Let's discuss your project - fixed price, professional implementation.",
+        "ctaPrimary": "Request now - 51,490 EUR",
+        "ctaSecondary": "View other packages"
+      }
+    },
+    "onePage": {
+      "hero": {
+        "breadcrumb": "Packages",
+        "badge": "One Page",
+        "tagline": "The perfect start for your professional web presence",
+        "description": "One page that says it all. Clearly structured, perfectly optimized, and to the point. Ideal for freelancers, small businesses, or as a landing page for a specific offer.",
+        "price": "from 1,390",
+        "billing": "one-time",
+        "timeline": "1-2 weeks",
+        "ctaPrimary": "Start now"
+      },
+      "features": {
+        "title": "What's included",
+        "subtitle": "Everything you need for a professional start",
+        "items": [
+          { "icon": "page", "title": "One Page Website", "desc": "A thoughtful page with all important sections: Hero, Services, About Us, Contact." },
+          { "icon": "phone", "title": "Contact Options", "desc": "Integration of email, WhatsApp and/or appointment booking - as it suits you." },
+          { "icon": "search", "title": "Basic SEO", "desc": "Basic search engine optimization: meta tags, structure, loading time." },
+          { "icon": "mobile", "title": "Responsive Design", "desc": "Perfect display on desktop, tablet, and smartphone." },
+          { "icon": "lightning", "title": "Performance Optimization", "desc": "Fast loading times through optimized images and clean code." },
+          { "icon": "lock", "title": "SSL Certificate", "desc": "Secure HTTPS connection for trust and better ranking." }
+        ]
+      },
+      "idealFor": {
+        "title": "Ideal for",
+        "description": "The One Page package is perfectly suited for anyone who wants a clear, professional web presence without the bells and whistles.",
+        "items": [
+          "Freelancers & Self-employed",
+          "Small Businesses",
+          "New Projects & Startups",
+          "Specific Landing Pages",
+          "Portfolios & Business Cards"
+        ],
+        "notIncluded": {
+          "title": "Not included (but expandable):",
+          "items": [
+            "Publishing Agent (Workflow Automation)",
+            "Leads Generator Agent",
+            "Multiple Subpages",
+            "CMS Integration"
+          ],
+          "needMore": "Need more? Check out the",
+          "businessPackage": "Business Package"
+        }
+      },
+      "process": {
+        "title": "How it works",
+        "subtitle": "From idea to finished website in {timeline}",
+        "steps": [
+          { "step": 1, "title": "Kickoff Meeting", "desc": "We discuss your goals, target audience, and wishes." },
+          { "step": 2, "title": "Design Draft", "desc": "You receive a first design proposal for coordination." },
+          { "step": 3, "title": "Development", "desc": "Implementation with modern technologies." },
+          { "step": 4, "title": "Feedback & Polish", "desc": "Revision rounds until you are satisfied." },
+          { "step": 5, "title": "Go-Live", "desc": "Publication and brief introduction." }
+        ]
+      },
+      "compare": {
+        "title": "Need more?",
+        "description": "Compare all packages and find the right one for your project",
+        "businessPackage": "Business Package",
+        "growthPackage": "Growth Package",
+        "allPackages": "Compare all packages"
+      },
+      "finalCta": {
+        "headline": "Ready for your web presence?",
+        "subheadline": "Start now with the One Page package."
       }
     }
   }

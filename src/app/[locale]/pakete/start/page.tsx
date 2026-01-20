@@ -1,54 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export default function StartPackagePage() {
   const [isVisible, setIsVisible] = useState(false);
+  const t = useTranslations("pages.pakete.start");
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
+  const featureIcons: Record<string, string> = {
+    globe: "\uD83C\uDF10",
+    search: "\uD83D\uDD0D",
+    phone: "\uD83D\uDCDE",
+    rocket: "\uD83D\uDE80",
+    settings: "\u2699\uFE0F",
+    mobile: "\uD83D\uDCF1",
+  };
+
   const features = [
-    {
-      icon: "🌐",
-      title: "Landingpage + 2 Unterseiten",
-      desc: "3 perfekt optimierte Seiten fur Ihren professionellen Webauftritt",
-    },
-    {
-      icon: "🔍",
-      title: "High-Quality SEO",
-      desc: "Suchmaschinenoptimierung fur bessere Sichtbarkeit von Anfang an",
-    },
-    {
-      icon: "📞",
-      title: "Kontakt- & Terminfluss",
-      desc: "Klare Fuhrung Ihrer Besucher zur Kontaktaufnahme",
-    },
-    {
-      icon: "🚀",
-      title: "Live-ready Setup",
-      desc: "Technisch sauber, sofort einsatzbereit",
-    },
-    {
-      icon: "⚙️",
-      title: "Admin-Portal (Basis)",
-      desc: "Inhalte selbst pflegen und verwalten",
-    },
-    {
-      icon: "📱",
-      title: "Responsive Design",
-      desc: "Perfekte Darstellung auf allen Geraten",
-    },
+    { icon: "globe", titleKey: "features.0.title", descKey: "features.0.desc" },
+    { icon: "search", titleKey: "features.1.title", descKey: "features.1.desc" },
+    { icon: "phone", titleKey: "features.2.title", descKey: "features.2.desc" },
+    { icon: "rocket", titleKey: "features.3.title", descKey: "features.3.desc" },
+    { icon: "settings", titleKey: "features.4.title", descKey: "features.4.desc" },
+    { icon: "mobile", titleKey: "features.5.title", descKey: "features.5.desc" },
   ];
 
-  const process = [
-    { step: "1", title: "Kickoff-Call", desc: "Wir besprechen Ihre Ziele und Anforderungen" },
-    { step: "2", title: "Design & Konzept", desc: "Wir erstellen Ihr individuelles Design" },
-    { step: "3", title: "Entwicklung", desc: "Umsetzung mit modernsten Technologien" },
-    { step: "4", title: "Go-Live", desc: "Ihre Website geht online" },
+  const processSteps = [
+    { stepKey: "process.0.step", titleKey: "process.0.title", descKey: "process.0.desc" },
+    { stepKey: "process.1.step", titleKey: "process.1.title", descKey: "process.1.desc" },
+    { stepKey: "process.2.step", titleKey: "process.2.title", descKey: "process.2.desc" },
+    { stepKey: "process.3.step", titleKey: "process.3.title", descKey: "process.3.desc" },
   ];
+
+  const idealForKeys = ["idealFor.0", "idealFor.1", "idealFor.2", "idealFor.3"];
 
   return (
     <main className="min-h-screen bg-[#030308]">
@@ -69,15 +58,15 @@ export default function StartPackagePage() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
-              Alle Pakete
+              {t("backLink")}
             </Link>
 
             {/* Badge */}
             <div
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FFB347]/10 border border-[#FFB347]/20 mb-5 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              <span className="text-lg">🚀</span>
-              <span className="text-xs font-medium text-[#FFB347]">Schneller Start</span>
+              <span className="text-lg">{"\uD83D\uDE80"}</span>
+              <span className="text-xs font-medium text-[#FFB347]">{t("badge")}</span>
             </div>
 
             {/* Title */}
@@ -85,24 +74,23 @@ export default function StartPackagePage() {
               className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 transition-all duration-700 delay-100 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFB347] to-[#FC682C]">
-                START
+                {t("title")}
               </span>
-              <span className="text-white"> Paket</span>
+              <span className="text-white">{t("titleSuffix")}</span>
             </h1>
 
             {/* Subtitle */}
             <p
               className={`text-lg text-white/70 mb-6 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              Website + Admin-Portal
+              {t("subtitle")}
             </p>
 
             {/* Description */}
             <p
               className={`text-sm sm:text-base text-white/60 max-w-2xl mb-8 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              Fur wen: schneller, professioneller Start - sofort serios, sofort kontaktstark.
-              Ideal, wenn Sie schnell live gehen wollen - ohne spater neu bauen zu mussen.
+              {t("description")}
             </p>
 
             {/* Price Box */}
@@ -110,13 +98,13 @@ export default function StartPackagePage() {
               className={`inline-flex items-center gap-4 p-6 rounded-2xl bg-white/[0.03] border border-[#FFB347]/20 mb-8 transition-all duration-700 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
               <div>
-                <div className="text-4xl font-bold text-[#FFB347]">5.390 €</div>
-                <div className="text-sm text-white/50">einmalig</div>
+                <div className="text-4xl font-bold text-[#FFB347]">{t("price")} {"\u20AC"}</div>
+                <div className="text-sm text-white/50">{t("priceUnit")}</div>
               </div>
               <div className="h-12 w-px bg-white/10" />
               <div>
-                <div className="text-sm text-white/70">Umsetzungszeit</div>
-                <div className="text-lg font-semibold text-white">1-2 Wochen</div>
+                <div className="text-sm text-white/70">{t("timeline")}</div>
+                <div className="text-lg font-semibold text-white">{t("timelineValue")}</div>
               </div>
             </div>
 
@@ -128,13 +116,13 @@ export default function StartPackagePage() {
                 href="/termin?paket=start"
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#FFB347] to-[#FC682C] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FFB347]/25 text-center"
               >
-                Start auswahlen
+                {t("ctaPrimary")}
               </Link>
               <Link
                 href="/termin"
                 className="px-6 py-3 rounded-lg border border-white/20 text-white font-semibold hover:bg-white/5 transition-all text-center"
               >
-                Kostenlose Beratung
+                {t("ctaSecondary")}
               </Link>
             </div>
           </div>
@@ -146,7 +134,7 @@ export default function StartPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              Was ist enthalten?
+              {t("featuresTitle")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((feature, i) => (
@@ -154,9 +142,9 @@ export default function StartPackagePage() {
                   key={i}
                   className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#FFB347]/30 transition-all"
                 >
-                  <span className="text-2xl mb-3 block">{feature.icon}</span>
-                  <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
-                  <p className="text-sm text-white/60">{feature.desc}</p>
+                  <span className="text-2xl mb-3 block">{featureIcons[feature.icon]}</span>
+                  <h3 className="font-semibold text-white mb-2">{t(feature.titleKey)}</h3>
+                  <p className="text-sm text-white/60">{t(feature.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -169,16 +157,16 @@ export default function StartPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              So lauft das Projekt ab
+              {t("processTitle")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {process.map((item, i) => (
+              {processSteps.map((item, i) => (
                 <div key={i} className="relative p-5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
                   <div className="w-10 h-10 rounded-full bg-[#FFB347]/20 flex items-center justify-center text-[#FFB347] font-bold mb-3">
-                    {item.step}
+                    {t(item.stepKey)}
                   </div>
-                  <h3 className="font-semibold text-white mb-1">{item.title}</h3>
-                  <p className="text-xs text-white/60">{item.desc}</p>
+                  <h3 className="font-semibold text-white mb-1">{t(item.titleKey)}</h3>
+                  <p className="text-xs text-white/60">{t(item.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -191,20 +179,15 @@ export default function StartPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
-              Perfekt fur Sie, wenn...
+              {t("idealForTitle")}
             </h2>
             <div className="space-y-3 text-left max-w-xl mx-auto">
-              {[
-                "Sie schnell einen professionellen Webauftritt brauchen",
-                "Sie gerade erst starten oder Ihre alte Website ersetzen wollen",
-                "Sie eine klare, fokussierte Prasenz ohne Schnorkel wunschen",
-                "Sie ein begrenztes Budget haben, aber Qualitat erwarten",
-              ].map((item, i) => (
+              {idealForKeys.map((key, i) => (
                 <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02]">
                   <svg className="w-5 h-5 text-[#FFB347] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-white/80">{item}</span>
+                  <span className="text-white/80">{t(key)}</span>
                 </div>
               ))}
             </div>
@@ -217,23 +200,23 @@ export default function StartPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-              Bereit fur Ihren Start?
+              {t("ctaTitle")}
             </h2>
             <p className="text-white/60 mb-6">
-              In 1-2 Wochen ist Ihre neue Website online.
+              {t("ctaDescription")}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
               <Link
                 href="/termin?paket=start"
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#FFB347] to-[#FC682C] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FFB347]/25 text-center"
               >
-                Jetzt starten - 5.390 €
+                {t("ctaPrimaryFinal")} {"\u20AC"}
               </Link>
               <Link
                 href="/pakete"
                 className="px-6 py-3 rounded-lg border border-white/20 text-white font-semibold hover:bg-white/5 transition-all text-center"
               >
-                Andere Pakete ansehen
+                {t("ctaSecondaryFinal")}
               </Link>
             </div>
           </div>

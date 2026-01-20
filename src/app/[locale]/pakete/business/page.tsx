@@ -1,91 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export default function BusinessPackagePage() {
   const [isVisible, setIsVisible] = useState(false);
+  const t = useTranslations("pages.pakete.business");
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
+  const featureIcons: Record<string, string> = {
+    globe: "\uD83C\uDF10",
+    search: "\uD83D\uDD0D",
+    rocket: "\uD83D\uDE80",
+    settings: "\u2699\uFE0F",
+    user: "\uD83D\uDC64",
+    users: "\uD83D\uDC65",
+  };
+
+  const benefitIcons: Record<string, string> = {
+    chart: "\uD83D\uDCCA",
+    lock: "\uD83D\uDD10",
+    trending: "\uD83D\uDCC8",
+    zap: "\u26A1",
+  };
+
   const features = [
-    {
-      icon: "🌐",
-      title: "Landingpage + 8 Unterseiten",
-      desc: "Bis zu 9 perfekt optimierte Seiten fur Ihren umfassenden Webauftritt",
-    },
-    {
-      icon: "🔍",
-      title: "High-Quality SEO + Performance",
-      desc: "Erweiterte Suchmaschinenoptimierung fur maximale Sichtbarkeit",
-    },
-    {
-      icon: "🚀",
-      title: "Live-ready Setup + Betriebsstart",
-      desc: "Technisch sauber mit vollstandiger Betriebsbereitschaft",
-    },
-    {
-      icon: "⚙️",
-      title: "Admin-Portal (erweitert)",
-      desc: "Umfangreiche Verwaltungsmoglichkeiten fur Inhalte und Anfragen",
-    },
-    {
-      icon: "👤",
-      title: "Kundenportal",
-      desc: "Freigaben, Uploads, Status, Dokumente - projektabhangig",
-    },
-    {
-      icon: "👥",
-      title: "Mitarbeiterportal",
-      desc: "Aufgaben, Zustandigkeiten, interne Bereiche - projektabhangig",
-    },
+    { icon: "globe", titleKey: "features.0.title", descKey: "features.0.desc" },
+    { icon: "search", titleKey: "features.1.title", descKey: "features.1.desc" },
+    { icon: "rocket", titleKey: "features.2.title", descKey: "features.2.desc" },
+    { icon: "settings", titleKey: "features.3.title", descKey: "features.3.desc" },
+    { icon: "user", titleKey: "features.4.title", descKey: "features.4.desc" },
+    { icon: "users", titleKey: "features.5.title", descKey: "features.5.desc" },
   ];
 
   const benefits = [
-    {
-      icon: "📊",
-      title: "Ubersicht",
-      desc: "Alle Anfragen und Leads zentral im Blick",
-    },
-    {
-      icon: "🔐",
-      title: "Kontrolle",
-      desc: "Rollen und Rechte sauber organisiert",
-    },
-    {
-      icon: "📈",
-      title: "Skalierbar",
-      desc: "Wachst mit Ihrem Unternehmen mit",
-    },
-    {
-      icon: "⚡",
-      title: "Effizient",
-      desc: "Interne Prozesse laufen reibungslos",
-    },
+    { icon: "chart", titleKey: "benefits.0.title", descKey: "benefits.0.desc" },
+    { icon: "lock", titleKey: "benefits.1.title", descKey: "benefits.1.desc" },
+    { icon: "trending", titleKey: "benefits.2.title", descKey: "benefits.2.desc" },
+    { icon: "zap", titleKey: "benefits.3.title", descKey: "benefits.3.desc" },
   ];
 
-  const process = [
-    {
-      step: "1",
-      title: "Strategie-Call",
-      desc: "Tiefgehende Analyse Ihrer Anforderungen",
-    },
-    {
-      step: "2",
-      title: "Konzeption",
-      desc: "Portal-Struktur und User-Flows definieren",
-    },
-    { step: "3", title: "Design", desc: "Modernes UI/UX fur alle Bereiche" },
-    {
-      step: "4",
-      title: "Entwicklung",
-      desc: "Website + Portale werden gebaut",
-    },
-    { step: "5", title: "Testing", desc: "Qualitatscheck aller Funktionen" },
-    { step: "6", title: "Go-Live", desc: "Launch mit Einweisung" },
+  const processSteps = [
+    { stepKey: "process.0.step", titleKey: "process.0.title", descKey: "process.0.desc" },
+    { stepKey: "process.1.step", titleKey: "process.1.title", descKey: "process.1.desc" },
+    { stepKey: "process.2.step", titleKey: "process.2.title", descKey: "process.2.desc" },
+    { stepKey: "process.3.step", titleKey: "process.3.title", descKey: "process.3.desc" },
+    { stepKey: "process.4.step", titleKey: "process.4.title", descKey: "process.4.desc" },
+    { stepKey: "process.5.step", titleKey: "process.5.title", descKey: "process.5.desc" },
   ];
+
+  const idealForKeys = ["idealFor.0", "idealFor.1", "idealFor.2", "idealFor.3", "idealFor.4"];
 
   return (
     <main className="min-h-screen bg-[#030308]">
@@ -116,16 +84,16 @@ export default function BusinessPackagePage() {
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-              Alle Pakete
+              {t("backLink")}
             </Link>
 
             {/* Badge */}
             <div
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FC682C]/10 border border-[#FC682C]/20 mb-5 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              <span className="text-lg">⚡</span>
+              <span className="text-lg">{"\u26A1"}</span>
               <span className="text-xs font-medium text-[#FC682C]">
-                Empfohlen
+                {t("badge")}
               </span>
             </div>
 
@@ -134,25 +102,23 @@ export default function BusinessPackagePage() {
               className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 transition-all duration-700 delay-100 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FC682C] to-[#FFB347]">
-                BUSINESS
+                {t("title")}
               </span>
-              <span className="text-white"> Paket</span>
+              <span className="text-white">{t("titleSuffix")}</span>
             </h1>
 
             {/* Subtitle */}
             <p
               className={`text-lg text-white/70 mb-6 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              Website + Admin + Portale
+              {t("subtitle")}
             </p>
 
             {/* Description */}
             <p
               className={`text-sm sm:text-base text-white/60 max-w-2xl mb-8 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              Fur Unternehmen, die Wachstum wollen - mit Kontrolle, Ubersicht
-              und internen Bereichen. Das ist das Paket fur Unternehmen, die
-              nicht nur online sein wollen, sondern intern Struktur brauchen.
+              {t("description")}
             </p>
 
             {/* Price Box */}
@@ -161,15 +127,15 @@ export default function BusinessPackagePage() {
             >
               <div>
                 <div className="text-4xl font-bold text-[#FC682C]">
-                  11.990 €
+                  {t("price")} {"\u20AC"}
                 </div>
-                <div className="text-sm text-white/50">einmalig</div>
+                <div className="text-sm text-white/50">{t("priceUnit")}</div>
               </div>
               <div className="h-12 w-px bg-white/10" />
               <div>
-                <div className="text-sm text-white/70">Umsetzungszeit</div>
+                <div className="text-sm text-white/70">{t("timeline")}</div>
                 <div className="text-lg font-semibold text-white">
-                  3-4 Wochen
+                  {t("timelineValue")}
                 </div>
               </div>
             </div>
@@ -182,13 +148,13 @@ export default function BusinessPackagePage() {
                 href="/termin?paket=business"
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#FC682C] to-[#e55a1f] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FC682C]/25 text-center"
               >
-                Business auswahlen
+                {t("ctaPrimary")}
               </Link>
               <Link
                 href="/termin"
                 className="px-6 py-3 rounded-lg border border-white/20 text-white font-semibold hover:bg-white/5 transition-all text-center"
               >
-                Kostenlose Beratung
+                {t("ctaSecondary")}
               </Link>
             </div>
           </div>
@@ -200,7 +166,7 @@ export default function BusinessPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              Was ist enthalten?
+              {t("featuresTitle")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((feature, i) => (
@@ -208,11 +174,11 @@ export default function BusinessPackagePage() {
                   key={i}
                   className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#FC682C]/30 transition-all"
                 >
-                  <span className="text-2xl mb-3 block">{feature.icon}</span>
+                  <span className="text-2xl mb-3 block">{featureIcons[feature.icon]}</span>
                   <h3 className="font-semibold text-white mb-2">
-                    {feature.title}
+                    {t(feature.titleKey)}
                   </h3>
-                  <p className="text-sm text-white/60">{feature.desc}</p>
+                  <p className="text-sm text-white/60">{t(feature.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -225,7 +191,7 @@ export default function BusinessPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              Ihre Vorteile mit Portalen
+              {t("benefitsTitle")}
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {benefits.map((benefit, i) => (
@@ -233,11 +199,11 @@ export default function BusinessPackagePage() {
                   key={i}
                   className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-center"
                 >
-                  <span className="text-3xl mb-3 block">{benefit.icon}</span>
+                  <span className="text-3xl mb-3 block">{benefitIcons[benefit.icon]}</span>
                   <h3 className="font-semibold text-white mb-1">
-                    {benefit.title}
+                    {t(benefit.titleKey)}
                   </h3>
-                  <p className="text-xs text-white/60">{benefit.desc}</p>
+                  <p className="text-xs text-white/60">{t(benefit.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -250,21 +216,21 @@ export default function BusinessPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              So lauft das Projekt ab
+              {t("processTitle")}
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-              {process.map((item, i) => (
+              {processSteps.map((item, i) => (
                 <div
                   key={i}
                   className="relative p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]"
                 >
                   <div className="w-8 h-8 rounded-full bg-[#FC682C]/20 flex items-center justify-center text-[#FC682C] font-bold text-sm mb-2">
-                    {item.step}
+                    {t(item.stepKey)}
                   </div>
                   <h3 className="font-semibold text-white text-sm mb-1">
-                    {item.title}
+                    {t(item.titleKey)}
                   </h3>
-                  <p className="text-[10px] text-white/60">{item.desc}</p>
+                  <p className="text-[10px] text-white/60">{t(item.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -277,16 +243,10 @@ export default function BusinessPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
-              Perfekt fur Sie, wenn...
+              {t("idealForTitle")}
             </h2>
             <div className="space-y-3 text-left max-w-xl mx-auto">
-              {[
-                "Sie ein wachsendes Unternehmen fuhren",
-                "Sie interne Prozesse digitalisieren wollen",
-                "Ihre Kunden oder Mitarbeiter Zugang zu Bereichen brauchen",
-                "Sie Anfragen und Leads strukturiert verwalten mochten",
-                "Sie langfristig skalieren wollen",
-              ].map((item, i) => (
+              {idealForKeys.map((key, i) => (
                 <div
                   key={i}
                   className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02]"
@@ -302,7 +262,7 @@ export default function BusinessPackagePage() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="text-white/80">{item}</span>
+                  <span className="text-white/80">{t(key)}</span>
                 </div>
               ))}
             </div>
@@ -315,23 +275,23 @@ export default function BusinessPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-              Bereit fur Ihr System?
+              {t("ctaTitle")}
             </h2>
             <p className="text-white/60 mb-6">
-              In 3-4 Wochen haben Sie Website + Portale - alles aus einer Hand.
+              {t("ctaDescription")}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
               <Link
                 href="/termin?paket=business"
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#FC682C] to-[#e55a1f] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FC682C]/25 text-center"
               >
-                Jetzt starten - 11.990 €
+                {t("ctaPrimaryFinal")} {"\u20AC"}
               </Link>
               <Link
                 href="/pakete"
                 className="px-6 py-3 rounded-lg border border-white/20 text-white font-semibold hover:bg-white/5 transition-all text-center"
               >
-                Andere Pakete ansehen
+                {t("ctaSecondaryFinal")}
               </Link>
             </div>
           </div>

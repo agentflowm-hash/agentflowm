@@ -1,54 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export default function KonfiguratorPackagePage() {
   const [isVisible, setIsVisible] = useState(false);
+  const t = useTranslations("pages.pakete.konfigurator");
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
+  const optionIcons: Record<string, string> = {
+    page: "\uD83D\uDCC4",
+    lock: "\uD83D\uDD10",
+    calendar: "\uD83D\uDCC5",
+    chart: "\uD83D\uDCCA",
+    tool: "\uD83D\uDD27",
+    link: "\uD83D\uDD17",
+  };
+
   const options = [
-    {
-      icon: "📄",
-      title: "Mehr Seiten",
-      desc: "Beliebig viele Seiten und Bereiche nach Ihrem Bedarf",
-    },
-    {
-      icon: "🔐",
-      title: "Zusatzliche Portale",
-      desc: "Kunden-, Mitarbeiter-, Partner-Portale mit Rollen & Rechten",
-    },
-    {
-      icon: "📅",
-      title: "Buchungssysteme",
-      desc: "Termine, Reservierungen, Kalender-Integrationen",
-    },
-    {
-      icon: "📊",
-      title: "Dashboards",
-      desc: "Individuelle Ubersichten und Auswertungen",
-    },
-    {
-      icon: "🔧",
-      title: "Interne Tools",
-      desc: "Massgeschneiderte Werkzeuge fur Ihre Prozesse",
-    },
-    {
-      icon: "🔗",
-      title: "Integrationen",
-      desc: "Anbindung an Ihre bestehenden Systeme",
-    },
+    { icon: "page", titleKey: "options.0.title", descKey: "options.0.desc" },
+    { icon: "lock", titleKey: "options.1.title", descKey: "options.1.desc" },
+    { icon: "calendar", titleKey: "options.2.title", descKey: "options.2.desc" },
+    { icon: "chart", titleKey: "options.3.title", descKey: "options.3.desc" },
+    { icon: "tool", titleKey: "options.4.title", descKey: "options.4.desc" },
+    { icon: "link", titleKey: "options.5.title", descKey: "options.5.desc" },
   ];
 
-  const process = [
-    { step: "1", title: "Anfrage", desc: "Sie beschreiben Ihr Projekt" },
-    { step: "2", title: "Analyse", desc: "Wir prufen die Machbarkeit" },
-    { step: "3", title: "Angebot", desc: "Transparentes Angebot mit Meilensteinen" },
-    { step: "4", title: "Umsetzung", desc: "Schritt fur Schritt zum fertigen System" },
+  const processSteps = [
+    { stepKey: "process.0.step", titleKey: "process.0.title", descKey: "process.0.desc" },
+    { stepKey: "process.1.step", titleKey: "process.1.title", descKey: "process.1.desc" },
+    { stepKey: "process.2.step", titleKey: "process.2.title", descKey: "process.2.desc" },
+    { stepKey: "process.3.step", titleKey: "process.3.title", descKey: "process.3.desc" },
   ];
+
+  const idealForKeys = ["idealFor.0", "idealFor.1", "idealFor.2", "idealFor.3"];
 
   return (
     <main className="min-h-screen bg-[#030308]">
@@ -66,18 +55,30 @@ export default function KonfiguratorPackagePage() {
               href="/pakete"
               className={`inline-flex items-center gap-2 text-white/60 hover:text-white text-sm mb-6 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
-              Alle Pakete
+              {t("backLink")}
             </Link>
 
             {/* Badge */}
             <div
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#9D65C9]/10 border border-[#9D65C9]/20 mb-5 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              <span className="text-lg">💎</span>
-              <span className="text-xs font-medium text-[#9D65C9]">Individuell</span>
+              <span className="text-lg">{"\uD83D\uDC8E"}</span>
+              <span className="text-xs font-medium text-[#9D65C9]">
+                {t("badge")}
+              </span>
             </div>
 
             {/* Title */}
@@ -85,7 +86,7 @@ export default function KonfiguratorPackagePage() {
               className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 transition-all duration-700 delay-100 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9D65C9] to-[#FC682C]">
-                KONFIGURATOR
+                {t("title")}
               </span>
             </h1>
 
@@ -93,15 +94,14 @@ export default function KonfiguratorPackagePage() {
             <p
               className={`text-lg text-white/70 mb-6 transition-all duration-700 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              Ihr individuelles System - genau nach Ihren Anforderungen
+              {t("subtitle")}
             </p>
 
             {/* Description */}
             <p
               className={`text-sm sm:text-base text-white/60 max-w-2xl mb-8 leading-relaxed transition-all duration-700 delay-300 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              Wenn Umfang, Seiten, Portale oder Systembereiche individuell geplant werden sollen.
-              Wir nehmen nur Projekte an, die wir qualitativ sauber liefern konnen.
+              {t("description")}
             </p>
 
             {/* Price Box */}
@@ -109,13 +109,17 @@ export default function KonfiguratorPackagePage() {
               className={`inline-flex items-center gap-4 p-6 rounded-2xl bg-white/[0.03] border border-[#9D65C9]/20 mb-8 transition-all duration-700 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
               <div>
-                <div className="text-3xl font-bold text-[#9D65C9]">auf Anfrage</div>
-                <div className="text-sm text-white/50">individuelles Angebot</div>
+                <div className="text-3xl font-bold text-[#9D65C9]">
+                  {t("price")}
+                </div>
+                <div className="text-sm text-white/50">{t("priceSubtext")}</div>
               </div>
               <div className="h-12 w-px bg-white/10" />
               <div>
-                <div className="text-sm text-white/70">Kapazitatscheck</div>
-                <div className="text-lg font-semibold text-white">vor Projektstart</div>
+                <div className="text-sm text-white/70">{t("capacityLabel")}</div>
+                <div className="text-lg font-semibold text-white">
+                  {t("capacityValue")}
+                </div>
               </div>
             </div>
 
@@ -127,13 +131,13 @@ export default function KonfiguratorPackagePage() {
                 href="/termin?paket=konfigurator"
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#9D65C9] to-[#FC682C] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#9D65C9]/25 text-center"
               >
-                Angebot anfragen
+                {t("ctaPrimary")}
               </Link>
               <Link
                 href="/termin"
                 className="px-6 py-3 rounded-lg border border-white/20 text-white font-semibold hover:bg-white/5 transition-all text-center"
               >
-                Kostenlose Beratung
+                {t("ctaSecondary")}
               </Link>
             </div>
           </div>
@@ -145,7 +149,7 @@ export default function KonfiguratorPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              Mogliche Erweiterungen
+              {t("optionsTitle")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {options.map((option, i) => (
@@ -153,9 +157,11 @@ export default function KonfiguratorPackagePage() {
                   key={i}
                   className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-[#9D65C9]/30 transition-all"
                 >
-                  <span className="text-2xl mb-3 block">{option.icon}</span>
-                  <h3 className="font-semibold text-white mb-2">{option.title}</h3>
-                  <p className="text-sm text-white/60">{option.desc}</p>
+                  <span className="text-2xl mb-3 block">{optionIcons[option.icon]}</span>
+                  <h3 className="font-semibold text-white mb-2">
+                    {t(option.titleKey)}
+                  </h3>
+                  <p className="text-sm text-white/60">{t(option.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -168,16 +174,21 @@ export default function KonfiguratorPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 text-center">
-              So funktioniert es
+              {t("processTitle")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {process.map((item, i) => (
-                <div key={i} className="relative p-5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              {processSteps.map((item, i) => (
+                <div
+                  key={i}
+                  className="relative p-5 rounded-xl bg-white/[0.03] border border-white/[0.08]"
+                >
                   <div className="w-10 h-10 rounded-full bg-[#9D65C9]/20 flex items-center justify-center text-[#9D65C9] font-bold mb-3">
-                    {item.step}
+                    {t(item.stepKey)}
                   </div>
-                  <h3 className="font-semibold text-white mb-1">{item.title}</h3>
-                  <p className="text-xs text-white/60">{item.desc}</p>
+                  <h3 className="font-semibold text-white mb-1">
+                    {t(item.titleKey)}
+                  </h3>
+                  <p className="text-xs text-white/60">{t(item.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -190,20 +201,26 @@ export default function KonfiguratorPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
-              Perfekt fur Sie, wenn...
+              {t("idealForTitle")}
             </h2>
             <div className="space-y-3 text-left max-w-xl mx-auto">
-              {[
-                "Ihre Anforderungen uber die Standard-Pakete hinausgehen",
-                "Sie ein komplexes System mit mehreren Bereichen brauchen",
-                "Sie spezielle Integrationen oder Funktionen benotigen",
-                "Sie ein langfristiges Projekt mit klaren Meilensteinen wunschen",
-              ].map((item, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02]">
-                  <svg className="w-5 h-5 text-[#9D65C9] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              {idealForKeys.map((key, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02]"
+                >
+                  <svg
+                    className="w-5 h-5 text-[#9D65C9] mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
-                  <span className="text-white/80">{item}</span>
+                  <span className="text-white/80">{t(key)}</span>
                 </div>
               ))}
             </div>
@@ -211,19 +228,19 @@ export default function KonfiguratorPackagePage() {
         </div>
       </section>
 
-      {/* Important Notice */}
+      {/* Notice */}
       <section className="py-12 border-t border-white/5">
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl mx-auto">
             <div className="p-6 rounded-xl bg-[#9D65C9]/10 border border-[#9D65C9]/20">
               <div className="flex items-start gap-4">
-                <span className="text-2xl">⚠️</span>
+                <span className="text-2xl">{"\u26A0\uFE0F"}</span>
                 <div>
-                  <h3 className="font-semibold text-white mb-2">Qualitatssicherung</h3>
+                  <h3 className="font-semibold text-white mb-2">
+                    {t("noticeTitle")}
+                  </h3>
                   <p className="text-sm text-white/70">
-                    Wir nehmen nur Projekte an, die wir qualitativ sauber liefern konnen.
-                    Vor Projektstart prufen wir unsere Kapazitaten, damit Geschwindigkeit
-                    und Qualitat fur Sie stabil bleiben.
+                    {t("noticeText")}
                   </p>
                 </div>
               </div>
@@ -237,23 +254,23 @@ export default function KonfiguratorPackagePage() {
         <div className="container px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-              Haben Sie ein individuelles Projekt?
+              {t("ctaTitle")}
             </h2>
             <p className="text-white/60 mb-6">
-              Lassen Sie uns gemeinsam prufen, was Sie brauchen - und was wir liefern konnen.
+              {t("ctaDescription")}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
               <Link
                 href="/termin?paket=konfigurator"
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#9D65C9] to-[#FC682C] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#9D65C9]/25 text-center"
               >
-                Angebot anfragen
+                {t("ctaPrimaryFinal")}
               </Link>
               <Link
                 href="/pakete"
                 className="px-6 py-3 rounded-lg border border-white/20 text-white font-semibold hover:bg-white/5 transition-all text-center"
               >
-                Andere Pakete ansehen
+                {t("ctaSecondaryFinal")}
               </Link>
             </div>
           </div>
