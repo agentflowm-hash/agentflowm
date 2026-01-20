@@ -1,0 +1,153 @@
+{
+  "common": {
+    "portal": "Kundenportal",
+    "welcome": "Willkommen",
+    "dashboard": "Dashboard",
+    "projectOverview": "Projektübersicht",
+    "files": "Dateien",
+    "messages": "Nachrichten",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "retry": "Erneut versuchen",
+    "close": "Schließen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "download": "Download",
+    "upload": "Hochladen",
+    "send": "Senden",
+    "sending": "Senden..."
+  },
+  "navigation": {
+    "overview": "Übersicht",
+    "messages": "Nachrichten",
+    "files": "Dateien",
+    "approvals": "Freigaben",
+    "preview": "Vorschau"
+  },
+  "login": {
+    "title": "Willkommen",
+    "subtitle": "Geben Sie Ihren Zugangscode ein",
+    "accessCode": "Ihr Zugangscode",
+    "placeholder": "XXXX-0000",
+    "codeHint": "Sie haben den Code per Telegram oder E-Mail erhalten",
+    "loginButton": "Einloggen",
+    "checking": "Prüfen...",
+    "noCode": "Keinen Code erhalten?",
+    "contactUs": "Kontaktieren Sie uns",
+    "codeInfo": "Den Zugangscode erhalten Sie nach einer Anfrage oder Bestellung.",
+    "invalidCode": "Ungültiger Zugangscode",
+    "connectionError": "Verbindungsfehler"
+  },
+  "dashboard": {
+    "welcomeBack": "Willkommen, {name}!",
+    "projectStatus": "Hier ist der aktuelle Stand Ihres Projekts.",
+    "project": "Projekt",
+    "package": "Paket",
+    "overallProgress": "Gesamtfortschritt",
+    "projectStart": "Projektstart",
+    "plannedGoLive": "Geplanter Go-Live",
+    "milestones": "Meilensteine",
+    "contactPerson": "Ansprechpartner",
+    "projectTimeline": "Projekt-Timeline",
+    "completed": "erledigt",
+    "of": "von",
+    "milestonesCompleted": "Meilensteine erledigt"
+  },
+  "messages": {
+    "title": "Nachrichten",
+    "count": "{count} Nachrichten",
+    "noMessages": "Noch keine Nachrichten",
+    "placeholder": "Nachricht schreiben..."
+  },
+  "files": {
+    "title": "Projektdateien",
+    "noFiles": "Noch keine Dateien hochgeladen",
+    "dragHint": "Ziehen Sie Dateien in den Bereich oben",
+    "dropHere": "Dateien hier ablegen",
+    "dragFiles": "Dateien hierher ziehen",
+    "maxSize": "oder klicken Sie auf \"Hochladen\" · Max. 10MB pro Datei",
+    "uploading": "Wird hochgeladen...",
+    "all": "Alle",
+    "images": "Bilder",
+    "documents": "Dokumente",
+    "other": "Sonstige"
+  },
+  "approvals": {
+    "title": "Freigaben",
+    "pending": "Ausstehende Freigaben",
+    "waitingCount": "{count} warten auf Ihre Freigabe",
+    "changesRequested": "Änderungen angefragt",
+    "workingOnChanges": "Wir arbeiten an Ihren Änderungswünschen",
+    "completedTitle": "Abgeschlossen",
+    "approvalsGiven": "{count} Freigaben erteilt",
+    "allDone": "Alles erledigt!",
+    "noApprovals": "Aktuell gibt es keine ausstehenden Freigaben. Wir benachrichtigen Sie, sobald etwas zur Freigabe bereit ist.",
+    "reviewApprove": "Prüfen & Freigeben",
+    "approve": "Freigeben",
+    "requestChange": "Änderung",
+    "feedbackPlaceholder": "Ihr Feedback (optional bei Freigabe)...",
+    "describeChanges": "Bitte beschreiben Sie die gewünschten Änderungen.",
+    "yourFeedback": "Ihr Feedback:",
+    "created": "Erstellt:",
+    "approvedOn": "Freigegeben am",
+    "design": "Design",
+    "content": "Inhalt",
+    "final": "Finale Abnahme"
+  },
+  "preview": {
+    "title": "Live-Vorschau",
+    "mobile": "Mobile",
+    "tablet": "Tablet",
+    "desktop": "Desktop",
+    "refresh": "Aktualisieren",
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden",
+    "openNewTab": "In neuem Tab öffnen"
+  },
+  "profile": {
+    "myProfile": "Mein Profil",
+    "notifications": "Benachrichtigungen",
+    "email": "E-Mail",
+    "company": "Unternehmen",
+    "privateCustomer": "Privatkunde",
+    "currentProject": "Aktuelles Projekt",
+    "progress": "Fortschritt"
+  },
+  "quickStart": {
+    "title": "Quick Start",
+    "subtitle": "Erste Schritte",
+    "setup": "Einrichtung",
+    "checkStatus": "Projektstatus prüfen",
+    "checkStatusDesc": "Sehen Sie den aktuellen Fortschritt",
+    "sendMessage": "Nachricht senden",
+    "sendMessageDesc": "Stellen Sie eine Frage an unser Team",
+    "uploadFiles": "Dateien hochladen",
+    "uploadFilesDesc": "Teilen Sie wichtige Dokumente",
+    "viewProfile": "Profil ansehen",
+    "viewProfileDesc": "Überprüfen Sie Ihre Daten",
+    "done": "Erledigt"
+  },
+  "footer": {
+    "questions": "Bei Fragen:",
+    "copyright": "Alle Rechte vorbehalten."
+  },
+  "status": {
+    "inProgress": "In Bearbeitung",
+    "completed": "Abgeschlossen",
+    "pending": "Ausstehend",
+    "onHold": "Pausiert"
+  },
+  "redirect": {
+    "redirecting": "Weiterleitung..."
+  },
+  "error": {
+    "loadingError": "Fehler beim Laden",
+    "somethingWentWrong": "Etwas ist schief gelaufen",
+    "couldNotLoad": "Daten konnten nicht geladen werden",
+    "dashboardLoading": "Dashboard wird geladen..."
+  }
+}

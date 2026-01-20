@@ -1,0 +1,153 @@
+{
+  "common": {
+    "portal": "Client Portal",
+    "welcome": "Welcome",
+    "dashboard": "Dashboard",
+    "projectOverview": "Project Overview",
+    "files": "Files",
+    "messages": "Messages",
+    "settings": "Settings",
+    "logout": "Logout",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "download": "Download",
+    "upload": "Upload",
+    "send": "Send",
+    "sending": "Sending..."
+  },
+  "navigation": {
+    "overview": "Overview",
+    "messages": "Messages",
+    "files": "Files",
+    "approvals": "Approvals",
+    "preview": "Preview"
+  },
+  "login": {
+    "title": "Welcome",
+    "subtitle": "Enter your access code",
+    "accessCode": "Your Access Code",
+    "placeholder": "XXXX-0000",
+    "codeHint": "You received the code via Telegram or email",
+    "loginButton": "Login",
+    "checking": "Checking...",
+    "noCode": "Didn't receive a code?",
+    "contactUs": "Contact us",
+    "codeInfo": "You will receive the access code after a request or order.",
+    "invalidCode": "Invalid access code",
+    "connectionError": "Connection error"
+  },
+  "dashboard": {
+    "welcomeBack": "Welcome, {name}!",
+    "projectStatus": "Here is the current status of your project.",
+    "project": "Project",
+    "package": "Package",
+    "overallProgress": "Overall Progress",
+    "projectStart": "Project Start",
+    "plannedGoLive": "Planned Go-Live",
+    "milestones": "Milestones",
+    "contactPerson": "Contact Person",
+    "projectTimeline": "Project Timeline",
+    "completed": "completed",
+    "of": "of",
+    "milestonesCompleted": "Milestones completed"
+  },
+  "messages": {
+    "title": "Messages",
+    "count": "{count} messages",
+    "noMessages": "No messages yet",
+    "placeholder": "Write a message..."
+  },
+  "files": {
+    "title": "Project Files",
+    "noFiles": "No files uploaded yet",
+    "dragHint": "Drag files to the area above",
+    "dropHere": "Drop files here",
+    "dragFiles": "Drag files here",
+    "maxSize": "or click \"Upload\" · Max. 10MB per file",
+    "uploading": "Uploading...",
+    "all": "All",
+    "images": "Images",
+    "documents": "Documents",
+    "other": "Other"
+  },
+  "approvals": {
+    "title": "Approvals",
+    "pending": "Pending Approvals",
+    "waitingCount": "{count} waiting for your approval",
+    "changesRequested": "Changes Requested",
+    "workingOnChanges": "We are working on your change requests",
+    "completedTitle": "Completed",
+    "approvalsGiven": "{count} approvals given",
+    "allDone": "All done!",
+    "noApprovals": "There are no pending approvals. We will notify you when something is ready for approval.",
+    "reviewApprove": "Review & Approve",
+    "approve": "Approve",
+    "requestChange": "Change",
+    "feedbackPlaceholder": "Your feedback (optional for approval)...",
+    "describeChanges": "Please describe the desired changes.",
+    "yourFeedback": "Your feedback:",
+    "created": "Created:",
+    "approvedOn": "Approved on",
+    "design": "Design",
+    "content": "Content",
+    "final": "Final Approval"
+  },
+  "preview": {
+    "title": "Live Preview",
+    "mobile": "Mobile",
+    "tablet": "Tablet",
+    "desktop": "Desktop",
+    "refresh": "Refresh",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "openNewTab": "Open in new tab"
+  },
+  "profile": {
+    "myProfile": "My Profile",
+    "notifications": "Notifications",
+    "email": "Email",
+    "company": "Company",
+    "privateCustomer": "Private Customer",
+    "currentProject": "Current Project",
+    "progress": "Progress"
+  },
+  "quickStart": {
+    "title": "Quick Start",
+    "subtitle": "First Steps",
+    "setup": "Setup",
+    "checkStatus": "Check project status",
+    "checkStatusDesc": "See the current progress",
+    "sendMessage": "Send message",
+    "sendMessageDesc": "Ask our team a question",
+    "uploadFiles": "Upload files",
+    "uploadFilesDesc": "Share important documents",
+    "viewProfile": "View profile",
+    "viewProfileDesc": "Check your data",
+    "done": "Done"
+  },
+  "footer": {
+    "questions": "Questions?",
+    "copyright": "All rights reserved."
+  },
+  "status": {
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "pending": "Pending",
+    "onHold": "On Hold"
+  },
+  "redirect": {
+    "redirecting": "Redirecting..."
+  },
+  "error": {
+    "loadingError": "Loading Error",
+    "somethingWentWrong": "Something went wrong",
+    "couldNotLoad": "Data could not be loaded",
+    "dashboardLoading": "Loading dashboard..."
+  }
+}

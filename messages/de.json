@@ -1,315 +1,315 @@
 {
   "meta": {
-    "title": "AgentFlowMarketing - Websites & Workflows from Berlin",
-    "description": "Professional websites, smart workflows and seamless integrations from Berlin. We automate contact, publication and handover - reliably and efficiently.",
-    "keywords": "Website, Workflows, Integrations, Berlin, Automation, AI, Web Design, n8n, Next.js"
+    "title": "AgentFlowMarketing - Webseiten & Workflows aus Berlin",
+    "description": "Professionelle Webseiten, smarte Workflows und nahtlose Integrationen aus Berlin. Wir automatisieren Kontakt, Veröffentlichung und Übergabe - zuverlässig und effizient.",
+    "keywords": "Webseite, Workflows, Integrationen, Berlin, Automatisierung, KI, Webdesign, n8n, Next.js"
   },
   "notFound": {
-    "title": "Page Not Found",
+    "title": "Seite nicht gefunden",
     "heading": "404",
-    "message": "Sorry, the page you're looking for doesn't exist or has been moved.",
-    "backHome": "Back to Home",
-    "contact": "Contact Us"
+    "message": "Entschuldigung, die Seite, die Sie suchen, existiert nicht oder wurde verschoben.",
+    "backHome": "Zurück zur Startseite",
+    "contact": "Kontakt"
   },
   "nav": {
-    "solution": "Solution",
-    "packages": "Packages",
+    "solution": "Lösung",
+    "packages": "Pakete",
     "tools": "Tools",
-    "contact": "Contact",
-    "bookAppointment": "Book Appointment",
-    "login": "Login"
+    "contact": "Kontakt",
+    "bookAppointment": "Termin buchen",
+    "login": "Anmelden"
   },
   "hero": {
-    "badge": "Close system gaps - Stabilize processes - Make results predictable",
-    "headline1": "Your business isn't losing performance.",
-    "headline2": "It's losing system.",
-    "subheadline": "Gaps emerge everywhere: inquiries fade away, tasks get stuck, handovers stall. This costs time, nerves, and revenue.",
+    "badge": "Systemlücken schließen - Prozesse stabilisieren - Ergebnisse planbar machen",
+    "headline1": "Dein Business verliert keine Leistung.",
+    "headline2": "Es verliert System.",
+    "subheadline": "Überall entstehen Lücken: Anfragen versickern, Aufgaben bleiben stecken, Übergaben stocken. Das kostet Zeit, Nerven und Umsatz.",
     "chips": {
-      "lostLeads": "Lost Leads",
-      "manualWork": "Manual Work",
-      "handoverChaos": "Handover Chaos",
-      "noGuidance": "No Clear Guidance"
+      "lostLeads": "Verlorene Leads",
+      "manualWork": "Manuelle Arbeit",
+      "handoverChaos": "Übergabe-Chaos",
+      "noGuidance": "Keine klare Führung"
     },
-    "solutionBridge": "We close these gaps with clear structure: Website/App as the center + Workflows that do real work.",
-    "ctaPrimary": "Free Website Check",
-    "ctaSecondary": "Book Appointment",
+    "solutionBridge": "Wir schließen diese Lücken mit klarer Struktur: Webseite/App als Zentrum + Workflows, die echte Arbeit leisten.",
+    "ctaPrimary": "Kostenloser Webseiten-Check",
+    "ctaSecondary": "Termin buchen",
     "trustItems": {
-      "fixedPrices": "Fixed Prices",
-      "clearSteps": "Clear Steps",
-      "fastDelivery": "Fast Delivery",
-      "ndaOptional": "NDA Optional"
+      "fixedPrices": "Festpreise",
+      "clearSteps": "Klare Schritte",
+      "fastDelivery": "Schnelle Lieferung",
+      "ndaOptional": "NDA optional"
     },
-    "scroll": "Scroll"
+    "scroll": "Scrollen"
   },
   "problem": {
-    "badge": "The Problem",
-    "headline": "The most common",
-    "headlineHighlight": "system problems",
-    "subheadline": "When systems are missing, friction occurs. Friction costs revenue.",
-    "bridge": "The problem isn't marketing.",
-    "bridgeHighlight": "It's missing process leadership.",
+    "badge": "Das Problem",
+    "headline": "Die häufigsten",
+    "headlineHighlight": "Systemprobleme",
+    "subheadline": "Wenn Systeme fehlen, entsteht Reibung. Reibung kostet Umsatz.",
+    "bridge": "Das Problem ist nicht das Marketing.",
+    "bridgeHighlight": "Es fehlt Prozessführung.",
     "items": {
       "noPath": {
-        "title": "Inquiries without a path",
-        "desc": "Prospects want clarity - but can't find a clean next step."
+        "title": "Anfragen ohne Weg",
+        "desc": "Interessenten wollen Klarheit - finden aber keinen sauberen nächsten Schritt."
       },
       "peopleDependent": {
-        "title": "Work depends on people",
-        "desc": "If someone doesn't follow up, it stays stuck. Systems are missing."
+        "title": "Arbeit hängt an Personen",
+        "desc": "Wenn jemand nicht nachhakt, bleibt es liegen. Systeme fehlen."
       },
       "handoversBreak": {
-        "title": "Handovers break",
-        "desc": "Tasks move into chats, notes, heads - and get lost."
+        "title": "Übergaben brechen",
+        "desc": "Aufgaben wandern in Chats, Notizen, Köpfe - und gehen verloren."
       },
       "noVisibility": {
-        "title": "No visibility",
-        "desc": "Nobody sees: What's open? What's urgent? What's blocking?"
+        "title": "Keine Sichtbarkeit",
+        "desc": "Niemand sieht: Was ist offen? Was ist dringend? Was blockiert?"
       },
       "surfaceModern": {
-        "title": "Modern outside - chaos inside",
-        "desc": "The surface looks good, but internally structure is missing."
+        "title": "Außen modern - innen Chaos",
+        "desc": "Die Oberfläche sieht gut aus, aber intern fehlt die Struktur."
       }
     }
   },
   "impact": {
-    "badge": "Impact",
-    "headline": "What these gaps",
-    "headlineHighlight": "actually cost",
-    "subheadline": "Every gap in the system means lost time, missed opportunities, and unnecessary stress.",
+    "badge": "Auswirkung",
+    "headline": "Was diese Lücken",
+    "headlineHighlight": "wirklich kosten",
+    "subheadline": "Jede Lücke im System bedeutet verlorene Zeit, verpasste Chancen und unnötigen Stress.",
     "items": [
-      "fewer inquiries because visitors aren't guided",
-      "more stress because everything is handled 'manually'",
-      "longer response times because handovers stall",
-      "errors because standards are missing",
-      "standstill because nobody has the overview"
+      "weniger Anfragen, weil Besucher nicht geführt werden",
+      "mehr Stress, weil alles 'händisch' erledigt wird",
+      "längere Reaktionszeiten, weil Übergaben stocken",
+      "Fehler, weil Standards fehlen",
+      "Stillstand, weil niemand den Überblick hat"
     ],
-    "keyStatement": "A good offer doesn't sell",
-    "keyStatementHighlight": "if the system behind it breaks."
+    "keyStatement": "Ein gutes Angebot verkauft sich nicht",
+    "keyStatementHighlight": "wenn das System dahinter bricht."
   },
   "audience": {
-    "badge": "Target Audience",
-    "headline": "For whom this",
-    "headlineHighlight": "works immediately",
-    "subheadline": "For everyone who wants to grow - and notices it's not about effort, but about structure.",
+    "badge": "Zielgruppe",
+    "headline": "Für wen das",
+    "headlineHighlight": "sofort funktioniert",
+    "subheadline": "Für alle, die wachsen wollen - und merken, dass es nicht um Aufwand geht, sondern um Struktur.",
     "items": {
       "freelancers": {
-        "title": "Freelancers",
-        "desc": "Professional start without chaos"
+        "title": "Freelancer",
+        "desc": "Professioneller Start ohne Chaos"
       },
       "sme": {
-        "title": "SMEs",
-        "desc": "Clear processes, less friction"
+        "title": "KMU",
+        "desc": "Klare Prozesse, weniger Reibung"
       },
       "teams": {
         "title": "Teams",
-        "desc": "Decide faster, handover cleaner"
+        "desc": "Schneller entscheiden, sauberer übergeben"
       }
     }
   },
   "solution": {
-    "badge": "The Solution",
-    "headline": "AgentFlow closes",
-    "headlineHighlight": "system gaps",
-    "subheadline": "We don't build a 'project'. We build a system: convincing outside, stable inside.",
+    "badge": "Die Lösung",
+    "headline": "AgentFlow schließt",
+    "headlineHighlight": "Systemlücken",
+    "subheadline": "Wir bauen kein 'Projekt'. Wir bauen ein System: außen überzeugend, innen stabil.",
     "blocks": {
       "website": {
-        "title": "Website / Web-App / App",
-        "subtitle": "External guidance",
-        "desc": "Visitors instantly understand: What's the offer? What's the next step?",
+        "title": "Webseite / Web-App / App",
+        "subtitle": "Externe Führung",
+        "desc": "Besucher verstehen sofort: Was ist das Angebot? Was ist der nächste Schritt?",
         "bullets": [
-          "Clear structure & user guidance",
-          "High-quality SEO & performance",
-          "Contact & appointment flow clean"
+          "Klare Struktur & Benutzerführung",
+          "Hochwertiges SEO & Performance",
+          "Kontakt- & Terminfluss sauber"
         ]
       },
       "workflows": {
         "title": "Agent Workflows",
-        "subtitle": "Automatic work",
-        "desc": "Recurring tasks run automatically: reliable, repeatable.",
+        "subtitle": "Automatische Arbeit",
+        "desc": "Wiederkehrende Aufgaben laufen automatisch: zuverlässig, wiederholbar.",
         "bullets": [
-          "Standards instead of chaos",
-          "Sorting & clear steps",
-          "Expandable via add-ons"
+          "Standards statt Chaos",
+          "Sortierung & klare Schritte",
+          "Erweiterbar über Add-ons"
         ]
       },
       "leadflow": {
         "title": "Lead Flow",
-        "subtitle": "Interest → Conversations",
-        "desc": "Inquiries are captured and followed up systematically.",
+        "subtitle": "Interesse → Gespräche",
+        "desc": "Anfragen werden erfasst und systematisch nachverfolgt.",
         "bullets": [
-          "Entry + sorting",
-          "Follow-up as process",
-          "Handovers documented"
+          "Eingang + Sortierung",
+          "Follow-up als Prozess",
+          "Übergaben dokumentiert"
         ]
       }
     }
   },
   "process": {
-    "badge": "Process",
-    "headline": "5 Steps",
-    "headlineHighlight": "– without standstill",
-    "subheadline": "Clear steps, immediately actionable. No endless loops.",
-    "note": "Fast implementation without downtime – response windows are defined.",
+    "badge": "Prozess",
+    "headline": "5 Schritte",
+    "headlineHighlight": "– ohne Stillstand",
+    "subheadline": "Klare Schritte, sofort umsetzbar. Keine Endlosschleifen.",
+    "note": "Schnelle Umsetzung ohne Ausfallzeiten – Reaktionsfenster sind definiert.",
     "steps": {
       "1": {
-        "title": "Clarity",
-        "desc": "Goals & priorities"
+        "title": "Klarheit",
+        "desc": "Ziele & Prioritäten"
       },
       "2": {
-        "title": "Structure",
-        "desc": "Paths & portals"
+        "title": "Struktur",
+        "desc": "Wege & Portale"
       },
       "3": {
-        "title": "Implementation",
-        "desc": "Design & build"
+        "title": "Umsetzung",
+        "desc": "Design & Entwicklung"
       },
       "4": {
         "title": "Test",
-        "desc": "Stable & clean"
+        "desc": "Stabil & sauber"
       },
       "5": {
         "title": "Launch",
-        "desc": "Live & handover"
+        "desc": "Live & Übergabe"
       }
     }
   },
   "packages": {
-    "badge": "Packages",
-    "headline": "Start now –",
-    "headlineHighlight": "grow later",
-    "popular": "Popular",
-    "inquire": "Inquire",
+    "badge": "Pakete",
+    "headline": "Jetzt starten –",
+    "headlineHighlight": "später wachsen",
+    "popular": "Beliebt",
+    "inquire": "Anfragen",
     "items": {
       "launch": {
         "name": "LAUNCH",
-        "subtitle": "3 Pages",
-        "price": "5,390",
-        "desc": "A clean start that doesn't lose leads.",
+        "subtitle": "3 Seiten",
+        "price": "5.390",
+        "desc": "Ein sauberer Start, der keine Leads verliert.",
         "features": [
-          "Landing page + 2 subpages",
-          "SEO & performance",
-          "Contact & appointment flow",
-          "Admin portal (basic)"
+          "Landingpage + 2 Unterseiten",
+          "SEO & Performance",
+          "Kontakt- & Terminfluss",
+          "Admin-Portal (Basis)"
         ]
       },
       "business": {
         "name": "BUSINESS",
-        "subtitle": "9 Pages + Workflow",
-        "price": "11,990",
-        "desc": "For companies with real processes.",
+        "subtitle": "9 Seiten + Workflow",
+        "price": "11.990",
+        "desc": "Für Unternehmen mit echten Prozessen.",
         "features": [
-          "Up to 9 pages",
-          "Publishing workflow",
-          "Admin portal (extended)",
-          "Employee & customer portal"
+          "Bis zu 9 Seiten",
+          "Publishing-Workflow",
+          "Admin-Portal (erweitert)",
+          "Mitarbeiter- & Kundenportal"
         ]
       },
       "configurator": {
-        "name": "CONFIGURATOR",
-        "subtitle": "Custom",
-        "price": "On request",
-        "desc": "When it needs to be bigger.",
+        "name": "KONFIGURATOR",
+        "subtitle": "Individuell",
+        "price": "Auf Anfrage",
+        "desc": "Wenn es größer werden muss.",
         "features": [
-          "Individual modules",
-          "Enterprise features",
-          "Dedicated support"
+          "Individuelle Module",
+          "Enterprise-Features",
+          "Dedizierter Support"
         ]
       }
     }
   },
   "webapps": {
-    "badge": "Extended",
+    "badge": "Erweitert",
     "headline": "Web Apps &",
     "headlineHighlight": "Mobile Apps",
-    "subheadline": "When it needs to be more than a website",
-    "popular": "Popular",
-    "inquire": "Inquire",
-    "priceNote": "All prices excl. VAT",
+    "subheadline": "Wenn es mehr als eine Webseite sein muss",
+    "popular": "Beliebt",
+    "inquire": "Anfragen",
+    "priceNote": "Alle Preise zzgl. MwSt.",
     "items": {
       "webapp": {
         "title": "Web App",
-        "price": "26,990",
-        "desc": "Complex browser applications",
+        "price": "26.990",
+        "desc": "Komplexe Browser-Anwendungen",
         "features": [
-          "Login & dashboard",
-          "Workflow automation",
-          "API integrations"
+          "Login & Dashboard",
+          "Workflow-Automatisierung",
+          "API-Integrationen"
         ]
       },
       "mobile": {
         "title": "Mobile App",
-        "price": "51,490",
-        "desc": "Native apps for iOS & Android",
+        "price": "51.490",
+        "desc": "Native Apps für iOS & Android",
         "features": [
-          "Native performance",
-          "Push notifications",
-          "Offline mode"
+          "Native Performance",
+          "Push-Benachrichtigungen",
+          "Offline-Modus"
         ]
       },
       "enterprise": {
         "title": "Enterprise",
-        "price": "On request",
-        "desc": "Custom solutions",
+        "price": "Auf Anfrage",
+        "desc": "Maßgeschneiderte Lösungen",
         "features": [
-          "Individual architecture",
-          "Scalable",
-          "SLA support"
+          "Individuelle Architektur",
+          "Skalierbar",
+          "SLA-Support"
         ]
       }
     }
   },
   "free": {
-    "badge": "100% Free",
-    "headline": "Website Check",
-    "subheadline": "Analyzed in seconds. See where your website stands.",
+    "badge": "100% Kostenlos",
+    "headline": "Webseiten-Check",
+    "subheadline": "In Sekunden analysiert. Sieh, wo deine Webseite steht.",
     "benefits": [
-      "Instant results",
-      "Action recommendations",
-      "No registration"
+      "Sofortige Ergebnisse",
+      "Handlungsempfehlungen",
+      "Keine Registrierung"
     ],
-    "cta": "Check now",
+    "cta": "Jetzt prüfen",
     "checkpoints": [
-      "Security",
+      "Sicherheit",
       "Performance",
       "SEO",
-      "Accessibility",
-      "Structure"
+      "Barrierefreiheit",
+      "Struktur"
     ]
   },
   "finalCta": {
-    "badge": "The First Step",
-    "headline": "Want to close the",
-    "headlineHighlight": "gaps?",
-    "subheadline": "Systems that work. Leads that flow. Results that become predictable.",
-    "ctaPrimary": "Book appointment",
-    "ctaSecondary": "Website Check",
+    "badge": "Der erste Schritt",
+    "headline": "Willst du die",
+    "headlineHighlight": "Lücken schließen?",
+    "subheadline": "Systeme, die funktionieren. Leads, die fließen. Ergebnisse, die planbar werden.",
+    "ctaPrimary": "Termin buchen",
+    "ctaSecondary": "Webseiten-Check",
     "trust": [
-      "Non-binding",
-      "Free initial consultation",
-      "Response within 24h"
+      "Unverbindlich",
+      "Kostenlose Erstberatung",
+      "Antwort innerhalb 24h"
     ]
   },
   "footer": {
     "company": "AgentFlowMarketing",
-    "tagline": "Websites & Workflows from Berlin",
-    "contact": "Contact",
-    "legal": "Legal",
-    "imprint": "Imprint",
-    "privacy": "Privacy Policy",
-    "terms": "Terms",
-    "copyright": "All rights reserved."
+    "tagline": "Webseiten & Workflows aus Berlin",
+    "contact": "Kontakt",
+    "legal": "Rechtliches",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "copyright": "Alle Rechte vorbehalten."
   },
   "language": {
-    "switch": "Language",
-    "en": "English",
-    "ar": "Arabic"
+    "switch": "Sprache",
+    "en": "Englisch",
+    "ar": "Arabisch"
   },
   "pages": {
     "pakete": {
       "visualization": {
-        "website": "Website",
+        "website": "Webseite",
         "admin": "Admin",
-        "customers": "Customers",
+        "customers": "Kunden",
         "team": "Team",
         "system": "System",
         "responsive": "Responsive",
@@ -317,842 +317,842 @@
         "online": "Online"
       },
       "hero": {
-        "badge": "System gaps - Friction - Lost inquiries",
-        "headline1": "Your website is slowing you down.",
-        "headline2": "We build a system that sells.",
-        "subheadline": "When inquiries fade and nobody has the overview, the problem lies in the system behind it.",
+        "badge": "Systemlücken - Reibung - Verlorene Anfragen",
+        "headline1": "Deine Webseite bremst dich aus.",
+        "headline2": "Wir bauen ein System, das verkauft.",
+        "subheadline": "Wenn Anfragen versickern und niemand den Überblick hat, liegt das Problem im System dahinter.",
         "chips": {
-          "seo": "High-Quality SEO",
+          "seo": "Hochwertiges SEO",
           "liveReady": "Live-ready Setup",
-          "adminPortal": "Admin Portal",
-          "portals": "Portals per package"
+          "adminPortal": "Admin-Portal",
+          "portals": "Portale je Paket"
         },
-        "ctaPrimary": "Book Appointment",
-        "ctaSecondary": "Free Check",
-        "limitedSlots": "Limited project slots per month"
+        "ctaPrimary": "Termin buchen",
+        "ctaSecondary": "Kostenloser Check",
+        "limitedSlots": "Begrenzte Projektplätze pro Monat"
       },
       "problem": {
-        "headline": "Why strong offers still lose",
+        "headline": "Warum starke Angebote trotzdem verlieren",
         "items": {
           "unclearGuidance": {
-            "title": "Unclear Guidance",
-            "desc": "Visitors see content but no clear next step."
+            "title": "Unklare Führung",
+            "desc": "Besucher sehen Inhalte, aber keinen klaren nächsten Schritt."
           },
           "noBackend": {
-            "title": "No Backend System",
-            "desc": "Content/inquiries/status are not properly organized."
+            "title": "Kein Backend-System",
+            "desc": "Inhalte/Anfragen/Status sind nicht richtig organisiert."
           },
           "noPortal": {
-            "title": "No Portal",
-            "desc": "Customers/employees need access, but there is no clear area."
+            "title": "Kein Portal",
+            "desc": "Kunden/Mitarbeiter brauchen Zugang, aber es gibt keinen klaren Bereich."
           },
           "growthWithoutStructure": {
-            "title": "Growth Without Structure",
-            "desc": "As soon as more happens, it turns into chaos."
+            "title": "Wachstum ohne Struktur",
+            "desc": "Sobald mehr passiert, wird es chaotisch."
           }
         },
-        "conclusion": "A good system turns interest into contact - and contact into closure."
+        "conclusion": "Ein gutes System wandelt Interesse in Kontakt - und Kontakt in Abschluss."
       },
       "whatWeDeliver": {
-        "headline": "Website + Backend + Portals - cleanly structured",
+        "headline": "Webseite + Backend + Portale - sauber strukturiert",
         "sections": {
           "website": {
-            "title": "Website",
-            "subtitle": "(Front that sells)",
+            "title": "Webseite",
+            "subtitle": "(Front, die verkauft)",
             "items": [
-              "clear page logic (no detours)",
-              "texts and CTAs that guide visitors to action",
-              "high-quality SEO + performance as standard",
-              "mobile perfect, fast loading, clean structure"
+              "klare Seitenlogik (keine Umwege)",
+              "Texte und CTAs, die Besucher zur Aktion führen",
+              "hochwertiges SEO + Performance als Standard",
+              "mobil perfekt, schnell ladend, saubere Struktur"
             ]
           },
           "adminPortal": {
-            "title": "Admin Portal",
+            "title": "Admin-Portal",
             "subtitle": "(Standard)",
             "items": [
-              "manage content (pages, texts, media)",
-              "inquiries/leads overview (depending on setup)",
-              "structure and roles cleanly organized (package-dependent)"
+              "Inhalte verwalten (Seiten, Texte, Medien)",
+              "Anfragen-/Lead-Übersicht (je nach Setup)",
+              "Struktur und Rollen sauber organisiert (paketabhängig)"
             ]
           },
           "portals": {
-            "title": "Portals",
-            "subtitle": "(per package)",
+            "title": "Portale",
+            "subtitle": "(je Paket)",
             "items": [
-              "Customer portal: approvals, uploads, status, documents (project-dependent)",
-              "Employee portal: tasks, responsibilities, internal areas (project-dependent)"
+              "Kundenportal: Freigaben, Uploads, Status, Dokumente (projektabhängig)",
+              "Mitarbeiterportal: Aufgaben, Verantwortlichkeiten, interne Bereiche (projektabhängig)"
             ]
           }
         },
-        "conclusion": "You do not just get a website, but a system that convinces outside and creates order inside."
+        "conclusion": "Du bekommst nicht nur eine Webseite, sondern ein System, das außen überzeugt und innen Ordnung schafft."
       },
       "packages": {
-        "badge": "Websites + Portals",
-        "headline": "Choose Your Package",
-        "subheadline": "Clear scope. Fixed price. Professional implementation.",
-        "popularBadge": "Most Popular Choice",
-        "oneTime": "one-time",
-        "onRequest": "on request",
-        "viewDetails": "View details",
+        "badge": "Webseiten + Portale",
+        "headline": "Wähle dein Paket",
+        "subheadline": "Klarer Umfang. Festpreis. Professionelle Umsetzung.",
+        "popularBadge": "Beliebteste Wahl",
+        "oneTime": "einmalig",
+        "onRequest": "auf Anfrage",
+        "viewDetails": "Details ansehen",
         "items": {
           "start": {
             "name": "START",
-            "subtitle": "Website + Admin",
-            "price": "5,390",
-            "forWho": "Fast, professional start",
+            "subtitle": "Webseite + Admin",
+            "price": "5.390",
+            "forWho": "Schneller, professioneller Start",
             "features": [
-              "Landing page + 2 subpages",
-              "High-Quality SEO",
-              "Contact and appointment flow",
-              "Live-ready setup",
-              "Admin Portal (basic)"
+              "Landingpage + 2 Unterseiten",
+              "Hochwertiges SEO",
+              "Kontakt- und Terminfluss",
+              "Live-ready Setup",
+              "Admin-Portal (Basis)"
             ],
-            "cta": "Choose Start"
+            "cta": "Start wählen"
           },
           "business": {
             "name": "BUSINESS",
-            "subtitle": "Website + Admin + Portals",
-            "price": "11,990",
-            "forWho": "Growth with structure",
+            "subtitle": "Webseite + Admin + Portale",
+            "price": "11.990",
+            "forWho": "Wachstum mit Struktur",
             "features": [
-              "Up to 9 pages",
-              "High-Quality SEO + Performance",
-              "Admin Portal (extended)",
-              "Customer portal",
-              "Employee portal",
-              "Live-ready + operational start"
+              "Bis zu 9 Seiten",
+              "Hochwertiges SEO + Performance",
+              "Admin-Portal (erweitert)",
+              "Kundenportal",
+              "Mitarbeiterportal",
+              "Live-ready + Betriebsstart"
             ],
-            "cta": "Choose Business"
+            "cta": "Business wählen"
           },
           "konfigurator": {
-            "name": "CONFIGURATOR",
-            "subtitle": "Individual",
-            "forWho": "Tailored solution",
+            "name": "KONFIGURATOR",
+            "subtitle": "Individuell",
+            "forWho": "Maßgeschneiderte Lösung",
             "features": [
-              "Unlimited pages",
-              "Additional portals",
-              "Booking and dashboard",
-              "Internal tools",
-              "System extensions"
+              "Unbegrenzte Seiten",
+              "Zusätzliche Portale",
+              "Buchung und Dashboard",
+              "Interne Tools",
+              "Systemerweiterungen"
             ],
-            "cta": "Request Quote"
+            "cta": "Angebot anfordern"
           }
         },
         "trustBadges": {
-          "fixedPrice": "Fixed Price Guarantee",
-          "noHiddenCosts": "No Hidden Costs",
-          "fastImplementation": "Fast Implementation"
+          "fixedPrice": "Festpreisgarantie",
+          "noHiddenCosts": "Keine versteckten Kosten",
+          "fastImplementation": "Schnelle Umsetzung"
         }
       },
       "apps": {
-        "badge": "Apps and Software",
-        "headline": "Web Apps and Mobile Apps",
-        "subheadline": "Complete systems - from idea to go-live.",
-        "completeSolution": "Complete Solution",
-        "onRequest": "on request",
-        "viewDetails": "View details",
+        "badge": "Apps und Software",
+        "headline": "Web Apps und Mobile Apps",
+        "subheadline": "Komplette Systeme - von der Idee bis zum Go-live.",
+        "completeSolution": "Komplettlösung",
+        "onRequest": "auf Anfrage",
+        "viewDetails": "Details ansehen",
         "items": {
           "webapp": {
             "name": "Web App",
-            "subtitle": "Fixed Price",
-            "price": "26,990",
-            "highlight": "Browser-based",
-            "desc": "Browser-based system with logins, roles, areas - production-ready implementation.",
+            "subtitle": "Festpreis",
+            "price": "26.990",
+            "highlight": "Browser-basiert",
+            "desc": "Browser-basiertes System mit Logins, Rollen, Bereichen - produktionsreife Umsetzung.",
             "features": [
-              "Concept and structure (screens, roles, logic)",
+              "Konzept und Struktur (Screens, Rollen, Logik)",
               "UI/UX (modern, responsive)",
-              "Implementation of features in agreed scope",
-              "Test and quality check",
-              "Go-live preparation",
-              "Handover after completion"
+              "Umsetzung der Features im vereinbarten Umfang",
+              "Test und Qualitätsprüfung",
+              "Go-live-Vorbereitung",
+              "Übergabe nach Abschluss"
             ],
-            "cta": "Request Web App"
+            "cta": "Web App anfragen"
           },
           "mobile": {
             "name": "Mobile App",
-            "subtitle": "iOS/Android (Fixed Price)",
-            "price": "51,490",
+            "subtitle": "iOS/Android (Festpreis)",
+            "price": "51.490",
             "highlight": "Store-ready",
-            "desc": "Complete app implementation as a stable system - scalable and cleanly handed over.",
+            "desc": "Komplette App-Umsetzung als stabiles System - skalierbar und sauber übergeben.",
             "features": [
-              "Concept and structure (user flows, screens, roles)",
+              "Konzept und Struktur (User Flows, Screens, Rollen)",
               "Mobile-first UI/UX",
-              "Implementation of features in agreed scope",
-              "Tests and stability check",
-              "Publication preparation",
-              "Handover after completion"
+              "Umsetzung der Features im vereinbarten Umfang",
+              "Tests und Stabilitätsprüfung",
+              "Veröffentlichungsvorbereitung",
+              "Übergabe nach Abschluss"
             ],
-            "cta": "Request App"
+            "cta": "App anfragen"
           },
           "enterprise": {
             "name": "Enterprise",
-            "subtitle": "on request",
-            "highlight": "Custom-built",
-            "desc": "When scope/teams/modules are larger: brief analysis, roadmap, quote with milestones.",
+            "subtitle": "auf Anfrage",
+            "highlight": "Maßgeschneidert",
+            "desc": "Wenn Umfang/Teams/Module größer sind: kurze Analyse, Roadmap, Angebot mit Meilensteinen.",
             "features": [
-              "Individual analysis",
-              "Scalable architecture",
-              "Team integration",
-              "Long-term support"
+              "Individuelle Analyse",
+              "Skalierbare Architektur",
+              "Team-Integration",
+              "Langfristiger Support"
             ],
-            "cta": "Get Project Review"
+            "cta": "Projektprüfung anfordern"
           }
         },
         "trustBadges": {
-          "secureCode": "Secure Code",
-          "completeHandover": "Complete Handover",
-          "maintainableScalable": "Maintainable and Scalable"
+          "secureCode": "Sicherer Code",
+          "completeHandover": "Vollständige Übergabe",
+          "maintainableScalable": "Wartbar und skalierbar"
         }
       },
       "service": {
-        "headline": "Service Activations (if needed) - on request",
-        "description": "Certain activations may be charged separately depending on project scope - e.g., when external accounts, special platform approvals, or complex setups are required. We communicate this transparently beforehand so everything runs 100% smoothly in the end.",
+        "headline": "Service-Aktivierungen (bei Bedarf) - auf Anfrage",
+        "description": "Bestimmte Aktivierungen können je nach Projektumfang separat berechnet werden - z.B. wenn externe Konten, spezielle Plattform-Freigaben oder komplexe Setups erforderlich sind. Wir kommunizieren das vorher transparent, damit am Ende alles 100% reibungslos läuft.",
         "items": [
-          "Platform/account approvals and special setups",
-          "Additional system areas outside package scope",
-          "Special integration requirements (project-dependent)"
+          "Plattform-/Konto-Freigaben und spezielle Setups",
+          "Zusätzliche Systembereiche außerhalb des Paketumfangs",
+          "Spezielle Integrationsanforderungen (projektabhängig)"
         ]
       },
       "payment": {
-        "headline": "Start immediately - in 3 steps",
+        "headline": "Sofort starten - in 3 Schritten",
         "steps": {
-          "1": "Choose package or book appointment",
-          "2": "Immediate payment or invoice (after quote/confirmation)",
-          "3": "Project starts once payment + approvals are in place"
+          "1": "Paket wählen oder Termin buchen",
+          "2": "Sofortzahlung oder Rechnung (nach Angebot/Bestätigung)",
+          "3": "Projekt startet, sobald Zahlung + Freigaben vorliegen"
         },
-        "warning": "Start slots are limited. First come, first served."
+        "warning": "Startplätze sind begrenzt. Wer zuerst kommt, mahlt zuerst."
       },
       "comparison": {
-        "headline": "Packages Compared",
-        "subheadline": "All important features at a glance",
+        "headline": "Pakete im Vergleich",
+        "subheadline": "Alle wichtigen Features auf einen Blick",
         "features": {
-          "pages": "Pages",
-          "designDevelopment": "Design and Development",
-          "responsive": "Responsive (all devices)",
-          "seo": "High-Quality SEO",
-          "adminPortal": "Admin Portal",
-          "customerPortal": "Customer Portal",
-          "employeePortal": "Employee Portal",
-          "bookingSystem": "Booking System",
-          "customTools": "Custom Tools",
-          "timeline": "Implementation Time"
+          "pages": "Seiten",
+          "designDevelopment": "Design und Entwicklung",
+          "responsive": "Responsive (alle Geräte)",
+          "seo": "Hochwertiges SEO",
+          "adminPortal": "Admin-Portal",
+          "customerPortal": "Kundenportal",
+          "employeePortal": "Mitarbeiterportal",
+          "bookingSystem": "Buchungssystem",
+          "customTools": "Individuelle Tools",
+          "timeline": "Umsetzungszeit"
         },
         "values": {
           "start": {
             "pages": "1-3",
-            "adminPortal": "Basic",
-            "timeline": "1-2 weeks"
+            "adminPortal": "Basis",
+            "timeline": "1-2 Wochen"
           },
           "business": {
-            "pages": "up to 9",
-            "adminPortal": "Extended",
-            "timeline": "3-4 weeks"
+            "pages": "bis zu 9",
+            "adminPortal": "Erweitert",
+            "timeline": "3-4 Wochen"
           },
           "konfigurator": {
-            "pages": "Unlimited",
-            "adminPortal": "Complete",
-            "timeline": "By scope"
+            "pages": "Unbegrenzt",
+            "adminPortal": "Komplett",
+            "timeline": "Nach Umfang"
           }
         },
-        "recommended": "Recommended",
+        "recommended": "Empfohlen",
         "ctas": {
-          "start": "Choose START",
-          "business": "Choose BUSINESS",
-          "konfigurator": "Request Individual"
+          "start": "START wählen",
+          "business": "BUSINESS wählen",
+          "konfigurator": "Individuell anfragen"
         }
       },
       "finalCta": {
-        "headline": "Want a system that sells - and creates internal order?",
-        "subheadline": "Start free with the website check or book an appointment. After that, you will know clearly which package fits - and what makes sense next.",
-        "ctaPrimary": "Free Website Check",
-        "ctaSecondary": "Book Appointment"
+        "headline": "Willst du ein System, das verkauft - und intern Ordnung schafft?",
+        "subheadline": "Starte kostenlos mit dem Webseiten-Check oder buche einen Termin. Danach weißt du klar, welches Paket passt - und was als nächstes Sinn macht.",
+        "ctaPrimary": "Kostenloser Webseiten-Check",
+        "ctaSecondary": "Termin buchen"
       },
       "start": {
-        "backLink": "All Packages",
-        "badge": "Quick Start",
+        "backLink": "Alle Pakete",
+        "badge": "Schnellstart",
         "title": "START",
-        "titleSuffix": " Package",
-        "subtitle": "Website + Admin Portal",
-        "description": "For whom: Quick, professional start - immediately professional, immediately strong in contact. Ideal when you want to go live fast - without having to rebuild later.",
-        "price": "5,390",
-        "priceUnit": "one-time",
-        "timeline": "Implementation Time",
-        "timelineValue": "1-2 Weeks",
-        "ctaPrimary": "Choose Start",
-        "ctaSecondary": "Free Consultation",
-        "featuresTitle": "What's included?",
+        "titleSuffix": " Paket",
+        "subtitle": "Webseite + Admin-Portal",
+        "description": "Für wen: Schneller, professioneller Start - sofort professionell, sofort stark im Kontakt. Ideal, wenn du schnell live gehen willst - ohne später alles neu bauen zu müssen.",
+        "price": "5.390",
+        "priceUnit": "einmalig",
+        "timeline": "Umsetzungszeit",
+        "timelineValue": "1-2 Wochen",
+        "ctaPrimary": "Start wählen",
+        "ctaSecondary": "Kostenlose Beratung",
+        "featuresTitle": "Was ist enthalten?",
         "features": [
           {
             "icon": "globe",
-            "title": "Landing page + 2 Subpages",
-            "desc": "3 perfectly optimized pages for your professional web presence"
+            "title": "Landingpage + 2 Unterseiten",
+            "desc": "3 perfekt optimierte Seiten für deine professionelle Webpräsenz"
           },
           {
             "icon": "search",
-            "title": "High-Quality SEO",
-            "desc": "Search engine optimization for better visibility from the start"
+            "title": "Hochwertiges SEO",
+            "desc": "Suchmaschinenoptimierung für bessere Sichtbarkeit von Anfang an"
           },
           {
             "icon": "phone",
-            "title": "Contact & Appointment Flow",
-            "desc": "Clear guidance for your visitors to contact you"
+            "title": "Kontakt- & Terminfluss",
+            "desc": "Klare Führung für deine Besucher zur Kontaktaufnahme"
           },
           {
             "icon": "rocket",
             "title": "Live-ready Setup",
-            "desc": "Technically clean, ready to use immediately"
+            "desc": "Technisch sauber, sofort einsatzbereit"
           },
           {
             "icon": "settings",
-            "title": "Admin Portal (Basic)",
-            "desc": "Manage and maintain content yourself"
+            "title": "Admin-Portal (Basis)",
+            "desc": "Inhalte selbst verwalten und pflegen"
           },
           {
             "icon": "mobile",
             "title": "Responsive Design",
-            "desc": "Perfect display on all devices"
+            "desc": "Perfekte Darstellung auf allen Geräten"
           }
         ],
-        "processTitle": "How the project works",
+        "processTitle": "So läuft das Projekt",
         "process": [
           {
             "step": "1",
-            "title": "Kickoff Call",
-            "desc": "We discuss your goals and requirements"
+            "title": "Kickoff-Call",
+            "desc": "Wir besprechen deine Ziele und Anforderungen"
           },
           {
             "step": "2",
-            "title": "Design & Concept",
-            "desc": "We create your individual design"
+            "title": "Design & Konzept",
+            "desc": "Wir erstellen dein individuelles Design"
           },
           {
             "step": "3",
-            "title": "Development",
-            "desc": "Implementation with the latest technologies"
+            "title": "Entwicklung",
+            "desc": "Umsetzung mit den neuesten Technologien"
           },
           {
             "step": "4",
             "title": "Go-Live",
-            "desc": "Your website goes online"
+            "desc": "Deine Webseite geht online"
           }
         ],
-        "idealForTitle": "Perfect for you if...",
+        "idealForTitle": "Perfekt für dich, wenn...",
         "idealFor": [
-          "You need a professional web presence quickly",
-          "You are just starting out or want to replace your old website",
-          "You want a clear, focused presence without frills",
-          "You have a limited budget but expect quality"
+          "Du schnell eine professionelle Webpräsenz brauchst",
+          "Du gerade startest oder deine alte Webseite ersetzen willst",
+          "Du eine klare, fokussierte Präsenz ohne Schnickschnack willst",
+          "Du ein begrenztes Budget hast, aber Qualität erwartest"
         ],
-        "ctaTitle": "Ready for your start?",
-        "ctaDescription": "In 1-2 weeks, your new website will be online.",
-        "ctaPrimaryFinal": "Start now - 5,390",
-        "ctaSecondaryFinal": "View other packages"
+        "ctaTitle": "Bereit für deinen Start?",
+        "ctaDescription": "In 1-2 Wochen ist deine neue Webseite online.",
+        "ctaPrimaryFinal": "Jetzt starten - 5.390",
+        "ctaSecondaryFinal": "Andere Pakete ansehen"
       },
       "business": {
-        "backLink": "All Packages",
-        "badge": "Recommended",
+        "backLink": "Alle Pakete",
+        "badge": "Empfohlen",
         "title": "BUSINESS",
-        "titleSuffix": " Package",
-        "subtitle": "Website + Admin + Portals",
-        "description": "For companies that want growth - with control, overview, and internal areas. This is the package for companies that don't just want to be online, but need internal structure.",
-        "price": "11,990",
-        "priceUnit": "one-time",
-        "timeline": "Implementation Time",
-        "timelineValue": "3-4 Weeks",
-        "ctaPrimary": "Choose Business",
-        "ctaSecondary": "Free Consultation",
-        "featuresTitle": "What's included?",
+        "titleSuffix": " Paket",
+        "subtitle": "Webseite + Admin + Portale",
+        "description": "Für Unternehmen, die wachsen wollen - mit Kontrolle, Überblick und internen Bereichen. Das ist das Paket für Unternehmen, die nicht nur online sein wollen, sondern interne Struktur brauchen.",
+        "price": "11.990",
+        "priceUnit": "einmalig",
+        "timeline": "Umsetzungszeit",
+        "timelineValue": "3-4 Wochen",
+        "ctaPrimary": "Business wählen",
+        "ctaSecondary": "Kostenlose Beratung",
+        "featuresTitle": "Was ist enthalten?",
         "features": [
           {
             "icon": "globe",
-            "title": "Landing page + 8 Subpages",
-            "desc": "Up to 9 perfectly optimized pages for your comprehensive web presence"
+            "title": "Landingpage + 8 Unterseiten",
+            "desc": "Bis zu 9 perfekt optimierte Seiten für deine umfassende Webpräsenz"
           },
           {
             "icon": "search",
-            "title": "High-Quality SEO + Performance",
-            "desc": "Extended search engine optimization for maximum visibility"
+            "title": "Hochwertiges SEO + Performance",
+            "desc": "Erweiterte Suchmaschinenoptimierung für maximale Sichtbarkeit"
           },
           {
             "icon": "rocket",
-            "title": "Live-ready Setup + Operational Start",
-            "desc": "Technically clean with complete operational readiness"
+            "title": "Live-ready Setup + Betriebsstart",
+            "desc": "Technisch sauber mit vollständiger Betriebsbereitschaft"
           },
           {
             "icon": "settings",
-            "title": "Admin Portal (Extended)",
-            "desc": "Comprehensive management options for content and inquiries"
+            "title": "Admin-Portal (Erweitert)",
+            "desc": "Umfassende Verwaltungsoptionen für Inhalte und Anfragen"
           },
           {
             "icon": "user",
-            "title": "Customer Portal",
-            "desc": "Approvals, uploads, status, documents - project-dependent"
+            "title": "Kundenportal",
+            "desc": "Freigaben, Uploads, Status, Dokumente - projektabhängig"
           },
           {
             "icon": "users",
-            "title": "Employee Portal",
-            "desc": "Tasks, responsibilities, internal areas - project-dependent"
+            "title": "Mitarbeiterportal",
+            "desc": "Aufgaben, Verantwortlichkeiten, interne Bereiche - projektabhängig"
           }
         ],
-        "benefitsTitle": "Your benefits with portals",
+        "benefitsTitle": "Deine Vorteile mit Portalen",
         "benefits": [
           {
             "icon": "chart",
-            "title": "Overview",
-            "desc": "All inquiries and leads at a glance"
+            "title": "Überblick",
+            "desc": "Alle Anfragen und Leads auf einen Blick"
           },
           {
             "icon": "lock",
-            "title": "Control",
-            "desc": "Roles and permissions cleanly organized"
+            "title": "Kontrolle",
+            "desc": "Rollen und Berechtigungen sauber organisiert"
           },
           {
             "icon": "trending",
-            "title": "Scalable",
-            "desc": "Grows with your company"
+            "title": "Skalierbar",
+            "desc": "Wächst mit deinem Unternehmen"
           },
           {
             "icon": "zap",
-            "title": "Efficient",
-            "desc": "Internal processes run smoothly"
+            "title": "Effizient",
+            "desc": "Interne Prozesse laufen reibungslos"
           }
         ],
-        "processTitle": "How the project works",
+        "processTitle": "So läuft das Projekt",
         "process": [
           {
             "step": "1",
-            "title": "Strategy Call",
-            "desc": "In-depth analysis of your requirements"
+            "title": "Strategie-Call",
+            "desc": "Tiefgehende Analyse deiner Anforderungen"
           },
           {
             "step": "2",
-            "title": "Conception",
-            "desc": "Define portal structure and user flows"
+            "title": "Konzeption",
+            "desc": "Portal-Struktur und User Flows definieren"
           },
           {
             "step": "3",
             "title": "Design",
-            "desc": "Modern UI/UX for all areas"
+            "desc": "Modernes UI/UX für alle Bereiche"
           },
           {
             "step": "4",
-            "title": "Development",
-            "desc": "Website + portals are built"
+            "title": "Entwicklung",
+            "desc": "Webseite + Portale werden gebaut"
           },
           {
             "step": "5",
             "title": "Testing",
-            "desc": "Quality check of all functions"
+            "desc": "Qualitätsprüfung aller Funktionen"
           },
           {
             "step": "6",
             "title": "Go-Live",
-            "desc": "Launch with training"
+            "desc": "Launch mit Einweisung"
           }
         ],
-        "idealForTitle": "Perfect for you if...",
+        "idealForTitle": "Perfekt für dich, wenn...",
         "idealFor": [
-          "You run a growing company",
-          "You want to digitize internal processes",
-          "Your customers or employees need access to areas",
-          "You want to manage inquiries and leads in a structured way",
-          "You want to scale long-term"
+          "Du ein wachsendes Unternehmen führst",
+          "Du interne Prozesse digitalisieren willst",
+          "Deine Kunden oder Mitarbeiter Zugang zu Bereichen brauchen",
+          "Du Anfragen und Leads strukturiert verwalten willst",
+          "Du langfristig skalieren willst"
         ],
-        "ctaTitle": "Ready for your system?",
-        "ctaDescription": "In 3-4 weeks, you'll have website + portals - all from one source.",
-        "ctaPrimaryFinal": "Start now - 11,990",
-        "ctaSecondaryFinal": "View other packages"
+        "ctaTitle": "Bereit für dein System?",
+        "ctaDescription": "In 3-4 Wochen hast du Webseite + Portale - alles aus einer Hand.",
+        "ctaPrimaryFinal": "Jetzt starten - 11.990",
+        "ctaSecondaryFinal": "Andere Pakete ansehen"
       },
       "growth": {
-        "backLink": "Packages",
+        "backLink": "Pakete",
         "breadcrumb": "Growth",
         "badge": "Premium",
         "name": "Growth",
-        "tagline": "The complete system for maximum growth",
-        "description": "Up to 13 pages plus landing pages, publishing agent, leads generator agent, and priority support. For companies that don't compromise and want to grow with a system.",
-        "price": "from 10,990",
-        "priceUnit": "one-time",
-        "timeline": "4-6 Weeks",
-        "ctaPrimary": "Start Premium",
-        "featuresTitle": "The complete package",
-        "featuresSubtitle": "Everything you need for systematic growth",
+        "tagline": "Das komplette System für maximales Wachstum",
+        "description": "Bis zu 13 Seiten plus Landingpages, Publishing Agent, Leads Generator Agent und Priority Support. Für Unternehmen, die keine Kompromisse machen und mit einem System wachsen wollen.",
+        "price": "ab 10.990",
+        "priceUnit": "einmalig",
+        "timeline": "4-6 Wochen",
+        "ctaPrimary": "Premium starten",
+        "featuresTitle": "Das komplette Paket",
+        "featuresSubtitle": "Alles, was du für systematisches Wachstum brauchst",
         "features": [
           {
-            "title": "Up to 13+ Pages",
-            "desc": "Comprehensive web presence with all important pages plus dedicated landing pages.",
+            "title": "Bis zu 13+ Seiten",
+            "desc": "Umfassende Webpräsenz mit allen wichtigen Seiten plus dedizierte Landingpages.",
             "icon": "pages",
             "highlight": false
           },
           {
             "title": "Publishing Agent",
-            "desc": "Automated content workflow: Planning -> Approval -> Publication.",
+            "desc": "Automatisierter Content-Workflow: Planung -> Freigabe -> Veröffentlichung.",
             "icon": "robot",
             "highlight": false
           },
           {
             "title": "Leads Generator Agent",
-            "desc": "Automatic lead capture, categorization, and follow-up. No lead gets lost.",
+            "desc": "Automatische Lead-Erfassung, Kategorisierung und Follow-up. Kein Lead geht verloren.",
             "icon": "target",
             "highlight": true
           },
           {
             "title": "Priority Support",
-            "desc": "Fast response times and direct line to us.",
+            "desc": "Schnelle Reaktionszeiten und direkter Draht zu uns.",
             "icon": "zap",
             "highlight": true
           },
           {
-            "title": "Complete Handover",
-            "desc": "Detailed documentation and comprehensive training for your team.",
+            "title": "Vollständige Übergabe",
+            "desc": "Detaillierte Dokumentation und umfassende Schulung für dein Team.",
             "icon": "book",
             "highlight": false
           },
           {
-            "title": "Quarterly Reviews",
-            "desc": "Regular analysis and optimization suggestions.",
+            "title": "Quartals-Reviews",
+            "desc": "Regelmäßige Analyse und Optimierungsvorschläge.",
             "icon": "chart",
             "highlight": true
           },
           {
-            "title": "Expandable",
-            "desc": "Additional pages, workflows, or features can be added anytime.",
+            "title": "Erweiterbar",
+            "desc": "Zusätzliche Seiten, Workflows oder Features können jederzeit hinzugefügt werden.",
             "icon": "tool",
             "highlight": false
           },
           {
-            "title": "Everything from Business",
-            "desc": "CMS, tracking, SEO, responsive design, and more.",
+            "title": "Alles aus Business",
+            "desc": "CMS, Tracking, SEO, Responsive Design und mehr.",
             "icon": "star",
             "highlight": false
           }
         ],
-        "exclusive": "Exclusive",
-        "leadsAgentTitle": "The Leads Generator Agent explained",
-        "leadsAgentSubtitle": "Your automated lead management system",
+        "exclusive": "Exklusiv",
+        "leadsAgentTitle": "Der Leads Generator Agent erklärt",
+        "leadsAgentSubtitle": "Dein automatisiertes Lead-Management-System",
         "leadsAgentSteps": [
           {
             "icon": "inbox",
-            "title": "Capture",
-            "desc": "Leads are automatically captured and categorized"
+            "title": "Erfassen",
+            "desc": "Leads werden automatisch erfasst und kategorisiert"
           },
           {
             "icon": "tag",
             "title": "Scoring",
-            "desc": "Automatic evaluation according to your criteria"
+            "desc": "Automatische Bewertung nach deinen Kriterien"
           },
           {
             "icon": "list",
             "title": "Pipeline",
-            "desc": "Clear Kanban board for all leads"
+            "desc": "Übersichtliches Kanban-Board für alle Leads"
           },
           {
             "icon": "clock",
             "title": "Follow-up",
-            "desc": "Automatic reminders and tasks"
+            "desc": "Automatische Erinnerungen und Aufgaben"
           },
           {
             "icon": "trending",
             "title": "Reporting",
-            "desc": "Overview of conversion rates and performance"
+            "desc": "Überblick über Conversion-Raten und Performance"
           }
         ],
-        "leadsAgentBenefitsTitle": "Your benefits:",
+        "leadsAgentBenefitsTitle": "Deine Vorteile:",
         "leadsAgentBenefits": [
-          "No lead gets lost anymore",
-          "30% more closes through systematic follow-up",
-          "Full transparency over your pipeline",
-          "Time savings through automation"
+          "Kein Lead geht mehr verloren",
+          "30% mehr Abschlüsse durch systematisches Follow-up",
+          "Volle Transparenz über deine Pipeline",
+          "Zeitersparnis durch Automatisierung"
         ],
         "comparisonTitle": "Growth vs. Business",
         "comparison": [
           {
-            "feature": "Number of pages",
-            "business": "up to 10",
-            "growth": "up to 13+"
+            "feature": "Anzahl Seiten",
+            "business": "bis zu 10",
+            "growth": "bis zu 13+"
           },
           {
             "feature": "Publishing Agent",
-            "business": "yes",
-            "growth": "yes"
+            "business": "ja",
+            "growth": "ja"
           },
           {
             "feature": "Leads Generator",
-            "business": "no",
-            "growth": "yes"
+            "business": "nein",
+            "growth": "ja"
           },
           {
             "feature": "Priority Support",
-            "business": "no",
-            "growth": "yes"
+            "business": "nein",
+            "growth": "ja"
           },
           {
-            "feature": "Quarterly Reviews",
-            "business": "no",
-            "growth": "yes"
+            "feature": "Quartals-Reviews",
+            "business": "nein",
+            "growth": "ja"
           },
           {
-            "feature": "Landing pages",
-            "business": "no",
-            "growth": "yes"
+            "feature": "Landingpages",
+            "business": "nein",
+            "growth": "ja"
           }
         ],
-        "idealForTitle": "Ideal for companies that...",
+        "idealForTitle": "Ideal für Unternehmen, die...",
         "idealFor": [
-          "Growth-oriented companies",
-          "B2B with complex sales processes",
-          "Companies with high lead volume",
-          "Teams that need maximum efficiency",
-          "Long-term partnerships"
+          "Wachstumsorientierte Unternehmen",
+          "B2B mit komplexen Vertriebsprozessen",
+          "Unternehmen mit hohem Lead-Volumen",
+          "Teams, die maximale Effizienz brauchen",
+          "Langfristige Partnerschaften"
         ],
-        "processTitle": "The Premium Process",
-        "processSubtitle": "Thorough, structured, and tailored to your needs",
+        "processTitle": "Der Premium-Prozess",
+        "processSubtitle": "Gründlich, strukturiert und auf deine Bedürfnisse zugeschnitten",
         "process": [
           {
             "step": 1,
-            "title": "Strategy Session",
-            "desc": "In-depth analysis of your goals, processes, and requirements."
+            "title": "Strategie-Session",
+            "desc": "Tiefgehende Analyse deiner Ziele, Prozesse und Anforderungen."
           },
           {
             "step": 2,
-            "title": "System Architecture",
-            "desc": "Planning the complete infrastructure and workflows."
+            "title": "System-Architektur",
+            "desc": "Planung der kompletten Infrastruktur und Workflows."
           },
           {
             "step": 3,
             "title": "Design & Branding",
-            "desc": "Premium design that perfectly represents your brand."
+            "desc": "Premium-Design, das deine Marke perfekt repräsentiert."
           },
           {
             "step": 4,
-            "title": "Development",
-            "desc": "Implementation with the latest technologies."
+            "title": "Entwicklung",
+            "desc": "Umsetzung mit den neuesten Technologien."
           },
           {
             "step": 5,
-            "title": "Workflow Setup",
-            "desc": "Setting up both agents and all automations."
+            "title": "Workflow-Setup",
+            "desc": "Einrichtung beider Agents und aller Automatisierungen."
           },
           {
             "step": 6,
             "title": "Integration",
-            "desc": "Connection to your existing tools (CRM, email, etc.)."
+            "desc": "Anbindung an deine bestehenden Tools (CRM, E-Mail, etc.)."
           },
           {
             "step": 7,
             "title": "Testing",
-            "desc": "Comprehensive testing of all functions and workflows."
+            "desc": "Umfassende Tests aller Funktionen und Workflows."
           },
           {
             "step": 8,
-            "title": "Launch & Training",
-            "desc": "Go-live with comprehensive training for your team."
+            "title": "Launch & Schulung",
+            "desc": "Go-live mit umfassender Schulung für dein Team."
           }
         ],
-        "otherPackagesTitle": "Maybe a different package?",
-        "otherPackagesSubtitle": "No problem - we have the right one for everyone",
-        "otherPackageOnePage": "One Page (from 1,390)",
-        "otherPackageBusiness": "Business (6,990)",
-        "otherPackageCompare": "Compare all",
-        "finalCtaTitle": "Ready for maximum growth?",
-        "finalCtaSubtitle": "Start with the Growth package and let us build your system."
+        "otherPackagesTitle": "Vielleicht ein anderes Paket?",
+        "otherPackagesSubtitle": "Kein Problem - wir haben das Richtige für jeden",
+        "otherPackageOnePage": "One Page (ab 1.390)",
+        "otherPackageBusiness": "Business (6.990)",
+        "otherPackageCompare": "Alle vergleichen",
+        "finalCtaTitle": "Bereit für maximales Wachstum?",
+        "finalCtaSubtitle": "Starte mit dem Growth-Paket und lass uns dein System bauen."
       },
       "konfigurator": {
-        "backLink": "All Packages",
-        "badge": "Individual",
-        "title": "CONFIGURATOR",
-        "subtitle": "Your individual system - exactly according to your requirements",
-        "description": "When scope, pages, portals, or system areas need to be planned individually. We only accept projects that we can deliver with quality.",
-        "price": "on request",
-        "priceSubtext": "individual quote",
-        "capacityLabel": "Capacity Check",
-        "capacityValue": "before project start",
-        "ctaPrimary": "Request Quote",
-        "ctaSecondary": "Free Consultation",
-        "optionsTitle": "Possible Extensions",
+        "backLink": "Alle Pakete",
+        "badge": "Individuell",
+        "title": "KONFIGURATOR",
+        "subtitle": "Dein individuelles System - genau nach deinen Anforderungen",
+        "description": "Wenn Umfang, Seiten, Portale oder Systembereiche individuell geplant werden müssen. Wir nehmen nur Projekte an, die wir mit Qualität liefern können.",
+        "price": "auf Anfrage",
+        "priceSubtext": "individuelles Angebot",
+        "capacityLabel": "Kapazitätsprüfung",
+        "capacityValue": "vor Projektstart",
+        "ctaPrimary": "Angebot anfordern",
+        "ctaSecondary": "Kostenlose Beratung",
+        "optionsTitle": "Mögliche Erweiterungen",
         "options": [
           {
             "icon": "page",
-            "title": "More Pages",
-            "desc": "Any number of pages and areas according to your needs"
+            "title": "Mehr Seiten",
+            "desc": "Beliebige Anzahl an Seiten und Bereichen nach deinen Bedürfnissen"
           },
           {
             "icon": "lock",
-            "title": "Additional Portals",
-            "desc": "Customer, employee, partner portals with roles & permissions"
+            "title": "Zusätzliche Portale",
+            "desc": "Kunden-, Mitarbeiter-, Partnerportale mit Rollen & Berechtigungen"
           },
           {
             "icon": "calendar",
-            "title": "Booking Systems",
-            "desc": "Appointments, reservations, calendar integrations"
+            "title": "Buchungssysteme",
+            "desc": "Termine, Reservierungen, Kalender-Integrationen"
           },
           {
             "icon": "chart",
             "title": "Dashboards",
-            "desc": "Individual overviews and evaluations"
+            "desc": "Individuelle Übersichten und Auswertungen"
           },
           {
             "icon": "tool",
-            "title": "Internal Tools",
-            "desc": "Custom tools for your processes"
+            "title": "Interne Tools",
+            "desc": "Maßgeschneiderte Tools für deine Prozesse"
           },
           {
             "icon": "link",
-            "title": "Integrations",
-            "desc": "Connection to your existing systems"
+            "title": "Integrationen",
+            "desc": "Anbindung an deine bestehenden Systeme"
           }
         ],
-        "processTitle": "How it works",
+        "processTitle": "So funktioniert es",
         "process": [
           {
             "step": "1",
-            "title": "Request",
-            "desc": "You describe your project"
+            "title": "Anfrage",
+            "desc": "Du beschreibst dein Projekt"
           },
           {
             "step": "2",
-            "title": "Analysis",
-            "desc": "We check feasibility"
+            "title": "Analyse",
+            "desc": "Wir prüfen die Machbarkeit"
           },
           {
             "step": "3",
-            "title": "Quote",
-            "desc": "Transparent quote with milestones"
+            "title": "Angebot",
+            "desc": "Transparentes Angebot mit Meilensteinen"
           },
           {
             "step": "4",
-            "title": "Implementation",
-            "desc": "Step by step to the finished system"
+            "title": "Umsetzung",
+            "desc": "Schritt für Schritt zum fertigen System"
           }
         ],
-        "idealForTitle": "Perfect for you if...",
+        "idealForTitle": "Perfekt für dich, wenn...",
         "idealFor": [
-          "Your requirements go beyond the standard packages",
-          "You need a complex system with multiple areas",
-          "You need special integrations or functions",
-          "You want a long-term project with clear milestones"
+          "Deine Anforderungen über die Standardpakete hinausgehen",
+          "Du ein komplexes System mit mehreren Bereichen brauchst",
+          "Du spezielle Integrationen oder Funktionen benötigst",
+          "Du ein langfristiges Projekt mit klaren Meilensteinen willst"
         ],
-        "noticeTitle": "Quality Assurance",
-        "noticeText": "We only accept projects that we can deliver with quality. Before project start, we check our capacities so that speed and quality remain stable for you.",
-        "ctaTitle": "Do you have an individual project?",
-        "ctaDescription": "Let's check together what you need - and what we can deliver.",
-        "ctaPrimaryFinal": "Request Quote",
-        "ctaSecondaryFinal": "View other packages"
+        "noticeTitle": "Qualitätssicherung",
+        "noticeText": "Wir nehmen nur Projekte an, die wir mit Qualität liefern können. Vor Projektstart prüfen wir unsere Kapazitäten, damit Geschwindigkeit und Qualität für dich stabil bleiben.",
+        "ctaTitle": "Hast du ein individuelles Projekt?",
+        "ctaDescription": "Lass uns gemeinsam prüfen, was du brauchst - und was wir liefern können.",
+        "ctaPrimaryFinal": "Angebot anfordern",
+        "ctaSecondaryFinal": "Andere Pakete ansehen"
       },
       "webapp": {
         "hero": {
-          "backLink": "All Packages",
+          "backLink": "Alle Pakete",
           "badge": "Software",
           "title": "Web App",
-          "subtitle": "Browser-based system - production-ready implementation",
-          "description": "A complete browser-based system with logins, roles, and areas. No installation required - your users simply access it via the browser.",
-          "price": "26,990",
-          "priceLabel": "Fixed Price",
-          "included": "Included",
-          "codeHandover": "Code Handover",
-          "ctaPrimary": "Request Web App",
-          "ctaSecondary": "Free Consultation"
+          "subtitle": "Browser-basiertes System - produktionsreife Umsetzung",
+          "description": "Ein komplettes browser-basiertes System mit Logins, Rollen und Bereichen. Keine Installation nötig - deine Nutzer greifen einfach über den Browser zu.",
+          "price": "26.990",
+          "priceLabel": "Festpreis",
+          "included": "Inklusive",
+          "codeHandover": "Code-Übergabe",
+          "ctaPrimary": "Web App anfragen",
+          "ctaSecondary": "Kostenlose Beratung"
         },
         "features": {
-          "title": "What's included?",
+          "title": "Was ist enthalten?",
           "items": [
             {
               "icon": "clipboard",
-              "title": "Concept & Structure",
-              "desc": "Screens, roles, logic - all thought through and documented"
+              "title": "Konzept & Struktur",
+              "desc": "Screens, Rollen, Logik - alles durchdacht und dokumentiert"
             },
             {
               "icon": "palette",
               "title": "UI/UX Design",
-              "desc": "Modern, responsive design for all devices"
+              "desc": "Modernes, responsives Design für alle Geräte"
             },
             {
               "icon": "settings",
-              "title": "Feature Development",
-              "desc": "Implementation of all features in agreed scope"
+              "title": "Feature-Entwicklung",
+              "desc": "Umsetzung aller Features im vereinbarten Umfang"
             },
             {
               "icon": "flask",
-              "title": "Testing & Quality Check",
-              "desc": "Comprehensive tests for stable performance"
+              "title": "Testing & Qualitätsprüfung",
+              "desc": "Umfassende Tests für stabile Performance"
             },
             {
               "icon": "rocket",
-              "title": "Go-Live Preparation",
-              "desc": "Everything ready for production use"
+              "title": "Go-Live-Vorbereitung",
+              "desc": "Alles bereit für den Produktiveinsatz"
             },
             {
               "icon": "package",
-              "title": "Handover",
-              "desc": "Complete handover, optionally as code"
+              "title": "Übergabe",
+              "desc": "Vollständige Übergabe, optional als Code"
             }
           ]
         },
         "useCases": {
-          "title": "Typical Use Cases",
+          "title": "Typische Anwendungsfälle",
           "items": [
             {
               "icon": "chart",
               "title": "Dashboards",
-              "desc": "Overviews and analytics"
+              "desc": "Übersichten und Analysen"
             },
             {
               "icon": "form",
-              "title": "Forms",
-              "desc": "Complex data capture"
+              "title": "Formulare",
+              "desc": "Komplexe Datenerfassung"
             },
             {
               "icon": "users",
-              "title": "User Management",
-              "desc": "Roles and permissions"
+              "title": "Benutzerverwaltung",
+              "desc": "Rollen und Berechtigungen"
             },
             {
               "icon": "folder",
-              "title": "Document Management",
-              "desc": "Upload and management"
+              "title": "Dokumentenmanagement",
+              "desc": "Upload und Verwaltung"
             },
             {
               "icon": "calendar",
-              "title": "Booking Systems",
-              "desc": "Appointments and reservations"
+              "title": "Buchungssysteme",
+              "desc": "Termine und Reservierungen"
             },
             {
               "icon": "chat",
-              "title": "Communication",
-              "desc": "Internal messaging"
+              "title": "Kommunikation",
+              "desc": "Interne Nachrichten"
             }
           ]
         },
         "advantages": {
-          "title": "Advantages of a Web App",
+          "title": "Vorteile einer Web App",
           "items": [
-            "No app store needed - immediately usable",
-            "Works on any device with a browser",
-            "Easy updates without user action",
-            "Full control over your data",
-            "Scales with your growth"
+            "Kein App Store nötig - sofort nutzbar",
+            "Funktioniert auf jedem Gerät mit Browser",
+            "Einfache Updates ohne Nutzeraktion",
+            "Volle Kontrolle über deine Daten",
+            "Skaliert mit deinem Wachstum"
           ]
         },
         "cta": {
-          "title": "Ready for your Web App?",
-          "description": "Let's discuss your project - fixed price, clear milestones.",
-          "ctaPrimary": "Request now - 26,990 EUR",
-          "ctaSecondary": "View other packages"
+          "title": "Bereit für deine Web App?",
+          "description": "Lass uns über dein Projekt sprechen - Festpreis, klare Meilensteine.",
+          "ctaPrimary": "Jetzt anfragen - 26.990 EUR",
+          "ctaSecondary": "Andere Pakete ansehen"
         }
       },
       "mobile": {
         "hero": {
-          "backLink": "All Packages",
+          "backLink": "Alle Pakete",
           "badge": "Mobile App",
           "title": "Mobile App",
           "titleSuffix": "iOS & Android",
-          "subtitle": "Complete app implementation - scalable and cleanly handed over",
-          "description": "A complete native app for iOS and Android. Professionally developed, tested, and ready for publication in the app stores.",
-          "price": "51,490",
-          "priceLabel": "Fixed Price",
-          "included": "Included",
+          "subtitle": "Komplette App-Umsetzung - skalierbar und sauber übergeben",
+          "description": "Eine komplette native App für iOS und Android. Professionell entwickelt, getestet und bereit für die Veröffentlichung in den App Stores.",
+          "price": "51.490",
+          "priceLabel": "Festpreis",
+          "included": "Inklusive",
           "platforms": "iOS + Android",
-          "ctaPrimary": "Request App",
-          "ctaSecondary": "Free Consultation"
+          "ctaPrimary": "App anfragen",
+          "ctaSecondary": "Kostenlose Beratung"
         },
         "platformsList": [
           {
@@ -1167,1222 +1167,1222 @@
           }
         ],
         "features": {
-          "title": "What's included?",
+          "title": "Was ist enthalten?",
           "items": [
             {
               "icon": "clipboard",
-              "title": "Concept & Structure",
-              "desc": "User flows, screens, roles - thought through and documented"
+              "title": "Konzept & Struktur",
+              "desc": "User Flows, Screens, Rollen - durchdacht und dokumentiert"
             },
             {
               "icon": "mobile",
               "title": "Mobile-first UI/UX",
-              "desc": "Optimal design for smartphones and tablets"
+              "desc": "Optimales Design für Smartphones und Tablets"
             },
             {
               "icon": "settings",
-              "title": "Feature Development",
-              "desc": "Implementation of all features in agreed scope"
+              "title": "Feature-Entwicklung",
+              "desc": "Umsetzung aller Features im vereinbarten Umfang"
             },
             {
               "icon": "flask",
-              "title": "Tests & Stability Check",
-              "desc": "Intensive tests on various devices"
+              "title": "Tests & Stabilitätsprüfung",
+              "desc": "Intensive Tests auf verschiedenen Geräten"
             },
             {
               "icon": "rocket",
-              "title": "Publication Preparation",
+              "title": "Veröffentlichungsvorbereitung",
               "desc": "App Store & Google Play ready"
             },
             {
               "icon": "package",
-              "title": "Handover",
-              "desc": "Complete handover, optionally as code"
+              "title": "Übergabe",
+              "desc": "Vollständige Übergabe, optional als Code"
             }
           ]
         },
         "storeReady": {
-          "title": "Store-Ready Delivery",
-          "description": "Your app is fully prepared for publication",
+          "title": "Store-Ready Lieferung",
+          "description": "Deine App ist vollständig für die Veröffentlichung vorbereitet",
           "appStore": {
             "title": "App Store",
-            "desc": "Ready for iPhone and iPad"
+            "desc": "Bereit für iPhone und iPad"
           },
           "googlePlay": {
             "title": "Google Play",
-            "desc": "Ready for Android devices"
+            "desc": "Bereit für Android-Geräte"
           }
         },
         "advantages": {
-          "title": "Advantages of a Native App",
+          "title": "Vorteile einer nativen App",
           "items": [
-            "Optimal performance on mobile devices",
-            "Access to device features (camera, GPS, etc.)",
-            "Push notifications for user engagement",
-            "Offline capability possible",
-            "Presence in the app stores"
+            "Optimale Performance auf mobilen Geräten",
+            "Zugriff auf Gerätefunktionen (Kamera, GPS, etc.)",
+            "Push-Benachrichtigungen für Nutzer-Engagement",
+            "Offline-Fähigkeit möglich",
+            "Präsenz in den App Stores"
           ]
         },
         "cta": {
-          "title": "Ready for your App?",
-          "description": "Let's discuss your project - fixed price, professional implementation.",
-          "ctaPrimary": "Request now - 51,490 EUR",
-          "ctaSecondary": "View other packages"
+          "title": "Bereit für deine App?",
+          "description": "Lass uns über dein Projekt sprechen - Festpreis, professionelle Umsetzung.",
+          "ctaPrimary": "Jetzt anfragen - 51.490 EUR",
+          "ctaSecondary": "Andere Pakete ansehen"
         }
       },
       "onePage": {
         "hero": {
-          "breadcrumb": "Packages",
+          "breadcrumb": "Pakete",
           "badge": "One Page",
-          "tagline": "The perfect start for your professional web presence",
-          "description": "One page that says it all. Clearly structured, perfectly optimized, and to the point. Ideal for freelancers, small businesses, or as a landing page for a specific offer.",
-          "price": "from 1,390",
-          "billing": "one-time",
-          "timeline": "1-2 weeks",
-          "ctaPrimary": "Start now"
+          "tagline": "Der perfekte Start für deine professionelle Webpräsenz",
+          "description": "Eine Seite, die alles sagt. Klar strukturiert, perfekt optimiert und auf den Punkt. Ideal für Freelancer, kleine Unternehmen oder als Landingpage für ein spezifisches Angebot.",
+          "price": "ab 1.390",
+          "billing": "einmalig",
+          "timeline": "1-2 Wochen",
+          "ctaPrimary": "Jetzt starten"
         },
         "features": {
-          "title": "What's included",
-          "subtitle": "Everything you need for a professional start",
+          "title": "Was ist enthalten",
+          "subtitle": "Alles, was du für einen professionellen Start brauchst",
           "items": [
             {
               "icon": "page",
-              "title": "One Page Website",
-              "desc": "A thoughtful page with all important sections: Hero, Services, About Us, Contact."
+              "title": "One Page Webseite",
+              "desc": "Eine durchdachte Seite mit allen wichtigen Abschnitten: Hero, Leistungen, Über uns, Kontakt."
             },
             {
               "icon": "phone",
-              "title": "Contact Options",
-              "desc": "Integration of email, WhatsApp and/or appointment booking - as it suits you."
+              "title": "Kontaktoptionen",
+              "desc": "Integration von E-Mail, WhatsApp und/oder Terminbuchung - wie es zu dir passt."
             },
             {
               "icon": "search",
-              "title": "Basic SEO",
-              "desc": "Basic search engine optimization: meta tags, structure, loading time."
+              "title": "Basis-SEO",
+              "desc": "Grundlegende Suchmaschinenoptimierung: Meta-Tags, Struktur, Ladezeit."
             },
             {
               "icon": "mobile",
               "title": "Responsive Design",
-              "desc": "Perfect display on desktop, tablet, and smartphone."
+              "desc": "Perfekte Darstellung auf Desktop, Tablet und Smartphone."
             },
             {
               "icon": "lightning",
-              "title": "Performance Optimization",
-              "desc": "Fast loading times through optimized images and clean code."
+              "title": "Performance-Optimierung",
+              "desc": "Schnelle Ladezeiten durch optimierte Bilder und sauberen Code."
             },
             {
               "icon": "lock",
-              "title": "SSL Certificate",
-              "desc": "Secure HTTPS connection for trust and better ranking."
+              "title": "SSL-Zertifikat",
+              "desc": "Sichere HTTPS-Verbindung für Vertrauen und besseres Ranking."
             }
           ]
         },
         "idealFor": {
-          "title": "Ideal for",
-          "description": "The One Page package is perfectly suited for anyone who wants a clear, professional web presence without the bells and whistles.",
+          "title": "Ideal für",
+          "description": "Das One Page Paket ist perfekt geeignet für alle, die eine klare, professionelle Webpräsenz ohne Schnickschnack wollen.",
           "items": [
-            "Freelancers & Self-employed",
-            "Small Businesses",
-            "New Projects & Startups",
-            "Specific Landing Pages",
-            "Portfolios & Business Cards"
+            "Freelancer & Selbstständige",
+            "Kleine Unternehmen",
+            "Neue Projekte & Startups",
+            "Spezifische Landingpages",
+            "Portfolios & Visitenkarten"
           ],
           "notIncluded": {
-            "title": "Not included (but expandable):",
+            "title": "Nicht enthalten (aber erweiterbar):",
             "items": [
-              "Publishing Agent (Workflow Automation)",
+              "Publishing Agent (Workflow-Automatisierung)",
               "Leads Generator Agent",
-              "Multiple Subpages",
-              "CMS Integration"
+              "Mehrere Unterseiten",
+              "CMS-Integration"
             ],
-            "needMore": "Need more? Check out the",
-            "businessPackage": "Business Package"
+            "needMore": "Brauchst du mehr? Schau dir das",
+            "businessPackage": "Business Paket an"
           }
         },
         "process": {
-          "title": "How it works",
-          "subtitle": "From idea to finished website in {timeline}",
+          "title": "So funktioniert es",
+          "subtitle": "Von der Idee zur fertigen Webseite in {timeline}",
           "steps": [
             {
               "step": 1,
-              "title": "Kickoff Meeting",
-              "desc": "We discuss your goals, target audience, and wishes."
+              "title": "Kickoff-Meeting",
+              "desc": "Wir besprechen deine Ziele, Zielgruppe und Wünsche."
             },
             {
               "step": 2,
-              "title": "Design Draft",
-              "desc": "You receive a first design proposal for coordination."
+              "title": "Design-Entwurf",
+              "desc": "Du erhältst einen ersten Design-Vorschlag zur Abstimmung."
             },
             {
               "step": 3,
-              "title": "Development",
-              "desc": "Implementation with modern technologies."
+              "title": "Entwicklung",
+              "desc": "Umsetzung mit modernen Technologien."
             },
             {
               "step": 4,
-              "title": "Feedback & Polish",
-              "desc": "Revision rounds until you are satisfied."
+              "title": "Feedback & Feinschliff",
+              "desc": "Korrekturschleifen, bis du zufrieden bist."
             },
             {
               "step": 5,
               "title": "Go-Live",
-              "desc": "Publication and brief introduction."
+              "desc": "Veröffentlichung und kurze Einführung."
             }
           ]
         },
         "compare": {
-          "title": "Need more?",
-          "description": "Compare all packages and find the right one for your project",
-          "businessPackage": "Business Package",
-          "growthPackage": "Growth Package",
-          "allPackages": "Compare all packages"
+          "title": "Brauchst du mehr?",
+          "description": "Vergleiche alle Pakete und finde das richtige für dein Projekt",
+          "businessPackage": "Business Paket",
+          "growthPackage": "Growth Paket",
+          "allPackages": "Alle Pakete vergleichen"
         },
         "finalCta": {
-          "headline": "Ready for your web presence?",
-          "subheadline": "Start now with the One Page package."
+          "headline": "Bereit für deine Webpräsenz?",
+          "subheadline": "Starte jetzt mit dem One Page Paket."
         }
       }
     },
     "portal": {
       "login": {
-        "title": "Customer Portal",
-        "subtitle": "Sign in with your access code",
-        "codeLabel": "Access Code",
-        "codePlaceholder": "Your access code",
-        "loginButton": "Enter Portal",
-        "loggingIn": "Signing in...",
-        "noCode": "Don't have an access code?",
-        "startProject": "Start a project now",
-        "helpText": "You will receive your access code via email or Telegram after booking a project.",
-        "backToWebsite": "Back to website",
-        "invalidCode": "Invalid code",
-        "connectionError": "Connection error"
+        "title": "Kundenportal",
+        "subtitle": "Mit deinem Zugangscode anmelden",
+        "codeLabel": "Zugangscode",
+        "codePlaceholder": "Dein Zugangscode",
+        "loginButton": "Portal betreten",
+        "loggingIn": "Anmeldung läuft...",
+        "noCode": "Keinen Zugangscode?",
+        "startProject": "Jetzt ein Projekt starten",
+        "helpText": "Du erhältst deinen Zugangscode per E-Mail oder Telegram nach Buchung eines Projekts.",
+        "backToWebsite": "Zurück zur Webseite",
+        "invalidCode": "Ungültiger Code",
+        "connectionError": "Verbindungsfehler"
       },
       "dashboard": {
-        "loading": "Loading dashboard...",
-        "loadError": "Error loading",
-        "somethingWrong": "Something went wrong",
-        "retry": "Try again",
-        "welcome": "Welcome",
-        "projectStatus": "Here is the current status of your project.",
-        "project": "Project",
-        "package": "Package",
-        "progress": "Progress",
-        "projectStart": "Project Start",
+        "loading": "Dashboard wird geladen...",
+        "loadError": "Fehler beim Laden",
+        "somethingWrong": "Etwas ist schiefgelaufen",
+        "retry": "Erneut versuchen",
+        "welcome": "Willkommen",
+        "projectStatus": "Hier ist der aktuelle Status deines Projekts.",
+        "project": "Projekt",
+        "package": "Paket",
+        "progress": "Fortschritt",
+        "projectStart": "Projektstart",
         "goLive": "Go-Live",
-        "milestones": "Milestones",
-        "contactPerson": "Contact Person",
-        "timeline": "Timeline",
+        "milestones": "Meilensteine",
+        "contactPerson": "Ansprechpartner",
+        "timeline": "Zeitplan",
         "tabs": {
-          "overview": "Overview",
-          "messages": "Messages",
-          "files": "Files"
+          "overview": "Übersicht",
+          "messages": "Nachrichten",
+          "files": "Dateien"
         },
         "messages": {
-          "title": "Messages",
-          "noMessages": "No messages yet",
-          "placeholder": "Write a message...",
-          "send": "Send"
+          "title": "Nachrichten",
+          "noMessages": "Noch keine Nachrichten",
+          "placeholder": "Nachricht schreiben...",
+          "send": "Senden"
         },
         "files": {
-          "title": "Project Files",
-          "noFiles": "No files yet",
-          "download": "Download"
+          "title": "Projektdateien",
+          "noFiles": "Noch keine Dateien",
+          "download": "Herunterladen"
         },
         "footer": {
-          "backToWebsite": "Back to website",
-          "questions": "Questions?"
+          "backToWebsite": "Zurück zur Webseite",
+          "questions": "Fragen?"
         }
       }
     },
     "tools": {
       "hero": {
-        "badge": "Professional Tools",
+        "badge": "Professionelle Tools",
         "headline": "Tools &",
-        "headlineHighlight": "Models",
-        "description": "For implementation & production. Focus: building blocks, not buzzwords.",
+        "headlineHighlight": "Modelle",
+        "description": "Für Umsetzung & Produktion. Fokus: Bausteine, keine Buzzwords.",
         "stats": {
           "tools": "Tools",
-          "categories": "Categories",
-          "possibilities": "Possibilities"
+          "categories": "Kategorien",
+          "possibilities": "Möglichkeiten"
         }
       },
       "philosophy": {
         "bestTool": {
-          "title": "Best Tool for the Job",
-          "desc": "No tool lock-in. We always choose the best tool for each task."
+          "title": "Das beste Tool für den Job",
+          "desc": "Kein Tool-Lock-in. Wir wählen immer das beste Tool für jede Aufgabe."
         },
         "aiPowered": {
-          "title": "AI-Powered",
-          "desc": "Modern AI tools accelerate development and creation - without compromising quality."
+          "title": "KI-unterstützt",
+          "desc": "Moderne KI-Tools beschleunigen Entwicklung und Erstellung - ohne Qualitätskompromisse."
         },
         "openStandards": {
-          "title": "Open Standards",
-          "desc": "Open formats and standards. Your project stays portable and future-proof."
+          "title": "Offene Standards",
+          "desc": "Offene Formate und Standards. Dein Projekt bleibt portabel und zukunftssicher."
         }
       },
       "categories": {
-        "headline": "Our Tech Stack",
-        "subheadline": "The tools behind our projects - proven and efficient.",
+        "headline": "Unser Tech Stack",
+        "subheadline": "Die Tools hinter unseren Projekten - bewährt und effizient.",
         "ai": {
-          "title": "AI & Development",
-          "description": "Cutting-edge AI tools for efficient development",
+          "title": "KI & Entwicklung",
+          "description": "Modernste KI-Tools für effiziente Entwicklung",
           "tools": {
             "claude": {
               "name": "Claude",
-              "desc": "AI assistant for code & concepts"
+              "desc": "KI-Assistent für Code & Konzepte"
             },
             "chatgpt": {
               "name": "ChatGPT",
-              "desc": "Versatile language processing"
+              "desc": "Vielseitige Sprachverarbeitung"
             },
             "vscode": {
               "name": "VS Code",
-              "desc": "Professional development environment"
+              "desc": "Professionelle Entwicklungsumgebung"
             },
             "github": {
               "name": "GitHub",
-              "desc": "Version control & collaboration"
+              "desc": "Versionskontrolle & Zusammenarbeit"
             }
           }
         },
         "design": {
-          "title": "Design & Media",
-          "description": "Creative tools for visual excellence",
+          "title": "Design & Medien",
+          "description": "Kreative Tools für visuelle Exzellenz",
           "tools": {
             "figma": {
               "name": "Figma",
-              "desc": "UI/UX design & prototyping"
+              "desc": "UI/UX Design & Prototyping"
             },
             "veo3": {
               "name": "Veo 3",
-              "desc": "AI video generation"
+              "desc": "KI-Videogenerierung"
             },
             "blender": {
               "name": "Blender",
-              "desc": "3D modeling & animation"
+              "desc": "3D-Modellierung & Animation"
             },
             "canva": {
               "name": "Canva",
-              "desc": "Quick graphic creation"
+              "desc": "Schnelle Grafikerstellung"
             }
           }
         },
         "automation": {
-          "title": "Workflows & Automation",
-          "description": "Connections that work",
+          "title": "Workflows & Automatisierung",
+          "description": "Verbindungen, die funktionieren",
           "tools": {
             "n8n": {
               "name": "n8n",
-              "desc": "Workflow automation (self-hosted)"
+              "desc": "Workflow-Automatisierung (self-hosted)"
             },
             "make": {
               "name": "Make",
-              "desc": "Visual automation"
+              "desc": "Visuelle Automatisierung"
             },
             "zapier": {
               "name": "Zapier",
-              "desc": "App integrations"
+              "desc": "App-Integrationen"
             },
             "customApis": {
               "name": "Custom APIs",
-              "desc": "Tailored interfaces"
+              "desc": "Maßgeschneiderte Schnittstellen"
             }
           }
         },
         "hosting": {
           "title": "Hosting & Deployment",
-          "description": "Fast, secure, reliable",
+          "description": "Schnell, sicher, zuverlässig",
           "tools": {
             "vercel": {
               "name": "Vercel",
-              "desc": "Frontend deployment"
+              "desc": "Frontend-Deployment"
             },
             "netlify": {
               "name": "Netlify",
-              "desc": "JAMstack hosting"
+              "desc": "JAMstack-Hosting"
             },
             "cloudflare": {
               "name": "Cloudflare",
-              "desc": "CDN & security"
+              "desc": "CDN & Sicherheit"
             },
             "docker": {
               "name": "Docker",
-              "desc": "Container orchestration"
+              "desc": "Container-Orchestrierung"
             }
           }
         },
-        "disclaimer": "Note: Listing describes tools used - no official partnership. Tool selection varies based on project requirements."
+        "disclaimer": "Hinweis: Auflistung beschreibt verwendete Tools - keine offizielle Partnerschaft. Tool-Auswahl variiert je nach Projektanforderungen."
       },
       "cta": {
-        "headline": "Start a project?",
-        "subheadline": "Let's discuss which tools are best suited for your project.",
-        "packagesButton": "Packages",
-        "appointmentButton": "Book Appointment"
+        "headline": "Ein Projekt starten?",
+        "subheadline": "Lass uns besprechen, welche Tools am besten für dein Projekt geeignet sind.",
+        "packagesButton": "Pakete",
+        "appointmentButton": "Termin buchen"
       }
     },
     "checkout": {
       "success": {
-        "loading": "Processing request...",
-        "defaultPackage": "Your selected package",
-        "title": "Thank you for your inquiry!",
-        "description": "We have received your inquiry for {packageName}. Our team will contact you within 24 hours to discuss the next steps.",
-        "whatHappensNow": "What happens now?",
-        "step1": "We review your inquiry and project details",
-        "step2": "We contact you for a free initial consultation",
-        "step3": "After placing the order, you will receive access to the customer portal",
-        "backToHome": "Back to Homepage"
+        "loading": "Anfrage wird verarbeitet...",
+        "defaultPackage": "Dein gewähltes Paket",
+        "title": "Danke für deine Anfrage!",
+        "description": "Wir haben deine Anfrage für {packageName} erhalten. Unser Team wird sich innerhalb von 24 Stunden bei dir melden, um die nächsten Schritte zu besprechen.",
+        "whatHappensNow": "Was passiert jetzt?",
+        "step1": "Wir prüfen deine Anfrage und Projektdetails",
+        "step2": "Wir kontaktieren dich für eine kostenlose Erstberatung",
+        "step3": "Nach Auftragserteilung erhältst du Zugang zum Kundenportal",
+        "backToHome": "Zurück zur Startseite"
       },
       "cancelled": {
-        "title": "Payment cancelled",
-        "description": "No problem! Your payment was not processed and no charges were made. You can start a new attempt at any time.",
-        "backToPackages": "Back to Packages",
-        "preferConversation": "Prefer a conversation first?",
-        "questionsText": "Have questions? Contact us at"
+        "title": "Zahlung abgebrochen",
+        "description": "Kein Problem! Deine Zahlung wurde nicht verarbeitet und es wurden keine Gebühren erhoben. Du kannst jederzeit einen neuen Versuch starten.",
+        "backToPackages": "Zurück zu den Paketen",
+        "preferConversation": "Lieber erst ein Gespräch?",
+        "questionsText": "Fragen? Kontaktiere uns unter"
       }
     },
     "termin": {
-      "badge": "Free Initial Consultation",
-      "title": "Contact &",
-      "titleHighlight": "Appointment",
-      "subtitle": "Short conversation, clear answers - no sales pressure.",
+      "badge": "Kostenlose Erstberatung",
+      "title": "Kontakt &",
+      "titleHighlight": "Termin",
+      "subtitle": "Kurzes Gespräch, klare Antworten - kein Verkaufsdruck.",
       "stats": {
         "responseTime": {
           "value": "24h",
-          "label": "Response Time"
+          "label": "Reaktionszeit"
         },
         "consultation": {
           "value": "30min",
-          "label": "Initial Call"
+          "label": "Erstgespräch"
         },
         "nonBinding": {
           "value": "100%",
-          "label": "Non-binding"
+          "label": "Unverbindlich"
         }
       },
       "form": {
-        "title": "Write a Message",
+        "title": "Nachricht schreiben",
         "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "phone": "Phone",
-        "phonePlaceholder": "+1 ...",
-        "company": "Company",
-        "companyPlaceholder": "Company (optional)",
-        "interest": "Interested in",
-        "interestPlaceholder": "Please select...",
+        "namePlaceholder": "Dein Name",
+        "email": "E-Mail",
+        "emailPlaceholder": "deine@email.com",
+        "phone": "Telefon",
+        "phonePlaceholder": "+49 ...",
+        "company": "Unternehmen",
+        "companyPlaceholder": "Unternehmen (optional)",
+        "interest": "Interesse an",
+        "interestPlaceholder": "Bitte auswählen...",
         "interestOptions": {
-          "onePage": "One Page (from 1,390 EUR)",
-          "business": "Business (6,990 EUR)",
-          "growth": "Growth (from 10,990 EUR)"
+          "onePage": "One Page (ab 1.390 EUR)",
+          "business": "Business (6.990 EUR)",
+          "growth": "Growth (ab 10.990 EUR)"
         },
-        "message": "Message",
-        "messagePlaceholder": "Tell us about your project...",
-        "submit": "Send Message",
-        "sending": "Sending...",
+        "message": "Nachricht",
+        "messagePlaceholder": "Erzähl uns von deinem Projekt...",
+        "submit": "Nachricht senden",
+        "sending": "Wird gesendet...",
         "success": {
-          "title": "Message sent!",
-          "text": "Thank you! We will get back to you within 24 hours.",
-          "newMessage": "New Message"
+          "title": "Nachricht gesendet!",
+          "text": "Danke! Wir melden uns innerhalb von 24 Stunden bei dir.",
+          "newMessage": "Neue Nachricht"
         },
-        "error": "An error occurred",
-        "privacyText": "By submitting, you agree to our",
-        "privacyLink": "Privacy Policy"
+        "error": "Ein Fehler ist aufgetreten",
+        "privacyText": "Mit dem Absenden stimmst du unserer",
+        "privacyLink": "Datenschutzerklärung zu"
       },
       "calendar": {
-        "title": "Book an Appointment Directly",
-        "subtitle": "30 minutes free initial consultation",
-        "button": "Open Calendly"
+        "title": "Direkt einen Termin buchen",
+        "subtitle": "30 Minuten kostenlose Erstberatung",
+        "button": "Calendly öffnen"
       },
       "directContact": {
-        "title": "Direct Contact",
+        "title": "Direkter Kontakt",
         "whatsapp": {
           "label": "WhatsApp",
-          "sublabel": "Quick response"
+          "sublabel": "Schnelle Antwort"
         },
         "email": {
-          "label": "Email",
+          "label": "E-Mail",
           "sublabel": "kontakt@agentflowm.com"
         },
         "phone": {
-          "label": "Phone",
+          "label": "Telefon",
           "sublabel": "+49 179 949 8247"
         }
       },
       "location": {
-        "title": "Location Berlin",
+        "title": "Standort Berlin",
         "address": "Achillesstrasse 69\n13125 Berlin"
       }
     },
     "kontakt": {
-      "redirecting": "Redirecting to appointment page..."
+      "redirecting": "Weiterleitung zur Terminseite..."
     },
     "websiteCheck": {
-      "badge": "Free Analysis",
-      "title": "Website",
+      "badge": "Kostenlose Analyse",
+      "title": "Webseiten",
       "titleHighlight": "Check",
-      "subtitle": "Security, SEO, Accessibility, Performance & Structure - analyzed in seconds.",
+      "subtitle": "Sicherheit, SEO, Barrierefreiheit, Performance & Struktur - in Sekunden analysiert.",
       "stats": {
-        "categories": "Categories",
-        "checks": "Checks",
-        "analysis": "Analysis"
+        "categories": "Kategorien",
+        "checks": "Prüfungen",
+        "analysis": "Analyse"
       },
       "hero": {
         "categories": {
-          "security": "Security",
+          "security": "Sicherheit",
           "seo": "SEO",
-          "accessibility": "Accessibility",
+          "accessibility": "Barrierefreiheit",
           "performance": "Performance",
-          "structure": "Structure"
+          "structure": "Struktur"
         }
       },
       "categories": {
-        "headline": "What we",
-        "headlineHighlight": "analyze",
-        "subheadline": "Comprehensive review of your website in 5 critical areas",
+        "headline": "Was wir",
+        "headlineHighlight": "analysieren",
+        "subheadline": "Umfassende Prüfung deiner Webseite in 5 kritischen Bereichen",
         "security": {
-          "title": "Security",
-          "desc": "HTTPS, Security Headers, SSL Certificate and more",
+          "title": "Sicherheit",
+          "desc": "HTTPS, Security Headers, SSL-Zertifikat und mehr",
           "checks": [
-            "HTTPS active",
+            "HTTPS aktiv",
             "Security Headers",
-            "SSL Validation",
+            "SSL-Validierung",
             "Content Security Policy"
           ]
         },
         "seo": {
           "title": "SEO",
-          "desc": "Meta tags, structure, indexability check",
+          "desc": "Meta-Tags, Struktur, Indexierbarkeit prüfen",
           "checks": [
             "Meta Title & Description",
-            "Heading Structure",
+            "Überschriften-Struktur",
             "Canonical Tags",
             "Robots.txt"
           ]
         },
         "accessibility": {
-          "title": "Accessibility",
-          "desc": "WCAG compliance and accessibility standards",
+          "title": "Barrierefreiheit",
+          "desc": "WCAG-Konformität und Barrierefreiheits-Standards",
           "checks": [
-            "Alt text for images",
-            "Contrast ratio",
+            "Alt-Text für Bilder",
+            "Kontrastverhältnis",
             "ARIA Labels",
-            "Keyboard navigation"
+            "Tastaturnavigation"
           ]
         },
         "performance": {
           "title": "Performance",
-          "desc": "Load time, resources and Core Web Vitals",
+          "desc": "Ladezeit, Ressourcen und Core Web Vitals",
           "checks": [
-            "Load time",
-            "Image optimization",
+            "Ladezeit",
+            "Bildoptimierung",
             "Caching",
-            "Resource size"
+            "Ressourcengröße"
           ]
         },
         "structure": {
-          "title": "Structure",
-          "desc": "HTML validity, semantic structure, links",
+          "title": "Struktur",
+          "desc": "HTML-Validität, semantische Struktur, Links",
           "checks": [
-            "HTML Validation",
-            "Semantics",
-            "Broken Links",
+            "HTML-Validierung",
+            "Semantik",
+            "Kaputte Links",
             "Sitemap"
           ]
         }
       },
       "form": {
-        "headline": "Check",
-        "headlineHighlight": "now",
-        "subheadline": "Enter your URL and get instant results",
-        "urlLabel": "Website URL",
-        "placeholder": "example.com",
-        "submit": "Check website",
-        "loading": "Analyzing...",
-        "disclaimer": "We only analyze publicly visible content. No invasive scans.",
-        "errorDefault": "An error occurred",
-        "errorCheck": "Error checking website"
+        "headline": "Jetzt",
+        "headlineHighlight": "prüfen",
+        "subheadline": "Gib deine URL ein und erhalte sofortige Ergebnisse",
+        "urlLabel": "Webseiten-URL",
+        "placeholder": "beispiel.de",
+        "submit": "Webseite prüfen",
+        "loading": "Wird analysiert...",
+        "disclaimer": "Wir analysieren nur öffentlich sichtbare Inhalte. Keine invasiven Scans.",
+        "errorDefault": "Ein Fehler ist aufgetreten",
+        "errorCheck": "Fehler beim Prüfen der Webseite"
       },
       "results": {
-        "checked": "Checked:",
-        "overall": "Overall",
-        "security": "Security",
+        "checked": "Geprüft:",
+        "overall": "Gesamt",
+        "security": "Sicherheit",
         "seo": "SEO",
         "accessibility": "A11y",
         "performance": "Speed",
-        "structure": "Structure",
-        "metaInfo": "Meta Information",
-        "metaTitle": "Title:",
-        "metaDescription": "Description:",
-        "detailedAnalysis": "Detailed Analysis",
-        "all": "All",
-        "recommendations": "Recommendations",
-        "newCheck": "New Check",
-        "freeConsultation": "Free Consultation"
+        "structure": "Struktur",
+        "metaInfo": "Meta-Informationen",
+        "metaTitle": "Titel:",
+        "metaDescription": "Beschreibung:",
+        "detailedAnalysis": "Detaillierte Analyse",
+        "all": "Alle",
+        "recommendations": "Empfehlungen",
+        "newCheck": "Neuer Check",
+        "freeConsultation": "Kostenlose Beratung"
       },
       "cta": {
-        "headline": "Found problems?",
-        "subheadline": "We help you fix all weaknesses and take your website to the next level.",
-        "primaryButton": "Schedule appointment",
-        "secondaryButton": "Our packages"
+        "headline": "Probleme gefunden?",
+        "subheadline": "Wir helfen dir, alle Schwächen zu beheben und deine Webseite auf das nächste Level zu bringen.",
+        "primaryButton": "Termin vereinbaren",
+        "secondaryButton": "Unsere Pakete"
       }
     },
     "impressum": {
-      "title": "Imprint",
-      "metaTitle": "Imprint - AgentFlowMarketing",
-      "infoTitle": "Information according to Section 5 TMG",
+      "title": "Impressum",
+      "metaTitle": "Impressum - AgentFlowMarketing",
+      "infoTitle": "Angaben gemäß § 5 TMG",
       "company": "AgentFlowMarketing",
       "address": "Achillesstrasse 69",
       "zip": "13125 Berlin",
-      "country": "Germany",
-      "contactTitle": "Contact",
-      "phone": "Phone: +49 179 949 8247",
-      "email": "Email: kontakt@agentflowm.com",
-      "responsibleTitle": "Responsible for content according to Section 55 para. 2 RStV",
+      "country": "Deutschland",
+      "contactTitle": "Kontakt",
+      "phone": "Telefon: +49 179 949 8247",
+      "email": "E-Mail: kontakt@agentflowm.com",
+      "responsibleTitle": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV",
       "responsibleName": "Alex Shaer",
-      "euDisputeTitle": "EU Dispute Resolution",
-      "euDisputeText": "The European Commission provides a platform for online dispute resolution (OS):",
-      "euDisputeNote": "Our email address can be found above in the imprint.",
-      "consumerDisputeTitle": "Consumer Dispute Resolution/Universal Arbitration Board",
-      "consumerDisputeText": "We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board.",
-      "liabilityContentTitle": "Liability for Content",
-      "liabilityContentText": "As a service provider, we are responsible for our own content on these pages according to general laws pursuant to Section 7 para. 1 TMG. However, according to Sections 8 to 10 TMG, we are not obliged as a service provider to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.",
-      "liabilityLinksTitle": "Liability for Links",
-      "liabilityLinksText": "Our offer contains links to external third-party websites, the content of which we have no influence over. Therefore, we cannot assume any liability for this external content. The respective provider or operator of the linked pages is always responsible for the content of the linked pages.",
-      "copyrightTitle": "Copyright",
-      "copyrightText": "The content and works created by the site operators on these pages are subject to German copyright law. Reproduction, editing, distribution and any kind of exploitation outside the limits of copyright require the written consent of the respective author or creator."
+      "euDisputeTitle": "EU-Streitschlichtung",
+      "euDisputeText": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:",
+      "euDisputeNote": "Unsere E-Mail-Adresse finden Sie oben im Impressum.",
+      "consumerDisputeTitle": "Verbraucherstreitbeilegung/Universalschlichtungsstelle",
+      "consumerDisputeText": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+      "liabilityContentTitle": "Haftung für Inhalte",
+      "liabilityContentText": "Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.",
+      "liabilityLinksTitle": "Haftung für Links",
+      "liabilityLinksText": "Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.",
+      "copyrightTitle": "Urheberrecht",
+      "copyrightText": "Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers."
     },
     "datenschutz": {
-      "title": "Privacy Policy",
-      "metaTitle": "Privacy Policy - AgentFlowMarketing",
-      "section1Title": "1. Privacy at a Glance",
-      "generalInfoTitle": "General Information",
-      "generalInfoText": "The following information provides a simple overview of what happens to your personal data when you visit this website. Personal data is any data with which you can be personally identified.",
-      "dataCollectionTitle": "Data Collection on this Website",
-      "dataCollectionQuestion": "Who is responsible for data collection on this website?",
-      "dataCollectionAnswer": "Data processing on this website is carried out by the website operator. You can find their contact details in the imprint of this website.",
+      "title": "Datenschutzerklärung",
+      "metaTitle": "Datenschutz - AgentFlowMarketing",
+      "section1Title": "1. Datenschutz auf einen Blick",
+      "generalInfoTitle": "Allgemeine Hinweise",
+      "generalInfoText": "Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.",
+      "dataCollectionTitle": "Datenerfassung auf dieser Website",
+      "dataCollectionQuestion": "Wer ist verantwortlich für die Datenerfassung auf dieser Website?",
+      "dataCollectionAnswer": "Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Impressum dieser Website entnehmen.",
       "section2Title": "2. Hosting",
-      "hostingIntro": "We host the contents of our website with the following provider:",
-      "externalHostingTitle": "External Hosting",
-      "externalHostingText": "This website is hosted externally. The personal data collected on this website is stored on the host's servers. This may include IP addresses, contact requests, meta and communication data, contract data, contact details, names, website accesses and other data generated via a website.",
-      "section3Title": "3. General Information and Mandatory Information",
-      "privacyTitle": "Data Protection",
-      "privacyText": "The operators of these pages take the protection of your personal data very seriously. We treat your personal data confidentially and in accordance with the statutory data protection regulations and this privacy policy.",
-      "responsiblePartyTitle": "Note on the Responsible Party",
-      "responsiblePartyIntro": "The responsible party for data processing on this website is:",
-      "section4Title": "4. Data Collection on this Website",
-      "contactFormTitle": "Contact Form",
-      "contactFormText": "If you send us inquiries via the contact form, your details from the inquiry form including the contact data you provided there will be stored by us for the purpose of processing the inquiry and in case of follow-up questions.",
-      "inquiryTitle": "Inquiry by Email, Phone or Fax",
-      "inquiryText": "If you contact us by email, telephone or fax, your inquiry including all resulting personal data (name, inquiry) will be stored and processed by us for the purpose of processing your request.",
+      "hostingIntro": "Wir hosten die Inhalte unserer Website bei folgendem Anbieter:",
+      "externalHostingTitle": "Externes Hosting",
+      "externalHostingText": "Diese Website wird extern gehostet. Die personenbezogenen Daten, die auf dieser Website erfasst werden, werden auf den Servern des Hosters gespeichert. Hierbei kann es sich v.a. um IP-Adressen, Kontaktanfragen, Meta- und Kommunikationsdaten, Vertragsdaten, Kontaktdaten, Namen, Websitezugriffe und sonstige Daten, die über eine Website generiert werden, handeln.",
+      "section3Title": "3. Allgemeine Hinweise und Pflichtinformationen",
+      "privacyTitle": "Datenschutz",
+      "privacyText": "Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend den gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.",
+      "responsiblePartyTitle": "Hinweis zur verantwortlichen Stelle",
+      "responsiblePartyIntro": "Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:",
+      "section4Title": "4. Datenerfassung auf dieser Website",
+      "contactFormTitle": "Kontaktformular",
+      "contactFormText": "Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben aus dem Anfrageformular inklusive der von Ihnen dort angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert.",
+      "inquiryTitle": "Anfrage per E-Mail, Telefon oder Fax",
+      "inquiryText": "Wenn Sie uns per E-Mail, Telefon oder Fax kontaktieren, wird Ihre Anfrage inklusive aller daraus hervorgehenden personenbezogenen Daten (Name, Anfrage) zum Zwecke der Bearbeitung Ihres Anliegens bei uns gespeichert und verarbeitet.",
       "section5Title": "5. Newsletter",
-      "newsletterText": "If you wish to receive the newsletter offered on the website, we require an email address from you as well as information that allows us to verify that you are the owner of the email address provided and that you agree to receive the newsletter.",
-      "section6Title": "6. Your Rights",
-      "rightsText": "You have the right at any time to obtain free information about the origin, recipient and purpose of your stored personal data. You also have the right to request the correction or deletion of this data.",
-      "lastUpdated": "Last updated: January 2026"
+      "newsletterText": "Wenn Sie den auf der Website angebotenen Newsletter beziehen möchten, benötigen wir von Ihnen eine E-Mail-Adresse sowie Informationen, welche uns die Überprüfung gestatten, dass Sie der Inhaber der angegebenen E-Mail-Adresse sind und mit dem Empfang des Newsletters einverstanden sind.",
+      "section6Title": "6. Ihre Rechte",
+      "rightsText": "Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten. Sie haben außerdem ein Recht, die Berichtigung oder Löschung dieser Daten zu verlangen.",
+      "lastUpdated": "Zuletzt aktualisiert: Januar 2026"
     },
     "projekte": {
       "hero": {
-        "badge": "Before → After Comparison",
-        "headline": "Real",
-        "headlineHighlight": "Transformations",
-        "description": "Drag the slider and see the difference. From outdated websites to modern, conversion-optimized solutions.",
+        "badge": "Vorher → Nachher Vergleich",
+        "headline": "Echte",
+        "headlineHighlight": "Transformationen",
+        "description": "Ziehe den Schieberegler und sieh den Unterschied. Von veralteten Webseiten zu modernen, conversion-optimierten Lösungen.",
         "stats": {
-          "projects": "Projects",
-          "successful": "Successful",
-          "projectTime": "Project Time"
+          "projects": "Projekte",
+          "successful": "Erfolgreich",
+          "projectTime": "Projektzeit"
         }
       },
       "filters": {
-        "all": "All Projects",
+        "all": "Alle Projekte",
         "onePage": "One-Page",
         "business": "Business",
         "growth": "Growth"
       },
       "tabs": {
-        "overview": "Overview",
-        "solution": "Solution",
-        "results": "Results"
+        "overview": "Übersicht",
+        "solution": "Lösung",
+        "results": "Ergebnisse"
       },
       "labels": {
-        "before": "BEFORE",
-        "after": "AFTER",
-        "completed": "Completed",
-        "challenge": "Challenge",
-        "scope": "Scope"
+        "before": "VORHER",
+        "after": "NACHHER",
+        "completed": "Abgeschlossen",
+        "challenge": "Herausforderung",
+        "scope": "Umfang"
       },
       "industries": {
-        "headline": "Industries We Serve",
-        "subheadline": "Experience from various sectors for your requirements",
+        "headline": "Branchen, die wir bedienen",
+        "subheadline": "Erfahrung aus verschiedenen Sektoren für deine Anforderungen",
         "items": {
-          "automobile": "Automobile",
-          "legal": "Legal & Consulting",
-          "health": "Healthcare",
-          "agencies": "Agencies",
-          "craft": "Skilled Trades",
+          "automobile": "Automobil",
+          "legal": "Recht & Beratung",
+          "health": "Gesundheitswesen",
+          "agencies": "Agenturen",
+          "craft": "Handwerk",
           "coaching": "Coaching",
-          "b2b": "B2B Services",
-          "local": "Local Businesses"
+          "b2b": "B2B-Dienstleistungen",
+          "local": "Lokale Unternehmen"
         }
       },
       "note": {
-        "prefix": "Note:",
-        "text": "The projects shown are representative examples. We are happy to discuss your specific requirements in a personal conversation."
+        "prefix": "Hinweis:",
+        "text": "Die gezeigten Projekte sind repräsentative Beispiele. Wir besprechen deine spezifischen Anforderungen gerne in einem persönlichen Gespräch."
       },
       "cta": {
-        "headline": "Your project could be next",
-        "subheadline": "Let's discuss how we can help you too."
+        "headline": "Dein Projekt könnte das nächste sein",
+        "subheadline": "Lass uns besprechen, wie wir auch dir helfen können."
       },
       "projects": {
         "autohausSchmidt": {
           "title": "Autohaus Schmidt",
-          "category": "Automobile",
-          "subtitle": "Premium car dealership with service booking",
-          "summary": "Modern web presence with integrated service booking system, vehicle gallery and automated lead management.",
-          "challenge": "Outdated website without online booking. Customers called or came by - inefficient for both sides.",
-          "solution": "New website with online appointment booking, vehicle showcase with filter function, and automatic inquiry routing to the right advisor.",
+          "category": "Automobil",
+          "subtitle": "Premium-Autohaus mit Service-Buchung",
+          "summary": "Moderne Webpräsenz mit integriertem Service-Buchungssystem, Fahrzeuggalerie und automatisiertem Lead-Management.",
+          "challenge": "Veraltete Webseite ohne Online-Buchung. Kunden riefen an oder kamen vorbei - ineffizient für beide Seiten.",
+          "solution": "Neue Webseite mit Online-Terminbuchung, Fahrzeug-Showcase mit Filterfunktion und automatische Anfragen-Weiterleitung an den richtigen Berater.",
           "results": {
-            "onlineBookings": "Online Bookings",
-            "inquiries": "Inquiries",
-            "available": "Available"
+            "onlineBookings": "Online-Buchungen",
+            "inquiries": "Anfragen",
+            "available": "Verfügbar"
           },
-          "testimonial": "\"Our customers love the online booking. Less phone time, more consulting time.\"",
+          "testimonial": "\"Unsere Kunden lieben die Online-Buchung. Weniger Telefonzeit, mehr Beratungszeit.\"",
           "scope": [
-            "Website",
-            "Booking System",
-            "Vehicle Gallery",
-            "Lead Routing",
-            "CRM Integration"
+            "Webseite",
+            "Buchungssystem",
+            "Fahrzeuggalerie",
+            "Lead-Routing",
+            "CRM-Integration"
           ]
         },
         "kanzleiMueller": {
-          "title": "Mueller & Partners Law Firm",
-          "category": "Legal & Consulting",
-          "subtitle": "Law firm with client portal",
-          "summary": "Professional law firm website with protected client area, document upload and automated appointment reminders.",
-          "challenge": "Documents were exchanged via email, appointments made by phone. No central overview for clients.",
-          "solution": "Client portal with secure document storage, online appointment booking with calendar sync, automatic reminders.",
+          "title": "Kanzlei Müller & Partner",
+          "category": "Recht & Beratung",
+          "subtitle": "Anwaltskanzlei mit Mandantenportal",
+          "summary": "Professionelle Kanzlei-Webseite mit geschütztem Mandantenbereich, Dokumenten-Upload und automatisierten Terminerinnerungen.",
+          "challenge": "Dokumente wurden per E-Mail ausgetauscht, Termine telefonisch vereinbart. Keine zentrale Übersicht für Mandanten.",
+          "solution": "Mandantenportal mit sicherer Dokumentenablage, Online-Terminbuchung mit Kalender-Sync, automatische Erinnerungen.",
           "results": {
-            "fewerCalls": "Fewer Calls",
-            "documentsDigital": "Documents Digital",
-            "missedAppointments": "Missed Appointments"
+            "fewerCalls": "Weniger Anrufe",
+            "documentsDigital": "Dokumente digital",
+            "missedAppointments": "Verpasste Termine"
           },
-          "testimonial": "\"The portal saves us hours every day. Clients can view everything themselves.\"",
+          "testimonial": "\"Das Portal spart uns täglich Stunden. Mandanten können alles selbst einsehen.\"",
           "scope": [
-            "Website",
-            "Client Portal",
-            "Document System",
-            "Appointment Booking",
-            "Automation"
+            "Webseite",
+            "Mandantenportal",
+            "Dokumentensystem",
+            "Terminbuchung",
+            "Automatisierung"
           ]
         },
         "praxisGesund": {
           "title": "Praxis Gesund",
-          "category": "Healthcare",
-          "subtitle": "Physiotherapy practice with online booking",
-          "summary": "Friendly practice website with therapist introduction, service overview and seamless online appointment booking.",
-          "challenge": "Reception was overwhelmed with appointment requests. Patients couldn't check availability themselves.",
-          "solution": "Online booking calendar with therapist selection, automatic confirmations and reminders, waitlist function.",
+          "category": "Gesundheitswesen",
+          "subtitle": "Physiotherapie-Praxis mit Online-Buchung",
+          "summary": "Freundliche Praxis-Webseite mit Therapeuten-Vorstellung, Leistungsübersicht und nahtloser Online-Terminbuchung.",
+          "challenge": "Empfang war mit Terminanfragen überlastet. Patienten konnten Verfügbarkeit nicht selbst prüfen.",
+          "solution": "Online-Buchungskalender mit Therapeuten-Auswahl, automatische Bestätigungen und Erinnerungen, Wartelisten-Funktion.",
           "results": {
-            "bookedOnline": "Booked Online",
-            "phoneTime": "Phone Time",
-            "appointmentUtilization": "Appointment Utilization"
+            "bookedOnline": "Online gebucht",
+            "phoneTime": "Telefonzeit",
+            "appointmentUtilization": "Termin-Auslastung"
           },
-          "testimonial": "\"The reception can finally focus on patients on site.\"",
+          "testimonial": "\"Der Empfang kann sich endlich auf Patienten vor Ort konzentrieren.\"",
           "scope": [
-            "Website",
-            "Booking Calendar",
-            "Team Page",
-            "Reminders",
-            "Waitlist"
+            "Webseite",
+            "Buchungskalender",
+            "Team-Seite",
+            "Erinnerungen",
+            "Warteliste"
           ]
         },
         "agenturKreativ": {
-          "title": "Kreativ Agency",
+          "title": "Kreativ Agentur",
           "category": "Marketing",
-          "subtitle": "Creative agency with portfolio & workflow",
-          "summary": "Dynamic agency website with impressive portfolio, project request system and internal publishing workflow.",
-          "challenge": "Portfolio was outdated, project inquiries unstructured, content publishing chaotic.",
-          "solution": "Portfolio with project showcase, structured request form with automatic briefing, publishing pipeline for social media.",
+          "subtitle": "Kreativagentur mit Portfolio & Workflow",
+          "summary": "Dynamische Agentur-Webseite mit beeindruckendem Portfolio, Projektanfrage-System und internem Publishing-Workflow.",
+          "challenge": "Portfolio war veraltet, Projektanfragen unstrukturiert, Content-Veröffentlichung chaotisch.",
+          "solution": "Portfolio mit Projekt-Showcase, strukturiertes Anfrageformular mit automatischem Briefing, Publishing-Pipeline für Social Media.",
           "results": {
-            "moreInquiries": "More Inquiries",
-            "contentOutput": "Content Output",
-            "publishingErrors": "Publishing Errors"
+            "moreInquiries": "Mehr Anfragen",
+            "contentOutput": "Content-Output",
+            "publishingErrors": "Publishing-Fehler"
           },
-          "testimonial": "\"Finally we have a process. From briefing to publication - everything flows.\"",
+          "testimonial": "\"Endlich haben wir einen Prozess. Vom Briefing bis zur Veröffentlichung - alles fließt.\"",
           "scope": [
-            "Website",
+            "Webseite",
             "Portfolio",
-            "Request System",
+            "Anfrage-System",
             "Publishing Agent",
             "Social Media"
           ]
         },
         "handwerkMeister": {
-          "title": "Master Electrical Engineering",
-          "category": "Skilled Trades",
-          "subtitle": "Electrical specialist with emergency service",
-          "summary": "Trust-building craftsman website with service overview, emergency button and inquiry management.",
-          "challenge": "No professional online presence. Inquiries were mixed up, emergency service requests were overlooked.",
-          "solution": "Clear website with trust signals, prominent emergency CTA, prioritized inquiry routing by urgency.",
+          "title": "Meister Elektrotechnik",
+          "category": "Handwerk",
+          "subtitle": "Elektrofachbetrieb mit Notdienst",
+          "summary": "Vertrauensbildende Handwerker-Webseite mit Leistungsübersicht, Notfall-Button und Anfragen-Management.",
+          "challenge": "Keine professionelle Online-Präsenz. Anfragen wurden vermischt, Notdienst-Anfragen übersehen.",
+          "solution": "Klare Webseite mit Vertrauenssignalen, prominenter Notfall-CTA, priorisierte Anfragen-Weiterleitung nach Dringlichkeit.",
           "results": {
-            "moreInquiries": "More Inquiries",
-            "responseTime": "Response Time",
-            "emergencyProcessed": "Emergency Processed"
+            "moreInquiries": "Mehr Anfragen",
+            "responseTime": "Reaktionszeit",
+            "emergencyProcessed": "Notfälle bearbeitet"
           },
-          "testimonial": "\"Finally a website that shows what we can do. The inquiries have doubled.\"",
+          "testimonial": "\"Endlich eine Webseite, die zeigt, was wir können. Die Anfragen haben sich verdoppelt.\"",
           "scope": [
-            "Website",
-            "Emergency System",
-            "Inquiry Routing",
-            "Reviews",
-            "Local SEO"
+            "Webseite",
+            "Notfall-System",
+            "Anfragen-Routing",
+            "Bewertungen",
+            "Lokales SEO"
           ]
         },
         "coachErfolg": {
-          "title": "Success Coach Berlin",
+          "title": "Erfolgscoach Berlin",
           "category": "Coaching",
-          "subtitle": "Business coach with booking system",
-          "summary": "Personal coach website with method presentation, package selection and direct calendar booking.",
-          "challenge": "Too much time coordinating appointments. No clear presentation of coaching packages and prices.",
-          "solution": "One-page with storytelling, clear package overview with prices, direct Calendly integration for initial consultations.",
+          "subtitle": "Business-Coach mit Buchungssystem",
+          "summary": "Persönliche Coach-Webseite mit Methoden-Präsentation, Paketauswahl und direkter Kalender-Buchung.",
+          "challenge": "Zu viel Zeit für Terminkoordination. Keine klare Darstellung von Coaching-Paketen und Preisen.",
+          "solution": "One-Page mit Storytelling, klare Paket-Übersicht mit Preisen, direkte Calendly-Integration für Erstgespräche.",
           "results": {
-            "moreBookings": "More Bookings",
-            "appointmentCoordination": "Appointment Coordination",
-            "customerRating": "Customer Rating"
+            "moreBookings": "Mehr Buchungen",
+            "appointmentCoordination": "Terminkoordination",
+            "customerRating": "Kundenbewertung"
           },
-          "testimonial": "\"My prospects now book directly. I can fully focus on my clients.\"",
+          "testimonial": "\"Meine Interessenten buchen jetzt direkt. Ich kann mich voll auf meine Klienten konzentrieren.\"",
           "scope": [
             "One-Page",
-            "Package Overview",
+            "Paket-Übersicht",
             "Calendly",
             "Testimonials",
-            "Blog Integration"
+            "Blog-Integration"
           ]
         }
       }
     },
     "loesung": {
       "hero": {
-        "badge": "System gaps - Friction - Lost inquiries",
-        "headline1": "Your systems are slowing you down.",
-        "headline2": "We turn them into a process that delivers.",
-        "subheadline1": "When inquiries get lost, handovers stall, and tasks are pulled manually, chaos emerges - not growth.",
-        "subheadline2": "We close these gaps with a clear system of website, workflows, and - when needed - web apps/apps. Stable, understandable, expandable.",
+        "badge": "Systemlücken - Reibung - Verlorene Anfragen",
+        "headline1": "Deine Systeme bremsen dich aus.",
+        "headline2": "Wir machen daraus einen Prozess, der liefert.",
+        "subheadline1": "Wenn Anfragen verloren gehen, Übergaben stocken und Aufgaben manuell gezogen werden, entsteht Chaos - kein Wachstum.",
+        "subheadline2": "Wir schließen diese Lücken mit einem klaren System aus Webseite, Workflows und - wenn nötig - Web Apps/Apps. Stabil, verständlich, erweiterbar.",
         "chips": {
-          "seoHighQuality": "High-Quality SEO",
+          "seoHighQuality": "Hochwertiges SEO",
           "liveReadySetup": "Live-ready Setup",
-          "understandable": "Understandable, not complicated",
-          "codeHandover": "Code handover optional"
+          "understandable": "Verständlich, nicht kompliziert",
+          "codeHandover": "Code-Übergabe optional"
         },
-        "ctaPrimary": "Book Appointment",
-        "ctaSecondary": "Free Website Check",
+        "ctaPrimary": "Termin buchen",
+        "ctaSecondary": "Kostenloser Webseiten-Check",
         "trustItems": {
-          "clearSteps": "Clear steps",
-          "cleanHandover": "Clean handover",
-          "ndaPossible": "NDA possible"
+          "clearSteps": "Klare Schritte",
+          "cleanHandover": "Saubere Übergabe",
+          "ndaPossible": "NDA möglich"
         },
         "visualization": {
-          "website": "Website",
+          "website": "Webseite",
           "workflows": "Workflows",
           "apps": "Apps"
         }
       },
       "problem": {
-        "badge": "What's usually missing?",
-        "headline": "Why good offers still",
-        "headlineHighlight": "lose",
-        "subheadline": "The service is often strong - but the process is weak. And that's exactly where inquiries, time, and revenue get lost.",
+        "badge": "Was meist fehlt?",
+        "headline": "Warum gute Angebote trotzdem",
+        "headlineHighlight": "verlieren",
+        "subheadline": "Die Leistung ist oft stark - aber der Prozess ist schwach. Und genau da gehen Anfragen, Zeit und Umsatz verloren.",
         "items": {
           "noGuidance": {
-            "title": "Inquiries without guidance",
-            "desc": "Visitors see content - but no clear next step."
+            "title": "Anfragen ohne Führung",
+            "desc": "Besucher sehen Inhalte - aber keinen klaren nächsten Schritt."
           },
           "handoversStall": {
-            "title": "Handovers that stall",
-            "desc": "Information is scattered, responsibilities unclear, follow-ups cost time."
+            "title": "Übergaben, die stocken",
+            "desc": "Informationen sind verstreut, Verantwortlichkeiten unklar, Nachfassen kostet Zeit."
           },
           "tooMuchManual": {
-            "title": "Too much manual work",
-            "desc": "Posting, following up, sorting, responding: expensive, slow, error-prone."
+            "title": "Zu viel manuelle Arbeit",
+            "desc": "Posten, nachfassen, sortieren, antworten: teuer, langsam, fehleranfällig."
           },
           "noOverview": {
-            "title": "No operational overview",
-            "desc": "Problems only become visible when things are already on fire."
+            "title": "Kein operativer Überblick",
+            "desc": "Probleme werden erst sichtbar, wenn es schon brennt."
           }
         },
-        "bridge": "A system turns stress into",
-        "bridgeHighlight1": "structure",
-        "bridgeAnd": "and structure into",
-        "bridgeHighlight2": "predictable results"
+        "bridge": "Ein System verwandelt Stress in",
+        "bridgeHighlight1": "Struktur",
+        "bridgeAnd": "und Struktur in",
+        "bridgeHighlight2": "planbare Ergebnisse"
       },
       "leistungen": {
-        "badge": "Our Services",
-        "headline": "Services that work together as a",
-        "headlineHighlight": "system",
-        "subheadline": "We don't build \"individual components\". We connect everything so it works in daily operations: clear entry -> clear handovers -> clear results.",
+        "badge": "Unsere Leistungen",
+        "headline": "Leistungen, die als",
+        "headlineHighlight": "System zusammenwirken",
+        "subheadline": "Wir bauen keine \"Einzelkomponenten\". Wir verbinden alles, damit es im Alltag funktioniert: klarer Eingang -> klare Übergaben -> klare Ergebnisse.",
         "items": {
           "website": {
             "number": "1",
-            "title": "Website",
-            "subtitle": "Center & Guidance",
-            "desc": "Your website becomes a clear path: people immediately understand what you offer - and how they should act. No detours, no guessing.",
+            "title": "Webseite",
+            "subtitle": "Zentrum & Führung",
+            "desc": "Deine Webseite wird zum klaren Weg: Menschen verstehen sofort, was du anbietest - und wie sie handeln sollen. Keine Umwege, kein Raten.",
             "bullets": [
-              "Structure & page logic that guides visitors",
-              "Copy that leads to action (contact/appointment/inquiry)",
-              "SEO (high-quality) + performance as standard",
-              "Mobile-first: fast, stable, cleanly built",
-              "Live-ready: technically prepared for visibility & measurability"
+              "Struktur & Seitenlogik, die Besucher führt",
+              "Texte, die zur Aktion führen (Kontakt/Termin/Anfrage)",
+              "SEO (hochwertig) + Performance als Standard",
+              "Mobile-first: schnell, stabil, sauber gebaut",
+              "Live-ready: technisch vorbereitet für Sichtbarkeit & Messbarkeit"
             ]
           },
           "workflows": {
             "number": "2",
             "title": "Workflows",
-            "subtitle": "Processes instead of follow-ups",
-            "desc": "Workflows make recurring steps reliable. They save time, reduce errors, and ensure things don't get stuck.",
+            "subtitle": "Prozesse statt Nachfassen",
+            "desc": "Workflows machen wiederkehrende Schritte zuverlässig. Sie sparen Zeit, reduzieren Fehler und sorgen dafür, dass nichts stecken bleibt.",
             "bullets": [
-              "Inquiry in -> sort -> trigger action",
-              "Publishing flow: Plan -> Review -> Approve -> Publish",
-              "Quality stays consistent: templates & checks instead of gut feeling",
-              "Expandable: additional modules possible anytime"
+              "Anfrage rein -> sortieren -> Aktion auslösen",
+              "Publishing Flow: Planen -> Prüfen -> Freigeben -> Veröffentlichen",
+              "Qualität bleibt konsistent: Templates & Checks statt Bauchgefühl",
+              "Erweiterbar: zusätzliche Module jederzeit möglich"
             ],
-            "note": "Workflows are built to be understood: clear steps, clear states, clear responsibilities."
+            "note": "Workflows sind gebaut, um verstanden zu werden: klare Schritte, klare Zustände, klare Verantwortlichkeiten."
           },
           "apps": {
             "number": "3",
             "title": "Web Apps & Apps",
-            "subtitle": "When you need more than pages",
-            "desc": "If you need logins, portals, dashboards, bookings, or internal tools, we build a real system - cleanly structured and production-ready.",
+            "subtitle": "Wenn du mehr als Seiten brauchst",
+            "desc": "Wenn du Logins, Portale, Dashboards, Buchungen oder interne Tools brauchst, bauen wir ein echtes System - sauber strukturiert und produktionsreif.",
             "bullets": [
-              "User areas & roles (depending on project)",
-              "Portals, bookings, dashboards, internal tools",
-              "Stable architecture, planned for scale",
-              "Handover as code possible (ownership & control)"
+              "Nutzerbereiche & Rollen (projektabhängig)",
+              "Portale, Buchungen, Dashboards, interne Tools",
+              "Stabile Architektur, für Skalierung geplant",
+              "Übergabe als Code möglich (Eigentum & Kontrolle)"
             ],
-            "note": "Apps don't automatically include workflows. Workflows can be added and connected separately."
+            "note": "Apps enthalten nicht automatisch Workflows. Workflows können separat hinzugefügt und verbunden werden."
           }
         }
       },
       "ablauf": {
-        "badge": "How we work",
-        "headline": "A process from start to finish -",
-        "headlineHighlight": "without friction",
-        "subheadline": "To keep things fast, clean, and reliable, we work in a fixed system. You always see where we stand - and what happens next.",
+        "badge": "Wie wir arbeiten",
+        "headline": "Ein Prozess von Anfang bis Ende -",
+        "headlineHighlight": "ohne Reibung",
+        "subheadline": "Um die Dinge schnell, sauber und zuverlässig zu halten, arbeiten wir in einem festen System. Du siehst immer, wo wir stehen - und was als nächstes passiert.",
         "steps": {
           "1": {
             "number": "01",
-            "title": "Analysis",
-            "subtitle": "Understand & Capture",
-            "desc": "Goal, offer, paths, handovers: We find the levers that actually improve inquiries and operations."
+            "title": "Analyse",
+            "subtitle": "Verstehen & Erfassen",
+            "desc": "Ziel, Angebot, Wege, Übergaben: Wir finden die Hebel, die Anfragen und Betrieb wirklich verbessern."
           },
           "2": {
             "number": "02",
-            "title": "Structure",
-            "subtitle": "Plan & Organize",
-            "desc": "Page logic, content, CTAs, user paths - as clean architecture."
+            "title": "Struktur",
+            "subtitle": "Planen & Organisieren",
+            "desc": "Seitenlogik, Inhalte, CTAs, Nutzerwege - als saubere Architektur."
           },
           "3": {
             "number": "03",
-            "title": "Implementation",
-            "subtitle": "Build & Connect",
-            "desc": "We build, test, set up, and connect everything agreed upon - traceable and stable."
+            "title": "Umsetzung",
+            "subtitle": "Bauen & Verbinden",
+            "desc": "Wir bauen, testen, richten ein und verbinden alles Vereinbarte - nachvollziehbar und stabil."
           },
           "4": {
             "number": "04",
-            "title": "Go-live & Handover",
-            "subtitle": "Review & Completion",
-            "desc": "Joint review, go-live, structured handover. After that, the project is complete - additional services only if separately agreed."
+            "title": "Go-live & Übergabe",
+            "subtitle": "Prüfen & Abschluss",
+            "desc": "Gemeinsame Prüfung, Go-live, strukturierte Übergabe. Danach ist das Projekt abgeschlossen - zusätzliche Leistungen nur wenn separat vereinbart."
           }
         },
         "visualization": {
-          "analyse": "Analysis",
-          "struktur": "Structure",
-          "umsetzung": "Implementation",
+          "analyse": "Analyse",
+          "struktur": "Struktur",
+          "umsetzung": "Umsetzung",
           "golive": "Go-live"
         }
       },
       "anbindungen": {
-        "headline": "Connections & Activations",
-        "description": "Some projects need additional activations to run 100% smoothly (e.g., platform approvals, additional channels, extended setups). These points are service-specific depending on scope and calculated on request.",
+        "headline": "Anbindungen & Aktivierungen",
+        "description": "Manche Projekte brauchen zusätzliche Aktivierungen, um 100% reibungslos zu laufen (z.B. Plattform-Freigaben, zusätzliche Kanäle, erweiterte Setups). Diese Punkte sind leistungsspezifisch je nach Umfang und werden auf Anfrage kalkuliert.",
         "items": [
-          "Connections to social media channels / additional platforms",
-          "Additional channel/account setups and approvals",
-          "Extended integrations beyond the standard setup"
+          "Anbindungen an Social-Media-Kanäle / zusätzliche Plattformen",
+          "Zusätzliche Kanal-/Konto-Setups und Freigaben",
+          "Erweiterte Integrationen über das Standard-Setup hinaus"
         ],
-        "note": "You receive a clear estimate upfront. No hidden costs."
+        "note": "Du erhältst vorab eine klare Kalkulation. Keine versteckten Kosten."
       },
       "eigentum": {
-        "headline": "Ownership instead of dependency",
-        "description": "Upon request, we hand over the project as code (repository/project files). This way you own the structure and implementation - and can have it extended flexibly at any time.",
+        "headline": "Eigentum statt Abhängigkeit",
+        "description": "Auf Wunsch übergeben wir das Projekt als Code (Repository/Projektdateien). So besitzt du die Struktur und Umsetzung - und kannst jederzeit flexibel erweitern lassen.",
         "items": [
-          "Maximum control & usage rights (as agreed)",
-          "Faster to extend (modules, areas, functions)",
-          "Independent of individual providers",
-          "Cleanly transferable after project completion"
+          "Maximale Kontrolle & Nutzungsrechte (wie vereinbart)",
+          "Schneller erweiterbar (Module, Bereiche, Funktionen)",
+          "Unabhängig von einzelnen Anbietern",
+          "Sauber übertragbar nach Projektabschluss"
         ],
-        "note": "Handover scope, rights, and content are clearly defined in the offer.",
+        "note": "Übergabeumfang, Rechte und Inhalte sind klar im Angebot definiert.",
         "visualization": {
-          "us": "Us",
-          "you": "You",
+          "us": "Wir",
+          "you": "Du",
           "code100": "100% Code",
-          "control": "Control",
-          "flexible": "Flexible",
-          "independent": "Independent"
+          "control": "Kontrolle",
+          "flexible": "Flexibel",
+          "independent": "Unabhängig"
         }
       },
       "vertraulichkeit": {
-        "headline": "Confidentiality is standard",
-        "description": "Upon request, we sign a confidentiality agreement (NDA) before project start. Concepts, processes, documents, and code are treated confidentially.",
+        "headline": "Vertraulichkeit ist Standard",
+        "description": "Auf Wunsch unterzeichnen wir vor Projektstart eine Vertraulichkeitsvereinbarung (NDA). Konzepte, Prozesse, Dokumente und Code werden vertraulich behandelt.",
         "items": {
-          "noDisclosure": "No disclosure to third parties",
-          "conceptProtection": "Protection of concept & system logic",
-          "writtenAgreement": "Written agreement in offer/contract"
+          "noDisclosure": "Keine Weitergabe an Dritte",
+          "conceptProtection": "Schutz von Konzept & Systemlogik",
+          "writtenAgreement": "Schriftliche Vereinbarung in Angebot/Vertrag"
         }
       },
       "finalCta": {
-        "headline": "Start free. Decide clearly.",
-        "headlineHighlight": "Then act.",
-        "description": "Start with the free website check or book an appointment directly. After that, you'll know in a short time if your website is losing inquiries - and which next step actually makes sense.",
-        "ctaPrimary": "Free Website Check",
-        "ctaSecondary": "Book Appointment"
+        "headline": "Starte kostenlos. Entscheide klar.",
+        "headlineHighlight": "Dann handle.",
+        "description": "Starte mit dem kostenlosen Webseiten-Check oder buche direkt einen Termin. Danach weißt du in kurzer Zeit, ob deine Webseite Anfragen verliert - und welcher nächste Schritt tatsächlich Sinn macht.",
+        "ctaPrimary": "Kostenloser Webseiten-Check",
+        "ctaSecondary": "Termin buchen"
       }
     },
     "workflows": {
       "meta": {
-        "title": "Bot Shop - 100+ Premium Automation Bots | AgentFlowMarketing",
-        "description": "Ready-to-use bots for rent or purchase. Based on 2,061 real n8n workflows. From AI-powered WhatsApp support to complete CRM automation."
+        "title": "Bot Shop - 100+ Premium Automatisierungs-Bots | AgentFlowMarketing",
+        "description": "Sofort einsatzbereit Bots zur Miete oder Kauf. Basierend auf 2.061 echten n8n-Workflows. Von KI-gestütztem WhatsApp-Support bis zur kompletten CRM-Automatisierung."
       },
       "hero": {
-        "badge": "Bot Shop - 2,061 workflows analyzed - {totalBots} Premium Bots",
+        "badge": "Bot Shop - 2.061 Workflows analysiert - {totalBots} Premium Bots",
         "headline1": "{totalBots}+ Premium Bots",
-        "headline2": "for real automation",
-        "subheadline": "Ready-to-use bots for rent or purchase. Based on 2,061 real n8n workflows. From AI-powered WhatsApp support to complete CRM automation.",
+        "headline2": "für echte Automatisierung",
+        "subheadline": "Sofort einsatzbereit Bots zur Miete oder Kauf. Basierend auf 2.061 echten n8n-Workflows. Von KI-gestütztem WhatsApp-Support bis zur kompletten CRM-Automatisierung.",
         "stats": {
           "bots": "Bots",
-          "categories": "Categories",
-          "integrations": "Integrations",
+          "categories": "Kategorien",
+          "integrations": "Integrationen",
           "workflows": "Workflows"
         },
         "cta": {
-          "discover": "Discover all {totalBots} Bots",
-          "consultation": "Free Consultation"
+          "discover": "Alle {totalBots} Bots entdecken",
+          "consultation": "Kostenlose Beratung"
         },
         "trust": {
-          "gdpr": "GDPR compliant",
-          "servers": "German Servers",
-          "instant": "Instantly activatable",
-          "support": "Support included"
+          "gdpr": "DSGVO-konform",
+          "servers": "Deutsche Server",
+          "instant": "Sofort aktivierbar",
+          "support": "Support inklusive"
         },
-        "integrationNote": "Connects with over 187 tools"
+        "integrationNote": "Verbindet sich mit über 187 Tools"
       },
       "howItWorks": {
-        "badge": "This is how easy automation is",
-        "headline": "One bot = one clear job",
-        "subheadline": "In 3 steps from selection to running system",
+        "badge": "So einfach ist Automatisierung",
+        "headline": "Ein Bot = ein klarer Job",
+        "subheadline": "In 3 Schritten von der Auswahl zum laufenden System",
         "steps": {
           "1": {
-            "title": "Choose Bot",
-            "desc": "Browse through 107+ specialized bots. Find the perfect one for your task.",
+            "title": "Bot wählen",
+            "desc": "Stöbere durch 107+ spezialisierte Bots. Finde den perfekten für deine Aufgabe.",
             "details": [
-              "22 Categories",
-              "Search function",
-              "Detail view"
+              "22 Kategorien",
+              "Suchfunktion",
+              "Detailansicht"
             ]
           },
           "2": {
-            "title": "Connect",
-            "desc": "We set up all connections to your tools. You don't need to do anything technical.",
+            "title": "Verbinden",
+            "desc": "Wir richten alle Verbindungen zu deinen Tools ein. Du musst nichts Technisches tun.",
             "details": [
-              "187+ Integrations",
-              "Secure Auth",
+              "187+ Integrationen",
+              "Sichere Auth",
               "No Code"
             ]
           },
           "3": {
-            "title": "Running",
-            "desc": "Your bot works 24/7 automatically. You see all results live in the dashboard.",
+            "title": "Läuft",
+            "desc": "Dein Bot arbeitet automatisch 24/7. Du siehst alle Ergebnisse live im Dashboard.",
             "details": [
-              "24/7 active",
+              "24/7 aktiv",
               "Live Dashboard",
               "Alerts"
             ]
           }
         },
-        "cta": "Choose bot now",
-        "ctaNote": "Free consultation - No obligation"
+        "cta": "Jetzt Bot wählen",
+        "ctaNote": "Kostenlose Beratung - Unverbindlich"
       },
       "pricing": {
-        "badge": "New Year Action: -20% on all bots",
-        "headline": "Transparent Prices",
-        "subheadline": "Rent for flexibility or buy for permanent use",
+        "badge": "Neujahrs-Aktion: -20% auf alle Bots",
+        "headline": "Transparente Preise",
+        "subheadline": "Mieten für Flexibilität oder kaufen für dauerhafte Nutzung",
         "rent": {
-          "title": "RENT",
-          "desc": "Monthly cancellable, including updates & support",
+          "title": "MIETEN",
+          "desc": "Monatlich kündbar, inklusive Updates & Support",
           "tiers": {
             "standard": {
               "name": "Standard Bot",
-              "price": "from 99",
+              "price": "ab 99",
               "original": "119",
-              "desc": "Simple automations"
+              "desc": "Einfache Automatisierungen"
             },
             "pro": {
               "name": "Pro Bot",
-              "price": "from 179",
+              "price": "ab 179",
               "original": "215",
-              "desc": "Multi-integration, complex logic"
+              "desc": "Multi-Integration, komplexe Logik"
             },
             "premium": {
               "name": "Premium Bot",
-              "price": "from 290",
+              "price": "ab 290",
               "original": "349",
-              "desc": "AI features, enterprise-ready"
+              "desc": "KI-Features, Enterprise-ready"
             }
           },
           "perMonth": "/Mo",
-          "instead": "instead of"
+          "instead": "statt"
         },
         "buy": {
-          "title": "BUY",
-          "desc": "One-time payment, your solution for life",
+          "title": "KAUFEN",
+          "desc": "Einmalzahlung, deine Lösung für immer",
           "tiers": {
             "core": {
               "name": "Core Bot",
-              "price": "from 1,290",
-              "original": "1,549",
-              "desc": "Clean integration, one job"
+              "price": "ab 1.290",
+              "original": "1.549",
+              "desc": "Saubere Integration, ein Job"
             },
             "plus": {
               "name": "Plus Bot",
-              "price": "from 1,490",
-              "original": "1,790",
-              "desc": "More logic, more steps"
+              "price": "ab 1.490",
+              "original": "1.790",
+              "desc": "Mehr Logik, mehr Schritte"
             },
             "premium": {
               "name": "Premium Bot",
-              "price": "from 1,790",
-              "original": "2,149",
-              "desc": "Complex workflows"
+              "price": "ab 1.790",
+              "original": "2.149",
+              "desc": "Komplexe Workflows"
             }
           }
         },
         "included": {
-          "setup": "Setup included",
-          "guarantee": "30-day money-back",
-          "support": "German Support",
-          "nohidden": "No hidden costs"
+          "setup": "Setup inklusive",
+          "guarantee": "30-Tage-Geld-zurück",
+          "support": "Deutscher Support",
+          "nohidden": "Keine versteckten Kosten"
         }
       },
       "search": {
-        "placeholder": "Search bot, integration or use case...",
-        "all": "All",
+        "placeholder": "Bot, Integration oder Anwendungsfall suchen...",
+        "all": "Alle",
         "noResults": {
-          "title": "No bots found",
-          "desc": "Try a different search term",
-          "reset": "Reset filter"
+          "title": "Keine Bots gefunden",
+          "desc": "Probiere einen anderen Suchbegriff",
+          "reset": "Filter zurücksetzen"
         }
       },
       "botCard": {
-        "popular": "Popular",
-        "goodFor": "Good for:",
-        "connects": "Connects:",
-        "rent": "Rent",
-        "buy": "Buy",
-        "rentPrice": "Rent:",
-        "buyPrice": "Buy:",
+        "popular": "Beliebt",
+        "goodFor": "Gut für:",
+        "connects": "Verbindet:",
+        "rent": "Mieten",
+        "buy": "Kaufen",
+        "rentPrice": "Miete:",
+        "buyPrice": "Kauf:",
         "perMonth": "/Mo",
-        "oneTime": "one-time",
-        "onRequest": "On Request",
-        "inquire": "Inquire"
+        "oneTime": "einmalig",
+        "onRequest": "Auf Anfrage",
+        "inquire": "Anfragen"
       },
       "categories": {
         "ai-power": {
-          "name": "AI & Intelligence",
-          "description": "OpenAI-powered workflows for intelligent automation"
+          "name": "KI & Intelligenz",
+          "description": "OpenAI-gestützte Workflows für intelligente Automatisierung"
         },
         "telegram-chat": {
           "name": "Telegram & Messenger",
-          "description": "119 analyzed Telegram workflows for chat automation"
+          "description": "119 analysierte Telegram-Workflows für Chat-Automatisierung"
         },
         "google-suite": {
           "name": "Google Workspace",
-          "description": "Gmail, Sheets, Calendar, Drive - all automatically connected"
+          "description": "Gmail, Sheets, Calendar, Drive - alles automatisch verbunden"
         },
         "communication": {
-          "name": "Team Communication",
-          "description": "Slack, Mattermost, Discord - automated messages"
+          "name": "Team-Kommunikation",
+          "description": "Slack, Mattermost, Discord - automatisierte Nachrichten"
         },
         "sales-crm": {
           "name": "Sales & CRM",
-          "description": "HubSpot, Pipedrive, Stripe - automatically qualify leads"
+          "description": "HubSpot, Pipedrive, Stripe - Leads automatisch qualifizieren"
         },
         "social-marketing": {
           "name": "Marketing & Social",
-          "description": "LinkedIn, Twitter, Newsletter - automatically distribute content"
+          "description": "LinkedIn, Twitter, Newsletter - Content automatisch verteilen"
         },
         "ecommerce": {
           "name": "E-Commerce",
-          "description": "Shopify, WooCommerce, Payments - automatically process orders"
+          "description": "Shopify, WooCommerce, Payments - Bestellungen automatisch verarbeiten"
         },
         "scheduling": {
-          "name": "Appointments & Booking",
-          "description": "Calendly, Google Calendar - automatically coordinate appointments"
+          "name": "Termine & Buchung",
+          "description": "Calendly, Google Calendar - Termine automatisch koordinieren"
         },
         "support": {
           "name": "Support & Helpdesk",
-          "description": "Zendesk, Intercom, Email - automate support"
+          "description": "Zendesk, Intercom, E-Mail - Support automatisieren"
         },
         "hr-recruiting": {
           "name": "HR & Recruiting",
-          "description": "Onboarding, Recruiting, Performance - automate HR"
+          "description": "Onboarding, Recruiting, Performance - HR automatisieren"
         },
         "project-management": {
-          "name": "Project Management",
-          "description": "Jira, Asana, Trello, ClickUp - automate projects"
+          "name": "Projektmanagement",
+          "description": "Jira, Asana, Trello, ClickUp - Projekte automatisieren"
         },
         "dev-ops": {
           "name": "DevOps & Code",
-          "description": "GitHub, GitLab, CI/CD - automate development"
+          "description": "GitHub, GitLab, CI/CD - Entwicklung automatisieren"
         },
         "data-sync": {
-          "name": "Data & Integration",
-          "description": "Databases, APIs, Webhooks - keep everything in sync"
+          "name": "Daten & Integration",
+          "description": "Datenbanken, APIs, Webhooks - alles synchron halten"
         },
         "finance": {
-          "name": "Finance & Accounting",
-          "description": "Invoices, Expenses, Reports - automate finances"
+          "name": "Finanzen & Buchhaltung",
+          "description": "Rechnungen, Ausgaben, Reports - Finanzen automatisieren"
         },
         "enterprise": {
           "name": "Enterprise & Custom",
-          "description": "Custom solutions for complex requirements"
+          "description": "Maßgeschneiderte Lösungen für komplexe Anforderungen"
         },
         "no-code-databases": {
-          "name": "No-Code Databases",
-          "description": "Airtable, Notion, Supabase - manage data flexibly"
+          "name": "No-Code Datenbanken",
+          "description": "Airtable, Notion, Supabase - Daten flexibel verwalten"
         },
         "microsoft-enterprise": {
           "name": "Microsoft & Office",
-          "description": "Outlook, Teams, Excel - automate Microsoft 365"
+          "description": "Outlook, Teams, Excel - Microsoft 365 automatisieren"
         },
         "project-tools-extended": {
-          "name": "More PM Tools",
-          "description": "Monday.com, ClickUp, Baserow - alternative PM tools"
+          "name": "Weitere PM Tools",
+          "description": "Monday.com, ClickUp, Baserow - alternative PM-Tools"
         },
         "forms-surveys": {
-          "name": "Surveys & Forms",
-          "description": "Typeform, Jotform, Google Forms - collect and process data"
+          "name": "Umfragen & Formulare",
+          "description": "Typeform, Jotform, Google Forms - Daten sammeln und verarbeiten"
         },
         "sms-telephony": {
-          "name": "SMS & Telephony",
-          "description": "Twilio, SMS, VoIP - automate phone communication"
+          "name": "SMS & Telefonie",
+          "description": "Twilio, SMS, VoIP - Telefon-Kommunikation automatisieren"
         },
         "analytics-reporting": {
           "name": "Analytics & Reporting",
-          "description": "Google Analytics, Dashboards, Reports - visualize data"
+          "description": "Google Analytics, Dashboards, Reports - Daten visualisieren"
         },
         "content-cms": {
           "name": "Content & CMS",
-          "description": "WordPress, Webflow, RSS - automatically manage content"
+          "description": "WordPress, Webflow, RSS - Content automatisch verwalten"
         }
       },
       "categoryLabels": {
@@ -2390,63 +2390,63 @@
         "bots": "Bots"
       },
       "finalCta": {
-        "headline": "Ready for real automation?",
-        "subheadline": "Let us discuss in 15 minutes which bots will save you the most time.",
-        "cta": "Free Initial Consultation",
-        "ctaSecondary": "View all {totalBots} bots"
+        "headline": "Bereit für echte Automatisierung?",
+        "subheadline": "Lass uns in 15 Minuten besprechen, welche Bots dir am meisten Zeit sparen.",
+        "cta": "Kostenloses Erstgespräch",
+        "ctaSecondary": "Alle {totalBots} Bots ansehen"
       },
       "checkout": {
-        "rent": "Rent",
-        "buy": "Buy",
-        "perMonth": "/ Month",
-        "oneTime": "one-time",
+        "rent": "Mieten",
+        "buy": "Kaufen",
+        "perMonth": "/ Monat",
+        "oneTime": "einmalig",
         "form": {
           "name": "Name *",
-          "namePlaceholder": "John Doe",
-          "email": "Email *",
-          "emailPlaceholder": "john@company.com",
-          "phone": "Phone",
-          "phonePlaceholder": "+1 123 456789",
-          "company": "Company",
-          "companyPlaceholder": "Company Inc.",
-          "message": "Message (optional)",
-          "messagePlaceholder": "Special requirements or questions...",
-          "integrations": "Integrations:",
+          "namePlaceholder": "Max Mustermann",
+          "email": "E-Mail *",
+          "emailPlaceholder": "max@firma.de",
+          "phone": "Telefon",
+          "phonePlaceholder": "+49 123 456789",
+          "company": "Unternehmen",
+          "companyPlaceholder": "Firma GmbH",
+          "message": "Nachricht (optional)",
+          "messagePlaceholder": "Besondere Anforderungen oder Fragen...",
+          "integrations": "Integrationen:",
           "submit": {
-            "rent": "Rent Now",
-            "buy": "Buy Now"
+            "rent": "Jetzt mieten",
+            "buy": "Jetzt kaufen"
           },
-          "processing": "Processing...",
-          "note": "After ordering, we will contact you within 24h for setup."
+          "processing": "Wird verarbeitet...",
+          "note": "Nach der Bestellung kontaktieren wir dich innerhalb von 24h für das Setup."
         },
-        "error": "Order failed"
+        "error": "Bestellung fehlgeschlagen"
       },
       "erfolg": {
-        "headline": "Order successful!",
-        "subheadline": "Thank you for your order",
+        "headline": "Bestellung erfolgreich!",
+        "subheadline": "Danke für deine Bestellung",
         "summary": {
           "bot": "Bot",
-          "rent": "Rent",
-          "buy": "Purchase",
-          "price": "Price:"
+          "rent": "Miete",
+          "buy": "Kauf",
+          "price": "Preis:"
         },
         "nextSteps": {
-          "title": "Next Steps",
-          "step1": "You will receive a confirmation email shortly",
-          "step2": "We will contact you within 24h for setup",
-          "step3": "Together we will connect your tools with the bot",
-          "step4": "After setup, your bot runs automatically 24/7"
+          "title": "Nächste Schritte",
+          "step1": "Du erhältst in Kürze eine Bestätigungs-E-Mail",
+          "step2": "Wir kontaktieren dich innerhalb von 24h für das Setup",
+          "step3": "Gemeinsam verbinden wir deine Tools mit dem Bot",
+          "step4": "Nach dem Setup läuft dein Bot automatisch 24/7"
         },
         "support": {
-          "questions": "Questions?",
-          "contactUs": "Contact us anytime at",
-          "orTelegram": "or via Telegram."
+          "questions": "Fragen?",
+          "contactUs": "Kontaktiere uns jederzeit unter",
+          "orTelegram": "oder per Telegram."
         },
         "cta": {
-          "moreBots": "Discover more bots",
-          "home": "To homepage"
+          "moreBots": "Weitere Bots entdecken",
+          "home": "Zur Startseite"
         },
-        "loading": "Loading..."
+        "loading": "Wird geladen..."
       }
     },
     "anmelden": {

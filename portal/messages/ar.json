@@ -1,0 +1,153 @@
+{
+  "common": {
+    "portal": "بوابة العملاء",
+    "welcome": "مرحباً",
+    "dashboard": "لوحة التحكم",
+    "projectOverview": "نظرة عامة على المشروع",
+    "files": "الملفات",
+    "messages": "الرسائل",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "retry": "إعادة المحاولة",
+    "close": "إغلاق",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "download": "تنزيل",
+    "upload": "رفع",
+    "send": "إرسال",
+    "sending": "جاري الإرسال..."
+  },
+  "navigation": {
+    "overview": "نظرة عامة",
+    "messages": "الرسائل",
+    "files": "الملفات",
+    "approvals": "الموافقات",
+    "preview": "معاينة"
+  },
+  "login": {
+    "title": "مرحباً",
+    "subtitle": "أدخل رمز الوصول الخاص بك",
+    "accessCode": "رمز الوصول الخاص بك",
+    "placeholder": "XXXX-0000",
+    "codeHint": "لقد تلقيت الرمز عبر Telegram أو البريد الإلكتروني",
+    "loginButton": "تسجيل الدخول",
+    "checking": "جاري التحقق...",
+    "noCode": "لم تتلق رمزاً؟",
+    "contactUs": "اتصل بنا",
+    "codeInfo": "ستتلقى رمز الوصول بعد تقديم طلب أو طلب شراء.",
+    "invalidCode": "رمز وصول غير صالح",
+    "connectionError": "خطأ في الاتصال"
+  },
+  "dashboard": {
+    "welcomeBack": "مرحباً، {name}!",
+    "projectStatus": "هذه هي الحالة الحالية لمشروعك.",
+    "project": "المشروع",
+    "package": "الباقة",
+    "overallProgress": "التقدم الإجمالي",
+    "projectStart": "بداية المشروع",
+    "plannedGoLive": "الإطلاق المخطط",
+    "milestones": "المراحل",
+    "contactPerson": "جهة الاتصال",
+    "projectTimeline": "الجدول الزمني للمشروع",
+    "completed": "مكتمل",
+    "of": "من",
+    "milestonesCompleted": "المراحل المكتملة"
+  },
+  "messages": {
+    "title": "الرسائل",
+    "count": "{count} رسالة",
+    "noMessages": "لا توجد رسائل بعد",
+    "placeholder": "اكتب رسالة..."
+  },
+  "files": {
+    "title": "ملفات المشروع",
+    "noFiles": "لم يتم رفع أي ملفات بعد",
+    "dragHint": "اسحب الملفات إلى المنطقة أعلاه",
+    "dropHere": "أفلت الملفات هنا",
+    "dragFiles": "اسحب الملفات هنا",
+    "maxSize": "أو انقر على \"رفع\" · بحد أقصى 10 ميجابايت لكل ملف",
+    "uploading": "جاري الرفع...",
+    "all": "الكل",
+    "images": "صور",
+    "documents": "مستندات",
+    "other": "أخرى"
+  },
+  "approvals": {
+    "title": "الموافقات",
+    "pending": "الموافقات المعلقة",
+    "waitingCount": "{count} في انتظار موافقتك",
+    "changesRequested": "التغييرات المطلوبة",
+    "workingOnChanges": "نحن نعمل على طلبات التغيير الخاصة بك",
+    "completedTitle": "مكتمل",
+    "approvalsGiven": "تم منح {count} موافقة",
+    "allDone": "تم الانتهاء!",
+    "noApprovals": "لا توجد موافقات معلقة حالياً. سنخطرك عندما يكون هناك شيء جاهز للموافقة.",
+    "reviewApprove": "مراجعة والموافقة",
+    "approve": "موافقة",
+    "requestChange": "تغيير",
+    "feedbackPlaceholder": "ملاحظاتك (اختياري للموافقة)...",
+    "describeChanges": "يرجى وصف التغييرات المطلوبة.",
+    "yourFeedback": "ملاحظاتك:",
+    "created": "تم الإنشاء:",
+    "approvedOn": "تمت الموافقة في",
+    "design": "التصميم",
+    "content": "المحتوى",
+    "final": "الموافقة النهائية"
+  },
+  "preview": {
+    "title": "معاينة مباشرة",
+    "mobile": "جوال",
+    "tablet": "لوحي",
+    "desktop": "سطح المكتب",
+    "refresh": "تحديث",
+    "fullscreen": "ملء الشاشة",
+    "exitFullscreen": "إنهاء ملء الشاشة",
+    "openNewTab": "فتح في علامة تبويب جديدة"
+  },
+  "profile": {
+    "myProfile": "ملفي الشخصي",
+    "notifications": "الإشعارات",
+    "email": "البريد الإلكتروني",
+    "company": "الشركة",
+    "privateCustomer": "عميل خاص",
+    "currentProject": "المشروع الحالي",
+    "progress": "التقدم"
+  },
+  "quickStart": {
+    "title": "البدء السريع",
+    "subtitle": "الخطوات الأولى",
+    "setup": "الإعداد",
+    "checkStatus": "تحقق من حالة المشروع",
+    "checkStatusDesc": "انظر التقدم الحالي",
+    "sendMessage": "إرسال رسالة",
+    "sendMessageDesc": "اطرح سؤالاً على فريقنا",
+    "uploadFiles": "رفع الملفات",
+    "uploadFilesDesc": "شارك المستندات المهمة",
+    "viewProfile": "عرض الملف الشخصي",
+    "viewProfileDesc": "تحقق من بياناتك",
+    "done": "تم"
+  },
+  "footer": {
+    "questions": "هل لديك أسئلة؟",
+    "copyright": "جميع الحقوق محفوظة."
+  },
+  "status": {
+    "inProgress": "قيد التنفيذ",
+    "completed": "مكتمل",
+    "pending": "معلق",
+    "onHold": "متوقف"
+  },
+  "redirect": {
+    "redirecting": "جاري التحويل..."
+  },
+  "error": {
+    "loadingError": "خطأ في التحميل",
+    "somethingWentWrong": "حدث خطأ ما",
+    "couldNotLoad": "تعذر تحميل البيانات",
+    "dashboardLoading": "جاري تحميل لوحة التحكم..."
+  }
+}
