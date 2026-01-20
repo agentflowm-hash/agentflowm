@@ -1,51 +1,65 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
-const pakete = [
-  {
-    name: "LAUNCH",
-    subtitle: "3 Pages",
-    price: "5.390",
-    desc: "Ein sauberer Start, der Leads nicht verliert.",
-    features: [
-      "Landingpage + 2 Unterseiten",
-      "SEO & Performance",
-      "Kontakt- & Terminfluss",
-      "Admin-Portal (Basis)",
-    ],
-    color: "#06b6d4",
-  },
-  {
-    name: "BUSINESS",
-    subtitle: "9 Pages + Workflow",
-    price: "11.990",
-    desc: "Für Unternehmen mit echten Prozessen.",
-    features: [
-      "Bis zu 9 Seiten",
-      "Publishing-Workflow",
-      "Admin-Portal (erweitert)",
-      "Mitarbeiter- & Kundenportal",
-    ],
-    color: "#FC682C",
-    popular: true,
-  },
-  {
-    name: "KONFIGURATOR",
-    subtitle: "Custom",
-    price: "Anfrage",
-    desc: "Wenn es größer sein soll.",
-    features: [
-      "Individuelle Module",
-      "Enterprise Features",
-      "Dedizierter Support",
-    ],
-    color: "#a855f7",
-  },
-];
+const packageColors = {
+  launch: "#06b6d4",
+  business: "#FC682C",
+  configurator: "#a855f7",
+};
 
 export function PaketeSection() {
+  const t = useTranslations("packages");
+
+  const pakete = [
+    {
+      key: "launch",
+      name: t("items.launch.name"),
+      subtitle: t("items.launch.subtitle"),
+      price: t("items.launch.price"),
+      desc: t("items.launch.desc"),
+      features: [
+        t("items.launch.features.0"),
+        t("items.launch.features.1"),
+        t("items.launch.features.2"),
+        t("items.launch.features.3"),
+      ],
+      color: packageColors.launch,
+      popular: false,
+    },
+    {
+      key: "business",
+      name: t("items.business.name"),
+      subtitle: t("items.business.subtitle"),
+      price: t("items.business.price"),
+      desc: t("items.business.desc"),
+      features: [
+        t("items.business.features.0"),
+        t("items.business.features.1"),
+        t("items.business.features.2"),
+        t("items.business.features.3"),
+      ],
+      color: packageColors.business,
+      popular: true,
+    },
+    {
+      key: "configurator",
+      name: t("items.configurator.name"),
+      subtitle: t("items.configurator.subtitle"),
+      price: t("items.configurator.price"),
+      desc: t("items.configurator.desc"),
+      features: [
+        t("items.configurator.features.0"),
+        t("items.configurator.features.1"),
+        t("items.configurator.features.2"),
+      ],
+      color: packageColors.configurator,
+      popular: false,
+    },
+  ];
+
   return (
     <section className="py-10 sm:py-12 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FC682C]/3 to-transparent" />
@@ -59,11 +73,11 @@ export function PaketeSection() {
           viewport={{ once: true }}
         >
           <span className="text-sm text-[#FC682C] font-medium uppercase tracking-wider">
-            Pakete
+            {t("badge")}
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold mt-3 mb-2">
-            Sofort starten –{" "}
-            <span className="text-[#FC682C]">später wachsen</span>
+            {t("headline")}{" "}
+            <span className="text-[#FC682C]">{t("headlineHighlight")}</span>
           </h2>
         </motion.div>
 
@@ -71,7 +85,7 @@ export function PaketeSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-4xl mx-auto">
           {pakete.map((paket, i) => (
             <motion.div
-              key={paket.name}
+              key={paket.key}
               className={`relative p-5 rounded-xl border ${
                 paket.popular
                   ? "bg-gradient-to-br from-[#FC682C]/10 to-[#FFB347]/5 border-[#FC682C]/30"
@@ -85,7 +99,7 @@ export function PaketeSection() {
               {/* Popular badge */}
               {paket.popular && (
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#FC682C] text-white text-[10px] font-semibold">
-                  Beliebt
+                  {t("popular")}
                 </div>
               )}
 
@@ -105,7 +119,7 @@ export function PaketeSection() {
                 <span className="text-2xl font-bold text-white">
                   {paket.price}
                 </span>
-                {paket.price !== "Anfrage" && (
+                {paket.price !== t("items.configurator.price") && (
                   <span className="text-sm text-white/60 ml-1">€</span>
                 )}
               </div>
@@ -135,7 +149,7 @@ export function PaketeSection() {
                     : "border border-white/20 text-white hover:bg-white/5"
                 }`}
               >
-                Anfragen
+                {t("inquire")}
               </Link>
             </motion.div>
           ))}

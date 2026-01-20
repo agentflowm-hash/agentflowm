@@ -65,120 +65,155 @@
     }
   },
   "impact": {
-    "badge": "The Impact",
-    "headline": "What it",
-    "headlineHighlight": "actually costs",
-    "subheadline": "Every day without clear systems costs real money.",
-    "revenue": "Lost Revenue",
-    "time": "Lost Time",
-    "customers": "Lost Customers",
-    "motivation": "Lost Motivation"
+    "badge": "Impact",
+    "headline": "What these gaps",
+    "headlineHighlight": "actually cost",
+    "subheadline": "Every gap in the system means lost time, missed opportunities, and unnecessary stress.",
+    "items": [
+      "fewer inquiries because visitors aren't guided",
+      "more stress because everything is handled 'manually'",
+      "longer response times because handovers stall",
+      "errors because standards are missing",
+      "standstill because nobody has the overview"
+    ],
+    "keyStatement": "A good offer doesn't sell",
+    "keyStatementHighlight": "if the system behind it breaks."
   },
   "audience": {
-    "badge": "Target Group",
-    "headline": "Is this",
-    "headlineHighlight": "for you?",
-    "ideal": "Ideal for:",
+    "badge": "Target Audience",
+    "headline": "For whom this",
+    "headlineHighlight": "works immediately",
+    "subheadline": "For everyone who wants to grow - and notices it's not about effort, but about structure.",
     "items": {
-      "agencies": "Agencies & Service Providers",
-      "coaches": "Coaches & Consultants",
-      "startups": "Startups & Solo Founders",
-      "businesses": "Small Businesses"
+      "freelancers": {
+        "title": "Freelancers",
+        "desc": "Professional start without chaos"
+      },
+      "sme": {
+        "title": "SMEs",
+        "desc": "Clear processes, less friction"
+      },
+      "teams": {
+        "title": "Teams",
+        "desc": "Decide faster, handover cleaner"
+      }
     }
   },
   "solution": {
     "badge": "The Solution",
-    "headline": "How we",
-    "headlineHighlight": "close gaps",
-    "subheadline": "We build systems that work - not just pages that look good.",
-    "pillars": {
+    "headline": "AgentFlow closes",
+    "headlineHighlight": "system gaps",
+    "subheadline": "We don't build a 'project'. We build a system: convincing outside, stable inside.",
+    "blocks": {
       "website": {
-        "title": "Website/App",
-        "desc": "Your digital headquarters with clear paths"
+        "title": "Website / Web-App / App",
+        "subtitle": "External guidance",
+        "desc": "Visitors instantly understand: What's the offer? What's the next step?",
+        "bullets": ["Clear structure & user guidance", "High-quality SEO & performance", "Contact & appointment flow clean"]
       },
       "workflows": {
-        "title": "Workflows",
-        "desc": "Automation that handles the work for you"
+        "title": "Agent Workflows",
+        "subtitle": "Automatic work",
+        "desc": "Recurring tasks run automatically: reliable, repeatable.",
+        "bullets": ["Standards instead of chaos", "Sorting & clear steps", "Expandable via add-ons"]
       },
-      "integrations": {
-        "title": "Integrations",
-        "desc": "All your tools connected seamlessly"
+      "leadflow": {
+        "title": "Lead Flow",
+        "subtitle": "Interest → Conversations",
+        "desc": "Inquiries are captured and followed up systematically.",
+        "bullets": ["Entry + sorting", "Follow-up as process", "Handovers documented"]
       }
     }
   },
   "process": {
     "badge": "Process",
-    "headline": "How we",
-    "headlineHighlight": "work",
+    "headline": "5 Steps",
+    "headlineHighlight": "– without standstill",
+    "subheadline": "Clear steps, immediately actionable. No endless loops.",
+    "note": "Fast implementation without downtime – response windows are defined.",
     "steps": {
-      "analysis": {
-        "title": "Analysis",
-        "desc": "We understand your current situation"
-      },
-      "concept": {
-        "title": "Concept",
-        "desc": "We design the solution"
-      },
-      "implementation": {
-        "title": "Implementation",
-        "desc": "We build and test"
-      },
-      "handover": {
-        "title": "Handover",
-        "desc": "We hand over and train"
-      }
+      "1": { "title": "Clarity", "desc": "Goals & priorities" },
+      "2": { "title": "Structure", "desc": "Paths & portals" },
+      "3": { "title": "Implementation", "desc": "Design & build" },
+      "4": { "title": "Test", "desc": "Stable & clean" },
+      "5": { "title": "Launch", "desc": "Live & handover" }
     }
   },
   "packages": {
     "badge": "Packages",
-    "headline": "Choose your",
-    "headlineHighlight": "package",
-    "subheadline": "Clear prices. Clear scope. No surprises.",
-    "cta": "View All Packages",
-    "starter": {
-      "name": "Starter",
-      "desc": "For those just getting started"
-    },
-    "professional": {
-      "name": "Professional",
-      "desc": "For growing businesses"
-    },
-    "enterprise": {
-      "name": "Enterprise",
-      "desc": "For established companies"
+    "headline": "Start now –",
+    "headlineHighlight": "grow later",
+    "popular": "Popular",
+    "inquire": "Inquire",
+    "items": {
+      "launch": {
+        "name": "LAUNCH",
+        "subtitle": "3 Pages",
+        "price": "5,390",
+        "desc": "A clean start that doesn't lose leads.",
+        "features": ["Landing page + 2 subpages", "SEO & performance", "Contact & appointment flow", "Admin portal (basic)"]
+      },
+      "business": {
+        "name": "BUSINESS",
+        "subtitle": "9 Pages + Workflow",
+        "price": "11,990",
+        "desc": "For companies with real processes.",
+        "features": ["Up to 9 pages", "Publishing workflow", "Admin portal (extended)", "Employee & customer portal"]
+      },
+      "configurator": {
+        "name": "CONFIGURATOR",
+        "subtitle": "Custom",
+        "price": "On request",
+        "desc": "When it needs to be bigger.",
+        "features": ["Individual modules", "Enterprise features", "Dedicated support"]
+      }
     }
   },
   "webapps": {
-    "badge": "Web Apps",
-    "headline": "Customer portals &",
-    "headlineHighlight": "internal tools",
-    "subheadline": "More than just a website - real applications for your business.",
+    "badge": "Extended",
+    "headline": "Web Apps &",
+    "headlineHighlight": "Mobile Apps",
+    "subheadline": "When it needs to be more than a website",
+    "popular": "Popular",
+    "inquire": "Inquire",
+    "priceNote": "All prices excl. VAT",
     "items": {
-      "portals": "Customer Portals",
-      "dashboards": "Dashboards",
-      "booking": "Booking Systems",
-      "internal": "Internal Tools"
+      "webapp": {
+        "title": "Web App",
+        "price": "26,990",
+        "desc": "Complex browser applications",
+        "features": ["Login & dashboard", "Workflow automation", "API integrations"]
+      },
+      "mobile": {
+        "title": "Mobile App",
+        "price": "51,490",
+        "desc": "Native apps for iOS & Android",
+        "features": ["Native performance", "Push notifications", "Offline mode"]
+      },
+      "enterprise": {
+        "title": "Enterprise",
+        "price": "On request",
+        "desc": "Custom solutions",
+        "features": ["Individual architecture", "Scalable", "SLA support"]
+      }
     }
   },
   "free": {
-    "badge": "Free",
-    "headline": "Free",
-    "headlineHighlight": "Website Check",
-    "subheadline": "Get a detailed analysis of your current website in just 2 minutes.",
-    "cta": "Start Free Check",
-    "features": {
-      "performance": "Performance Analysis",
-      "seo": "SEO Check",
-      "mobile": "Mobile Optimization",
-      "security": "Security Review"
-    }
+    "badge": "100% Free",
+    "headline": "Website Check",
+    "subheadline": "Analyzed in seconds. See where your website stands.",
+    "benefits": ["Instant results", "Action recommendations", "No registration"],
+    "cta": "Check now",
+    "checkpoints": ["Security", "Performance", "SEO", "Accessibility", "Structure"]
   },
   "finalCta": {
-    "headline": "Ready to close the",
+    "badge": "The First Step",
+    "headline": "Want to close the",
     "headlineHighlight": "gaps?",
-    "subheadline": "Book a free consultation and let's discuss your situation.",
-    "ctaPrimary": "Book Free Consultation",
-    "ctaSecondary": "Or start with Website Check"
+    "subheadline": "Systems that work. Leads that flow. Results that become predictable.",
+    "ctaPrimary": "Book appointment",
+    "ctaSecondary": "Website Check",
+    "trust": ["Non-binding", "Free initial consultation", "Response within 24h"]
   },
   "footer": {
     "company": "AgentFlowMarketing",

@@ -1,17 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-
-const impacts = [
-  { text: "weniger Anfragen, weil Besucher nicht geführt werden", value: -34 },
-  {
-    text: 'mehr Stress, weil alles "manuell" geregelt werden muss',
-    value: -28,
-  },
-  { text: "längere Reaktionszeiten, weil Übergaben stocken", value: -45 },
-  { text: "Fehler, weil Standards fehlen", value: -23 },
-  { text: "Stillstand, weil niemand den Überblick hat", value: -51 },
-];
+import { useTranslations } from "next-intl";
 
 // Responsive Dashboard Visualisierung
 function ImpactVisualization() {
@@ -185,6 +175,16 @@ function ImpactVisualization() {
 }
 
 export function AuswirkungSection() {
+  const t = useTranslations("impact");
+
+  const impacts = [
+    t("items.0"),
+    t("items.1"),
+    t("items.2"),
+    t("items.3"),
+    t("items.4"),
+  ];
+
   return (
     <section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6">
@@ -201,15 +201,14 @@ export function AuswirkungSection() {
               transition={{ duration: 0.6 }}
             >
               <span className="text-sm text-red-400 font-medium uppercase tracking-wider">
-                Auswirkung
+                {t("badge")}
               </span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mt-3 mb-4 text-white">
-                Was diese Lücken{" "}
-                <span className="text-red-500">wirklich kosten</span>
+                {t("headline")}{" "}
+                <span className="text-red-500">{t("headlineHighlight")}</span>
               </h2>
               <p className="text-base sm:text-lg text-white/80 max-w-xl mx-auto lg:mx-0">
-                Jede Lücke im System bedeutet verlorene Zeit, verpasste Chancen
-                und unnötigen Stress.
+                {t("subheadline")}
               </p>
             </motion.div>
 
@@ -251,7 +250,7 @@ export function AuswirkungSection() {
                   </svg>
                 </div>
                 <p className="text-sm sm:text-base text-white/80">
-                  {impact.text}
+                  {impact}
                 </p>
               </motion.div>
             ))}
@@ -266,9 +265,9 @@ export function AuswirkungSection() {
           >
             <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-red-500/15 to-orange-500/5 border border-red-500/30">
               <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-white">
-                Ein gutes Angebot verkauft sich nicht,{" "}
+                {t("keyStatement")}{" "}
                 <span className="text-[#FC682C]">
-                  wenn das System dahinter bricht.
+                  {t("keyStatementHighlight")}
                 </span>
               </p>
             </div>

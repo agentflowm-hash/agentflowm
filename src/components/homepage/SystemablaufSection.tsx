@@ -1,21 +1,46 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
-const steps = [
-  {
-    number: "1",
-    title: "Klarheit",
-    desc: "Ziel & Prioritäten",
-    color: "#FC682C",
-  },
-  { number: "2", title: "Struktur", desc: "Wege & Portale", color: "#FFB347" },
-  { number: "3", title: "Umsetzung", desc: "Design & Build", color: "#06b6d4" },
-  { number: "4", title: "Test", desc: "Stabil & sauber", color: "#22c55e" },
-  { number: "5", title: "Launch", desc: "Live & Übergabe", color: "#a855f7" },
-];
+const stepColors = ["#FC682C", "#FFB347", "#06b6d4", "#22c55e", "#a855f7"];
 
 export function SystemablaufSection() {
+  const t = useTranslations("process");
+
+  const steps = [
+    {
+      number: "1",
+      title: t("steps.1.title"),
+      desc: t("steps.1.desc"),
+      color: stepColors[0],
+    },
+    {
+      number: "2",
+      title: t("steps.2.title"),
+      desc: t("steps.2.desc"),
+      color: stepColors[1],
+    },
+    {
+      number: "3",
+      title: t("steps.3.title"),
+      desc: t("steps.3.desc"),
+      color: stepColors[2],
+    },
+    {
+      number: "4",
+      title: t("steps.4.title"),
+      desc: t("steps.4.desc"),
+      color: stepColors[3],
+    },
+    {
+      number: "5",
+      title: t("steps.5.title"),
+      desc: t("steps.5.desc"),
+      color: stepColors[4],
+    },
+  ];
+
   return (
     <section className="py-10 sm:py-12 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6">
@@ -27,13 +52,13 @@ export function SystemablaufSection() {
           viewport={{ once: true }}
         >
           <span className="text-sm text-[#FC682C] font-medium uppercase tracking-wider">
-            Ablauf
+            {t("badge")}
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold mt-3 mb-3">
-            <span className="text-[#FC682C]">5 Schritte</span> – ohne Stillstand
+            <span className="text-[#FC682C]">{t("headline")}</span> {t("headlineHighlight")}
           </h2>
           <p className="text-base text-white/80 max-w-lg mx-auto">
-            Klare Schritte, sofort handelbar. Keine endlosen Schleifen.
+            {t("subheadline")}
           </p>
         </motion.div>
 
@@ -128,7 +153,7 @@ export function SystemablaufSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
         >
-          Schnelle Umsetzung ohne Leerlauf – Reaktionsfenster werden definiert.
+          {t("note")}
         </motion.p>
       </div>
     </section>

@@ -1,34 +1,60 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
-const products = [
-  {
-    title: "Web-App",
-    price: "26.990",
-    desc: "Komplexe Anwendungen im Browser",
-    features: ["Login & Dashboard", "Workflow-Automation", "API-Integrationen"],
-    color: "#3b82f6",
-  },
-  {
-    title: "Mobile App",
-    price: "51.490",
-    desc: "Native Apps für iOS & Android",
-    features: ["Native Performance", "Push-Notifications", "Offline-Modus"],
-    color: "#a855f7",
-    popular: true,
-  },
-  {
-    title: "Enterprise",
-    price: "Anfrage",
-    desc: "Maßgeschneiderte Lösungen",
-    features: ["Individuelle Architektur", "Skalierbar", "SLA-Support"],
-    color: "#f59e0b",
-  },
-];
+const productColors = {
+  webapp: "#3b82f6",
+  mobile: "#a855f7",
+  enterprise: "#f59e0b",
+};
 
 export function WebAppsSection() {
+  const t = useTranslations("webapps");
+
+  const products = [
+    {
+      key: "webapp",
+      title: t("items.webapp.title"),
+      price: t("items.webapp.price"),
+      desc: t("items.webapp.desc"),
+      features: [
+        t("items.webapp.features.0"),
+        t("items.webapp.features.1"),
+        t("items.webapp.features.2"),
+      ],
+      color: productColors.webapp,
+      popular: false,
+    },
+    {
+      key: "mobile",
+      title: t("items.mobile.title"),
+      price: t("items.mobile.price"),
+      desc: t("items.mobile.desc"),
+      features: [
+        t("items.mobile.features.0"),
+        t("items.mobile.features.1"),
+        t("items.mobile.features.2"),
+      ],
+      color: productColors.mobile,
+      popular: true,
+    },
+    {
+      key: "enterprise",
+      title: t("items.enterprise.title"),
+      price: t("items.enterprise.price"),
+      desc: t("items.enterprise.desc"),
+      features: [
+        t("items.enterprise.features.0"),
+        t("items.enterprise.features.1"),
+        t("items.enterprise.features.2"),
+      ],
+      color: productColors.enterprise,
+      popular: false,
+    },
+  ];
+
   return (
     <section className="py-10 sm:py-12 relative overflow-hidden">
       <div className="absolute inset-0">
@@ -44,13 +70,13 @@ export function WebAppsSection() {
           viewport={{ once: true }}
         >
           <span className="text-sm text-purple-400 font-medium uppercase tracking-wider">
-            Erweitert
+            {t("badge")}
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold mt-3 mb-2">
-            Web-Apps & <span className="text-purple-400">Mobile Apps</span>
+            {t("headline")} <span className="text-purple-400">{t("headlineHighlight")}</span>
           </h2>
           <p className="text-base text-white/80 mt-2">
-            Wenn es mehr als eine Website sein soll
+            {t("subheadline")}
           </p>
         </motion.div>
 
@@ -58,7 +84,7 @@ export function WebAppsSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-4xl mx-auto">
           {products.map((product, index) => (
             <motion.div
-              key={product.title}
+              key={product.key}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -71,7 +97,7 @@ export function WebAppsSection() {
             >
               {product.popular && (
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-purple-500 text-white text-[10px] font-semibold">
-                  Beliebt
+                  {t("popular")}
                 </div>
               )}
 
@@ -86,7 +112,7 @@ export function WebAppsSection() {
                 <span className="text-2xl font-bold text-white">
                   {product.price}
                 </span>
-                {product.price !== "Anfrage" && (
+                {product.price !== t("items.enterprise.price") && (
                   <span className="text-sm text-white/60 ml-1">€</span>
                 )}
               </div>
@@ -117,7 +143,7 @@ export function WebAppsSection() {
                     : "border border-white/20 text-white hover:bg-white/5"
                 }`}
               >
-                Anfragen
+                {t("inquire")}
               </Link>
             </motion.div>
           ))}
@@ -129,7 +155,7 @@ export function WebAppsSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
         >
-          Alle Preise zzgl. MwSt.
+          {t("priceNote")}
         </motion.p>
       </div>
     </section>

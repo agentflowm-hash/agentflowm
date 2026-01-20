@@ -1,48 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
-const bausteine = [
-  {
-    number: "1",
-    title: "Website / Web-App / App",
-    subtitle: "Führung nach außen",
-    desc: "Besucher verstehen sofort: Was ist das Angebot? Was ist der nächste Schritt?",
-    bullets: [
-      "Klare Struktur & Nutzerführung",
-      "High-Quality SEO & Performance",
-      "Kontakt- & Terminfluss sauber",
-    ],
-    color: "#06b6d4",
-  },
-  {
-    number: "2",
-    title: "Agenten-Workflows",
-    subtitle: "Automatische Arbeit",
-    desc: "Wiederkehrende Aufgaben laufen automatisch: zuverlässig, wiederholbar.",
-    bullets: [
-      "Standards statt Chaos",
-      "Sortierung & klare Schritte",
-      "Erweiterbar über Add-ons",
-    ],
-    color: "#FFB347",
-  },
-  {
-    number: "3",
-    title: "Lead-Fluss",
-    subtitle: "Interesse → Gespräche",
-    desc: "Anfragen werden strukturiert erfasst und weitergeführt.",
-    bullets: [
-      "Eingang + Sortierung",
-      "Follow-up als Prozess",
-      "Übergaben dokumentiert",
-    ],
-    color: "#22c55e",
-  },
-];
+const blockColors = {
+  website: "#06b6d4",
+  workflows: "#FFB347",
+  leadflow: "#22c55e",
+};
 
 // Responsive System-Integration Visualisierung
-function LoesungVisualization() {
+function LoesungVisualization({ bausteine }: { bausteine: { number: string; title: string; subtitle: string; desc: string; bullets: string[]; color: string }[] }) {
   return (
     <div className="relative w-full h-[260px] sm:h-[300px] lg:h-[360px] flex items-center justify-center">
       {/* Background Glows */}
@@ -282,6 +250,47 @@ function LoesungVisualization() {
 }
 
 export function LoesungSection() {
+  const t = useTranslations("solution");
+
+  const bausteine = [
+    {
+      number: "1",
+      title: t("blocks.website.title"),
+      subtitle: t("blocks.website.subtitle"),
+      desc: t("blocks.website.desc"),
+      bullets: [
+        t("blocks.website.bullets.0"),
+        t("blocks.website.bullets.1"),
+        t("blocks.website.bullets.2"),
+      ],
+      color: blockColors.website,
+    },
+    {
+      number: "2",
+      title: t("blocks.workflows.title"),
+      subtitle: t("blocks.workflows.subtitle"),
+      desc: t("blocks.workflows.desc"),
+      bullets: [
+        t("blocks.workflows.bullets.0"),
+        t("blocks.workflows.bullets.1"),
+        t("blocks.workflows.bullets.2"),
+      ],
+      color: blockColors.workflows,
+    },
+    {
+      number: "3",
+      title: t("blocks.leadflow.title"),
+      subtitle: t("blocks.leadflow.subtitle"),
+      desc: t("blocks.leadflow.desc"),
+      bullets: [
+        t("blocks.leadflow.bullets.0"),
+        t("blocks.leadflow.bullets.1"),
+        t("blocks.leadflow.bullets.2"),
+      ],
+      color: blockColors.leadflow,
+    },
+  ];
+
   return (
     <section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
       {/* Background */}
@@ -300,7 +309,7 @@ export function LoesungSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <LoesungVisualization />
+              <LoesungVisualization bausteine={bausteine} />
             </motion.div>
 
             {/* Text Content - Rechts auf Desktop, oben auf Mobile */}
@@ -312,15 +321,14 @@ export function LoesungSection() {
               transition={{ duration: 0.6 }}
             >
               <span className="text-sm text-[#FC682C] font-medium uppercase tracking-wider">
-                Die Lösung
+                {t("badge")}
               </span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mt-3 mb-4 text-white">
-                <span className="text-[#FC682C]">AgentFlow</span> schließt
-                Systemlücken
+                <span className="text-[#FC682C]">{t("headline")}</span>{" "}
+                {t("headlineHighlight")}
               </h2>
               <p className="text-base sm:text-lg text-white/80 max-w-xl mx-auto lg:mx-0">
-                Wir bauen kein "Projekt". Wir bauen ein System: außen
-                überzeugend, innen stabil.
+                {t("subheadline")}
               </p>
             </motion.div>
           </div>

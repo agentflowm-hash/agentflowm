@@ -1,9 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export function FinalCTASection() {
+  const t = useTranslations("finalCta");
+
+  const trustItems = [
+    t("trust.0"),
+    t("trust.1"),
+    t("trust.2"),
+  ];
+
   return (
     <section className="py-12 sm:py-16 bg-black relative overflow-hidden">
       {/* Background */}
@@ -39,7 +48,7 @@ export function FinalCTASection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Der erste Schritt
+            {t("badge")}
           </motion.span>
 
           {/* Headline */}
@@ -50,9 +59,9 @@ export function FinalCTASection() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            Wollen Sie die{" "}
+            {t("headline")}{" "}
             <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              Lücken schließen?
+              {t("headlineHighlight")}
             </span>
           </motion.h2>
 
@@ -64,8 +73,7 @@ export function FinalCTASection() {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Systeme, die arbeiten. Leads, die fließen. Ergebnisse, die planbar
-            werden.
+            {t("subheadline")}
           </motion.p>
 
           {/* CTA Buttons */}
@@ -80,7 +88,7 @@ export function FinalCTASection() {
               href="/kontakt"
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-semibold rounded-lg hover:opacity-90 transition-all"
             >
-              Termin buchen
+              {t("ctaPrimary")}
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -100,7 +108,7 @@ export function FinalCTASection() {
               href="/website-check"
               className="flex items-center gap-2 px-6 py-3 bg-gray-800 border border-gray-700 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-all"
             >
-              Website-Check
+              {t("ctaSecondary")}
             </Link>
           </motion.div>
 
@@ -112,14 +120,12 @@ export function FinalCTASection() {
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
           >
-            {["Unverbindlich", "Kostenlose Erstberatung", "Antwort in 24h"].map(
-              (item) => (
-                <div key={item} className="flex items-center gap-1.5">
-                  <div className="w-1 h-1 bg-green-500 rounded-full" />
-                  {item}
-                </div>
-              ),
-            )}
+            {trustItems.map((item) => (
+              <div key={item} className="flex items-center gap-1.5">
+                <div className="w-1 h-1 bg-green-500 rounded-full" />
+                {item}
+              </div>
+            ))}
           </motion.div>
         </div>
       </div>
