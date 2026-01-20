@@ -14,13 +14,30 @@ function generateSessionToken(): string {
 
 export function verifyPassword(inputPassword: string): boolean {
   const adminPassword = process.env.ADMIN_PASSWORD;
-  
+
   if (!adminPassword) {
     console.warn('⚠️ ADMIN_PASSWORD not set');
     return false;
   }
-  
-  return inputPassword === adminPassword;
+
+  // Timing-safe comparison to prevent timing attacks
+  if (inputPassword.length !== adminPassword.length) {
+    // Use constant-time comparison even for length mismatch
+    crypto.timingSafeEqual(
+      Buffer.from(inputPassword.padEnd(64, '\0')),
+      Buffer.from(adminPassword.padEnd(64, '\0'))
+    );
+    return false;
+  }
+
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(inputPassword),
+      Buffer.from(adminPassword)
+    );
+  } catch {
+    return false;
+  }
 }
 
 export async function createSession(): Promise<string> {
