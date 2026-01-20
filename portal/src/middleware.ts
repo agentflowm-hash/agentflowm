@@ -8,10 +8,17 @@ import { locales, defaultLocale } from "./i18n/config";
 // Session-basierte Authentifizierung für Kunden + i18n
 // ═══════════════════════════════════════════════════════════════
 
-// Create next-intl middleware
-const intlMiddleware = createMiddleware({
+// Create next-intl middleware for German (.de) - default German
+const intlMiddlewareDE = createMiddleware({
   locales,
-  defaultLocale,
+  defaultLocale: "de",
+  localePrefix: "as-needed",
+});
+
+// Create next-intl middleware for English (.com) - default English
+const intlMiddlewareEN = createMiddleware({
+  locales,
+  defaultLocale: "en",
   localePrefix: "as-needed",
 });
 
@@ -19,10 +26,10 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get("host") || "";
 
-  // Redirect portal-agentflowm.com to main site projekte page
-  if (hostname.includes("portal-agentflowm.com")) {
-    return NextResponse.redirect("https://agentflowm.com/projekte", { status: 301 });
-  }
+  // Determine which middleware to use based on domain
+  // .com = English default, .de = German default
+  const isComDomain = hostname.includes(".com");
+  const intlMiddleware = isComDomain ? intlMiddlewareEN : intlMiddlewareDE;
 
   // Static files and API routes - skip i18n
   if (
