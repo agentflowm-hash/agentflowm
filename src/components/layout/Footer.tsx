@@ -28,7 +28,7 @@ export function Footer({ locale = "en" }: FooterProps) {
       { label: tNav("packages"), href: "/#pakete" },
     ],
     tools: [
-      { label: "Website Check", href: "/website-check" },
+      { label: t("websiteCheck"), href: "/website-check" },
     ],
     legal: [
       { label: t("imprint"), href: "/impressum" },
@@ -91,7 +91,7 @@ export function Footer({ locale = "en" }: FooterProps) {
           {/* Navigation */}
           <div>
             <h4 className="font-semibold mb-3 sm:mb-4 text-white text-sm sm:text-base">
-              Navigation
+              {t("navigation")}
             </h4>
             <ul className="space-y-1.5 sm:space-y-2">
               {footerLinks.navigation.map((link) => (
@@ -171,7 +171,7 @@ export function Footer({ locale = "en" }: FooterProps) {
                     </svg>
                   ))}
                 </div>
-                <span className="text-[10px] text-white/40">Google Reviews</span>
+                <span className="text-[10px] text-white/40">{t("googleReviews")}</span>
               </div>
             </a>
 
@@ -181,8 +181,8 @@ export function Footer({ locale = "en" }: FooterProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               <div className="flex flex-col">
-                <span className="text-[11px] text-white/60 font-medium">SSL</span>
-                <span className="text-[10px] text-white/40">Secured</span>
+                <span className="text-[11px] text-white/60 font-medium">{t("ssl")}</span>
+                <span className="text-[10px] text-white/40">{t("secured")}</span>
               </div>
             </div>
 
@@ -192,8 +192,8 @@ export function Footer({ locale = "en" }: FooterProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div className="flex flex-col">
-                <span className="text-[11px] text-white/60 font-medium">GDPR</span>
-                <span className="text-[10px] text-white/40">Compliant</span>
+                <span className="text-[11px] text-white/60 font-medium">{t("gdpr")}</span>
+                <span className="text-[10px] text-white/40">{t("compliant")}</span>
               </div>
             </div>
 
@@ -205,8 +205,8 @@ export function Footer({ locale = "en" }: FooterProps) {
                 <div className="h-1/3 bg-yellow-400"></div>
               </div>
               <div className="flex flex-col">
-                <span className="text-[11px] text-white/60 font-medium">Made in</span>
-                <span className="text-[10px] text-white/40">Germany</span>
+                <span className="text-[11px] text-white/60 font-medium">{t("madeIn")}</span>
+                <span className="text-[10px] text-white/40">{t("germany")}</span>
               </div>
             </div>
           </div>
