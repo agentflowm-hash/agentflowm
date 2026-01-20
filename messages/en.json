@@ -1,0 +1,198 @@
+{
+  "meta": {
+    "title": "AgentFlowMarketing - Websites & Workflows from Berlin",
+    "description": "Professional websites, smart workflows and seamless integrations from Berlin. We automate contact, publication and handover - reliably and efficiently.",
+    "keywords": "Website, Workflows, Integrations, Berlin, Automation, AI, Web Design, n8n, Next.js"
+  },
+  "nav": {
+    "solution": "Solution",
+    "packages": "Packages",
+    "tools": "Tools",
+    "contact": "Contact",
+    "bookAppointment": "Book Appointment",
+    "login": "Login"
+  },
+  "hero": {
+    "badge": "Close system gaps - Stabilize processes - Make results predictable",
+    "headline1": "Your business isn't losing performance.",
+    "headline2": "It's losing system.",
+    "subheadline": "Gaps emerge everywhere: inquiries fade away, tasks get stuck, handovers stall. This costs time, nerves, and revenue.",
+    "chips": {
+      "lostLeads": "Lost Leads",
+      "manualWork": "Manual Work",
+      "handoverChaos": "Handover Chaos",
+      "noGuidance": "No Clear Guidance"
+    },
+    "solutionBridge": "We close these gaps with clear structure: Website/App as the center + Workflows that do real work.",
+    "ctaPrimary": "Free Website Check",
+    "ctaSecondary": "Book Appointment",
+    "trustItems": {
+      "fixedPrices": "Fixed Prices",
+      "clearSteps": "Clear Steps",
+      "fastDelivery": "Fast Delivery",
+      "ndaOptional": "NDA Optional"
+    },
+    "scroll": "Scroll"
+  },
+  "problem": {
+    "badge": "The Problem",
+    "headline": "The most common",
+    "headlineHighlight": "system problems",
+    "subheadline": "When systems are missing, friction occurs. Friction costs revenue.",
+    "bridge": "The problem isn't marketing.",
+    "bridgeHighlight": "It's missing process leadership.",
+    "items": {
+      "noPath": {
+        "title": "Inquiries without a path",
+        "desc": "Prospects want clarity - but can't find a clean next step."
+      },
+      "peopleDependent": {
+        "title": "Work depends on people",
+        "desc": "If someone doesn't follow up, it stays stuck. Systems are missing."
+      },
+      "handoversBreak": {
+        "title": "Handovers break",
+        "desc": "Tasks move into chats, notes, heads - and get lost."
+      },
+      "noVisibility": {
+        "title": "No visibility",
+        "desc": "Nobody sees: What's open? What's urgent? What's blocking?"
+      },
+      "surfaceModern": {
+        "title": "Modern outside - chaos inside",
+        "desc": "The surface looks good, but internally structure is missing."
+      }
+    }
+  },
+  "impact": {
+    "badge": "The Impact",
+    "headline": "What it",
+    "headlineHighlight": "actually costs",
+    "subheadline": "Every day without clear systems costs real money.",
+    "revenue": "Lost Revenue",
+    "time": "Lost Time",
+    "customers": "Lost Customers",
+    "motivation": "Lost Motivation"
+  },
+  "audience": {
+    "badge": "Target Group",
+    "headline": "Is this",
+    "headlineHighlight": "for you?",
+    "ideal": "Ideal for:",
+    "items": {
+      "agencies": "Agencies & Service Providers",
+      "coaches": "Coaches & Consultants",
+      "startups": "Startups & Solo Founders",
+      "businesses": "Small Businesses"
+    }
+  },
+  "solution": {
+    "badge": "The Solution",
+    "headline": "How we",
+    "headlineHighlight": "close gaps",
+    "subheadline": "We build systems that work - not just pages that look good.",
+    "pillars": {
+      "website": {
+        "title": "Website/App",
+        "desc": "Your digital headquarters with clear paths"
+      },
+      "workflows": {
+        "title": "Workflows",
+        "desc": "Automation that handles the work for you"
+      },
+      "integrations": {
+        "title": "Integrations",
+        "desc": "All your tools connected seamlessly"
+      }
+    }
+  },
+  "process": {
+    "badge": "Process",
+    "headline": "How we",
+    "headlineHighlight": "work",
+    "steps": {
+      "analysis": {
+        "title": "Analysis",
+        "desc": "We understand your current situation"
+      },
+      "concept": {
+        "title": "Concept",
+        "desc": "We design the solution"
+      },
+      "implementation": {
+        "title": "Implementation",
+        "desc": "We build and test"
+      },
+      "handover": {
+        "title": "Handover",
+        "desc": "We hand over and train"
+      }
+    }
+  },
+  "packages": {
+    "badge": "Packages",
+    "headline": "Choose your",
+    "headlineHighlight": "package",
+    "subheadline": "Clear prices. Clear scope. No surprises.",
+    "cta": "View All Packages",
+    "starter": {
+      "name": "Starter",
+      "desc": "For those just getting started"
+    },
+    "professional": {
+      "name": "Professional",
+      "desc": "For growing businesses"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "desc": "For established companies"
+    }
+  },
+  "webapps": {
+    "badge": "Web Apps",
+    "headline": "Customer portals &",
+    "headlineHighlight": "internal tools",
+    "subheadline": "More than just a website - real applications for your business.",
+    "items": {
+      "portals": "Customer Portals",
+      "dashboards": "Dashboards",
+      "booking": "Booking Systems",
+      "internal": "Internal Tools"
+    }
+  },
+  "free": {
+    "badge": "Free",
+    "headline": "Free",
+    "headlineHighlight": "Website Check",
+    "subheadline": "Get a detailed analysis of your current website in just 2 minutes.",
+    "cta": "Start Free Check",
+    "features": {
+      "performance": "Performance Analysis",
+      "seo": "SEO Check",
+      "mobile": "Mobile Optimization",
+      "security": "Security Review"
+    }
+  },
+  "finalCta": {
+    "headline": "Ready to close the",
+    "headlineHighlight": "gaps?",
+    "subheadline": "Book a free consultation and let's discuss your situation.",
+    "ctaPrimary": "Book Free Consultation",
+    "ctaSecondary": "Or start with Website Check"
+  },
+  "footer": {
+    "company": "AgentFlowMarketing",
+    "tagline": "Websites & Workflows from Berlin",
+    "contact": "Contact",
+    "legal": "Legal",
+    "imprint": "Imprint",
+    "privacy": "Privacy Policy",
+    "terms": "Terms",
+    "copyright": "All rights reserved."
+  },
+  "language": {
+    "switch": "Language",
+    "en": "English",
+    "ar": "Arabic"
+  }
+}

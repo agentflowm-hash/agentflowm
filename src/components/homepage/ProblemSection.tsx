@@ -1,43 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
-const problems = [
-  {
-    title: "Anfragen ohne Weg",
-    desc: "Interessenten wollen Klarheit – aber finden keinen sauberen nächsten Schritt.",
-    color: "#ef4444",
-  },
-  {
-    title: "Arbeit hängt an Menschen",
-    desc: "Wenn jemand nicht nachfasst, bleibt es liegen. Systeme fehlen.",
-    color: "#f59e0b",
-  },
-  {
-    title: "Übergaben brechen",
-    desc: "Aufgaben wandern in Chats, Notizen, Köpfe – und gehen verloren.",
-    color: "#FFB347",
-  },
-  {
-    title: "Keine Sichtbarkeit",
-    desc: "Keiner sieht: Was ist offen? Was ist dringend? Was blockiert?",
-    color: "#06b6d4",
-  },
-  {
-    title: "Außen modern – innen Chaos",
-    desc: "Die Oberfläche wirkt gut, aber intern fehlt Struktur.",
-    color: "#a855f7",
-  },
-];
-
-// Responsive Visualisierung
+// Responsive Visualization
 function ProblemVisualization() {
   return (
     <div className="relative w-full h-[260px] sm:h-[300px] lg:h-[360px] flex items-center justify-center">
       {/* Background Glow */}
       <div className="absolute w-40 h-40 sm:w-56 sm:h-56 lg:w-64 lg:h-64 bg-gradient-to-br from-red-500/20 via-orange-500/10 to-transparent rounded-full blur-3xl" />
 
-      {/* Äußerer rotierender Ring */}
+      {/* Outer rotating ring */}
       <motion.div
         className="absolute w-44 h-44 sm:w-56 sm:h-56 lg:w-72 lg:h-72 rounded-full"
         style={{
@@ -48,21 +21,21 @@ function ProblemVisualization() {
         transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
       />
 
-      {/* Mittlerer Ring */}
+      {/* Middle Ring */}
       <motion.div
         className="absolute w-32 h-32 sm:w-44 sm:h-44 lg:w-56 lg:h-56 rounded-full border border-red-500/20"
         animate={{ rotate: -360 }}
         transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
       />
 
-      {/* Innerer pulsierender Ring */}
+      {/* Inner pulsing ring */}
       <motion.div
         className="absolute w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 rounded-full border-2 border-red-500/30"
         animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 2, repeat: Infinity }}
       />
 
-      {/* Hauptelement - Fragmentierter Würfel */}
+      {/* Main element - Fragmented cube */}
       <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24">
         {/* Fragment 1 */}
         <motion.div
@@ -113,7 +86,7 @@ function ProblemVisualization() {
           transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
         />
 
-        {/* Zentrum - Warnsymbol */}
+        {/* Center - Warning symbol */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           animate={{ opacity: [0.5, 1, 0.5] }}
@@ -137,7 +110,7 @@ function ProblemVisualization() {
         </motion.div>
       </div>
 
-      {/* Status Labels - nur auf größeren Screens */}
+      {/* Status Labels - Only on larger screens */}
       <div className="hidden lg:block">
         {[
           { label: "DISCONNECTED", x: "5%", y: "15%", color: "#ef4444" },
@@ -166,6 +139,31 @@ function ProblemVisualization() {
 }
 
 export function ProblemSection() {
+  const t = useTranslations("problem");
+
+  const problems = [
+    {
+      key: "noPath",
+      color: "#ef4444",
+    },
+    {
+      key: "peopleDependent",
+      color: "#f59e0b",
+    },
+    {
+      key: "handoversBreak",
+      color: "#FFB347",
+    },
+    {
+      key: "noVisibility",
+      color: "#06b6d4",
+    },
+    {
+      key: "surfaceModern",
+      color: "#a855f7",
+    },
+  ];
+
   return (
     <section className="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
       {/* Background glow */}
@@ -173,10 +171,10 @@ export function ProblemSection() {
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
-          {/* Desktop: Visualisierung LINKS, Text RECHTS */}
-          {/* Mobile: Text oben, Visualisierung unten */}
+          {/* Desktop: Visualization LEFT, Text RIGHT */}
+          {/* Mobile: Text on top, Visualization below */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-12 lg:mb-16">
-            {/* Visualisierung - Links auf Desktop, unten auf Mobile */}
+            {/* Visualization - Left on Desktop, bottom on Mobile */}
             <motion.div
               className="order-2 lg:order-1"
               initial={{ opacity: 0, x: -30 }}
@@ -187,23 +185,23 @@ export function ProblemSection() {
               <ProblemVisualization />
             </motion.div>
 
-            {/* Text Content - Rechts auf Desktop, oben auf Mobile */}
+            {/* Text Content - Right on Desktop, top on Mobile */}
             <motion.div
-              className="order-1 lg:order-2 text-center lg:text-left"
+              className="order-1 lg:order-2 text-center lg:text-start"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
               <span className="text-sm text-red-400 font-medium uppercase tracking-wider">
-                Das Problem
+                {t("badge")}
               </span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mt-3 mb-4 text-white">
-                Die häufigsten{" "}
-                <span className="text-red-500">Systemprobleme</span>
+                {t("headline")}{" "}
+                <span className="text-red-500">{t("headlineHighlight")}</span>
               </h2>
               <p className="text-base sm:text-lg text-white/80 max-w-xl mx-auto lg:mx-0">
-                Wenn Systeme fehlen, entsteht Reibung. Reibung kostet Umsatz.
+                {t("subheadline")}
               </p>
             </motion.div>
           </div>
@@ -212,7 +210,7 @@ export function ProblemSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-10">
             {problems.map((problem, i) => (
               <motion.div
-                key={problem.title}
+                key={problem.key}
                 className="p-5 sm:p-6 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-red-500/30 transition-all"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -229,10 +227,10 @@ export function ProblemSection() {
                   />
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold text-white mb-2">
-                      {problem.title}
+                      {t(`items.${problem.key}.title`)}
                     </h3>
                     <p className="text-sm sm:text-base text-white/70">
-                      {problem.desc}
+                      {t(`items.${problem.key}.desc`)}
                     </p>
                   </div>
                 </div>
@@ -240,7 +238,7 @@ export function ProblemSection() {
             ))}
           </div>
 
-          {/* Bridge Statement - Zentriert */}
+          {/* Bridge Statement - Centered */}
           <motion.div
             className="text-center"
             initial={{ opacity: 0 }}
@@ -248,9 +246,9 @@ export function ProblemSection() {
             viewport={{ once: true }}
           >
             <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto">
-              Das Problem ist nicht Marketing.{" "}
+              {t("bridge")}{" "}
               <span className="text-[#FC682C] font-semibold">
-                Es ist fehlende Prozess-Führung.
+                {t("bridgeHighlight")}
               </span>
             </p>
           </motion.div>

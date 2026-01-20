@@ -3,15 +3,18 @@
 import { usePathname } from "next/navigation";
 import { Header, Footer } from "@/components/layout";
 import { AuthProvider } from "@/lib/auth-context";
+import { type Locale } from "@/i18n/config";
 
 export default function LayoutWrapper({
   children,
+  locale = "en",
 }: {
   children: React.ReactNode;
+  locale?: Locale;
 }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
-  const isLoginRoute = pathname === "/anmelden";
+  const isLoginRoute = pathname?.endsWith("/anmelden") || pathname === "/anmelden";
 
   if (isAdminRoute) {
     // Admin pages get no header/footer
@@ -25,11 +28,11 @@ export default function LayoutWrapper({
 
   return (
     <AuthProvider>
-      <Header />
+      <Header locale={locale} />
       <main id="main-content" className="min-h-screen" role="main">
         {children}
       </main>
-      <Footer />
+      <Footer locale={locale} />
     </AuthProvider>
   );
 }

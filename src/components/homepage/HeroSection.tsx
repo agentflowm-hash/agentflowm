@@ -7,13 +7,14 @@ import {
   useTransform,
   useReducedMotion,
 } from "framer-motion";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
-// Verbesserte 3D Kugel Visualisierung
+// Enhanced 3D Sphere Visualization
 function HeroVisualization() {
   return (
     <div className="relative w-full h-[320px] sm:h-[420px] lg:h-[550px] flex items-center justify-center">
-      {/* Äußerer Glow-Effekt */}
+      {/* Outer Glow Effect */}
       <motion.div
         className="absolute w-72 h-72 sm:w-96 sm:h-96 lg:w-[480px] lg:h-[480px] rounded-full"
         style={{
@@ -24,14 +25,13 @@ function HeroVisualization() {
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Äußerer rotierender Ring mit Punkten */}
+      {/* Outer rotating ring with dots */}
       <motion.div
         className="absolute w-64 h-64 sm:w-80 sm:h-80 lg:w-[420px] lg:h-[420px]"
         animate={{ rotate: 360 }}
         transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
       >
         <div className="absolute inset-0 rounded-full border border-[#FC682C]/30" />
-        {/* Orbiting dots */}
         {[0, 90, 180, 270].map((angle, i) => (
           <motion.div
             key={i}
@@ -49,7 +49,7 @@ function HeroVisualization() {
         ))}
       </motion.div>
 
-      {/* Mittlerer Ring - Gegenrichtung */}
+      {/* Middle Ring - Counter direction */}
       <motion.div
         className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-80 lg:h-80"
         animate={{ rotate: -360 }}
@@ -72,7 +72,7 @@ function HeroVisualization() {
         ))}
       </motion.div>
 
-      {/* Innerer pulsierender Ring */}
+      {/* Inner pulsing ring */}
       <motion.div
         className="absolute w-32 h-32 sm:w-44 sm:h-44 lg:w-56 lg:h-56 rounded-full"
         style={{
@@ -84,13 +84,12 @@ function HeroVisualization() {
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Hauptkugel - 3D Sphere */}
+      {/* Main Sphere - 3D */}
       <motion.div
         className="relative w-28 h-28 sm:w-40 sm:h-40 lg:w-52 lg:h-52"
         animate={{ y: [0, -12, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       >
-        {/* Kugelkörper */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
@@ -107,8 +106,6 @@ function HeroVisualization() {
             `,
           }}
         />
-
-        {/* Glanzlicht oben */}
         <div
           className="absolute top-3 left-4 sm:top-4 sm:left-6 lg:top-6 lg:left-8 w-6 h-6 sm:w-8 sm:h-8 lg:w-12 lg:h-12 rounded-full"
           style={{
@@ -117,11 +114,7 @@ function HeroVisualization() {
             filter: "blur(2px)",
           }}
         />
-
-        {/* Kleiner Highlight-Punkt */}
         <div className="absolute top-5 left-6 sm:top-7 sm:left-9 lg:top-10 lg:left-12 w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 rounded-full bg-white/80" />
-
-        {/* Innere Struktur */}
         <div
           className="absolute inset-4 sm:inset-5 lg:inset-7 rounded-full"
           style={{
@@ -130,13 +123,9 @@ function HeroVisualization() {
               "radial-gradient(circle at 60% 60%, transparent 40%, rgba(0,0,0,0.1) 100%)",
           }}
         />
-
-        {/* Energy Pulse */}
         <motion.div
           className="absolute inset-0 rounded-full"
-          style={{
-            border: "2px solid rgba(252,104,44,0.5)",
-          }}
+          style={{ border: "2px solid rgba(252,104,44,0.5)" }}
           animate={{ scale: [1, 1.4, 1.4], opacity: [0.8, 0, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
         />
@@ -167,19 +156,12 @@ function HeroVisualization() {
             scale: [1, 1.5, 1],
             y: [0, -10, 0],
           }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            delay: point.delay,
-          }}
+          transition={{ duration: 3, repeat: Infinity, delay: point.delay }}
         />
       ))}
 
-      {/* Connection Lines - nur Desktop */}
-      <svg
-        className="absolute inset-0 w-full h-full hidden lg:block"
-        style={{ overflow: "visible" }}
-      >
+      {/* Connection Lines - Desktop only */}
+      <svg className="absolute inset-0 w-full h-full hidden lg:block" style={{ overflow: "visible" }}>
         <defs>
           <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#FC682C" stopOpacity="0" />
@@ -214,6 +196,7 @@ function HeroVisualization() {
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const t = useTranslations("hero");
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -230,6 +213,20 @@ export function HeroSection() {
       transition: { duration: 0.5, delay: prefersReducedMotion ? 0 : delay },
     }),
   };
+
+  const chips = [
+    t("chips.lostLeads"),
+    t("chips.manualWork"),
+    t("chips.handoverChaos"),
+    t("chips.noGuidance"),
+  ];
+
+  const trustItems = [
+    t("trustItems.fixedPrices"),
+    t("trustItems.clearSteps"),
+    t("trustItems.fastDelivery"),
+    t("trustItems.ndaOptional"),
+  ];
 
   return (
     <section
@@ -268,9 +265,9 @@ export function HeroSection() {
         style={{ opacity }}
       >
         <div className="flex flex-col lg:flex-row items-center justify-center min-h-screen py-16 sm:py-20 gap-8 lg:gap-12">
-          {/* Text Content - LINKS */}
+          {/* Text Content - LEFT */}
           <motion.div
-            className="flex-1 max-w-2xl text-center lg:text-left order-2 lg:order-1"
+            className="flex-1 max-w-2xl text-center lg:text-start order-2 lg:order-1"
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
@@ -284,8 +281,7 @@ export function HeroSection() {
               custom={0}
             >
               <span className="text-xs text-[#FC682C] font-medium">
-                Systemlücken schließen • Abläufe stabilisieren • Ergebnisse
-                planbar machen
+                {t("badge")}
               </span>
             </motion.div>
 
@@ -297,12 +293,10 @@ export function HeroSection() {
               animate="visible"
               custom={0.1}
             >
-              <span className="text-white">
-                Ihr Business verliert nicht an Leistung.
-              </span>
+              <span className="text-white">{t("headline1")}</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FC682C] via-[#FFB347] to-[#FC682C]">
-                Sondern an System.
+                {t("headline2")}
               </span>
             </motion.h1>
 
@@ -314,8 +308,7 @@ export function HeroSection() {
               animate="visible"
               custom={0.2}
             >
-              Überall entstehen Lücken: Anfragen versanden, Aufgaben bleiben
-              liegen, Übergaben stocken. Das kostet Zeit, Nerven und Umsatz.
+              {t("subheadline")}
             </motion.p>
 
             {/* Problem Chips */}
@@ -326,12 +319,7 @@ export function HeroSection() {
               animate="visible"
               custom={0.25}
             >
-              {[
-                "Verlorene Leads",
-                "Manuelle Handarbeit",
-                "Chaos bei Übergaben",
-                "Keine klare Führung",
-              ].map((chip) => (
+              {chips.map((chip) => (
                 <span
                   key={chip}
                   className="px-2.5 py-1 text-xs rounded-full bg-red-500/10 text-red-400 border border-red-500/20"
@@ -349,8 +337,7 @@ export function HeroSection() {
               animate="visible"
               custom={0.3}
             >
-              Wir schließen diese Lücken mit klarer Struktur: Website/App als
-              Zentrum + Workflows, die echte Arbeit übernehmen.
+              {t("solutionBridge")}
             </motion.p>
 
             {/* CTAs */}
@@ -365,26 +352,16 @@ export function HeroSection() {
                 href="/website-check"
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#e55a1f] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FC682C]/25"
               >
-                Kostenloser Webseitencheck
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
+                {t("ctaPrimary")}
+                <svg className="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </Link>
               <Link
                 href="/termin"
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-white/20 text-white text-sm font-semibold hover:bg-white/5 transition-all"
               >
-                Termin buchen
+                {t("ctaSecondary")}
               </Link>
             </motion.div>
 
@@ -396,18 +373,9 @@ export function HeroSection() {
               animate="visible"
               custom={0.4}
             >
-              {[
-                "Festpreise",
-                "klare Schritte",
-                "schnelle Umsetzung",
-                "NDA optional",
-              ].map((item) => (
+              {trustItems.map((item) => (
                 <span key={item} className="flex items-center gap-1.5">
-                  <svg
-                    className="w-4 h-4 text-green-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
+                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -420,7 +388,7 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* Visualization - RECHTS */}
+          {/* Visualization - RIGHT */}
           <motion.div
             className="flex-1 max-w-xl lg:max-w-2xl order-1 lg:order-2"
             initial={{ opacity: 0, x: 30 }}
@@ -440,7 +408,7 @@ export function HeroSection() {
         transition={{ delay: 1.2 }}
       >
         <span className="text-[9px] text-white/50 uppercase tracking-[0.2em]">
-          Scroll
+          {t("scroll")}
         </span>
         <motion.div
           className="w-5 h-7 border border-white/20 rounded-full flex justify-center pt-1.5"
