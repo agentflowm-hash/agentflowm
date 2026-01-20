@@ -17,6 +17,12 @@ const intlMiddleware = createMiddleware({
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get("host") || "";
+
+  // Redirect portal-agentflowm.com to main site projekte page
+  if (hostname.includes("portal-agentflowm.com")) {
+    return NextResponse.redirect("https://agentflowm.com/projekte", { status: 301 });
+  }
 
   // Static files and API routes - skip i18n
   if (
