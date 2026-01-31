@@ -2,7 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { routing } from './i18n/routing';
-import { getLocalesForDomain, getDefaultLocaleForDomain, type Locale } from './i18n/config';
+import { getLocalesForDomain, getDefaultLocaleForDomain, locales, type Locale } from './i18n/config';
 
 // ═══════════════════════════════════════════════════════════════
 //                    MIDDLEWARE
@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get('host')?.split(':')[0] || 'localhost';
 
-  // Skip i18n for API routes, admin, portal, and static files
+  // Skip for API routes, admin, portal, and static files
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/admin') ||
@@ -43,23 +43,21 @@ export function middleware(request: NextRequest) {
   const defaultLocale = getDefaultLocaleForDomain(hostname);
   
   // Extrahiere aktuelle Locale aus Pfad
-  const pathLocale = pathname.split('/')[1] as Locale | undefined;
+  const pathParts = pathname.split('/').filter(Boolean);
+  const pathLocale = pathParts[0] as Locale | undefined;
   
-  // Prüfe ob Sprache erlaubt ist
-  if (pathLocale && !allowedLocales.includes(pathLocale as Locale)) {
-    // Sprache nicht erlaubt auf dieser Domain → Redirect zur Default-Sprache
-    const newPathname = pathname.replace(`/${pathLocale}`, `/${defaultLocale}`);
-    const redirectUrl = new URL(newPathname, request.url);
-    return NextResponse.redirect(redirectUrl);
+  // Prüfe ob eine bekannte Locale im Pfad ist
+  const isLocaleInPath = pathLocale && locales.includes(pathLocale as Locale);
+  
+  // Wenn Locale im Pfad aber NICHT erlaubt auf dieser Domain
+  if (isLocaleInPath && !allowedLocales.includes(pathLocale as Locale)) {
+    // Ersetze mit erlaubter Default-Locale
+    const restOfPath = pathParts.slice(1).join('/');
+    const newPath = `/${defaultLocale}${restOfPath ? '/' + restOfPath : ''}`;
+    return NextResponse.redirect(new URL(newPath, request.url));
   }
 
-  // Wenn Root ohne Sprache → Redirect zur Default-Sprache der Domain
-  if (pathname === '/' || pathname === '') {
-    const redirectUrl = new URL(`/${defaultLocale}`, request.url);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // Apply standard i18n middleware
+  // Lass next-intl den Rest handlen
   return intlMiddleware(request);
 }
 
