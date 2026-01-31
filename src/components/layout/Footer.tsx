@@ -10,7 +10,7 @@ const contact = {
   phone: "+49 179 949 8247",
   phoneLink: "tel:+491799498247",
   whatsapp: "https://wa.me/491799498247",
-  address: "Achillesstrasse 69, 13125 Berlin",
+  address: "Achillesstraße 69A, 13125 Berlin",
 };
 
 interface FooterProps {
