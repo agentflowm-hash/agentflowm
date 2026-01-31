@@ -2504,6 +2504,52 @@
           "home": "Zur Startseite"
         },
         "loading": "Wird geladen..."
+      },
+      "trust": {
+        "badge": "✅ Vertrauenswürdig",
+        "headline": "Zahlen, die für sich sprechen",
+        "stats": {
+          "workflows": "Workflows verfügbar",
+          "uptime": "Uptime garantiert",
+          "support": "Support",
+          "rating": "Bewertung"
+        },
+        "badges": {
+          "noCode": "Kein Code nötig",
+          "hosted": "Vollständig gehosted",
+          "gdpr": "DSGVO-konform"
+        }
+      },
+      "faq": {
+        "badge": "❓ Häufige Fragen",
+        "headline": "Fragen zu Workflows?",
+        "subheadline": "Hier sind die Antworten",
+        "items": [
+          {
+            "q": "Was ist ein Workflow?",
+            "a": "Ein Workflow ist eine automatisierte Abfolge von Aktionen, die durch bestimmte Trigger ausgelöst werden. Sie arbeiten 24/7 und übernehmen wiederkehrende Aufgaben."
+          },
+          {
+            "q": "Brauche ich Programmierkenntnisse?",
+            "a": "Nein! Alle Workflows sind fertig konfiguriert und sofort einsatzbereit. Du musst nur deine Zugänge verbinden."
+          },
+          {
+            "q": "Wie funktioniert Miete vs. Kauf?",
+            "a": "Miete: Monatliche Zahlung, wir hosten alles, Updates inklusive. Kauf: Einmalzahlung, du erhältst den kompletten Workflow zur Selbstverwaltung."
+          },
+          {
+            "q": "Kann ich Workflows anpassen?",
+            "a": "Ja! Bei der Einrichtung passen wir den Workflow an deine Bedürfnisse an. Weitere Anpassungen sind jederzeit möglich."
+          },
+          {
+            "q": "Was passiert nach dem Kauf?",
+            "a": "Du erhältst Zugang zum Workflow innerhalb von 24h. Wir richten alles ein und schulen dich bei Bedarf."
+          },
+          {
+            "q": "Gibt es eine Garantie?",
+            "a": "Ja! 14 Tage Geld-zurück-Garantie bei Miete. Bei Kauf: Support bis alles läuft."
+          }
+        ]
       }
     },
     "anmelden": {

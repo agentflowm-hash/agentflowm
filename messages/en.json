@@ -2504,6 +2504,52 @@
           "home": "To homepage"
         },
         "loading": "Loading..."
+      },
+      "trust": {
+        "badge": "✅ Trusted",
+        "headline": "Numbers that speak for themselves",
+        "stats": {
+          "workflows": "Workflows available",
+          "uptime": "Uptime guaranteed",
+          "support": "Support",
+          "rating": "Rating"
+        },
+        "badges": {
+          "noCode": "No code required",
+          "hosted": "Fully hosted",
+          "gdpr": "GDPR compliant"
+        }
+      },
+      "faq": {
+        "badge": "❓ FAQ",
+        "headline": "Questions about Workflows?",
+        "subheadline": "Here are the answers",
+        "items": [
+          {
+            "q": "What is a workflow?",
+            "a": "A workflow is an automated sequence of actions triggered by specific events. They work 24/7 and handle repetitive tasks."
+          },
+          {
+            "q": "Do I need coding skills?",
+            "a": "No! All workflows come pre-configured and ready to use. You just need to connect your accounts."
+          },
+          {
+            "q": "How does rent vs. buy work?",
+            "a": "Rent: Monthly payment, we host everything, updates included. Buy: One-time payment, you get the complete workflow for self-management."
+          },
+          {
+            "q": "Can I customize workflows?",
+            "a": "Yes! During setup, we customize the workflow to your needs. Further adjustments are possible anytime."
+          },
+          {
+            "q": "What happens after purchase?",
+            "a": "You get access to the workflow within 24h. We set everything up and provide training if needed."
+          },
+          {
+            "q": "Is there a guarantee?",
+            "a": "Yes! 14-day money-back guarantee for rent. For purchase: Support until everything runs smoothly."
+          }
+        ]
       }
     },
     "anmelden": {
