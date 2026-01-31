@@ -1846,9 +1846,10 @@
         "headlineHighlight": "Transformations",
         "description": "Drag the slider and see the difference. From outdated websites to modern, conversion-optimized solutions.",
         "stats": {
-          "projects": "Projects",
+          "projects": "Projects completed",
           "successful": "Successful",
-          "projectTime": "Project Time"
+          "rating": "Google Rating",
+          "projectTime": "Avg. project time"
         }
       },
       "filters": {
@@ -2017,6 +2018,17 @@
             "Testimonials",
             "Blog Integration"
           ]
+        }
+      },
+      "results": {
+        "badge": "📊 Real Results",
+        "headline": "What our clients achieve",
+        "subheadline": "Average improvements after project completion",
+        "stats": {
+          "leads": "More inquiries",
+          "manualWork": "Less manual work",
+          "availability": "Availability",
+          "satisfaction": "Client satisfaction"
         }
       }
     },

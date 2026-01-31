@@ -1846,9 +1846,10 @@
         "headlineHighlight": "Transformationen",
         "description": "Ziehe den Slider und sieh den Unterschied. Von veralteten Websites zu modernen, conversion-optimierten Lösungen.",
         "stats": {
-          "projects": "Projekte",
+          "projects": "Projekte umgesetzt",
           "successful": "Erfolgreich",
-          "projectTime": "Projektzeit"
+          "rating": "Google-Bewertung",
+          "projectTime": "Ø Projektzeit"
         }
       },
       "filters": {
@@ -2017,6 +2018,17 @@
             "Testimonials",
             "Blog-Integration"
           ]
+        }
+      },
+      "results": {
+        "badge": "📊 Echte Ergebnisse",
+        "headline": "Was unsere Kunden erreichen",
+        "subheadline": "Durchschnittliche Verbesserungen nach Projektabschluss",
+        "stats": {
+          "leads": "Mehr Anfragen",
+          "manualWork": "Weniger manueller Aufwand",
+          "availability": "Erreichbarkeit",
+          "satisfaction": "Kundenzufriedenheit"
         }
       }
     },

@@ -855,25 +855,26 @@ function PageHero() {
 
           {/* Stats */}
           <motion.div
-            className="flex flex-wrap justify-center gap-6"
+            className="flex flex-wrap justify-center gap-4 sm:gap-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
             {[
-              { value: '6+', label: t('hero.stats.projects'), icon: 'R' },
-              { value: '100%', label: t('hero.stats.successful'), icon: 'OK' },
-              { value: 'Avg 4 W.', label: t('hero.stats.projectTime'), icon: 'F' },
+              { value: '50+', label: t('hero.stats.projects'), icon: '🚀' },
+              { value: '100%', label: t('hero.stats.successful'), icon: '✅' },
+              { value: '⭐ 5.0', label: t('hero.stats.rating'), icon: '' },
+              { value: '~4 Wo.', label: t('hero.stats.projectTime'), icon: '⚡' },
             ].map((stat, i) => (
               <motion.div
                 key={i}
-                className="flex items-center gap-3 px-5 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1]"
+                className="flex items-center gap-3 px-4 sm:px-5 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] backdrop-blur-sm"
                 whileHover={{ scale: 1.05, borderColor: 'rgba(252,104,44,0.3)' }}
               >
-                <span className="text-xl">{stat.icon}</span>
+                {stat.icon && <span className="text-xl sm:text-2xl">{stat.icon}</span>}
                 <div className="text-left">
-                  <div className="text-lg font-bold text-[#FC682C]">{stat.value}</div>
-                  <div className="text-xs text-white/50">{stat.label}</div>
+                  <div className="text-lg sm:text-xl font-bold text-[#FC682C]">{stat.value}</div>
+                  <div className="text-[10px] sm:text-xs text-white/50">{stat.label}</div>
                 </div>
               </motion.div>
             ))}
@@ -1009,6 +1010,49 @@ export default function ProjektePage() {
               <strong className="text-white/70">{t('note.prefix')}</strong> {t('note.text')}
             </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Results Summary */}
+      <section className="py-16 sm:py-20 border-t border-white/5">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              className="text-center mb-10"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <span className="inline-block px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-medium mb-3">
+                {t('results.badge')}
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{t('results.headline')}</h2>
+              <p className="text-sm text-white/60">{t('results.subheadline')}</p>
+            </motion.div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { value: '+67%', label: t('results.stats.leads'), color: '#FC682C' },
+                { value: '-80%', label: t('results.stats.manualWork'), color: '#10B981' },
+                { value: '24/7', label: t('results.stats.availability'), color: '#8B5CF6' },
+                { value: '100%', label: t('results.stats.satisfaction'), color: '#F59E0B' },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  className="text-center p-5 rounded-xl bg-white/[0.03] border border-white/5"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <div className="text-3xl sm:text-4xl font-bold mb-1" style={{ color: stat.color }}>
+                    {stat.value}
+                  </div>
+                  <div className="text-xs text-white/50">{stat.label}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
