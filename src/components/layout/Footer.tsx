@@ -29,6 +29,7 @@ export function Footer({ locale = "en" }: FooterProps) {
     ],
     tools: [
       { label: t("websiteCheck"), href: "/website-check" },
+      { label: t("referral"), href: "/referral" },
     ],
     legal: [
       { label: t("imprint"), href: "/impressum" },
