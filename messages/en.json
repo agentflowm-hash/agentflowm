@@ -1383,6 +1383,21 @@
             "a": "50% at project start, 50% at handover. We accept bank transfer and card payment. Installment payment available on request."
           }
         ]
+      },
+      "trust": {
+        "badge": "✅ Trusted",
+        "headline": "Numbers that speak for themselves",
+        "stats": {
+          "projects": "Projects completed",
+          "satisfaction": "Customer satisfaction",
+          "response": "Response time",
+          "rating": "Google rating"
+        },
+        "badges": {
+          "verified": "Verified company",
+          "berlin": "Based in Berlin",
+          "gdpr": "GDPR compliant"
+        }
       }
     },
     "portal": {

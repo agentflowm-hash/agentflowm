@@ -1383,6 +1383,21 @@
             "a": "50% bei Projektstart, 50% bei Übergabe. Wir akzeptieren Überweisung und Kartenzahlung. Ratenzahlung auf Anfrage möglich."
           }
         ]
+      },
+      "trust": {
+        "badge": "✅ Vertrauenswürdig",
+        "headline": "Zahlen, die für sich sprechen",
+        "stats": {
+          "projects": "Projekte umgesetzt",
+          "satisfaction": "Kundenzufriedenheit",
+          "response": "Antwortzeit",
+          "rating": "Google-Bewertung"
+        },
+        "badges": {
+          "verified": "Verifiziertes Unternehmen",
+          "berlin": "Standort Berlin",
+          "gdpr": "DSGVO-konform"
+        }
       }
     },
     "portal": {
