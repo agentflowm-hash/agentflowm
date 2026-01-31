@@ -1352,6 +1352,37 @@
           "headline": "Bereit für deinen Webauftritt?",
           "subheadline": "Starte jetzt mit dem One Page Paket."
         }
+      },
+      "faq": {
+        "badge": "❓ Häufige Fragen",
+        "headline": "Fragen? Hier sind Antworten.",
+        "subheadline": "Was Kunden oft wissen wollen",
+        "items": [
+          {
+            "q": "Wie lange dauert ein Projekt?",
+            "a": "START Pakete sind in 1-2 Wochen fertig, BUSINESS Pakete in 3-4 Wochen. Bei individuellen Projekten besprechen wir den Zeitrahmen im Kickoff-Call."
+          },
+          {
+            "q": "Was kostet ein Projekt genau?",
+            "a": "Unsere Preise sind Festpreise - keine versteckten Kosten, keine Überraschungen. START ab 5.390€, BUSINESS ab 11.990€. Bei größeren Projekten erstellen wir ein individuelles Angebot."
+          },
+          {
+            "q": "Was passiert nach dem Go-Live?",
+            "a": "Du erhältst eine komplette Übergabe mit Dokumentation. Optionaler Support und Wartung sind verfügbar. Kleinere Anpassungen können wir auf Anfrage umsetzen."
+          },
+          {
+            "q": "Kann ich Inhalte selbst bearbeiten?",
+            "a": "Ja! Jedes Paket enthält ein Admin-Portal, über das du Texte, Bilder und mehr selbst verwalten kannst - ohne Programmierkenntnisse."
+          },
+          {
+            "q": "Was braucht ihr von mir?",
+            "a": "Texte, Bilder und Logo (falls vorhanden). Wir helfen auch bei der Content-Erstellung. Im Kickoff-Call klären wir alles Weitere."
+          },
+          {
+            "q": "Wie läuft die Zahlung?",
+            "a": "50% bei Projektstart, 50% bei Übergabe. Wir akzeptieren Überweisung und Kartenzahlung. Ratenzahlung auf Anfrage möglich."
+          }
+        ]
       }
     },
     "portal": {

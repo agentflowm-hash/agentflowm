@@ -809,6 +809,66 @@ function ComparisonSection() {
   );
 }
 
+// FAQ Section
+function FAQSection() {
+  const t = useTranslations("pages.pakete.faq");
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const faqs = [
+    { q: t("items.0.q"), a: t("items.0.a") },
+    { q: t("items.1.q"), a: t("items.1.a") },
+    { q: t("items.2.q"), a: t("items.2.a") },
+    { q: t("items.3.q"), a: t("items.3.a") },
+    { q: t("items.4.q"), a: t("items.4.a") },
+    { q: t("items.5.q"), a: t("items.5.a") },
+  ];
+
+  return (
+    <section className="py-12 sm:py-16 border-t border-white/5">
+      <div className="container px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <span className="inline-block px-3 py-1 rounded-full bg-[#FC682C]/10 text-[#FC682C] text-xs font-medium mb-3">
+              {t("badge")}
+            </span>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">{t("headline")}</h2>
+            <p className="text-sm text-white/60">{t("subheadline")}</p>
+          </div>
+
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div
+                key={i}
+                className="rounded-xl bg-white/[0.02] border border-white/5 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+                >
+                  <span className="text-sm font-medium text-white pr-4">{faq.q}</span>
+                  <svg
+                    className={`w-5 h-5 text-[#FC682C] flex-shrink-0 transition-transform ${openIndex === i ? "rotate-180" : ""}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {openIndex === i && (
+                  <div className="px-4 pb-4">
+                    <p className="text-sm text-white/60 leading-relaxed">{faq.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // Final CTA Section
 function FinalCTA() {
   const t = useTranslations("pages.pakete.finalCta");
@@ -872,6 +932,7 @@ export default function PaketePage() {
       <ServiceSection />
       <PaymentSection />
       <ComparisonSection />
+      <FAQSection />
       <FinalCTA />
     </>
   );

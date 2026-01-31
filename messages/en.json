@@ -1352,6 +1352,37 @@
           "headline": "Ready for your web presence?",
           "subheadline": "Start now with the One Page package."
         }
+      },
+      "faq": {
+        "badge": "❓ FAQ",
+        "headline": "Questions? Here are answers.",
+        "subheadline": "What customers often want to know",
+        "items": [
+          {
+            "q": "How long does a project take?",
+            "a": "START packages are ready in 1-2 weeks, BUSINESS packages in 3-4 weeks. For custom projects, we discuss the timeline in the kickoff call."
+          },
+          {
+            "q": "What exactly does a project cost?",
+            "a": "Our prices are fixed prices - no hidden costs, no surprises. START from €5,390, BUSINESS from €11,990. For larger projects, we create a custom quote."
+          },
+          {
+            "q": "What happens after go-live?",
+            "a": "You receive a complete handover with documentation. Optional support and maintenance are available. Smaller adjustments can be made on request."
+          },
+          {
+            "q": "Can I edit content myself?",
+            "a": "Yes! Every package includes an admin portal where you can manage texts, images and more yourself - no coding skills required."
+          },
+          {
+            "q": "What do you need from me?",
+            "a": "Texts, images and logo (if available). We also help with content creation. We clarify everything else in the kickoff call."
+          },
+          {
+            "q": "How does payment work?",
+            "a": "50% at project start, 50% at handover. We accept bank transfer and card payment. Installment payment available on request."
+          }
+        ]
       }
     },
     "portal": {
