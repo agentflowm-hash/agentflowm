@@ -1,26 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-// Paket-Preise (netto)
+// Paket-Preise (netto) - AKTUALISIERT 31.01.2026
+// Synchronisiert mit Website /pakete
 const PACKAGES: Record<
   string,
-  { name: string; price: number; description: string }
+  { name: string; price: number; description: string; priceDisplay?: string }
 > = {
-  "one-page": {
-    name: "One Page Website",
-    price: 1390,
-    description: "Eine Seite mit allen wichtigen Sektionen",
+  // Website Pakete
+  start: {
+    name: "START",
+    price: 5390,
+    description: "Website + Admin - Schneller, professioneller Start",
   },
   business: {
-    name: "Business Website",
-    price: 6990,
-    description: "Vollständige Website mit Publishing-Workflow (bis 10 Seiten)",
+    name: "BUSINESS",
+    price: 11990,
+    description: "Website + Admin + Portale - Wachstum mit Struktur",
+  },
+  konfigurator: {
+    name: "KONFIGURATOR",
+    price: 0,
+    priceDisplay: "auf Anfrage",
+    description: "Maßgeschneiderte Lösung - Individuell nach Bedarf",
+  },
+  // App Pakete
+  webapp: {
+    name: "Web App",
+    price: 26990,
+    description: "Browserbasiertes System mit Logins, Rollen, Bereichen",
+  },
+  mobile: {
+    name: "Mobile App",
+    price: 51490,
+    description: "iOS/Android - Komplette App-Umsetzung als stabiles System",
+  },
+  enterprise: {
+    name: "Enterprise",
+    price: 0,
+    priceDisplay: "auf Anfrage",
+    description: "Maßgeschneidert für große Teams und komplexe Anforderungen",
+  },
+  // Legacy Support (für alte Links)
+  "one-page": {
+    name: "One Page (Legacy → START)",
+    price: 5390,
+    description: "Weitergeleitet zu START Paket",
   },
   growth: {
-    name: "Growth Website",
-    price: 10990,
-    description:
-      "Das komplette System mit Lead-Automatisierung (bis 13 Seiten)",
+    name: "Growth (Legacy → BUSINESS)",
+    price: 11990,
+    description: "Weitergeleitet zu BUSINESS Paket",
   },
 };
 
@@ -48,6 +78,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Preis-Anzeige formatieren
+    const priceText = pkg.priceDisplay || `${pkg.price.toLocaleString("de-DE")} €`;
+
     // Erstelle Lead in Supabase
     const { data: result, error } = await supabaseAdmin
       .from("leads")
@@ -60,7 +93,7 @@ export async function POST(request: NextRequest) {
         package_interest: pkg.name,
         message:
           message ||
-          `Interesse an ${pkg.name} (${pkg.price.toLocaleString("de-DE")} € netto)`,
+          `Interesse an ${pkg.name} (${priceText} netto)`,
         status: "new",
         priority: "high",
         created_at: new Date().toISOString(),
@@ -76,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     const leadId = result.id;
 
-    // Optional: Benachrichtigung senden (Telegram/Discord)
+    // Benachrichtigung senden (Telegram/Discord)
     try {
       const { sendNotification } = await import("@/lib/notifications");
       await sendNotification({
@@ -89,7 +122,7 @@ export async function POST(request: NextRequest) {
           packageInterest: pkg.name,
           message:
             message ||
-            `Interesse an ${pkg.name} (${pkg.price.toLocaleString("de-DE")} € netto)`,
+            `Interesse an ${pkg.name} (${priceText} netto)`,
         },
       });
     } catch (notifError) {
@@ -104,6 +137,7 @@ export async function POST(request: NextRequest) {
       leadId,
       package: pkg.name,
       price: pkg.price,
+      priceDisplay: pkg.priceDisplay || `${pkg.price.toLocaleString("de-DE")} €`,
       url: `${baseUrl}/checkout/erfolg?package=${encodeURIComponent(pkg.name)}`,
     });
   } catch (error: any) {
