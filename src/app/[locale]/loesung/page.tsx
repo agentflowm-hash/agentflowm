@@ -734,14 +734,29 @@ function LeistungenSection() {
                     )}
                   </div>
 
-                  {/* Placeholder for visualization */}
+                  {/* Visual with Icon */}
                   <div
-                    className={`${isEven ? "lg:order-2" : "lg:order-1"} h-64 rounded-2xl`}
+                    className={`${isEven ? "lg:order-2" : "lg:order-1"} h-64 rounded-2xl flex items-center justify-center`}
                     style={{
-                      background: `linear-gradient(135deg, ${item.color}10, ${item.color}05)`,
-                      border: `1px solid ${item.color}20`,
+                      background: `linear-gradient(135deg, ${item.color}20, ${item.color}08)`,
+                      border: `2px solid ${item.color}40`,
                     }}
-                  />
+                  >
+                    <div className="text-center">
+                      <div 
+                        className="text-6xl mb-3 opacity-60"
+                        style={{ color: item.color }}
+                      >
+                        {item.icon}
+                      </div>
+                      <span 
+                        className="text-sm font-medium opacity-50"
+                        style={{ color: item.color }}
+                      >
+                        {item.title}
+                      </span>
+                    </div>
+                  </div>
                 </motion.div>
               );
             })}
