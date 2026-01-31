@@ -707,6 +707,7 @@ function PaymentSection() {
 // Comparison Section
 function ComparisonSection() {
   const t = useTranslations("pages.pakete.comparison");
+  const tPackages = useTranslations("pages.pakete.packages");
 
   const features = [
     { key: "pages", start: t("values.start.pages"), business: t("values.business.pages"), konfigurator: t("values.konfigurator.pages") },
@@ -765,7 +766,7 @@ function ComparisonSection() {
                 <th className="p-2 sm:p-3 text-center w-[23%]">
                   <div className="flex flex-col items-center">
                     <span className="text-[#9D65C9] font-bold text-[10px] sm:text-xs">KONFIGURATOR</span>
-                    <span className="text-[8px] sm:text-[10px] text-white/40">auf Anfrage</span>
+                    <span className="text-[8px] sm:text-[10px] text-white/40">{tPackages("onRequest")}</span>
                   </div>
                 </th>
               </tr>
