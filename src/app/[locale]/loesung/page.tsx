@@ -998,13 +998,58 @@ function EigentumSection() {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Visualization Placeholder */}
+            {/* Code Ownership Visualization */}
             <motion.div
-              className="order-2 lg:order-1 h-64 rounded-2xl bg-gradient-to-br from-[#FC682C]/10 to-green-500/5 border border-[#FC682C]/20"
+              className="order-2 lg:order-1 h-72 rounded-2xl bg-gradient-to-br from-[#FC682C]/10 to-green-500/5 border border-[#FC682C]/20 p-5 overflow-hidden"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-            />
+            >
+              {/* Code Editor Mockup */}
+              <div className="h-full rounded-xl bg-black/40 border border-white/10 overflow-hidden">
+                {/* Editor Header */}
+                <div className="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+                    </div>
+                    <span className="text-[10px] text-white/40 ml-2">projekt-repo</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-green-400 text-[10px]">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Dein Code
+                  </div>
+                </div>
+                {/* File Tree */}
+                <div className="p-3 space-y-1.5 text-[11px] font-mono">
+                  <div className="flex items-center gap-2 text-[#FC682C]">
+                    <span>📁</span> <span>src/</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/60 pl-4">
+                    <span>📁</span> <span>components/</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/60 pl-4">
+                    <span>📁</span> <span>pages/</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/60 pl-4">
+                    <span>📁</span> <span>api/</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-green-400">
+                    <span>📄</span> <span>package.json</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-green-400">
+                    <span>📄</span> <span>README.md</span>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-white/10 text-white/40 text-[10px]">
+                    ✓ Vollständige Übergabe • ✓ Dokumentation
+                  </div>
+                </div>
+              </div>
+            </motion.div>
 
             {/* Content */}
             <motion.div
