@@ -734,28 +734,109 @@ function LeistungenSection() {
                     )}
                   </div>
 
-                  {/* Visual with Icon */}
+                  {/* Visual Mockup */}
                   <div
-                    className={`${isEven ? "lg:order-2" : "lg:order-1"} h-64 rounded-2xl flex items-center justify-center`}
+                    className={`${isEven ? "lg:order-2" : "lg:order-1"} h-72 sm:h-80 rounded-2xl overflow-hidden`}
                     style={{
-                      background: `linear-gradient(135deg, ${item.color}20, ${item.color}08)`,
-                      border: `2px solid ${item.color}40`,
+                      background: `linear-gradient(135deg, ${item.color}15, ${item.color}05)`,
+                      border: `1px solid ${item.color}30`,
                     }}
                   >
-                    <div className="text-center">
-                      <div 
-                        className="text-6xl mb-3 opacity-60"
-                        style={{ color: item.color }}
-                      >
-                        {item.icon}
+                    {/* Website Mockup */}
+                    {i === 0 && (
+                      <div className="h-full p-4 flex flex-col">
+                        {/* Browser Chrome */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+                          </div>
+                          <div className="flex-1 h-5 rounded bg-white/10 mx-2" />
+                        </div>
+                        {/* Website Content */}
+                        <div className="flex-1 rounded-lg bg-white/5 p-3 space-y-3">
+                          <div className="flex justify-between items-center">
+                            <div className="w-16 h-4 rounded bg-cyan-500/40" />
+                            <div className="flex gap-2">
+                              <div className="w-10 h-3 rounded bg-white/20" />
+                              <div className="w-10 h-3 rounded bg-white/20" />
+                              <div className="w-14 h-5 rounded bg-[#FC682C]/60" />
+                            </div>
+                          </div>
+                          <div className="pt-4 space-y-2">
+                            <div className="w-3/4 h-6 rounded bg-white/20" />
+                            <div className="w-1/2 h-4 rounded bg-white/10" />
+                          </div>
+                          <div className="flex gap-2 pt-2">
+                            <div className="w-20 h-8 rounded bg-cyan-500/50" />
+                            <div className="w-20 h-8 rounded border border-white/20" />
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 pt-4">
+                            <div className="h-16 rounded bg-white/5 border border-white/10" />
+                            <div className="h-16 rounded bg-white/5 border border-white/10" />
+                            <div className="h-16 rounded bg-white/5 border border-white/10" />
+                          </div>
+                        </div>
                       </div>
-                      <span 
-                        className="text-sm font-medium opacity-50"
-                        style={{ color: item.color }}
-                      >
-                        {item.title}
-                      </span>
-                    </div>
+                    )}
+                    {/* Workflow Mockup */}
+                    {i === 1 && (
+                      <div className="h-full p-6 flex items-center justify-center">
+                        <div className="flex items-center gap-3">
+                          {/* Step 1 */}
+                          <div className="flex flex-col items-center">
+                            <div className="w-14 h-14 rounded-xl bg-orange-500/30 border border-orange-500/50 flex items-center justify-center text-orange-400 text-xl">📥</div>
+                            <span className="text-[10px] text-white/50 mt-1.5">Anfrage</span>
+                          </div>
+                          <div className="w-8 h-0.5 bg-gradient-to-r from-orange-500/50 to-orange-500/20" />
+                          {/* Step 2 */}
+                          <div className="flex flex-col items-center">
+                            <div className="w-14 h-14 rounded-xl bg-orange-500/30 border border-orange-500/50 flex items-center justify-center text-orange-400 text-xl">⚡</div>
+                            <span className="text-[10px] text-white/50 mt-1.5">Verarbeiten</span>
+                          </div>
+                          <div className="w-8 h-0.5 bg-gradient-to-r from-orange-500/50 to-orange-500/20" />
+                          {/* Step 3 */}
+                          <div className="flex flex-col items-center">
+                            <div className="w-14 h-14 rounded-xl bg-orange-500/30 border border-orange-500/50 flex items-center justify-center text-orange-400 text-xl">✅</div>
+                            <span className="text-[10px] text-white/50 mt-1.5">Erledigt</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {/* App Mockup */}
+                    {i === 2 && (
+                      <div className="h-full p-4 flex items-center justify-center gap-4">
+                        {/* Phone */}
+                        <div className="w-28 h-52 rounded-2xl bg-black/50 border-2 border-purple-500/40 p-1.5 relative">
+                          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full bg-white/20" />
+                          <div className="h-full rounded-xl bg-gradient-to-b from-purple-500/20 to-purple-500/5 p-2 pt-4">
+                            <div className="w-full h-3 rounded bg-white/20 mb-2" />
+                            <div className="w-2/3 h-2 rounded bg-white/10 mb-3" />
+                            <div className="space-y-1.5">
+                              <div className="h-8 rounded bg-white/10" />
+                              <div className="h-8 rounded bg-white/10" />
+                              <div className="h-8 rounded bg-purple-500/40" />
+                            </div>
+                          </div>
+                        </div>
+                        {/* Tablet */}
+                        <div className="w-36 h-48 rounded-xl bg-black/50 border-2 border-purple-500/40 p-1.5 hidden sm:block">
+                          <div className="h-full rounded-lg bg-gradient-to-b from-purple-500/20 to-purple-500/5 p-2">
+                            <div className="flex justify-between mb-2">
+                              <div className="w-10 h-3 rounded bg-purple-500/40" />
+                              <div className="w-6 h-3 rounded bg-white/20" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              <div className="h-14 rounded bg-white/10" />
+                              <div className="h-14 rounded bg-white/10" />
+                              <div className="h-14 rounded bg-white/10" />
+                              <div className="h-14 rounded bg-white/10" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               );
