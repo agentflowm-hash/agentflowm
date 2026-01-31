@@ -2509,9 +2509,9 @@
         "badge": "✅ Trusted",
         "headline": "Numbers that speak for themselves",
         "stats": {
-          "workflows": "Workflows available",
-          "uptime": "Uptime guaranteed",
-          "support": "Support",
+          "bots": "Premium Bots",
+          "workflows": "Workflows",
+          "integrations": "Integrations",
           "rating": "Rating"
         },
         "badges": {

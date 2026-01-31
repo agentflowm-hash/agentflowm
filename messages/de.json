@@ -2509,9 +2509,9 @@
         "badge": "✅ Vertrauenswürdig",
         "headline": "Zahlen, die für sich sprechen",
         "stats": {
-          "workflows": "Workflows verfügbar",
-          "uptime": "Uptime garantiert",
-          "support": "Support",
+          "bots": "Premium Bots",
+          "workflows": "Workflows",
+          "integrations": "Integrationen",
           "rating": "Bewertung"
         },
         "badges": {

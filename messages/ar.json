@@ -2686,9 +2686,9 @@
         "badge": "✅ موثوق",
         "headline": "أرقام تتحدث عن نفسها",
         "stats": {
-          "workflows": "سير عمل متاح",
-          "uptime": "وقت تشغيل مضمون",
-          "support": "دعم",
+          "bots": "روبوتات مميزة",
+          "workflows": "سير عمل",
+          "integrations": "تكاملات",
           "rating": "تقييم"
         },
         "badges": {

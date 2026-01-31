@@ -2550,9 +2550,9 @@ export default function WorkflowsPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {[
-              { value: "30+", label: t("trust.stats.workflows") },
-              { value: "99.9%", label: t("trust.stats.uptime") },
-              { value: "24/7", label: t("trust.stats.support") },
+              { value: "108+", label: t("trust.stats.bots") },
+              { value: "2.061", label: t("trust.stats.workflows") },
+              { value: "187+", label: t("trust.stats.integrations") },
               { value: "⭐ 5.0", label: t("trust.stats.rating") },
             ].map((stat, i) => (
               <div key={i} className="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
