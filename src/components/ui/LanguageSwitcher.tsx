@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { locales, localeNames, type Locale } from "@/i18n/config";
+import { locales, localeNames, getLocalesForDomain, type Locale } from "@/i18n/config";
 
 interface LanguageSwitcherProps {
   locale: Locale;
@@ -10,9 +10,16 @@ interface LanguageSwitcherProps {
 
 export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [allowedLocales, setAllowedLocales] = useState<readonly Locale[]>(locales);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    // Hole erlaubte Sprachen für aktuelle Domain
+    const hostname = window.location.hostname;
+    setAllowedLocales(getLocalesForDomain(hostname));
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -38,11 +45,16 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
       }
     }
 
-    // Add new locale prefix (unless it's the default and we use as-needed)
-    const finalPath = newLocale === "en" ? newPath : `/${newLocale}${newPath}`;
+    // Add new locale prefix
+    const finalPath = `/${newLocale}${newPath}`;
     router.push(finalPath);
     setIsOpen(false);
   };
+
+  // Nur anzeigen wenn mehr als eine Sprache erlaubt ist
+  if (allowedLocales.length <= 1) {
+    return null;
+  }
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -77,7 +89,7 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-36 rounded-xl bg-[#0f0f12] border border-white/10 shadow-2xl shadow-black/50 z-50 overflow-hidden">
-          {locales.map((loc) => (
+          {allowedLocales.map((loc) => (
             <button
               key={loc}
               onClick={() => switchLocale(loc)}

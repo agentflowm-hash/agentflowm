@@ -1,10 +1,17 @@
 import { MetadataRoute } from 'next';
 
+// ═══════════════════════════════════════════════════════════════
+//                    SITEMAP
+// Domain-basierte Sprachen:
+// - agentflowm.de → Nur Deutsch
+// - agentflowm.com → Englisch + Arabisch
+// ═══════════════════════════════════════════════════════════════
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrlCom = 'https://agentflowm.com';
   const baseUrlDe = 'https://agentflowm.de';
 
-  // KORRIGIERT: Nur Seiten die tatsächlich existieren!
+  // Alle Seiten (nur existierende!)
   const pages = [
     '',
     '/pakete',
@@ -30,7 +37,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const now = new Date().toISOString();
 
-  // Generate sitemap entries for .com (EN and AR)
+  // ═══════════════════════════════════════════════════════════════
+  // agentflowm.com → Englisch + Arabisch
+  // ═══════════════════════════════════════════════════════════════
+  
   const comEnPages = pages.map((page) => ({
     url: `${baseUrlCom}/en${page}`,
     lastModified: now,
@@ -45,7 +55,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: page === '' ? 0.9 : 0.7,
   }));
 
-  // Generate sitemap entries for .de (DE only)
+  // ═══════════════════════════════════════════════════════════════
+  // agentflowm.de → Nur Deutsch
+  // ═══════════════════════════════════════════════════════════════
+  
   const dePages = pages.map((page) => ({
     url: `${baseUrlDe}/de${page}`,
     lastModified: now,
