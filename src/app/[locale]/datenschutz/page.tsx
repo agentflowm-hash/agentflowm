@@ -39,7 +39,7 @@ export default function DatenschutzPage() {
           <p>
             AgentFlowMarketing
             <br />
-            Achillesstrasse 69
+            Achillesstraße 69A
             <br />
             13125 Berlin
             <br />
