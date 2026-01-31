@@ -142,75 +142,98 @@ function AutohausBefore() {
 
 function AutohausAfter() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-[#0f0f1a] via-[#1a1a2e] to-[#0f0f1a] rounded-sm overflow-hidden relative">
-      {/* Ambient glow */}
-      <div className="absolute top-0 right-0 w-20 h-20 bg-[#FC682C]/20 rounded-full blur-xl" />
-      <div className="absolute bottom-0 left-0 w-16 h-16 bg-blue-500/10 rounded-full blur-xl" />
+    <div className="w-full h-full bg-gradient-to-br from-[#0a0a12] via-[#12121f] to-[#0a0a12] rounded-sm overflow-hidden relative">
+      {/* Ambient glows */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[#FC682C]/15 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl" />
+      <div className="absolute top-1/2 left-1/2 w-20 h-20 bg-purple-500/5 rounded-full blur-xl" />
       
-      {/* Header */}
-      <div className="h-7 bg-black/40 backdrop-blur-sm flex items-center px-2 gap-2 border-b border-white/5">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded bg-gradient-to-br from-[#FC682C] to-[#e63946] flex items-center justify-center">
-            <span className="text-[5px] text-white font-bold">A</span>
+      {/* Top Navigation Bar */}
+      <div className="h-8 bg-black/60 backdrop-blur-md flex items-center px-2 border-b border-white/10">
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-[#FC682C] to-[#c41e3a] flex items-center justify-center shadow-lg shadow-[#FC682C]/30">
+            <span className="text-[7px] text-white font-black">AS</span>
           </div>
-          <span className="text-[8px] font-bold text-white tracking-wide">AUTOHAUS</span>
+          <div className="leading-none">
+            <span className="text-[8px] font-bold text-white block">AUTOHAUS</span>
+            <span className="text-[5px] text-[#FC682C]">SCHMIDT</span>
+          </div>
         </div>
-        <div className="flex gap-2 ml-auto">
-          {['Fahrzeuge', 'Service', 'Kontakt'].map(item => (
-            <span key={item} className="text-[6px] text-white/50 hover:text-white/80">{item}</span>
+        <div className="flex gap-3 ml-4">
+          {['🏠 Home', '🚗 Fahrzeuge', '🔧 Service', '📞 Kontakt'].map((item, i) => (
+            <span key={item} className={`text-[6px] ${i === 1 ? 'text-[#FC682C] font-bold' : 'text-white/50'}`}>{item}</span>
           ))}
         </div>
-        <div className="px-2 py-1 bg-gradient-to-r from-[#FC682C] to-[#e63946] rounded text-[6px] text-white font-medium shadow-lg shadow-[#FC682C]/30">
-          Termin →
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="text-[5px] text-green-400">● Online</span>
+          <div className="px-2 py-1 bg-gradient-to-r from-[#FC682C] to-[#c41e3a] rounded-md text-[6px] text-white font-bold shadow-lg shadow-[#FC682C]/40">
+            Termin buchen
+          </div>
         </div>
       </div>
       
-      {/* Hero */}
-      <div className="p-2">
-        <div className="h-20 bg-gradient-to-r from-[#FC682C]/20 via-[#FC682C]/10 to-transparent rounded-lg mb-2 flex items-center px-3 relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-16 h-full bg-gradient-to-l from-white/5 to-transparent" />
-          <div className="relative z-10">
-            <div className="text-[10px] font-bold text-white mb-0.5">Premium Fahrzeuge</div>
-            <div className="text-[7px] text-white/60 mb-2">Qualität, die überzeugt</div>
-            <div className="flex gap-1">
-              <div className="h-4 px-2 bg-gradient-to-r from-[#FC682C] to-[#e63946] rounded text-[6px] text-white flex items-center shadow-lg">
-                🚗 Entdecken
-              </div>
-              <div className="h-4 px-2 bg-white/10 border border-white/20 rounded text-[6px] text-white/80 flex items-center">
-                📅 Buchen
-              </div>
-            </div>
-          </div>
+      {/* Page Content - Fahrzeuge */}
+      <div className="p-2 h-[calc(100%-2rem)] overflow-hidden">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1 mb-2 text-[5px] text-white/40">
+          <span>Home</span><span>›</span><span className="text-[#FC682C]">Fahrzeuge</span>
         </div>
         
-        {/* Vehicle Cards */}
-        <div className="grid grid-cols-3 gap-1.5">
+        {/* Filter Bar */}
+        <div className="flex gap-1 mb-2">
+          {['Alle', 'Neu', 'Gebraucht', 'Leasing'].map((f, i) => (
+            <span key={f} className={`px-2 py-0.5 rounded-full text-[5px] ${i === 0 ? 'bg-[#FC682C] text-white' : 'bg-white/5 text-white/50'}`}>{f}</span>
+          ))}
+          <span className="ml-auto text-[5px] text-white/30">127 Fahrzeuge</span>
+        </div>
+        
+        {/* Vehicle Grid */}
+        <div className="grid grid-cols-3 gap-1.5 mb-2">
           {[
-            { name: 'BMW M3', price: '€89.900', tag: 'NEU' },
-            { name: 'Audi RS6', price: '€125.000', tag: 'TOP' },
-            { name: 'Mercedes AMG', price: '€98.500', tag: '' }
+            { img: '🚗', name: 'BMW M4 Competition', price: '€89.900', km: '12.500 km', year: '2024', tag: 'NEU', tagColor: '#22c55e' },
+            { img: '🏎️', name: 'Porsche 911 GT3', price: '€189.000', km: '3.200 km', year: '2024', tag: 'TOP', tagColor: '#FC682C' },
+            { img: '🚙', name: 'Mercedes AMG GT', price: '€125.500', km: '8.900 km', year: '2023', tag: 'FINANZIERUNG', tagColor: '#8b5cf6' },
           ].map((car, i) => (
-            <div key={i} className="bg-white/5 rounded-lg border border-white/10 overflow-hidden group hover:border-[#FC682C]/30 transition-all">
-              <div className="h-8 bg-gradient-to-br from-white/10 to-white/5 relative">
-                {car.tag && (
-                  <span className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-[#FC682C] rounded text-[4px] text-white font-bold">
-                    {car.tag}
-                  </span>
-                )}
+            <div key={i} className="bg-gradient-to-b from-white/[0.08] to-white/[0.02] rounded-lg border border-white/10 overflow-hidden hover:border-[#FC682C]/50 transition-all group">
+              <div className="h-12 bg-gradient-to-br from-white/10 via-white/5 to-transparent relative flex items-center justify-center">
+                <span className="text-2xl opacity-80 group-hover:scale-110 transition-transform">{car.img}</span>
+                <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[4px] text-white font-bold" style={{backgroundColor: car.tagColor}}>
+                  {car.tag}
+                </span>
+                <span className="absolute top-1 left-1 text-[5px] text-white/40">❤️</span>
               </div>
-              <div className="p-1.5">
-                <div className="text-[6px] font-bold text-white">{car.name}</div>
-                <div className="text-[7px] font-bold text-[#FC682C]">{car.price}</div>
+              <div className="p-1.5 bg-black/20">
+                <div className="text-[6px] font-bold text-white truncate">{car.name}</div>
+                <div className="flex justify-between items-center mt-0.5">
+                  <span className="text-[8px] font-black text-[#FC682C]">{car.price}</span>
+                  <span className="text-[4px] text-white/30">{car.km} • {car.year}</span>
+                </div>
               </div>
             </div>
           ))}
         </div>
         
-        {/* Trust Bar */}
-        <div className="mt-2 flex justify-center gap-3 py-1.5 bg-white/5 rounded-lg">
-          <span className="text-[5px] text-white/40">⭐ 5.0 Google</span>
-          <span className="text-[5px] text-white/40">✓ TÜV Zertifiziert</span>
-          <span className="text-[5px] text-white/40">🏆 Top Händler 2024</span>
+        {/* Bottom Stats & Trust */}
+        <div className="flex items-center justify-between px-2 py-1.5 bg-gradient-to-r from-white/5 via-white/[0.02] to-white/5 rounded-lg border border-white/5">
+          <div className="flex gap-3">
+            <div className="text-center">
+              <div className="text-[8px] font-bold text-[#FC682C]">127</div>
+              <div className="text-[4px] text-white/40">Fahrzeuge</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[8px] font-bold text-green-400">⭐ 4.9</div>
+              <div className="text-[4px] text-white/40">Google</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[8px] font-bold text-blue-400">24h</div>
+              <div className="text-[4px] text-white/40">Antwort</div>
+            </div>
+          </div>
+          <div className="flex gap-2 text-[4px] text-white/30">
+            <span>✓ TÜV</span>
+            <span>✓ Garantie</span>
+            <span>✓ Finanzierung</span>
+          </div>
         </div>
       </div>
     </div>
@@ -252,63 +275,93 @@ function KanzleiBefore() {
 
 function KanzleiAfter() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-[#0a1628] via-[#0d1d35] to-[#0a1628] rounded-sm overflow-hidden relative">
-      {/* Gold accent glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-12 bg-[#c9a227]/15 rounded-full blur-xl" />
+    <div className="w-full h-full bg-gradient-to-br from-[#080d14] via-[#0d1628] to-[#080d14] rounded-sm overflow-hidden relative">
+      {/* Ambient glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 bg-[#c9a227]/10 rounded-full blur-2xl" />
+      <div className="absolute bottom-0 right-0 w-20 h-20 bg-[#c9a227]/5 rounded-full blur-xl" />
       
-      {/* Header */}
-      <div className="h-7 bg-black/30 backdrop-blur-sm flex items-center justify-between px-2 border-b border-[#c9a227]/20">
+      {/* Navigation */}
+      <div className="h-8 bg-black/50 backdrop-blur-md flex items-center justify-between px-2 border-b border-[#c9a227]/20">
         <div className="flex items-center gap-1.5">
-          <div className="w-4 h-4 rounded bg-gradient-to-br from-[#c9a227] to-[#a08520] flex items-center justify-center">
-            <span className="text-[6px] text-black font-bold">M</span>
+          <div className="w-5 h-5 rounded bg-gradient-to-br from-[#c9a227] to-[#8b7355] flex items-center justify-center shadow-lg shadow-[#c9a227]/20">
+            <span className="text-[7px] text-black font-black">M&P</span>
           </div>
-          <div>
-            <span className="text-[7px] font-serif text-white block leading-none">MUELLER</span>
-            <span className="text-[5px] text-[#c9a227]">& PARTNER</span>
+          <div className="leading-none">
+            <span className="text-[7px] font-serif text-white block">MUELLER & PARTNER</span>
+            <span className="text-[4px] text-[#c9a227]">RECHTSANWÄLTE</span>
           </div>
         </div>
-        <div className="px-2 py-1 bg-gradient-to-r from-[#c9a227] to-[#a08520] rounded text-[5px] text-black font-medium">
-          Mandantenportal
+        <div className="flex gap-2">
+          {['⚖️ Rechtsgebiete', '👥 Team', '📍 Kontakt'].map((item, i) => (
+            <span key={item} className={`text-[5px] ${i === 0 ? 'text-[#c9a227]' : 'text-white/40'}`}>{item}</span>
+          ))}
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[5px] text-white/60">
+            🔐 Login
+          </div>
+          <div className="px-2 py-1 bg-gradient-to-r from-[#c9a227] to-[#a08520] rounded text-[5px] text-black font-bold shadow-lg">
+            Beratung anfragen
+          </div>
         </div>
       </div>
       
-      {/* Content */}
-      <div className="p-2">
-        {/* Hero Text */}
-        <div className="text-center mb-2 py-2">
-          <div className="text-[9px] font-serif text-white mb-0.5">Kompetenz & Vertrauen</div>
-          <div className="text-[6px] text-white/50">Ihre Kanzlei für Rechtsfragen</div>
+      {/* Content - Rechtsgebiete Page */}
+      <div className="p-2 h-[calc(100%-2rem)]">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1 mb-1.5 text-[4px] text-white/30">
+          <span>Home</span><span>›</span><span className="text-[#c9a227]">Rechtsgebiete</span>
         </div>
         
-        {/* Service Cards */}
+        {/* Page Title */}
+        <div className="mb-2">
+          <h2 className="text-[10px] font-serif text-white mb-0.5">Unsere Rechtsgebiete</h2>
+          <p className="text-[5px] text-white/40">Kompetente Beratung in allen Rechtsfragen</p>
+        </div>
+        
+        {/* Service Grid - Detailed */}
         <div className="grid grid-cols-2 gap-1.5 mb-2">
           {[
-            { icon: '⚖️', name: 'Arbeitsrecht', desc: 'Kündigungsschutz' },
-            { icon: '👨‍👩‍👧', name: 'Familienrecht', desc: 'Scheidung & Sorgerecht' },
-            { icon: '📜', name: 'Erbrecht', desc: 'Testament & Nachlass' },
-            { icon: '📋', name: 'Vertragsrecht', desc: 'Prüfung & Gestaltung' }
+            { icon: '⚖️', name: 'Arbeitsrecht', cases: '2.400+', desc: 'Kündigung • Abfindung • Mobbing', active: true },
+            { icon: '👨‍👩‍👧', name: 'Familienrecht', cases: '1.800+', desc: 'Scheidung • Sorgerecht • Unterhalt', active: false },
+            { icon: '📜', name: 'Erbrecht', cases: '950+', desc: 'Testament • Pflichtteil • Nachlass', active: false },
+            { icon: '🏢', name: 'Handelsrecht', cases: '1.200+', desc: 'Verträge • Gesellschaft • M&A', active: false },
           ].map((item, i) => (
-            <div key={i} className="p-1.5 bg-white/5 rounded-lg border border-[#c9a227]/20 hover:border-[#c9a227]/40 transition-all">
-              <div className="flex items-start gap-1">
-                <span className="text-[8px]">{item.icon}</span>
-                <div>
-                  <div className="text-[6px] font-medium text-white">{item.name}</div>
-                  <div className="text-[5px] text-white/40">{item.desc}</div>
+            <div key={i} className={`p-1.5 rounded-lg border transition-all ${item.active ? 'bg-[#c9a227]/10 border-[#c9a227]/40' : 'bg-white/[0.03] border-white/5 hover:border-[#c9a227]/20'}`}>
+              <div className="flex items-start gap-1.5">
+                <span className="text-[12px]">{item.icon}</span>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <span className="text-[6px] font-bold text-white">{item.name}</span>
+                    <span className="text-[4px] text-[#c9a227]">{item.cases} Fälle</span>
+                  </div>
+                  <div className="text-[4px] text-white/40 mt-0.5">{item.desc}</div>
+                  <div className="mt-1 flex gap-1">
+                    <span className="px-1 py-0.5 bg-white/5 rounded text-[4px] text-white/50">Details →</span>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
         
-        {/* CTA */}
-        <div className="h-6 bg-gradient-to-r from-[#c9a227] to-[#a08520] rounded-lg flex items-center justify-center gap-1 shadow-lg shadow-[#c9a227]/20">
-          <span className="text-[7px] text-black font-medium">🔐 Zum Mandantenportal</span>
-        </div>
-        
-        {/* Trust */}
-        <div className="mt-1.5 flex justify-center gap-2 text-[5px] text-white/30">
-          <span>✓ BRAO zertifiziert</span>
-          <span>✓ Erstberatung kostenlos</span>
+        {/* Bottom Bar - Trust + CTA */}
+        <div className="flex items-center justify-between p-1.5 bg-gradient-to-r from-[#c9a227]/10 via-transparent to-[#c9a227]/10 rounded-lg border border-[#c9a227]/20">
+          <div className="flex gap-3">
+            <div className="text-center">
+              <div className="text-[7px] font-bold text-[#c9a227]">98%</div>
+              <div className="text-[4px] text-white/30">Erfolgsquote</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[7px] font-bold text-white">⭐ 4.9</div>
+              <div className="text-[4px] text-white/30">Bewertung</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[7px] font-bold text-green-400">24h</div>
+              <div className="text-[4px] text-white/30">Rückruf</div>
+            </div>
+          </div>
+          <div className="text-[4px] text-white/20">✓ Erstberatung kostenlos • ✓ BRAO</div>
         </div>
       </div>
     </div>
@@ -343,64 +396,103 @@ function PraxisBefore() {
 
 function PraxisAfter() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-[#f0f7f4] via-white to-[#e8f5e9] rounded-sm overflow-hidden relative">
+    <div className="w-full h-full bg-gradient-to-br from-[#f8faf9] via-white to-[#f0f7f4] rounded-sm overflow-hidden relative">
       {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-16 h-16 bg-[#40916c]/10 rounded-full blur-xl" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-[#40916c]/10 rounded-full blur-2xl" />
+      <div className="absolute bottom-0 left-0 w-16 h-16 bg-[#40916c]/5 rounded-full blur-xl" />
       
-      {/* Header */}
-      <div className="h-7 bg-white/80 backdrop-blur-sm flex items-center justify-between px-2 border-b border-[#40916c]/20">
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-[#40916c] to-[#2d6a4f] flex items-center justify-center">
-            <span className="text-[6px] text-white">💚</span>
+      {/* Navigation */}
+      <div className="h-8 bg-white/90 backdrop-blur-md flex items-center justify-between px-2 border-b border-[#40916c]/10 shadow-sm">
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#40916c] to-[#2d6a4f] flex items-center justify-center shadow-md">
+            <span className="text-[8px]">🌿</span>
           </div>
-          <div>
-            <span className="text-[7px] font-medium text-[#2d6a4f] block leading-none">Praxis Gesund</span>
-            <span className="text-[5px] text-[#40916c]">Physiotherapie</span>
+          <div className="leading-none">
+            <span className="text-[7px] font-bold text-[#2d6a4f] block">PRAXIS GESUND</span>
+            <span className="text-[4px] text-[#40916c]">Physiotherapie & Wellness</span>
           </div>
         </div>
-        <div className="px-2 py-1 bg-gradient-to-r from-[#40916c] to-[#2d6a4f] rounded text-[5px] text-white font-medium shadow-md">
-          📅 Online Buchen
+        <div className="flex gap-2">
+          {['🏠 Start', '💆 Leistungen', '📅 Termine', '📍 Kontakt'].map((item, i) => (
+            <span key={item} className={`text-[5px] ${i === 2 ? 'text-[#40916c] font-bold' : 'text-gray-400'}`}>{item}</span>
+          ))}
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-[5px] text-green-500">● 3 Termine frei</span>
+          <div className="px-2 py-1 bg-gradient-to-r from-[#40916c] to-[#2d6a4f] rounded text-[5px] text-white font-bold shadow-md">
+            Jetzt buchen
+          </div>
         </div>
       </div>
       
-      {/* Content */}
-      <div className="p-2">
-        {/* Hero */}
-        <div className="h-14 bg-gradient-to-r from-[#40916c]/15 via-[#40916c]/10 to-transparent rounded-lg mb-2 p-2 flex items-center">
+      {/* Content - Booking Page */}
+      <div className="p-2 h-[calc(100%-2rem)]">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1 mb-1.5 text-[4px] text-gray-400">
+          <span>Home</span><span>›</span><span className="text-[#40916c]">Online Terminbuchung</span>
+        </div>
+        
+        {/* Booking Interface */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Left - Service Selection */}
+          <div className="space-y-1.5">
+            <div className="text-[6px] font-bold text-[#2d6a4f] mb-1">1. Leistung wählen</div>
+            {[
+              { icon: '💆', name: 'Klassische Massage', time: '30 Min', price: '€45', selected: true },
+              { icon: '🏃', name: 'Krankengymnastik', time: '45 Min', price: '€55', selected: false },
+              { icon: '💧', name: 'Lymphdrainage', time: '60 Min', price: '€65', selected: false },
+            ].map((s, i) => (
+              <div key={i} className={`p-1.5 rounded-lg border flex items-center gap-1.5 ${s.selected ? 'bg-[#40916c]/10 border-[#40916c]/40' : 'bg-white border-gray-100'}`}>
+                <span className="text-[10px]">{s.icon}</span>
+                <div className="flex-1">
+                  <div className="text-[5px] font-medium text-gray-700">{s.name}</div>
+                  <div className="text-[4px] text-gray-400">{s.time}</div>
+                </div>
+                <span className="text-[6px] font-bold text-[#40916c]">{s.price}</span>
+                {s.selected && <span className="text-[6px] text-[#40916c]">✓</span>}
+              </div>
+            ))}
+          </div>
+          
+          {/* Right - Calendar */}
           <div>
-            <div className="text-[8px] font-bold text-[#2d6a4f] mb-0.5">Ihr Wohlbefinden</div>
-            <div className="text-[6px] text-[#40916c]/70 mb-1">Termine in 30 Sekunden buchen</div>
-            <div className="flex gap-1">
-              <span className="px-1.5 py-0.5 bg-[#40916c] rounded text-[5px] text-white">Jetzt buchen</span>
-              <span className="px-1.5 py-0.5 bg-white border border-[#40916c]/30 rounded text-[5px] text-[#40916c]">Leistungen</span>
+            <div className="text-[6px] font-bold text-[#2d6a4f] mb-1">2. Termin wählen</div>
+            <div className="bg-white rounded-lg border border-gray-100 p-1.5">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-[5px] text-gray-400">‹</span>
+                <span className="text-[5px] font-bold text-gray-600">Februar 2026</span>
+                <span className="text-[5px] text-gray-400">›</span>
+              </div>
+              <div className="grid grid-cols-7 gap-0.5 text-center">
+                {['Mo','Di','Mi','Do','Fr','Sa','So'].map(d => (
+                  <span key={d} className="text-[4px] text-gray-400">{d}</span>
+                ))}
+                {[...Array(28)].map((_, i) => (
+                  <span key={i} className={`text-[5px] w-3 h-3 flex items-center justify-center rounded ${i === 14 ? 'bg-[#40916c] text-white' : i > 10 && i < 20 ? 'text-gray-700 hover:bg-[#40916c]/10' : 'text-gray-300'}`}>
+                    {i + 1}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-1.5 space-y-0.5">
+                <div className="text-[4px] text-gray-500 mb-0.5">Verfügbare Zeiten:</div>
+                <div className="flex flex-wrap gap-0.5">
+                  {['09:00', '10:30', '14:00', '15:30'].map(t => (
+                    <span key={t} className="px-1 py-0.5 bg-[#40916c]/10 rounded text-[4px] text-[#40916c]">{t}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
         
-        {/* Services */}
-        <div className="grid grid-cols-3 gap-1 mb-2">
-          {[
-            { icon: '💆', name: 'Massage' },
-            { icon: '🏃', name: 'Physio' },
-            { icon: '💧', name: 'Lymph' }
-          ].map((s, i) => (
-            <div key={i} className="text-center p-1.5 bg-white rounded-lg border border-[#40916c]/10 shadow-sm">
-              <span className="text-[10px] block">{s.icon}</span>
-              <span className="text-[5px] text-[#2d6a4f] font-medium">{s.name}</span>
-            </div>
-          ))}
-        </div>
-        
-        {/* Features */}
-        <div className="flex justify-between gap-1">
-          <div className="flex-1 p-1.5 bg-white rounded-lg border border-[#40916c]/20 text-center">
-            <span className="text-[7px] text-[#40916c] font-bold block">24/7</span>
-            <span className="text-[5px] text-gray-500">Online-Buchung</span>
+        {/* Bottom Stats */}
+        <div className="mt-2 flex items-center justify-between p-1.5 bg-[#40916c]/5 rounded-lg">
+          <div className="flex gap-3 text-center">
+            <div><span className="text-[7px] font-bold text-[#40916c]">⭐ 4.9</span><span className="text-[4px] text-gray-400 block">Google</span></div>
+            <div><span className="text-[7px] font-bold text-[#2d6a4f]">2.500+</span><span className="text-[4px] text-gray-400 block">Patienten</span></div>
+            <div><span className="text-[7px] font-bold text-green-500">24/7</span><span className="text-[4px] text-gray-400 block">Buchung</span></div>
           </div>
-          <div className="flex-1 p-1.5 bg-white rounded-lg border border-[#40916c]/20 text-center">
-            <span className="text-[7px] text-[#40916c] font-bold block">⭐ 4.9</span>
-            <span className="text-[5px] text-gray-500">Bewertung</span>
-          </div>
+          <span className="text-[4px] text-gray-400">✓ Alle Kassen • ✓ Rezeptpflichtig</span>
         </div>
       </div>
     </div>
