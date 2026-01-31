@@ -4,26 +4,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrlCom = 'https://agentflowm.com';
   const baseUrlDe = 'https://agentflowm.de';
 
-  // Common pages for both domains
+  // KORRIGIERT: Nur Seiten die tatsächlich existieren!
   const pages = [
     '',
     '/pakete',
-    '/pakete/starter',
+    '/pakete/start',
     '/pakete/growth',
-    '/pakete/scale',
-    '/pakete/enterprise',
-    '/pakete/compare',
+    '/pakete/business',
+    '/pakete/custom',
+    '/pakete/one-page',
+    '/pakete/webapp',
+    '/pakete/mobile',
+    '/pakete/konfigurator',
     '/projekte',
     '/loesung',
     '/workflows',
-    '/workflows/chatbot',
-    '/workflows/email-automation',
-    '/workflows/crm-integration',
-    '/workflows/analytics',
     '/tools',
     '/kontakt',
     '/termin',
-    '/empfehlen',
+    '/referral',
     '/website-check',
     '/impressum',
     '/datenschutz',
