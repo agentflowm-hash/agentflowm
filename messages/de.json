@@ -1799,7 +1799,7 @@
       "responsibleTitle": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV",
       "responsibleName": "Alex Shaer",
       "euDisputeTitle": "EU-Streitschlichtung",
-      "euDisputeText": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:",
+      "euDisputeText": "Die EU-Plattform zur Online-Streitbeilegung (ODR) wurde am 20.07.2025 eingestellt. Alternative Streitbeilegungsstellen finden Sie unter:",
       "euDisputeNote": "Unsere E-Mail-Adresse finden Sie oben im Impressum.",
       "consumerDisputeTitle": "Verbraucherstreitbeilegung/Universalschlichtungsstelle",
       "consumerDisputeText": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
@@ -2739,6 +2739,59 @@
         "createLink": "Empfehlungslink erstellen",
         "bookAppointment": "Termin buchen",
         "tagline": "Link teilen. Klarheit schaffen. Systeme starten."
+      }
+    },
+    "agb": {
+      "title": "Allgemeine Geschäftsbedingungen (AGB)",
+      "metaTitle": "AGB - AgentFlowMarketing",
+      "lastUpdated": "Stand: Februar 2026",
+      "scope": {
+        "title": "§1 Geltungsbereich",
+        "text": "Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge zwischen AgentFlowMarketing, Achillesstrasse 69, 13125 Berlin (nachfolgend 'Anbieter') und dem Kunden über die Erbringung von Webdesign-, Webentwicklungs- und Automatisierungsdienstleistungen."
+      },
+      "services": {
+        "title": "§2 Leistungsbeschreibung",
+        "text": "Der Anbieter erbringt Dienstleistungen im Bereich Webdesign, Webentwicklung, Workflow-Automatisierung und digitale Lösungen. Der genaue Leistungsumfang ergibt sich aus dem jeweiligen Angebot bzw. der Leistungsbeschreibung."
+      },
+      "contract": {
+        "title": "§3 Vertragsschluss",
+        "text": "Der Vertrag kommt durch die schriftliche Auftragsbestätigung des Anbieters oder durch den Beginn der Leistungserbringung zustande. Angebote des Anbieters sind freibleibend und unverbindlich."
+      },
+      "prices": {
+        "title": "§4 Preise und Zahlungsbedingungen",
+        "text": "Alle angegebenen Preise verstehen sich zuzüglich der gesetzlichen Mehrwertsteuer. Die Zahlung erfolgt nach Vereinbarung, in der Regel 50% bei Auftragserteilung und 50% bei Fertigstellung."
+      },
+      "payment": {
+        "title": "§5 Zahlungsmodalitäten",
+        "text": "Zahlungen sind innerhalb von 14 Tagen nach Rechnungsstellung fällig. Bei Zahlungsverzug behält sich der Anbieter vor, die Arbeiten einzustellen und Verzugszinsen zu berechnen."
+      },
+      "delivery": {
+        "title": "§6 Lieferung und Abnahme",
+        "text": "Die Lieferzeiten werden individuell vereinbart. Der Kunde ist zur Abnahme verpflichtet, wenn die vereinbarte Leistung vertragsgemäß erbracht wurde. Die Abnahme gilt als erteilt, wenn der Kunde nicht innerhalb von 14 Tagen nach Bereitstellung schriftlich Mängel rügt."
+      },
+      "warranty": {
+        "title": "§7 Gewährleistung",
+        "text": "Der Anbieter gewährleistet, dass die erbrachten Leistungen dem vereinbarten Leistungsumfang entsprechen. Mängel sind unverzüglich schriftlich zu rügen. Die Gewährleistungsfrist beträgt 12 Monate ab Abnahme."
+      },
+      "liability": {
+        "title": "§8 Haftung",
+        "text": "Der Anbieter haftet unbeschränkt für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit. Im Übrigen haftet der Anbieter nur bei Vorsatz und grober Fahrlässigkeit. Die Haftung ist auf den vertragstypischen, vorhersehbaren Schaden begrenzt."
+      },
+      "ip": {
+        "title": "§9 Nutzungsrechte und Urheberrecht",
+        "text": "Mit vollständiger Bezahlung erhält der Kunde die ausschließlichen Nutzungsrechte an den erstellten Werken für den vereinbarten Zweck. Das Urheberrecht verbleibt beim Anbieter. Der Anbieter ist berechtigt, die Arbeiten als Referenz zu verwenden."
+      },
+      "confidentiality": {
+        "title": "§10 Vertraulichkeit",
+        "text": "Beide Parteien verpflichten sich, alle im Rahmen der Zusammenarbeit erlangten vertraulichen Informationen geheim zu halten und nur für die vereinbarten Zwecke zu verwenden."
+      },
+      "termination": {
+        "title": "§11 Kündigung",
+        "text": "Dauerschuldverhältnisse können von beiden Parteien mit einer Frist von einem Monat zum Monatsende gekündigt werden. Das Recht zur außerordentlichen Kündigung aus wichtigem Grund bleibt unberührt."
+      },
+      "finalProvisions": {
+        "title": "§12 Schlussbestimmungen",
+        "text": "Es gilt das Recht der Bundesrepublik Deutschland. Erfüllungsort und Gerichtsstand ist Berlin, sofern der Kunde Kaufmann ist. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt."
       }
     }
   },

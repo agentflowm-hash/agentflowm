@@ -42,12 +42,12 @@ export default function ImpressumPage() {
           <p>
             {t("euDisputeText")}{" "}
             <a
-              href="https://ec.europa.eu/consumers/odr/"
+              href="https://consumer-redress.ec.europa.eu/dispute-resolution-bodies"
               target="_blank"
               rel="noopener nofollow"
               className="text-[var(--color-accent)] hover:underline"
             >
-              https://ec.europa.eu/consumers/odr/
+              https://consumer-redress.ec.europa.eu/dispute-resolution-bodies
             </a>
           </p>
           <p>{t("euDisputeNote")}</p>

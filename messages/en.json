@@ -1799,7 +1799,7 @@
       "responsibleTitle": "Responsible for content according to Section 55 para. 2 RStV",
       "responsibleName": "Alex Shaer",
       "euDisputeTitle": "EU Dispute Resolution",
-      "euDisputeText": "The European Commission provides a platform for online dispute resolution (OS):",
+      "euDisputeText": "The EU Online Dispute Resolution (ODR) platform was discontinued on 20.07.2025. Alternative dispute resolution bodies can be found at:",
       "euDisputeNote": "Our email address can be found above in the imprint.",
       "consumerDisputeTitle": "Consumer Dispute Resolution/Universal Arbitration Board",
       "consumerDisputeText": "We are not willing or obliged to participate in dispute resolution proceedings before a consumer arbitration board.",
@@ -2739,6 +2739,59 @@
         "createLink": "Create referral link",
         "bookAppointment": "Book appointment",
         "tagline": "Share link. Create clarity. Start systems."
+      }
+    },
+    "agb": {
+      "title": "Terms and Conditions",
+      "metaTitle": "Terms - AgentFlowMarketing",
+      "lastUpdated": "Last updated: February 2026",
+      "scope": {
+        "title": "§1 Scope",
+        "text": "These General Terms and Conditions apply to all contracts between AgentFlowMarketing, Achillesstrasse 69, 13125 Berlin (hereinafter 'Provider') and the customer for the provision of web design, web development, and automation services."
+      },
+      "services": {
+        "title": "§2 Services",
+        "text": "The Provider offers services in web design, web development, workflow automation, and digital solutions. The exact scope of services is defined in the respective offer or service description."
+      },
+      "contract": {
+        "title": "§3 Contract Formation",
+        "text": "The contract is concluded by the Provider's written order confirmation or by the commencement of service provision. The Provider's offers are non-binding and subject to change."
+      },
+      "prices": {
+        "title": "§4 Prices and Payment Terms",
+        "text": "All prices quoted are exclusive of statutory VAT. Payment is made as agreed, typically 50% upon order placement and 50% upon completion."
+      },
+      "payment": {
+        "title": "§5 Payment Methods",
+        "text": "Payments are due within 14 days of invoicing. In case of payment delay, the Provider reserves the right to suspend work and charge default interest."
+      },
+      "delivery": {
+        "title": "§6 Delivery and Acceptance",
+        "text": "Delivery times are individually agreed. The customer is obligated to accept the work when the agreed service has been provided in accordance with the contract. Acceptance is deemed given if the customer does not report defects in writing within 14 days of delivery."
+      },
+      "warranty": {
+        "title": "§7 Warranty",
+        "text": "The Provider warrants that the services provided correspond to the agreed scope. Defects must be reported in writing without delay. The warranty period is 12 months from acceptance."
+      },
+      "liability": {
+        "title": "§8 Liability",
+        "text": "The Provider is fully liable for damages resulting from injury to life, body, or health. Otherwise, the Provider is only liable for intent and gross negligence. Liability is limited to typical, foreseeable damages."
+      },
+      "ip": {
+        "title": "§9 Usage Rights and Copyright",
+        "text": "Upon full payment, the customer receives exclusive usage rights to the created works for the agreed purpose. Copyright remains with the Provider. The Provider is entitled to use the work as a reference."
+      },
+      "confidentiality": {
+        "title": "§10 Confidentiality",
+        "text": "Both parties undertake to keep all confidential information obtained during the cooperation secret and to use it only for the agreed purposes."
+      },
+      "termination": {
+        "title": "§11 Termination",
+        "text": "Ongoing contracts can be terminated by either party with one month's notice to the end of the month. The right to extraordinary termination for good cause remains unaffected."
+      },
+      "finalProvisions": {
+        "title": "§12 Final Provisions",
+        "text": "The law of the Federal Republic of Germany applies. Place of performance and jurisdiction is Berlin, provided the customer is a merchant. Should individual provisions be invalid, the validity of the remaining provisions remains unaffected."
       }
     }
   },
