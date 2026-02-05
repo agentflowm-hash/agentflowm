@@ -1422,7 +1422,7 @@ function ApprovalsTab({
                     ) : (
                       <button
                         onClick={() => setShowFeedbackFor(approval.id)}
-                        className="px-6 py-2.5 bg-[#FC682C] hover:bg-[#e55d27] text-white rounded-lg text-sm font-medium transition-colors"
+                        className="px-6 py-2.5 bg-[#FC682C] hover:bg-[#e55a1f] text-white rounded-lg text-sm font-medium transition-colors"
                       >
                         Prüfen & Freigeben
                       </button>
