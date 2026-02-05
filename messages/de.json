@@ -184,7 +184,7 @@
       "launch": {
         "name": "LAUNCH",
         "subtitle": "3 Seiten",
-        "price": "5.390",
+        "price": "3.790", "originalPrice": "5.390",
         "desc": "Ein sauberer Start, der keine Leads verliert.",
         "features": [
           "Landingpage + 2 Unterseiten",
@@ -196,7 +196,7 @@
       "business": {
         "name": "BUSINESS",
         "subtitle": "9 Seiten + Workflow",
-        "price": "11.990",
+        "price": "8.390", "originalPrice": "11.990",
         "desc": "Für Unternehmen mit echten Prozessen.",
         "features": [
           "Bis zu 9 Seiten",
@@ -229,7 +229,7 @@
     "items": {
       "webapp": {
         "title": "Web App",
-        "price": "26.990",
+        "price": "18.990", "originalPrice": "26.990",
         "desc": "Komplexe Browser-Anwendungen",
         "features": [
           "Login & Dashboard",
@@ -239,7 +239,7 @@
       },
       "mobile": {
         "title": "Mobile App",
-        "price": "51.490",
+        "price": "35.990", "originalPrice": "51.490",
         "desc": "Native Apps für iOS & Android",
         "features": [
           "Native Performance",
@@ -409,7 +409,7 @@
           "start": {
             "name": "START",
             "subtitle": "Website + Admin",
-            "price": "5.390",
+            "price": "3.790", "originalPrice": "5.390",
             "forWho": "Schneller, professioneller Start",
             "features": [
               "Landingpage + 2 Unterseiten",
@@ -423,7 +423,7 @@
           "business": {
             "name": "BUSINESS",
             "subtitle": "Website + Admin + Portale",
-            "price": "11.990",
+            "price": "8.390", "originalPrice": "11.990",
             "forWho": "Wachstum mit Struktur",
             "features": [
               "Bis zu 9 Seiten",
@@ -466,7 +466,7 @@
           "webapp": {
             "name": "Web App",
             "subtitle": "Festpreis",
-            "price": "26.990",
+            "price": "18.990", "originalPrice": "26.990",
             "highlight": "Browserbasiert",
             "desc": "Browserbasiertes System mit Logins, Rollen, Bereichen - produktionsreife Umsetzung.",
             "features": [
@@ -482,7 +482,7 @@
           "mobile": {
             "name": "Mobile App",
             "subtitle": "iOS/Android (Festpreis)",
-            "price": "51.490",
+            "price": "35.990", "originalPrice": "51.490",
             "highlight": "Store-ready",
             "desc": "Komplette App-Umsetzung als stabiles System - skalierbar und sauber übergeben.",
             "features": [
@@ -585,7 +585,7 @@
         "titleSuffix": " Paket",
         "subtitle": "Website + Admin-Portal",
         "description": "Für wen: Schneller, professioneller Start - sofort professionell, sofort stark im Kontakt. Ideal wenn du schnell live gehen willst - ohne später alles neu bauen zu müssen.",
-        "price": "5.390",
+        "price": "3.790", "originalPrice": "5.390",
         "priceUnit": "einmalig",
         "timeline": "Umsetzungszeit",
         "timelineValue": "1-2 Wochen",
@@ -666,7 +666,7 @@
         "titleSuffix": " Paket",
         "subtitle": "Website + Admin + Portale",
         "description": "Für Unternehmen, die wachsen wollen - mit Kontrolle, Überblick und internen Bereichen. Das ist das Paket für Unternehmen, die nicht nur online sein wollen, sondern interne Struktur brauchen.",
-        "price": "11.990",
+        "price": "8.390", "originalPrice": "11.990",
         "priceUnit": "einmalig",
         "timeline": "Umsetzungszeit",
         "timelineValue": "3-4 Wochen",
@@ -1056,7 +1056,7 @@
           "title": "Web App",
           "subtitle": "Browserbasiertes System - produktionsreife Umsetzung",
           "description": "Ein komplettes browserbasiertes System mit Logins, Rollen und Bereichen. Keine Installation nötig - deine Nutzer greifen einfach über den Browser zu.",
-          "price": "26.990",
+          "price": "18.990", "originalPrice": "26.990",
           "priceLabel": "Festpreis",
           "included": "Inklusive",
           "codeHandover": "Code-Übergabe",
@@ -1158,7 +1158,7 @@
           "titleSuffix": "iOS & Android",
           "subtitle": "Komplette App-Umsetzung - skalierbar und sauber übergeben",
           "description": "Eine komplette native App für iOS und Android. Professionell entwickelt, getestet und bereit zur Veröffentlichung in den App Stores.",
-          "price": "51.490",
+          "price": "35.990", "originalPrice": "51.490",
           "priceLabel": "Festpreis",
           "included": "Inklusive",
           "platforms": "iOS + Android",

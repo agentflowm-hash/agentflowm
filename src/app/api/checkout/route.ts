@@ -10,12 +10,12 @@ const PACKAGES: Record<
   // Website Pakete
   start: {
     name: "START",
-    price: 5390,
+    price: 3790,
     description: "Website + Admin - Schneller, professioneller Start",
   },
   business: {
     name: "BUSINESS",
-    price: 11990,
+    price: 8390,
     description: "Website + Admin + Portale - Wachstum mit Struktur",
   },
   konfigurator: {
@@ -27,12 +27,12 @@ const PACKAGES: Record<
   // App Pakete
   webapp: {
     name: "Web App",
-    price: 26990,
+    price: 18990,
     description: "Browserbasiertes System mit Logins, Rollen, Bereichen",
   },
   mobile: {
     name: "Mobile App",
-    price: 51490,
+    price: 35990,
     description: "iOS/Android - Komplette App-Umsetzung als stabiles System",
   },
   enterprise: {
@@ -44,12 +44,12 @@ const PACKAGES: Record<
   // Legacy Support (für alte Links)
   "one-page": {
     name: "One Page (Legacy → START)",
-    price: 5390,
+    price: 3790,
     description: "Weitergeleitet zu START Paket",
   },
   growth: {
     name: "Growth (Legacy → BUSINESS)",
-    price: 11990,
+    price: 8390,
     description: "Weitergeleitet zu BUSINESS Paket",
   },
 };

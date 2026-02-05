@@ -184,7 +184,7 @@
       "launch": {
         "name": "LAUNCH",
         "subtitle": "3 Pages",
-        "price": "5,390",
+        "price": "3,790", "originalPrice": "5,390",
         "desc": "A clean start that doesn't lose leads.",
         "features": [
           "Landing page + 2 subpages",
@@ -196,7 +196,7 @@
       "business": {
         "name": "BUSINESS",
         "subtitle": "9 Pages + Workflow",
-        "price": "11,990",
+        "price": "8,390", "originalPrice": "11,990",
         "desc": "For companies with real processes.",
         "features": [
           "Up to 9 pages",
@@ -229,7 +229,7 @@
     "items": {
       "webapp": {
         "title": "Web App",
-        "price": "26,990",
+        "price": "18,990", "originalPrice": "26,990",
         "desc": "Complex browser applications",
         "features": [
           "Login & dashboard",
@@ -239,7 +239,7 @@
       },
       "mobile": {
         "title": "Mobile App",
-        "price": "51,490",
+        "price": "35,990", "originalPrice": "51,490",
         "desc": "Native apps for iOS & Android",
         "features": [
           "Native performance",
@@ -409,7 +409,7 @@
           "start": {
             "name": "START",
             "subtitle": "Website + Admin",
-            "price": "5,390",
+            "price": "3,790", "originalPrice": "5,390",
             "forWho": "Fast, professional start",
             "features": [
               "Landing page + 2 subpages",
@@ -423,7 +423,7 @@
           "business": {
             "name": "BUSINESS",
             "subtitle": "Website + Admin + Portals",
-            "price": "11,990",
+            "price": "8,390", "originalPrice": "11,990",
             "forWho": "Growth with structure",
             "features": [
               "Up to 9 pages",
@@ -466,7 +466,7 @@
           "webapp": {
             "name": "Web App",
             "subtitle": "Fixed Price",
-            "price": "26,990",
+            "price": "18,990", "originalPrice": "26,990",
             "highlight": "Browser-based",
             "desc": "Browser-based system with logins, roles, areas - production-ready implementation.",
             "features": [
@@ -482,7 +482,7 @@
           "mobile": {
             "name": "Mobile App",
             "subtitle": "iOS/Android (Fixed Price)",
-            "price": "51,490",
+            "price": "35,990", "originalPrice": "51,490",
             "highlight": "Store-ready",
             "desc": "Complete app implementation as a stable system - scalable and cleanly handed over.",
             "features": [
@@ -585,7 +585,7 @@
         "titleSuffix": " Package",
         "subtitle": "Website + Admin Portal",
         "description": "For whom: Quick, professional start - immediately professional, immediately strong in contact. Ideal when you want to go live fast - without having to rebuild later.",
-        "price": "5,390",
+        "price": "3,790", "originalPrice": "5,390",
         "priceUnit": "one-time",
         "timeline": "Implementation Time",
         "timelineValue": "1-2 Weeks",
@@ -666,7 +666,7 @@
         "titleSuffix": " Package",
         "subtitle": "Website + Admin + Portals",
         "description": "For companies that want growth - with control, overview, and internal areas. This is the package for companies that don't just want to be online, but need internal structure.",
-        "price": "11,990",
+        "price": "8,390", "originalPrice": "11,990",
         "priceUnit": "one-time",
         "timeline": "Implementation Time",
         "timelineValue": "3-4 Weeks",
@@ -1056,7 +1056,7 @@
           "title": "Web App",
           "subtitle": "Browser-based system - production-ready implementation",
           "description": "A complete browser-based system with logins, roles, and areas. No installation required - your users simply access it via the browser.",
-          "price": "26,990",
+          "price": "18,990", "originalPrice": "26,990",
           "priceLabel": "Fixed Price",
           "included": "Included",
           "codeHandover": "Code Handover",
@@ -1158,7 +1158,7 @@
           "titleSuffix": "iOS & Android",
           "subtitle": "Complete app implementation - scalable and cleanly handed over",
           "description": "A complete native app for iOS and Android. Professionally developed, tested, and ready for publication in the app stores.",
-          "price": "51,490",
+          "price": "35,990", "originalPrice": "51,490",
           "priceLabel": "Fixed Price",
           "included": "Included",
           "platforms": "iOS + Android",

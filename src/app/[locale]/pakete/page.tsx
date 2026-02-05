@@ -753,14 +753,14 @@ function ComparisonSection() {
                 <th className="p-2 sm:p-3 text-center w-[23%]">
                   <div className="flex flex-col items-center">
                     <span className="text-[#FFB347] font-bold text-[10px] sm:text-xs">START</span>
-                    <span className="text-[8px] sm:text-[10px] text-white/40">5.390 €</span>
+                    <span className="text-[8px] sm:text-[10px] text-white/40"><s className="text-white/20">5.390 €</s> 3.790 €</span>
                   </div>
                 </th>
                 <th className="p-2 sm:p-3 text-center w-[23%] bg-[#FC682C]/5 rounded-t-lg">
                   <div className="flex flex-col items-center">
                     <span className="text-[#FC682C] font-bold text-[10px] sm:text-xs">BUSINESS</span>
                     <span className="text-[8px] sm:text-[10px] text-[#FC682C]/70">{t("recommended")}</span>
-                    <span className="text-[8px] sm:text-[10px] text-white/40">11.990 €</span>
+                    <span className="text-[8px] sm:text-[10px] text-white/40"><s className="text-white/20">11.990 €</s> 8.390 €</span>
                   </div>
                 </th>
                 <th className="p-2 sm:p-3 text-center w-[23%]">
