@@ -2834,183 +2834,183 @@
   "international": {
     "hero": {
       "eyebrow": "INTERNATIONAL PROJECTS",
-      "headline": "Aufbau braucht Systeme. Wir bauen sie.",
-      "subheadline": "Syrien bewegt sich – und viele wollen mithelfen oder investieren, wissen aber nicht, wo der sichere Einstieg ist. Wir bauen digitale Systeme, die Schritte, Status und Verantwortlichkeiten klar machen. So entsteht Aufbau, der nachvollziehbar, partnerschaftsfähig und skalierbar ist.",
+      "headline": "Rebuilding needs systems. We build them.",
+      "subheadline": "Syria is moving – and many want to help or invest, but don't know where the safe entry point is. We build digital systems that make steps, status, and responsibilities clear. This creates development that is traceable, partnership-ready, and scalable.",
       "chips": {
-        "chip1": "Systeme statt Chaos",
-        "chip2": "Digital-first Einstieg",
-        "chip3": "Klar & partnerfähig"
+        "chip1": "Systems over chaos",
+        "chip2": "Digital-first entry",
+        "chip3": "Clear & partnership-ready"
       },
       "cta": {
-        "primary": "Termin buchen",
-        "secondary": "Projekte ansehen"
+        "primary": "Book appointment",
+        "secondary": "View projects"
       },
-      "microProof": "Systeme → Plattformen → Partner → Betrieb"
+      "microProof": "Systems → Platforms → Partners → Operations"
     },
     "whySystems": {
-      "headline": "Warum Systeme der sichere Einstieg sind",
-      "intro": "Viele sehen Risiko – weil Abläufe fehlen, Infos verstreut sind und Entscheidungen oft aus dem Bauch kommen. Wir sehen vor allem eine Lücke: fehlende Systeme. Systeme machen Märkte planbarer, weil sie Schritte, Status und Nachweise sichtbar machen. Das senkt Unklarheit – ohne schönzureden.",
+      "headline": "Why systems are the safe entry point",
+      "intro": "Many see risk – because processes are missing, information is scattered, and decisions are often made from gut feeling. We see mainly one gap: missing systems. Systems make markets more plannable because they make steps, status, and evidence visible. This reduces uncertainty – without sugarcoating.",
       "bullets": {
-        "bullet1": "Du startest mit Struktur – nicht mit Bauchgefühl.",
-        "bullet2": "Du investierst in Abläufe, nicht nur in Fläche.",
-        "bullet3": "Du siehst Fortschritt als Status: klarer nächster Schritt.",
-        "bullet4": "Du kannst mitwirken, ohne dauerhaft vor Ort zu sein.",
-        "bullet5": "Partner vor Ort + digitale Plattform = planbarer Aufbau."
+        "bullet1": "You start with structure – not with gut feeling.",
+        "bullet2": "You invest in processes, not just in space.",
+        "bullet3": "You see progress as status: clear next step.",
+        "bullet4": "You can participate without being permanently on-site.",
+        "bullet5": "Partners on-site + digital platform = plannable development."
       }
     },
     "gaps": {
-      "headline": "Wo aktuell die größten Lücken sind",
-      "intro": "Nicht überall fehlt Kapital. Oft fehlen Standards, Prozesse und klare Schnittstellen. Genau dort entstehen Hebel.",
+      "headline": "Where the biggest gaps are right now",
+      "intro": "Not everywhere lacks capital. Often what's missing are standards, processes, and clear interfaces. That's exactly where leverage emerges.",
       "cards": {
         "immobilien": {
-          "title": "Immobilien-Prozesse",
-          "text": "Klare Schritte, Standards und Sicherheits-Checklisten statt Unsicherheit."
+          "title": "Real Estate Processes",
+          "text": "Clear steps, standards, and security checklists instead of uncertainty."
         },
         "renovierung": {
-          "title": "Renovierung & Sanierung",
-          "text": "Qualität wird planbar durch Partner, Abnahme und klare Übergaben."
+          "title": "Renovation & Restoration",
+          "text": "Quality becomes plannable through partners, acceptance, and clear handovers."
         },
         "mobilitaet": {
-          "title": "Mobilität & Werkstätten",
-          "text": "Service-Standards, Teilefluss und Ausbildung schaffen Verlässlichkeit."
+          "title": "Mobility & Workshops",
+          "text": "Service standards, parts flow, and training create reliability."
         },
         "tourismus": {
-          "title": "Tourismus & Orientierung",
-          "text": "Echte Routen, kuratierte Angebote und klare Buchung statt Zufall."
+          "title": "Tourism & Orientation",
+          "text": "Real routes, curated offerings, and clear booking instead of chance."
         },
         "handel": {
-          "title": "Handel & Marktplätze",
-          "text": "Online-Neustart ohne hohes Vorab-Risiko – strukturiert und messbar."
+          "title": "Trade & Marketplaces",
+          "text": "Online restart without high upfront risk – structured and measurable."
         },
         "transfers": {
-          "title": "Transfers & Abwicklung",
-          "text": "Transparente Prozesse mit Status & Nachweis für Nutzer und Partner."
+          "title": "Transfers & Processing",
+          "text": "Transparent processes with status & evidence for users and partners."
         }
       }
     },
     "approach": {
-      "headline": "Wir denken in Vogelperspektive",
-      "text": "Wir bauen nicht einzelne Sachen, die später nicht zusammenpassen. Wir bauen Systeme, die Menschen, Partner und Abläufe verbinden. Erst kommt Struktur: klare Schritte, Rollen, Status und Nachweise. Dann kommt Wachstum: mehr Partner, mehr Regionen, mehr Betrieb – ohne Chaos.",
+      "headline": "We think in bird's eye view",
+      "text": "We don't build individual things that later don't fit together. We build systems that connect people, partners, and processes. First comes structure: clear steps, roles, status, and evidence. Then comes growth: more partners, more regions, more operations – without chaos.",
       "timeline": {
         "step1": {
-          "title": "Lücke erkennen",
-          "sub": "Was fehlt wirklich – und warum?"
+          "title": "Identify gap",
+          "sub": "What's really missing – and why?"
         },
         "step2": {
-          "title": "System bauen",
-          "sub": "Abläufe, Portale, Status, Nachweise."
+          "title": "Build system",
+          "sub": "Processes, portals, status, evidence."
         },
         "step3": {
-          "title": "Partner anschließen",
-          "sub": "Vor Ort + digital: klare Rollen."
+          "title": "Connect partners",
+          "sub": "On-site + digital: clear roles."
         },
         "step4": {
-          "title": "Betrieb skalieren",
-          "sub": "Wachstum mit Standards, nicht Stress."
+          "title": "Scale operations",
+          "sub": "Growth with standards, not stress."
         }
       }
     },
     "projects": {
-      "headline": "Projekte",
-      "intro": "Systeme, die wir aufbauen – mit Partnern, die mitwirken wollen.",
-      "solves": "Was es löst:",
-      "participate": "Wie du mitwirken kannst:",
+      "headline": "Projects",
+      "intro": "Systems we're building – with partners who want to participate.",
+      "solves": "What it solves:",
+      "participate": "How you can participate:",
       "items": {
         "syriascout": {
           "name": "SyriaScout",
-          "miniHeadline": "Immobilien sicher entscheiden – mit klaren Standards.",
-          "about": "SyriaScout verbindet Eigentümer, Makler und Partner über ein System aus Checklisten, Standards und klaren Prozessschritten – von Prüfung bis Vermietung oder Verkauf.",
-          "solve1": "Klare Sicherheits- und Qualitätschecks statt Bauchgefühl.",
-          "solve2": "Renovierung und Sanierung mit Abnahme & Übergaben.",
-          "solve3": "Mehr Transparenz für Eigentümer, Partner und Interessenten.",
-          "role1": "Makler/Partner: Angebote listen, Prozesse nutzen, Standards umsetzen.",
-          "role2": "Renovierungspartner: Sanierung nach Checkliste, Abnahme dokumentieren.",
-          "role3": "Investor/Operator: Plattform-Ausbau, Regionen, Betrieb vor Ort.",
-          "cta": "Projekt anfragen"
+          "miniHeadline": "Make real estate decisions safely – with clear standards.",
+          "about": "SyriaScout connects owners, agents, and partners through a system of checklists, standards, and clear process steps – from inspection to rental or sale.",
+          "solve1": "Clear security and quality checks instead of gut feeling.",
+          "solve2": "Renovation and restoration with acceptance & handovers.",
+          "solve3": "More transparency for owners, partners, and prospects.",
+          "role1": "Agent/Partner: List offers, use processes, implement standards.",
+          "role2": "Renovation partner: Restoration by checklist, document acceptance.",
+          "role3": "Investor/Operator: Platform expansion, regions, on-site operations.",
+          "cta": "Request project"
         },
         "gosyriacar": {
           "name": "GoSyriaCar",
-          "miniHeadline": "Service, der zuverlässig wird – als System.",
-          "about": "GoSyriaCar baut ein System für Werkstätten, Services und Partner – mit App, Standards und klarer Ausbildung, damit Mobilität planbar wird.",
-          "solve1": "Einheitliche Service-Standards statt wechselnder Qualität.",
-          "solve2": "Teile/Services strukturieren: klare Abläufe, klare Übergaben.",
-          "solve3": "Training & Standards, damit Teams schneller liefern.",
-          "role1": "Werkstattpartner/Betreiber: Standorte betreiben, Standards nutzen.",
-          "role2": "Lieferanten/Partner: Teile, Services, Kooperationen integrieren.",
-          "role3": "Investor/Training-Partner: Infrastruktur, Expansion, Academy-Aufbau.",
-          "cta": "Partner werden"
+          "miniHeadline": "Service that becomes reliable – as a system.",
+          "about": "GoSyriaCar builds a system for workshops, services, and partners – with app, standards, and clear training, so mobility becomes plannable.",
+          "solve1": "Uniform service standards instead of varying quality.",
+          "solve2": "Structure parts/services: clear processes, clear handovers.",
+          "solve3": "Training & standards so teams deliver faster.",
+          "role1": "Workshop partner/Operator: Run locations, use standards.",
+          "role2": "Suppliers/Partners: Integrate parts, services, cooperations.",
+          "role3": "Investor/Training partner: Infrastructure, expansion, academy setup.",
+          "cta": "Become partner"
         },
         "syriaatlas": {
           "name": "SyriaAtlas",
-          "miniHeadline": "Syrien erlebbar machen – kuratiert und buchbar.",
-          "about": "SyriaAtlas zeigt das reale Syrien über kuratierte Routen, Orte und Anbieter – mit Buchung, Qualität und verlässlichen Infos.",
-          "solve1": "Orientierung durch echte, geprüfte Routen.",
-          "solve2": "Anbieter werden sichtbar und besser planbar.",
-          "solve3": "Vertrauen durch klare Informationen und Standards.",
-          "role1": "Guides/Partner: Touren anbieten, Qualität liefern, Prozesse nutzen.",
-          "role2": "Unterkünfte/Anbieter: Angebote integrieren, Buchung vereinfachen.",
-          "role3": "Investor/Kurator: Plattform skalieren, Content & Regionen ausbauen.",
-          "cta": "Deck ansehen"
+          "miniHeadline": "Make Syria experienceable – curated and bookable.",
+          "about": "SyriaAtlas shows the real Syria through curated routes, places, and providers – with booking, quality, and reliable information.",
+          "solve1": "Orientation through real, verified routes.",
+          "solve2": "Providers become visible and more plannable.",
+          "solve3": "Trust through clear information and standards.",
+          "role1": "Guides/Partners: Offer tours, deliver quality, use processes.",
+          "role2": "Accommodations/Providers: Integrate offerings, simplify booking.",
+          "role3": "Investor/Curator: Scale platform, expand content & regions.",
+          "cta": "View deck"
         },
         "syriatransfer": {
           "name": "SyriaTransfer",
-          "miniHeadline": "Transfers mit Status & Nachweis – transparent geführt.",
-          "about": "SyriaTransfer baut einen klaren Ablauf für Transfers und Abwicklung – mit Status, Nachweis und integrierbaren Partnerstellen.",
-          "solve1": "Nutzer sehen Schritte, Status und nächste Aktion.",
-          "solve2": "Partner arbeiten in einem sauberen Prozess, auditierbar aufgebaut.",
-          "solve3": "Klare Rollen und Übergaben statt Unsicherheit.",
-          "role1": "Partnerstellen/Offices: Prozesse bedienen, Status pflegen, Service liefern.",
-          "role2": "Compliance/Operations: Regeln, Abläufe, Dokumentation verbessern.",
-          "role3": "Investor: Infrastruktur, Partnernetz, System-Rollout.",
-          "cta": "Projekt anfragen"
+          "miniHeadline": "Transfers with status & evidence – transparently managed.",
+          "about": "SyriaTransfer builds a clear process for transfers and processing – with status, evidence, and integrable partner locations.",
+          "solve1": "Users see steps, status, and next action.",
+          "solve2": "Partners work in a clean process, built auditably.",
+          "solve3": "Clear roles and handovers instead of uncertainty.",
+          "role1": "Partner locations/Offices: Operate processes, maintain status, deliver service.",
+          "role2": "Compliance/Operations: Improve rules, processes, documentation.",
+          "role3": "Investor: Infrastructure, partner network, system rollout.",
+          "cta": "Request project"
         },
         "almdina": {
           "name": "Almdina",
-          "miniHeadline": "Online verkaufen ohne großes Start-Risiko.",
-          "about": "Almdina hilft Händlern und Produzenten, online zu starten – mit Lieferung, Struktur und späterer Skalierung Richtung Logistik.",
-          "solve1": "Händler starten klein, ohne hohe Vorfinanzierung.",
-          "solve2": "Kunden erhalten klare Abläufe: Bestellung, Status, Lieferung.",
-          "solve3": "Wachstum wird möglich durch Partner und Standards.",
-          "role1": "Händler/Produzenten: Produkte listen, Standards nutzen, liefern.",
-          "role2": "Logistik/Operations: Lieferung, Lager, Prozesse aufbauen.",
-          "role3": "Investor: Plattform-Ausbau, Partnerschaften, Warehouse-Option.",
-          "cta": "Partner werden"
+          "miniHeadline": "Sell online without high startup risk.",
+          "about": "Almdina helps merchants and producers start online – with delivery, structure, and later scaling toward logistics.",
+          "solve1": "Merchants start small, without high pre-financing.",
+          "solve2": "Customers get clear processes: order, status, delivery.",
+          "solve3": "Growth becomes possible through partners and standards.",
+          "role1": "Merchants/Producers: List products, use standards, deliver.",
+          "role2": "Logistics/Operations: Build delivery, warehouse, processes.",
+          "role3": "Investor: Platform expansion, partnerships, warehouse option.",
+          "cta": "Become partner"
         },
         "sabrspace": {
           "name": "SabrSpace",
-          "miniHeadline": "Ein ruhiger Space – respektvoll und stabil.",
-          "about": "SabrSpace ist ein digitaler Raum ohne Werbedruck, mit ruhigen Inhalten, Remindern und optionalen Unterstützungswegen – neutral und respektvoll.",
-          "solve1": "Weniger Ablenkung, mehr Fokus und Ruhe.",
-          "solve2": "Inhalte und Reminder in klarer Struktur.",
-          "solve3": "Stabiler Betrieb durch Sponsoring-Modelle.",
-          "role1": "Sponsoren/Partner: Space ermöglichen, langfristig tragen.",
-          "role2": "Community-Builder: Struktur, Moderation, Feedback.",
-          "role3": "Content-Kurator: Inhalte auswählen, Qualität sichern.",
-          "cta": "Projekt-Deck anfordern"
+          "miniHeadline": "A quiet space – respectful and stable.",
+          "about": "SabrSpace is a digital space without advertising pressure, with calm content, reminders, and optional support paths – neutral and respectful.",
+          "solve1": "Less distraction, more focus and calm.",
+          "solve2": "Content and reminders in clear structure.",
+          "solve3": "Stable operation through sponsoring models.",
+          "role1": "Sponsors/Partners: Enable space, carry long-term.",
+          "role2": "Community builder: Structure, moderation, feedback.",
+          "role3": "Content curator: Select content, ensure quality.",
+          "cta": "Request project deck"
         }
       }
     },
     "aiAgents": {
-      "headline": "AI als Helfer, nicht als Hype",
-      "text": "AI-Agenten sind bei uns keine Show. Sie unterstützen Abläufe, damit Teams sauber arbeiten – mit Klarheit, Status und weniger Handarbeit.",
+      "headline": "AI as helper, not as hype",
+      "text": "AI agents are not a show for us. They support processes so teams work cleanly – with clarity, status, and less manual work.",
       "examples": {
-        "example1": "Anfragen sortieren und an Teams leiten.",
-        "example2": "Status und nächste Schritte zeigen.",
-        "example3": "Portale und Dashboards aktuell halten.",
-        "example4": "Abläufe automatisieren, damit Menschen Zeit haben."
+        "example1": "Sort inquiries and route to teams.",
+        "example2": "Show status and next steps.",
+        "example3": "Keep portals and dashboards current.",
+        "example4": "Automate processes so people have time."
       }
     },
     "whyNow": {
-      "headline": "Wenn du helfen willst – wir geben dir den Einstieg",
-      "text": "Ob du schon eine Idee hast oder noch suchst: Wir machen den Einstieg klar. Wir zeigen Lücken, mögliche Wege und passende Partnerrollen. Du musst nicht blind springen – du gehst Schritt für Schritt.",
-      "cta1": "Termin buchen",
-      "cta2": "Partner werden",
-      "cta3": "Projekt-Deck anfordern"
+      "headline": "If you want to help – we give you the entry",
+      "text": "Whether you already have an idea or are still searching: We make the entry clear. We show gaps, possible paths, and matching partner roles. You don't have to jump blind – you go step by step.",
+      "cta1": "Book appointment",
+      "cta2": "Become partner",
+      "cta3": "Request project deck"
     },
     "footerCta": {
-      "headline": "Starte mit System. Nicht mit Risiko.",
-      "subline": "Ein klarer erster Schritt reicht – wir bauen den Rest strukturiert mit dir.",
-      "cta": "Jetzt Termin buchen"
+      "headline": "Start with system. Not with risk.",
+      "subline": "One clear first step is enough – we build the rest structured with you.",
+      "cta": "Book appointment now"
     }
   }
 }
