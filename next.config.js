@@ -34,6 +34,32 @@ const nextConfig = {
     return config;
   },
   
+  // Redirects für Portal und andere Seiten
+  async redirects() {
+    return [
+      {
+        source: '/portal',
+        destination: 'https://portal-agentflowm.de',
+        permanent: true,
+      },
+      {
+        source: '/portal/:path*',
+        destination: 'https://portal-agentflowm.de/:path*',
+        permanent: true,
+      },
+      {
+        source: '/admin',
+        destination: 'https://admin-agentflowm.vercel.app',
+        permanent: false,
+      },
+      {
+        source: '/kontakt',
+        destination: '/termin',
+        permanent: true,
+      },
+    ];
+  },
+
   // Security Headers - wichtig für Produktion
   async headers() {
     return [
