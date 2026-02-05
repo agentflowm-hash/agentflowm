@@ -1643,9 +1643,10 @@
         "interest": "Interested in",
         "interestPlaceholder": "Please select...",
         "interestOptions": {
-          "onePage": "One Page (from 1,390 EUR)",
-          "business": "Business (6,990 EUR)",
-          "growth": "Growth (from 10,990 EUR)"
+          "select": "Please select...",
+          "onePage": "One-Page Website",
+          "business": "Business Website",
+          "growth": "Growth Website"
         },
         "message": "Message",
         "messagePlaceholder": "Tell us about your project...",

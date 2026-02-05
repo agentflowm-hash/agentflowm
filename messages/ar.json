@@ -1643,9 +1643,10 @@
         "interest": "مهتم بـ",
         "interestPlaceholder": "يرجى الاختيار...",
         "interestOptions": {
-          "onePage": "صفحة واحدة (من 1,390 يورو)",
-          "business": "الأعمال (6,990 يورو)",
-          "growth": "النمو (من 10,990 يورو)"
+          "select": "الرجاء الاختيار...",
+          "onePage": "موقع صفحة واحدة",
+          "business": "موقع أعمال",
+          "growth": "موقع نمو"
         },
         "message": "الرسالة",
         "messagePlaceholder": "أخبرنا عن مشروعك...",
