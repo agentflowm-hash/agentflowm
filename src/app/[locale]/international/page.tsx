@@ -13,7 +13,7 @@ function WorldVisualization() {
   return (
     <div className="relative w-full h-[300px] sm:h-[380px] flex items-center justify-center">
       {/* Background glow - warm tones */}
-      <div className="absolute w-72 h-72 bg-gradient-to-br from-amber-500/20 via-orange-400/10 to-transparent rounded-full blur-3xl" />
+      <div className="absolute w-72 h-72 bg-gradient-to-br from-#FC682C/20 via-orange-400/10 to-transparent rounded-full blur-3xl" />
       
       {/* World circle */}
       <div className="relative">
@@ -23,9 +23,9 @@ function WorldVisualization() {
           animate={{ rotate: 360 }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         >
-          <div className="w-full h-full rounded-full border border-dashed border-amber-500/20" />
+          <div className="w-full h-full rounded-full border border-dashed border-#FC682C/20" />
           {/* Orbit points */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-#FC682C shadow-lg shadow-#FC682C/50" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-orange-400" />
         </motion.div>
         
@@ -35,7 +35,7 @@ function WorldVisualization() {
           animate={{ rotate: -360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         >
-          <div className="w-full h-full rounded-full border border-amber-500/30" />
+          <div className="w-full h-full rounded-full border border-#FC682C/30" />
           <div className="absolute top-1/2 left-0 -translate-y-1/2 w-2 h-2 rounded-full bg-teal-400" />
           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-2 h-2 rounded-full bg-rose-400" />
         </motion.div>
@@ -49,9 +49,9 @@ function WorldVisualization() {
           {/* Globe base */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-teal-900 shadow-2xl shadow-teal-500/30">
             {/* Land masses - stylized */}
-            <div className="absolute top-[20%] left-[25%] w-[35%] h-[25%] rounded-full bg-amber-600/60 blur-sm" />
-            <div className="absolute top-[45%] left-[15%] w-[25%] h-[20%] rounded-full bg-amber-700/50 blur-sm" />
-            <div className="absolute top-[30%] right-[20%] w-[20%] h-[30%] rounded-full bg-amber-600/40 blur-sm" />
+            <div className="absolute top-[20%] left-[25%] w-[35%] h-[25%] rounded-full bg-#e55a1f/60 blur-sm" />
+            <div className="absolute top-[45%] left-[15%] w-[25%] h-[20%] rounded-full bg-#c44a15/50 blur-sm" />
+            <div className="absolute top-[30%] right-[20%] w-[20%] h-[30%] rounded-full bg-#e55a1f/40 blur-sm" />
           </div>
           
           {/* Highlight */}
@@ -59,7 +59,7 @@ function WorldVisualization() {
           
           {/* Connection points on globe */}
           {[
-            { top: "25%", left: "35%", color: "#f59e0b" },
+            { top: "25%", left: "35%", color: "#FC682C" },
             { top: "45%", left: "55%", color: "#14b8a6" },
             { top: "60%", left: "30%", color: "#f43f5e" },
           ].map((point, i) => (
@@ -78,7 +78,7 @@ function WorldVisualization() {
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="absolute w-20 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"
+          className="absolute w-20 h-px bg-gradient-to-r from-transparent via-#FC682C to-transparent"
           style={{
             top: `${30 + i * 20}%`,
             left: `${10 + i * 25}%`,
@@ -149,7 +149,7 @@ function SystemsVisualization() {
         
         {/* Floating elements */}
         <motion.div
-          className="absolute -right-8 top-4 w-4 h-4 rounded bg-amber-500/60"
+          className="absolute -right-8 top-4 w-4 h-4 rounded bg-#FC682C/60"
           animate={{ y: [0, -8, 0], rotate: [0, 45, 0] }}
           transition={{ duration: 3, repeat: Infinity }}
         />
@@ -173,7 +173,7 @@ function GapsVisualization() {
         {/* Puzzle pieces */}
         {[
           { color: "from-rose-500 to-rose-600", delay: 0 },
-          { color: "from-amber-500 to-orange-500", delay: 0.2 },
+          { color: "from-#FC682C to-orange-500", delay: 0.2 },
           { color: "from-teal-500 to-cyan-500", delay: 0.4 },
         ].map((piece, i) => (
           <motion.div
@@ -222,7 +222,7 @@ function PathVisualization() {
         />
         <defs>
           <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#f59e0b" />
+            <stop offset="0%" stopColor="#FC682C" />
             <stop offset="50%" stopColor="#14b8a6" />
             <stop offset="100%" stopColor="#8b5cf6" />
           </linearGradient>
@@ -314,7 +314,7 @@ function HeroSection() {
     <section className="min-h-screen flex items-center py-20 relative overflow-hidden bg-[#030308]">
       {/* Background elements */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-[100px]" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-#FC682C/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-500/10 rounded-full blur-[120px]" />
       </div>
       
@@ -326,7 +326,7 @@ function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 text-sm font-medium rounded-full border border-amber-500/20 mb-4">
+            <span className="inline-block px-3 py-1 bg-#FC682C/10 text-#FC682C text-sm font-medium rounded-full border border-#FC682C/20 mb-4">
               {t("eyebrow")}
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
@@ -347,7 +347,7 @@ function HeroSection() {
             <div className="flex flex-wrap gap-3 mb-4">
               <Link 
                 href="/termin"
-                className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold rounded-xl transition-colors"
+                className="px-6 py-3 bg-#FC682C hover:bg-#e55a1f text-slate-900 font-semibold rounded-xl transition-colors"
               >
                 {t("cta.primary")}
               </Link>
@@ -430,7 +430,7 @@ function GapsSection() {
   
   const cards = [
     { key: "immobilien", color: "#f43f5e", icon: "🏠" },
-    { key: "renovierung", color: "#f59e0b", icon: "🔧" },
+    { key: "renovierung", color: "#FC682C", icon: "🔧" },
     { key: "mobilitaet", color: "#14b8a6", icon: "🚗" },
     { key: "tourismus", color: "#8b5cf6", icon: "🗺️" },
     { key: "handel", color: "#22c55e", icon: "🛒" },
@@ -488,7 +488,7 @@ function ApproachSection() {
   const t = useTranslations("international.approach");
   
   const steps = [
-    { key: "step1", color: "#f59e0b" },
+    { key: "step1", color: "#FC682C" },
     { key: "step2", color: "#14b8a6" },
     { key: "step3", color: "#8b5cf6" },
     { key: "step4", color: "#22c55e" },
@@ -504,7 +504,7 @@ function ApproachSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-sm text-amber-400 font-medium uppercase tracking-wider">Unser Ansatz</span>
+            <span className="text-sm text-#FC682C font-medium uppercase tracking-wider">Unser Ansatz</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mt-2 mb-3">
               {t("headline")}
             </h2>
@@ -548,14 +548,14 @@ function ProjectsSection() {
     { key: "gosyriacar", color: "#14b8a6", icon: "🚗" },
     { key: "syriaatlas", color: "#8b5cf6", icon: "🗺️" },
     { key: "syriatransfer", color: "#3b82f6", icon: "💸" },
-    { key: "almdina", color: "#f59e0b", icon: "🛒" },
+    { key: "almdina", color: "#FC682C", icon: "🛒" },
     { key: "sabrspace", color: "#ec4899", icon: "🧘" },
   ];
   
   return (
     <section id="projekte" className="py-20 relative bg-gradient-to-b from-slate-900 to-[#030308]">
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[150px]" />
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-#FC682C/5 rounded-full blur-[150px]" />
       </div>
       
       <div className="container mx-auto px-4 relative z-10">
@@ -566,7 +566,7 @@ function ProjectsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-sm text-amber-400 font-medium uppercase tracking-wider">Projekte</span>
+            <span className="text-sm text-#FC682C font-medium uppercase tracking-wider">Projekte</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mt-2 mb-3">
               {t("headline")}
             </h2>
@@ -691,14 +691,14 @@ function WhyNowSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <span className="text-sm text-amber-400 font-medium uppercase tracking-wider">Jetzt starten</span>
+          <span className="text-sm text-#FC682C font-medium uppercase tracking-wider">Jetzt starten</span>
           <h2 className="text-2xl sm:text-3xl font-bold text-white mt-2 mb-4">
             {t("headline")}
           </h2>
           <p className="text-slate-400 mb-8">{t("text")}</p>
           
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/termin" className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold rounded-xl transition-colors">
+            <Link href="/termin" className="px-6 py-3 bg-#FC682C hover:bg-#e55a1f text-slate-900 font-semibold rounded-xl transition-colors">
               {t("cta1")}
             </Link>
             <Link href="/kontakt" className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-colors">
@@ -718,7 +718,7 @@ function FooterCTA() {
   const t = useTranslations("international.footerCta");
   
   return (
-    <section className="py-16 relative bg-gradient-to-r from-amber-600/20 via-amber-500/10 to-teal-500/20">
+    <section className="py-16 relative bg-gradient-to-r from-#e55a1f/20 via-#FC682C/10 to-teal-500/20">
       <div className="container mx-auto px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -729,7 +729,7 @@ function FooterCTA() {
           <p className="text-slate-300 mb-6">{t("subline")}</p>
           <Link 
             href="/termin"
-            className="inline-flex px-8 py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl transition-colors shadow-xl shadow-amber-500/20"
+            className="inline-flex px-8 py-4 bg-#FC682C hover:bg-#e55a1f text-slate-900 font-bold rounded-xl transition-colors shadow-xl shadow-#FC682C/20"
           >
             {t("cta")} →
           </Link>
