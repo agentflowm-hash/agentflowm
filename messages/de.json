@@ -1645,8 +1645,8 @@
         "interestOptions": {
           "select": "Bitte wählen...",
           "onePage": "One-Page Website (ab 3.790€)",
-          "business": "Business Website (ab 5.390€)",
-          "growth": "Growth Website (ab 11.990€)",
+          "business": "Business Website (ab 8.390€)",
+          "growth": "Growth Website (ab 18.990€)",
           "webapp": "Web-App Entwicklung",
           "mobile": "Mobile App",
           "custom": "Individuelles Projekt",
