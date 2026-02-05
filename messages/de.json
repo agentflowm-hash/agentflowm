@@ -1644,9 +1644,14 @@
         "interestPlaceholder": "Bitte auswählen...",
         "interestOptions": {
           "select": "Bitte wählen...",
-          "onePage": "One-Page Website",
-          "business": "Business Website",
-          "growth": "Growth Website"
+          "onePage": "One-Page Website (ab 3.790€)",
+          "business": "Business Website (ab 5.390€)",
+          "growth": "Growth Website (ab 11.990€)",
+          "webapp": "Web-App Entwicklung",
+          "mobile": "Mobile App",
+          "custom": "Individuelles Projekt",
+          "workflows": "Workflow-Automatisierung",
+          "consulting": "Beratung"
         },
         "message": "Nachricht",
         "messagePlaceholder": "Erzähl uns von deinem Projekt...",

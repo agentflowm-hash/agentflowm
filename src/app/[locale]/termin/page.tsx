@@ -215,6 +215,11 @@ function ContactForm() {
           <option value="one-page" className="bg-[#0a0a0f]">{t("interestOptions.onePage")}</option>
           <option value="business" className="bg-[#0a0a0f]">{t("interestOptions.business")}</option>
           <option value="growth" className="bg-[#0a0a0f]">{t("interestOptions.growth")}</option>
+          <option value="webapp" className="bg-[#0a0a0f]">{t("interestOptions.webapp")}</option>
+          <option value="mobile" className="bg-[#0a0a0f]">{t("interestOptions.mobile")}</option>
+          <option value="custom" className="bg-[#0a0a0f]">{t("interestOptions.custom")}</option>
+          <option value="workflows" className="bg-[#0a0a0f]">{t("interestOptions.workflows")}</option>
+          <option value="consulting" className="bg-[#0a0a0f]">{t("interestOptions.consulting")}</option>
         </select>
       </div>
 

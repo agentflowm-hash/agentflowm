@@ -1644,9 +1644,14 @@
         "interestPlaceholder": "يرجى الاختيار...",
         "interestOptions": {
           "select": "الرجاء الاختيار...",
-          "onePage": "موقع صفحة واحدة",
-          "business": "موقع أعمال",
-          "growth": "موقع نمو"
+          "onePage": "موقع صفحة واحدة (من 3,790€)",
+          "business": "موقع أعمال (من 5,390€)",
+          "growth": "موقع نمو (من 11,990€)",
+          "webapp": "تطوير تطبيق ويب",
+          "mobile": "تطبيق موبايل",
+          "custom": "مشروع مخصص",
+          "workflows": "أتمتة سير العمل",
+          "consulting": "استشارات"
         },
         "message": "الرسالة",
         "messagePlaceholder": "أخبرنا عن مشروعك...",

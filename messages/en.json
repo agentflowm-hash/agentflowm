@@ -1644,9 +1644,14 @@
         "interestPlaceholder": "Please select...",
         "interestOptions": {
           "select": "Please select...",
-          "onePage": "One-Page Website",
-          "business": "Business Website",
-          "growth": "Growth Website"
+          "onePage": "One-Page Website (from €3,790)",
+          "business": "Business Website (from €5,390)",
+          "growth": "Growth Website (from €11,990)",
+          "webapp": "Web App Development",
+          "mobile": "Mobile App",
+          "custom": "Custom Project",
+          "workflows": "Workflow Automation",
+          "consulting": "Consulting"
         },
         "message": "Message",
         "messagePlaceholder": "Tell us about your project...",
