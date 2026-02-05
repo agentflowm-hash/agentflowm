@@ -311,7 +311,7 @@ function HeroSection() {
   const t = useTranslations("international.hero");
   
   return (
-    <section className="min-h-screen flex items-center py-20 relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <section className="min-h-screen flex items-center py-20 relative overflow-hidden bg-[#030308]">
       {/* Background elements */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-[100px]" />
@@ -381,7 +381,7 @@ function WhySystemsSection() {
   const bullets = ["bullet1", "bullet2", "bullet3", "bullet4", "bullet5"];
   
   return (
-    <section className="py-20 relative bg-slate-950">
+    <section className="py-20 relative bg-[#030308]">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -404,7 +404,7 @@ function WhySystemsSection() {
                 {bullets.map((bullet, i) => (
                   <motion.div
                     key={bullet}
-                    className="flex items-start gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-800"
+                    className="flex items-start gap-3 p-3 bg-[#0a0a12]/50 rounded-lg border border-slate-800"
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
@@ -438,7 +438,7 @@ function GapsSection() {
   ];
   
   return (
-    <section className="py-20 relative bg-gradient-to-b from-slate-950 to-slate-900">
+    <section className="py-20 relative bg-gradient-to-b from-[#030308] to-[#0a0a12]">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <motion.div 
@@ -459,7 +459,7 @@ function GapsSection() {
             {cards.map((card, i) => (
               <motion.div
                 key={card.key}
-                className="p-5 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors"
+                className="p-5 bg-[#0a0a12]/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -495,7 +495,7 @@ function ApproachSection() {
   ];
   
   return (
-    <section className="py-20 relative bg-slate-900">
+    <section className="py-20 relative bg-[#0a0a12]">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <motion.div 
@@ -553,7 +553,7 @@ function ProjectsSection() {
   ];
   
   return (
-    <section id="projekte" className="py-20 relative bg-gradient-to-b from-slate-900 to-slate-950">
+    <section id="projekte" className="py-20 relative bg-gradient-to-b from-slate-900 to-[#030308]">
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[150px]" />
       </div>
@@ -577,7 +577,7 @@ function ProjectsSection() {
             {projects.map((project, i) => (
               <motion.div
                 key={project.key}
-                className="p-6 bg-slate-900/70 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all"
+                className="p-6 bg-[#0a0a12]/70 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -639,7 +639,7 @@ function AIAgentsSection() {
   const examples = ["example1", "example2", "example3", "example4"];
   
   return (
-    <section className="py-20 relative bg-slate-950">
+    <section className="py-20 relative bg-[#030308]">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -660,7 +660,7 @@ function AIAgentsSection() {
                 {examples.map((ex, i) => (
                   <motion.div
                     key={ex}
-                    className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-800"
+                    className="flex items-center gap-3 p-3 bg-[#0a0a12]/50 rounded-lg border border-slate-800"
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
@@ -683,7 +683,7 @@ function WhyNowSection() {
   const t = useTranslations("international.whyNow");
   
   return (
-    <section className="py-20 relative bg-gradient-to-b from-slate-950 to-slate-900">
+    <section className="py-20 relative bg-gradient-to-b from-[#030308] to-[#0a0a12]">
       <div className="container mx-auto px-4">
         <motion.div 
           className="max-w-2xl mx-auto text-center"
@@ -745,7 +745,7 @@ function FooterCTA() {
 
 export default function InternationalPage() {
   return (
-    <div className="bg-slate-950 min-h-screen">
+    <div className="bg-[#030308] min-h-screen">
       <HeroSection />
       <WhySystemsSection />
       <GapsSection />
