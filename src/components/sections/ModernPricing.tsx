@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, FormEvent } from "react";
+import Link from "next/link";
 
 const packages = [
   {
@@ -534,12 +535,12 @@ export function ModernPricing() {
           </p>
           <p className="text-sm text-white/50">
             Individuelles Projekt?{" "}
-            <a
+            <Link
               href="/termin"
               className="text-[#FC682C] hover:text-[#FF8A57] transition-colors"
             >
               Lassen Sie uns sprechen →
-            </a>
+            </Link>
           </p>
         </div>
       </div>

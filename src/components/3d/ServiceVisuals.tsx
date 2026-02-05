@@ -457,4 +457,5 @@ export function LeadsVisual({ className = '' }: { className?: string }) {
   );
 }
 
-export default { WebseitenVisual, PublishingVisual, LeadsVisual };
+const ServiceVisuals = { WebseitenVisual, PublishingVisual, LeadsVisual };
+export default ServiceVisuals;
