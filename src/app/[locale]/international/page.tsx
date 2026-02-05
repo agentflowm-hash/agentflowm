@@ -23,9 +23,9 @@ function WorldVisualization() {
           animate={{ rotate: 360 }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         >
-          <div className="w-full h-full rounded-full border border-dashed border-#FC682C/20" />
+          <div className="w-full h-full rounded-full border border-dashed border-[#FC682C]/20" />
           {/* Orbit points */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-#FC682C shadow-lg shadow-#FC682C/50" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[#FC682C] shadow-lg shadow-[#FC682C]/50" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-orange-400" />
         </motion.div>
         
@@ -35,7 +35,7 @@ function WorldVisualization() {
           animate={{ rotate: -360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         >
-          <div className="w-full h-full rounded-full border border-#FC682C/30" />
+          <div className="w-full h-full rounded-full border border-[#FC682C]/30" />
           <div className="absolute top-1/2 left-0 -translate-y-1/2 w-2 h-2 rounded-full bg-teal-400" />
           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-2 h-2 rounded-full bg-rose-400" />
         </motion.div>
@@ -49,9 +49,9 @@ function WorldVisualization() {
           {/* Globe base */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-600 via-teal-700 to-teal-900 shadow-2xl shadow-teal-500/30">
             {/* Land masses - stylized */}
-            <div className="absolute top-[20%] left-[25%] w-[35%] h-[25%] rounded-full bg-#e55a1f/60 blur-sm" />
-            <div className="absolute top-[45%] left-[15%] w-[25%] h-[20%] rounded-full bg-#c44a15/50 blur-sm" />
-            <div className="absolute top-[30%] right-[20%] w-[20%] h-[30%] rounded-full bg-#e55a1f/40 blur-sm" />
+            <div className="absolute top-[20%] left-[25%] w-[35%] h-[25%] rounded-full bg-[#e55a1f]/60 blur-sm" />
+            <div className="absolute top-[45%] left-[15%] w-[25%] h-[20%] rounded-full bg-[#c44a15]/50 blur-sm" />
+            <div className="absolute top-[30%] right-[20%] w-[20%] h-[30%] rounded-full bg-[#e55a1f]/40 blur-sm" />
           </div>
           
           {/* Highlight */}
@@ -149,7 +149,7 @@ function SystemsVisualization() {
         
         {/* Floating elements */}
         <motion.div
-          className="absolute -right-8 top-4 w-4 h-4 rounded bg-#FC682C/60"
+          className="absolute -right-8 top-4 w-4 h-4 rounded bg-[#FC682C]/60"
           animate={{ y: [0, -8, 0], rotate: [0, 45, 0] }}
           transition={{ duration: 3, repeat: Infinity }}
         />
@@ -314,7 +314,7 @@ function HeroSection() {
     <section className="min-h-screen flex items-center py-20 relative overflow-hidden bg-[#030308]">
       {/* Background elements */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-#FC682C/10 rounded-full blur-[100px]" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-[#FC682C]/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-500/10 rounded-full blur-[120px]" />
       </div>
       
@@ -326,7 +326,7 @@ function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block px-3 py-1 bg-#FC682C/10 text-#FC682C text-sm font-medium rounded-full border border-#FC682C/20 mb-4">
+            <span className="inline-block px-3 py-1 bg-[#FC682C]/10 text-[#FC682C] text-sm font-medium rounded-full border border-[#FC682C]/20 mb-4">
               {t("eyebrow")}
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
@@ -347,7 +347,7 @@ function HeroSection() {
             <div className="flex flex-wrap gap-3 mb-4">
               <Link 
                 href="/termin"
-                className="px-6 py-3 bg-#FC682C hover:bg-#e55a1f text-slate-900 font-semibold rounded-xl transition-colors"
+                className="px-6 py-3 bg-[#FC682C] hover:bg-[#e55a1f] text-slate-900 font-semibold rounded-xl transition-colors"
               >
                 {t("cta.primary")}
               </Link>
@@ -504,7 +504,7 @@ function ApproachSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-sm text-#FC682C font-medium uppercase tracking-wider">Unser Ansatz</span>
+            <span className="text-sm text-[#FC682C] font-medium uppercase tracking-wider">Unser Ansatz</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mt-2 mb-3">
               {t("headline")}
             </h2>
@@ -555,7 +555,7 @@ function ProjectsSection() {
   return (
     <section id="projekte" className="py-20 relative bg-gradient-to-b from-slate-900 to-[#030308]">
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-#FC682C/5 rounded-full blur-[150px]" />
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-[#FC682C]/5 rounded-full blur-[150px]" />
       </div>
       
       <div className="container mx-auto px-4 relative z-10">
@@ -566,7 +566,7 @@ function ProjectsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-sm text-#FC682C font-medium uppercase tracking-wider">Projekte</span>
+            <span className="text-sm text-[#FC682C] font-medium uppercase tracking-wider">Projekte</span>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mt-2 mb-3">
               {t("headline")}
             </h2>
@@ -691,14 +691,14 @@ function WhyNowSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <span className="text-sm text-#FC682C font-medium uppercase tracking-wider">Jetzt starten</span>
+          <span className="text-sm text-[#FC682C] font-medium uppercase tracking-wider">Jetzt starten</span>
           <h2 className="text-2xl sm:text-3xl font-bold text-white mt-2 mb-4">
             {t("headline")}
           </h2>
           <p className="text-slate-400 mb-8">{t("text")}</p>
           
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/termin" className="px-6 py-3 bg-#FC682C hover:bg-#e55a1f text-slate-900 font-semibold rounded-xl transition-colors">
+            <Link href="/termin" className="px-6 py-3 bg-[#FC682C] hover:bg-[#e55a1f] text-slate-900 font-semibold rounded-xl transition-colors">
               {t("cta1")}
             </Link>
             <Link href="/kontakt" className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition-colors">
@@ -729,7 +729,7 @@ function FooterCTA() {
           <p className="text-slate-300 mb-6">{t("subline")}</p>
           <Link 
             href="/termin"
-            className="inline-flex px-8 py-4 bg-#FC682C hover:bg-#e55a1f text-slate-900 font-bold rounded-xl transition-colors shadow-xl shadow-#FC682C/20"
+            className="inline-flex px-8 py-4 bg-[#FC682C] hover:bg-[#e55a1f] text-slate-900 font-bold rounded-xl transition-colors shadow-xl shadow-[#FC682C]/20"
           >
             {t("cta")} →
           </Link>
