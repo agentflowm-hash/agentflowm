@@ -6,6 +6,11 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import "@/styles/globals.css";
 import { LayoutWrapper } from "@/components/layout";
 import { locales, localeDirection, type Locale } from "@/i18n/config";
+import {
+  OrganizationJsonLd,
+  LocalBusinessJsonLd,
+  WebsiteJsonLd,
+} from "@/components/seo";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const notoArabic = Noto_Sans_Arabic({
@@ -141,6 +146,11 @@ export default async function LocaleLayout({
         <link rel="apple-touch-icon" href="/brand/favicon-180.png" />
       </head>
       <body className={fontClass}>
+        {/* JSON-LD Structured Data for SEO */}
+        <OrganizationJsonLd locale={locale} />
+        <LocalBusinessJsonLd locale={locale} />
+        <WebsiteJsonLd locale={locale} />
+        
         <NextIntlClientProvider messages={messages}>
           {/* Skip Link for keyboard navigation - Accessibility */}
           <a
