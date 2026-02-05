@@ -11,6 +11,7 @@ import {
   LocalBusinessJsonLd,
   WebsiteJsonLd,
 } from "@/components/seo";
+import { GoogleAnalytics } from "@/components/analytics";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const notoArabic = Noto_Sans_Arabic({
@@ -146,6 +147,9 @@ export default async function LocaleLayout({
         <link rel="apple-touch-icon" href="/brand/favicon-180.png" />
       </head>
       <body className={fontClass}>
+        {/* Google Analytics */}
+        <GoogleAnalytics />
+        
         {/* JSON-LD Structured Data for SEO */}
         <OrganizationJsonLd locale={locale} />
         <LocalBusinessJsonLd locale={locale} />
