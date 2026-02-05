@@ -1644,12 +1644,12 @@
         "interestPlaceholder": "Bitte auswählen...",
         "interestOptions": {
           "select": "Bitte wählen...",
-          "onePage": "One-Page Website (ab 3.790€)",
-          "business": "Business Website (ab 8.390€)",
-          "growth": "Growth Website (ab 18.990€)",
-          "webapp": "Web-App Entwicklung",
-          "mobile": "Mobile App",
-          "custom": "Individuelles Projekt",
+          "launch": "LAUNCH Website (3.790€)",
+          "business": "BUSINESS Website (8.390€)",
+          "webapp": "Web App (18.990€)",
+          "mobile": "Mobile App (35.990€)",
+          "konfigurator": "Konfigurator (Auf Anfrage)",
+          "enterprise": "Enterprise (Auf Anfrage)",
           "workflows": "Workflow-Automatisierung",
           "consulting": "Beratung"
         },

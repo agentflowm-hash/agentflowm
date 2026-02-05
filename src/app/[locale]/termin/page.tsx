@@ -212,12 +212,12 @@ function ContactForm() {
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1rem' }}
         >
           <option value="" className="bg-[#0a0a0f]">{t("interestOptions.select")}</option>
-          <option value="one-page" className="bg-[#0a0a0f]">{t("interestOptions.onePage")}</option>
+          <option value="launch" className="bg-[#0a0a0f]">{t("interestOptions.launch")}</option>
           <option value="business" className="bg-[#0a0a0f]">{t("interestOptions.business")}</option>
-          <option value="growth" className="bg-[#0a0a0f]">{t("interestOptions.growth")}</option>
           <option value="webapp" className="bg-[#0a0a0f]">{t("interestOptions.webapp")}</option>
           <option value="mobile" className="bg-[#0a0a0f]">{t("interestOptions.mobile")}</option>
-          <option value="custom" className="bg-[#0a0a0f]">{t("interestOptions.custom")}</option>
+          <option value="konfigurator" className="bg-[#0a0a0f]">{t("interestOptions.konfigurator")}</option>
+          <option value="enterprise" className="bg-[#0a0a0f]">{t("interestOptions.enterprise")}</option>
           <option value="workflows" className="bg-[#0a0a0f]">{t("interestOptions.workflows")}</option>
           <option value="consulting" className="bg-[#0a0a0f]">{t("interestOptions.consulting")}</option>
         </select>

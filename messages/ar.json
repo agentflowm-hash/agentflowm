@@ -1644,12 +1644,12 @@
         "interestPlaceholder": "يرجى الاختيار...",
         "interestOptions": {
           "select": "الرجاء الاختيار...",
-          "onePage": "موقع صفحة واحدة (من 3,790€)",
-          "business": "موقع أعمال (من 8,390€)",
-          "growth": "موقع نمو (من 18,990€)",
-          "webapp": "تطوير تطبيق ويب",
-          "mobile": "تطبيق موبايل",
-          "custom": "مشروع مخصص",
+          "launch": "موقع LAUNCH (3,790€)",
+          "business": "موقع BUSINESS (8,390€)",
+          "webapp": "تطبيق ويب (18,990€)",
+          "mobile": "تطبيق موبايل (35,990€)",
+          "konfigurator": "المُكوِّن (عند الطلب)",
+          "enterprise": "Enterprise (عند الطلب)",
           "workflows": "أتمتة سير العمل",
           "consulting": "استشارات"
         },
