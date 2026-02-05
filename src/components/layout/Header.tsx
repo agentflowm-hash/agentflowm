@@ -28,6 +28,7 @@ export function Header({ locale = "en" }: HeaderProps) {
     { label: t("solution"), href: "/loesung" },
     { label: "Workflows", href: "/workflows" },
     { label: t("projects"), href: "/projekte" },
+    { label: t("international"), href: "/international" },
     { label: t("packages"), href: "/pakete", highlight: true },
     { label: t("tools"), href: "/tools" },
   ];
