@@ -13,21 +13,41 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Simple auth check
-  const handleLogin = (e: React.FormEvent) => {
+  // Secure auth check via API
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "agentflow2024") {
-      setAuthenticated(true);
-      localStorage.setItem("admin_auth", "true");
-    } else {
-      setError("Falsches Passwort");
+    setError("");
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      
+      if (res.ok) {
+        setAuthenticated(true);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Login fehlgeschlagen");
+      }
+    } catch {
+      setError("Verbindungsfehler");
     }
   };
 
+  // Check existing session on mount
   useEffect(() => {
-    if (localStorage.getItem("admin_auth") === "true") {
-      setAuthenticated(true);
-    }
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/api/admin/stats');
+        if (res.ok) {
+          setAuthenticated(true);
+        }
+      } catch {
+        // Not authenticated
+      }
+    };
+    checkSession();
   }, []);
 
   if (!authenticated) {
@@ -83,7 +103,10 @@ export default function AdminDashboard() {
               </div>
             </div>
             <button 
-              onClick={() => { localStorage.removeItem("admin_auth"); setAuthenticated(false); }}
+              onClick={async () => { 
+                await fetch('/api/admin/logout', { method: 'POST' }); 
+                setAuthenticated(false); 
+              }}
               className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors text-sm"
             >
               Logout
@@ -139,6 +162,49 @@ export default function AdminDashboard() {
         </div>
       </main>
     </div>
+  );
+}
+
+function RealStatsWidget() {
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/stats')
+      .then(r => r.ok ? r.json() : null)
+      .then(setStats)
+      .catch(() => null);
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="rounded-2xl p-5 bg-gradient-to-br from-[#FC682C]/10 to-transparent border border-[#FC682C]/20 backdrop-blur-xl"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-lg">🎯</span>
+        <h3 className="text-sm font-medium text-white/60">Business Stats (Live)</h3>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="text-center p-3 rounded-xl bg-black/20">
+          <div className="text-2xl font-bold text-white">{stats?.leads?.total || 0}</div>
+          <div className="text-xs text-white/40">Leads Gesamt</div>
+        </div>
+        <div className="text-center p-3 rounded-xl bg-black/20">
+          <div className="text-2xl font-bold text-emerald-400">{stats?.leads?.new || 0}</div>
+          <div className="text-xs text-white/40">Neue Leads</div>
+        </div>
+        <div className="text-center p-3 rounded-xl bg-black/20">
+          <div className="text-2xl font-bold text-white">{stats?.subscribers?.total || 0}</div>
+          <div className="text-xs text-white/40">Subscribers</div>
+        </div>
+        <div className="text-center p-3 rounded-xl bg-black/20">
+          <div className="text-2xl font-bold text-[#FC682C]">{stats?.referrals?.total || 0}</div>
+          <div className="text-xs text-white/40">Referrals</div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -210,36 +276,8 @@ function QuickActionsSection() {
         )}
       </motion.div>
 
-      {/* Quick Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="rounded-2xl p-5 bg-gradient-to-br from-[#FC682C]/10 to-transparent border border-[#FC682C]/20 backdrop-blur-xl"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-lg">🎯</span>
-          <h3 className="text-sm font-medium text-white/60">Heute</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-3 rounded-xl bg-black/20">
-            <div className="text-2xl font-bold text-white">247</div>
-            <div className="text-xs text-white/40">API Calls</div>
-          </div>
-          <div className="text-center p-3 rounded-xl bg-black/20">
-            <div className="text-2xl font-bold text-emerald-400">99.9%</div>
-            <div className="text-xs text-white/40">Uptime</div>
-          </div>
-          <div className="text-center p-3 rounded-xl bg-black/20">
-            <div className="text-2xl font-bold text-white">12</div>
-            <div className="text-xs text-white/40">Neue Leads</div>
-          </div>
-          <div className="text-center p-3 rounded-xl bg-black/20">
-            <div className="text-2xl font-bold text-[#FC682C]">3</div>
-            <div className="text-xs text-white/40">Anfragen</div>
-          </div>
-        </div>
-      </motion.div>
+      {/* Quick Stats - Live from API */}
+      <RealStatsWidget />
     </div>
   );
 }
