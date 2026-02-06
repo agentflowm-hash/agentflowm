@@ -60,6 +60,7 @@ export function middleware(request: NextRequest) {
   const isPortalPath = pathname.startsWith('/portal') || pathname.match(/^\/(de|en|ar)\/portal/);
 
   // Skip for API routes, admin, portal, and static files
+  // Admin page handles its own authentication internally
   if (
     pathname.startsWith('/api') ||
     isAdminPath ||
@@ -67,15 +68,6 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.includes('.')
   ) {
-    // Admin-Bereich: Prüfe Cookie (only for non-login admin pages)
-    if (isAdminPath && !pathname.includes('/admin/login') && !pathname.includes('/login')) {
-      const adminCookie = request.cookies.get("admin-auth");
-      if (adminCookie?.value !== "authenticated") {
-        // Redirect to locale-prefixed login
-        const locale = pathname.match(/^\/(de|en|ar)\//)?.[1] || domainLocale;
-        return NextResponse.redirect(new URL(`/${locale}/admin/login`, request.url));
-      }
-    }
     return NextResponse.next();
   }
 
