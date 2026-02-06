@@ -4,10 +4,10 @@ const config: CapacitorConfig = {
   appId: "de.agentflow.app",
   appName: "AgentFlowM",
   webDir: "out",
-  // Production URL - wird nach Deployment aktualisiert
+  // Production URL - LIVE!
   server: {
-    // Dev: http://192.168.0.232:3000
-    // Prod: https://agentflowm.vercel.app (nach Deployment)
+    url: "https://agentflowm.vercel.app/mobile",
+    cleartext: false,
     androidScheme: "https",
   },
   plugins: {
