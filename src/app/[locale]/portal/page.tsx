@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { Header } from "@/components/layout";
+import { type Locale } from "@/i18n/config";
 
 export default function PortalLogin() {
   const t = useTranslations("pages.portal.login");
+  const params = useParams();
+  const locale = (params?.locale as Locale) || "de";
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,26 +46,27 @@ export default function PortalLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030308] flex items-center justify-center p-4">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#FC682C]/10 rounded-full blur-[128px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[128px]" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Image
-            src="/brand/logo-primary-dark.png"
-            alt="AgentFlow"
-            width={200}
-            height={50}
-            className="h-12 w-auto mx-auto mb-4"
-          />
-          <h1 className="text-2xl font-bold text-white mb-2">{t("title")}</h1>
-          <p className="text-white/50">{t("subtitle")}</p>
+    <div className="min-h-screen bg-[#030308]">
+      {/* Header */}
+      <Header locale={locale} />
+      
+      {/* Main Content */}
+      <div className="min-h-screen flex items-center justify-center p-4 pt-24">
+        {/* Background Effects */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#FC682C]/10 rounded-full blur-[128px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[128px]" />
         </div>
+
+        <div className="relative w-full max-w-md">
+          {/* Title */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FC682C] to-[#FFB347] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(252,104,44,0.3)]">
+              <span className="text-2xl">🔑</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">{t("title")}</h1>
+            <p className="text-white/50">{t("subtitle")}</p>
+          </div>
 
         {/* Login Card */}
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-8">
@@ -86,7 +91,7 @@ export default function PortalLogin() {
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+              <div className="p-3 rounded-lg bg-[#FC682C]/10 border border-[#FC682C]/30 text-[#FC682C] text-sm text-center">
                 {error}
               </div>
             )}
@@ -179,6 +184,7 @@ export default function PortalLogin() {
             </svg>
             {t("backToWebsite")}
           </Link>
+        </div>
         </div>
       </div>
     </div>

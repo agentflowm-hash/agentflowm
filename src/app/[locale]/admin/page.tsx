@@ -1,13 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Header } from "@/components/layout";
+import { type Locale } from "@/i18n/config";
 
 // ═══════════════════════════════════════════════════════════════
 //     🔥 ADMIN DASHBOARD - Powerful Tools for Agency Management
 // ═══════════════════════════════════════════════════════════════
 
 export default function AdminDashboard() {
+  const params = useParams();
+  const locale = (params?.locale as Locale) || "de";
   const [stats, setStats] = useState<any>(null);
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -52,37 +57,40 @@ export default function AdminDashboard() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-[#030308] flex items-center justify-center p-4">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md"
-        >
-          <div className="rounded-3xl p-8 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.1] backdrop-blur-xl">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FC682C] to-[#FFB347] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(252,104,44,0.3)]">
-              <span className="text-2xl">🔐</span>
+      <div className="min-h-screen bg-[#030308]">
+        <Header locale={locale} />
+        <div className="min-h-screen flex items-center justify-center p-4 pt-24">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md"
+          >
+            <div className="rounded-3xl p-8 bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.1] backdrop-blur-xl">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FC682C] to-[#FFB347] flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(252,104,44,0.3)]">
+                <span className="text-2xl">🔐</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white text-center mb-2">Admin Dashboard</h1>
+              <p className="text-white/40 text-center mb-8">AgentFlowM Control Center</p>
+              
+              <form onSubmit={handleLogin}>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError(""); }}
+                  placeholder="Passwort eingeben..."
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-4 text-white placeholder-white/30 focus:outline-none focus:border-[#FC682C]/50 mb-4"
+                />
+                {error && <p className="text-[#FC682C] text-sm mb-4">{error}</p>}
+                <button 
+                  type="submit"
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-semibold shadow-[0_0_20px_rgba(252,104,44,0.3)] hover:shadow-[0_0_30px_rgba(252,104,44,0.5)] transition-all"
+                >
+                  Einloggen
+                </button>
+              </form>
             </div>
-            <h1 className="text-2xl font-bold text-white text-center mb-2">Admin Dashboard</h1>
-            <p className="text-white/40 text-center mb-8">AgentFlowM Control Center</p>
-            
-            <form onSubmit={handleLogin}>
-              <input
-                type="password"
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError(""); }}
-                placeholder="Passwort eingeben..."
-                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-4 text-white placeholder-white/30 focus:outline-none focus:border-[#FC682C]/50 mb-4"
-              />
-              {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
-              <button 
-                type="submit"
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-semibold shadow-[0_0_20px_rgba(252,104,44,0.3)] hover:shadow-[0_0_30px_rgba(252,104,44,0.5)] transition-all"
-              >
-                Einloggen
-              </button>
-            </form>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     );
   }

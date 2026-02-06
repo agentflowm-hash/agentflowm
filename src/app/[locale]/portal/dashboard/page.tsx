@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { Header } from "@/components/layout";
+import { type Locale } from "@/i18n/config";
 import PortalToolsSection from "@/components/PortalToolsSection";
 
 type Tab = "overview" | "messages" | "files" | "tools";
@@ -30,6 +32,8 @@ interface ProjectData {
 
 export default function PortalDashboard() {
   const t = useTranslations("pages.portal.dashboard");
+  const params = useParams();
+  const locale = (params?.locale as Locale) || "de";
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [newMessage, setNewMessage] = useState("");
   const [data, setData] = useState<ProjectData | null>(null);
