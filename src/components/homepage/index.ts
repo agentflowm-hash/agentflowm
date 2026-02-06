@@ -8,3 +8,4 @@ export { PaketeSection } from './PaketeSection';
 export { WebAppsSection } from './WebAppsSection';
 export { KostenlosSection } from './KostenlosSection';
 export { FinalCTASection } from './FinalCTASection';
+export { default as LiveAPISection } from './LiveAPISection';

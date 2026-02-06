@@ -11,6 +11,7 @@ import {
   WebAppsSection,
   KostenlosSection,
   FinalCTASection,
+  LiveAPISection,
 } from "@/components/homepage";
 import { ParallaxBackground } from "@/components/ui/ParallaxBackground";
 
@@ -24,6 +25,7 @@ export default function Home() {
         <ZielgruppeSection />
         <LoesungSection />
         <SystemablaufSection />
+        <LiveAPISection />
         <PaketeSection />
         <WebAppsSection />
         <KostenlosSection />
