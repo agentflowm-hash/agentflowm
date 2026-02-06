@@ -1,0 +1,76 @@
+/* Mobile App Styles - Native-like feel */
+
+.mobile-app {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area padding */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Allow selection in specific elements */
+.mobile-app input,
+.mobile-app textarea,
+.mobile-app [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Hide scrollbars for app-like feel */
+.mobile-app::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-app {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Touch feedback */
+.mobile-app button,
+.mobile-app a {
+  transition: transform 0.1s, opacity 0.1s;
+}
+
+.mobile-app button:active,
+.mobile-app a:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+}
+
+/* Smooth animations */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-app * {
+    transition-property: transform, opacity, background-color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+  }
+}
+
+/* iOS notch support */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .mobile-app {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Pull to refresh indicator space */
+.mobile-app main {
+  min-height: 100vh;
+  overscroll-behavior-y: contain;
+}
+
+/* Bottom bar safe area */
+.mobile-app nav {
+  padding-bottom: env(safe-area-inset-bottom);
+}
