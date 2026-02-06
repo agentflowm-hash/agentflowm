@@ -10,8 +10,22 @@ const packageColors = {
   configurator: "#a855f7",
 };
 
+// 🎉 DISCOUNT CONFIG - 20% für 2 Wochen (bis 20.02.2026)
+const DISCOUNT = {
+  active: true,
+  percent: 20,
+  endDate: new Date('2026-02-20T23:59:59'),
+  badge: '🔥 -20% LAUNCH RABATT',
+};
+
 export function PaketeSection() {
   const t = useTranslations("packages");
+  
+  // Check if discount is still active
+  const isDiscountActive = DISCOUNT.active && new Date() < DISCOUNT.endDate;
+  
+  // Calculate days remaining
+  const daysRemaining = Math.ceil((DISCOUNT.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
   const pakete = [
     {
@@ -65,6 +79,23 @@ export function PaketeSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FC682C]/3 to-transparent" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        {/* Discount Banner */}
+        {isDiscountActive && (
+          <motion.div
+            className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-[#FC682C] via-[#FF8F5C] to-[#FFB347] text-white text-center shadow-lg shadow-[#FC682C]/30"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+              <span className="text-2xl sm:text-3xl font-black">{DISCOUNT.badge}</span>
+              <span className="text-sm sm:text-base opacity-90">
+                Nur noch <strong>{daysRemaining} Tage</strong> – Spare bei allen Paketen!
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Header */}
         <motion.div
           className="text-center mb-8"

@@ -317,9 +317,27 @@ function WhatWeDeliverSection() {
   );
 }
 
+// 🎉 DISCOUNT CONFIG - 20% für 2 Wochen (bis 20.02.2026)
+const DISCOUNT = {
+  active: true,
+  percent: 20,
+  endDate: new Date('2026-02-20T23:59:59'),
+};
+
+// Helper to calculate discounted price
+function getDiscountedPrice(originalPrice: string): string {
+  const price = parseInt(originalPrice.replace(/[^0-9]/g, ''));
+  const discounted = Math.round(price * (1 - DISCOUNT.percent / 100));
+  return discounted.toLocaleString('de-DE');
+}
+
 // Packages Section
 function PackagesSection() {
   const t = useTranslations("pages.pakete.packages");
+  
+  // Check if discount is active
+  const isDiscountActive = DISCOUNT.active && new Date() < DISCOUNT.endDate;
+  const daysRemaining = Math.ceil((DISCOUNT.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
   const packages = [
     {
@@ -355,6 +373,20 @@ function PackagesSection() {
 
       <div className="container px-4 sm:px-6 relative z-10">
         <div className="max-w-5xl mx-auto">
+          {/* Discount Banner */}
+          {isDiscountActive && (
+            <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#FC682C] via-[#FF8F5C] to-[#FFB347] text-white text-center shadow-xl shadow-[#FC682C]/30 animate-pulse-slow">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+                <span className="text-2xl sm:text-3xl font-black">🔥 -20% LAUNCH RABATT</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm sm:text-base">Nur noch</span>
+                  <span className="px-3 py-1 rounded-lg bg-white/20 font-bold text-lg">{daysRemaining}</span>
+                  <span className="text-sm sm:text-base">Tage!</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#FC682C]/10 to-[#9D65C9]/10 border border-[#FC682C]/20 mb-4">
               <span className="text-sm">🌐</span>
@@ -411,10 +443,22 @@ function PackagesSection() {
                       {pkg.isCustom ? (
                         <div className="text-2xl font-bold text-white">{t("onRequest")}</div>
                       ) : (
-                        <div className="flex items-baseline justify-center gap-1">
-                          <span className="text-3xl sm:text-4xl font-bold text-white">{t(`items.${pkg.id}.price`)}</span>
-                          <span className="text-lg text-white/50">€</span>
-                        </div>
+                        <>
+                          {isDiscountActive && (
+                            <div className="mb-1">
+                              <span className="inline-block px-2 py-0.5 rounded bg-[#FC682C] text-white text-xs font-bold">-20%</span>
+                            </div>
+                          )}
+                          <div className="flex items-baseline justify-center gap-1">
+                            {isDiscountActive && (
+                              <span className="text-lg text-white/40 line-through mr-2">{t(`items.${pkg.id}.price`)}€</span>
+                            )}
+                            <span className="text-3xl sm:text-4xl font-bold text-white">
+                              {isDiscountActive ? getDiscountedPrice(t(`items.${pkg.id}.price`)) : t(`items.${pkg.id}.price`)}
+                            </span>
+                            <span className="text-lg text-white/50">€</span>
+                          </div>
+                        </>
                       )}
                       {!pkg.isCustom && <p className="text-xs text-white/40 mt-1">{t("oneTime")}</p>}
                     </div>
