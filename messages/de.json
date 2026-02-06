@@ -3018,5 +3018,109 @@
       "subline": "Ein klarer erster Schritt reicht – wir bauen den Rest strukturiert mit dir.",
       "cta": "Jetzt Termin buchen"
     }
+  },
+  "playground": {
+    "meta": {
+      "title": "API Playground - AgentFlowM",
+      "description": "Teste 70+ APIs live. Crypto, Tools, Generatoren - alles in Echtzeit."
+    },
+    "hero": {
+      "badge": "70+ APIs Live",
+      "title": "API",
+      "titleHighlight": "Playground",
+      "description": "Teste alle unsere APIs live. Crypto, Tools, Generatoren - alles in Echtzeit."
+    },
+    "stats": {
+      "apis": "APIs",
+      "free": "Kostenlos",
+      "response": "Response",
+      "requests": "Requests"
+    },
+    "tabs": {
+      "dashboard": "Dashboard",
+      "devTools": "Dev Tools",
+      "generators": "Generatoren"
+    },
+    "back": "Zurück",
+    "widgets": {
+      "marketSentiment": "Marktstimmung",
+      "cryptoMarketIndex": "Crypto Market Index",
+      "dailyInspiration": "Tägliche Inspiration",
+      "passwordGenerator": "Passwort Generator",
+      "length": "Länge",
+      "strength": "Stärke",
+      "veryStrong": "sehr stark",
+      "strong": "stark",
+      "medium": "mittel",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "qrCode": "QR Code",
+      "urlOrText": "URL oder Text...",
+      "dice": "Würfel",
+      "clickToRoll": "Klick zum Würfeln",
+      "rolling": "Würfelt...",
+      "roll": "Würfeln",
+      "sum": "Summe",
+      "randomColor": "Zufällige Farbe",
+      "clickToCopy": "Klick zum Kopieren"
+    },
+    "tools": {
+      "sha256Hash": "SHA-256 Hash",
+      "enterText": "Text eingeben...",
+      "generate": "Generieren",
+      "base64": "Base64",
+      "encode": "Kodieren",
+      "decode": "Dekodieren",
+      "convert": "Konvertieren",
+      "urlSlug": "URL Slug",
+      "enterTitle": "Titel eingeben...",
+      "textStats": "Text Statistiken",
+      "characters": "Zeichen",
+      "words": "Wörter",
+      "sentences": "Sätze",
+      "readingTime": "Lesezeit",
+      "uuidGenerator": "UUID Generator",
+      "unixTimestamp": "Unix Timestamp",
+      "showNow": "Jetzt anzeigen",
+      "local": "Lokal",
+      "metaTags": "Meta Tags",
+      "title": "Titel...",
+      "description": "Beschreibung...",
+      "loremIpsum": "Lorem Ipsum",
+      "paragraphs": "Absätze",
+      "placeholderImage": "Placeholder Bild",
+      "wifiQrCode": "WiFi QR Code",
+      "wifiName": "WLAN Name...",
+      "password": "Passwort...",
+      "createQr": "QR erstellen",
+      "robotsTxt": "robots.txt",
+      "countryInfo": "Land Info",
+      "capital": "Hauptstadt",
+      "population": "Einwohner",
+      "search": "Suchen"
+    },
+    "apiReference": "API Referenz",
+    "more": "+mehr"
+  },
+  "liveAPI": {
+    "badge": "Live Daten",
+    "title": "70+ APIs.",
+    "titleHighlight": "Echtzeit.",
+    "description": "Von Crypto-Preisen bis Wetterdaten – alles was du brauchst, in einem System.",
+    "btc": "Bitcoin",
+    "eth": "Ethereum",
+    "sol": "Solana",
+    "marketMood": "Marktstimmung",
+    "fearGreed": "Fear & Greed",
+    "categories": {
+      "finance": "Finanzen",
+      "devTools": "Dev Tools",
+      "fun": "Spaß",
+      "geo": "Geo",
+      "media": "Medien",
+      "security": "Sicherheit"
+    },
+    "openPlayground": "API Playground öffnen",
+    "freeNoLimits": "100% kostenlos • Keine Rate Limits"
   }
 }

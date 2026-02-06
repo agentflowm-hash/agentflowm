@@ -3018,5 +3018,109 @@
       "subline": "خطوة أولى واضحة كافية – نبني الباقي منظماً معك.",
       "cta": "احجز موعد الآن"
     }
+  },
+  "playground": {
+    "meta": {
+      "title": "ساحة API - AgentFlowM",
+      "description": "جرب أكثر من 70 واجهة برمجة مباشرة. العملات الرقمية والأدوات والمولدات - كل شيء في الوقت الفعلي."
+    },
+    "hero": {
+      "badge": "+70 API مباشرة",
+      "title": "ساحة",
+      "titleHighlight": "API",
+      "description": "جرب جميع واجهات برمجة التطبيقات الخاصة بنا مباشرة. العملات الرقمية والأدوات والمولدات."
+    },
+    "stats": {
+      "apis": "APIs",
+      "free": "مجاني",
+      "response": "الاستجابة",
+      "requests": "الطلبات"
+    },
+    "tabs": {
+      "dashboard": "لوحة التحكم",
+      "devTools": "أدوات المطور",
+      "generators": "المولدات"
+    },
+    "back": "رجوع",
+    "widgets": {
+      "marketSentiment": "مزاج السوق",
+      "cryptoMarketIndex": "مؤشر سوق الكريبتو",
+      "dailyInspiration": "إلهام يومي",
+      "passwordGenerator": "مولد كلمات المرور",
+      "length": "الطول",
+      "strength": "القوة",
+      "veryStrong": "قوي جداً",
+      "strong": "قوي",
+      "medium": "متوسط",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "qrCode": "رمز QR",
+      "urlOrText": "رابط أو نص...",
+      "dice": "النرد",
+      "clickToRoll": "انقر للرمي",
+      "rolling": "جارٍ الرمي...",
+      "roll": "ارمِ",
+      "sum": "المجموع",
+      "randomColor": "لون عشوائي",
+      "clickToCopy": "انقر للنسخ"
+    },
+    "tools": {
+      "sha256Hash": "تشفير SHA-256",
+      "enterText": "أدخل النص...",
+      "generate": "توليد",
+      "base64": "Base64",
+      "encode": "ترميز",
+      "decode": "فك الترميز",
+      "convert": "تحويل",
+      "urlSlug": "رابط URL",
+      "enterTitle": "أدخل العنوان...",
+      "textStats": "إحصائيات النص",
+      "characters": "الأحرف",
+      "words": "الكلمات",
+      "sentences": "الجمل",
+      "readingTime": "وقت القراءة",
+      "uuidGenerator": "مولد UUID",
+      "unixTimestamp": "طابع Unix الزمني",
+      "showNow": "عرض الآن",
+      "local": "محلي",
+      "metaTags": "علامات Meta",
+      "title": "العنوان...",
+      "description": "الوصف...",
+      "loremIpsum": "نص تجريبي",
+      "paragraphs": "فقرات",
+      "placeholderImage": "صورة بديلة",
+      "wifiQrCode": "رمز QR للواي فاي",
+      "wifiName": "اسم الشبكة...",
+      "password": "كلمة المرور...",
+      "createQr": "إنشاء QR",
+      "robotsTxt": "robots.txt",
+      "countryInfo": "معلومات البلد",
+      "capital": "العاصمة",
+      "population": "السكان",
+      "search": "بحث"
+    },
+    "apiReference": "مرجع API",
+    "more": "+المزيد"
+  },
+  "liveAPI": {
+    "badge": "بيانات مباشرة",
+    "title": "+70 API.",
+    "titleHighlight": "في الوقت الفعلي.",
+    "description": "من أسعار العملات الرقمية إلى بيانات الطقس - كل ما تحتاجه في نظام واحد.",
+    "btc": "بيتكوين",
+    "eth": "إيثريوم",
+    "sol": "سولانا",
+    "marketMood": "مزاج السوق",
+    "fearGreed": "الخوف والجشع",
+    "categories": {
+      "finance": "المالية",
+      "devTools": "أدوات المطور",
+      "fun": "ترفيه",
+      "geo": "جغرافيا",
+      "media": "الوسائط",
+      "security": "الأمان"
+    },
+    "openPlayground": "فتح ساحة API",
+    "freeNoLimits": "مجاني 100% • بدون حدود"
   }
 }

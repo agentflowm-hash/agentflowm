@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 // ═══════════════════════════════════════════════════════════════
 //           🎨 ELEGANT DASHBOARD - Matches AgentFlowM Design
@@ -46,6 +47,7 @@ function Card({ children, className = '', gradient = false, glow = false }: {
 
 // CRYPTO TICKER - Elegant Version
 export function CryptoTicker() {
+  const t = useTranslations('liveAPI');
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
@@ -56,9 +58,9 @@ export function CryptoTicker() {
   }, []);
 
   const coins = [
-    { name: 'Bitcoin', symbol: 'BTC', data: data?.bitcoin, color: '#F7931A' },
-    { name: 'Ethereum', symbol: 'ETH', data: data?.ethereum, color: '#627EEA' },
-    { name: 'Solana', symbol: 'SOL', data: data?.solana, color: '#00FFA3' },
+    { name: t('btc'), symbol: 'BTC', data: data?.bitcoin, color: '#F7931A' },
+    { name: t('eth'), symbol: 'ETH', data: data?.ethereum, color: '#627EEA' },
+    { name: t('sol'), symbol: 'SOL', data: data?.solana, color: '#00FFA3' },
   ];
 
   return (
@@ -68,7 +70,7 @@ export function CryptoTicker() {
       initial="initial"
       animate="animate"
     >
-      {coins.map((coin, i) => (
+      {coins.map((coin) => (
         <motion.div
           key={coin.symbol}
           variants={fadeIn}
@@ -112,6 +114,7 @@ export function CryptoTicker() {
 
 // FEAR & GREED - Elegant Gauge
 export function FearGreedWidget() {
+  const t = useTranslations('playground.widgets');
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
@@ -130,7 +133,7 @@ export function FearGreedWidget() {
 
   return (
     <Card gradient glow>
-      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">Market Sentiment</div>
+      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">{t('marketSentiment')}</div>
       <div className="flex items-center gap-6">
         <div className="relative w-24 h-24">
           {/* Background Ring */}
@@ -159,8 +162,8 @@ export function FearGreedWidget() {
           </div>
         </div>
         <div>
-          <div className="text-xl font-semibold text-white mb-1">{data?.label || 'Loading...'}</div>
-          <div className="text-sm text-white/40">Crypto Market Index</div>
+          <div className="text-xl font-semibold text-white mb-1">{data?.label || '...'}</div>
+          <div className="text-sm text-white/40">{t('cryptoMarketIndex')}</div>
         </div>
       </div>
     </Card>
@@ -169,6 +172,7 @@ export function FearGreedWidget() {
 
 // QUOTE WIDGET - Elegant
 export function QuoteWidget() {
+  const t = useTranslations('playground.widgets');
   const [quote, setQuote] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -184,7 +188,7 @@ export function QuoteWidget() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <div className="text-xs font-medium text-white/40 uppercase tracking-wider">Tägliche Inspiration</div>
+        <div className="text-xs font-medium text-white/40 uppercase tracking-wider">{t('dailyInspiration')}</div>
         <motion.button 
           onClick={loadQuote}
           disabled={loading}
@@ -209,6 +213,7 @@ export function QuoteWidget() {
 
 // PASSWORD GENERATOR - Elegant
 export function PasswordGenerator() {
+  const t = useTranslations('playground.widgets');
   const [password, setPassword] = useState<any>(null);
   const [length, setLength] = useState(16);
   const [copied, setCopied] = useState(false);
@@ -228,11 +233,11 @@ export function PasswordGenerator() {
 
   return (
     <Card>
-      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">Passwort Generator</div>
+      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">{t('passwordGenerator')}</div>
       
       <div className="mb-4">
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-white/60">Länge</span>
+          <span className="text-white/60">{t('length')}</span>
           <span className="text-white font-mono">{length}</span>
         </div>
         <input
@@ -255,14 +260,14 @@ export function PasswordGenerator() {
           whileTap={{ scale: 0.95 }}
           className="px-4 rounded-xl bg-[#FC682C] text-white font-medium hover:bg-[#e55a1f] transition-colors"
         >
-          {copied ? '✓' : 'Copy'}
+          {copied ? '✓' : t('copy')}
         </motion.button>
       </div>
       
       <div className="mt-3 flex items-center gap-2">
         <div className={`h-1 flex-1 rounded-full ${
-          password?.strength === 'sehr stark' ? 'bg-emerald-500' : 
-          password?.strength === 'stark' ? 'bg-yellow-500' : 'bg-orange-500'
+          password?.strength === 'sehr stark' || password?.strength === 'very strong' ? 'bg-emerald-500' : 
+          password?.strength === 'stark' || password?.strength === 'strong' ? 'bg-yellow-500' : 'bg-orange-500'
         }`} />
         <span className="text-xs text-white/40">{password?.strength}</span>
       </div>
@@ -272,6 +277,7 @@ export function PasswordGenerator() {
 
 // QR CODE GENERATOR - Elegant
 export function QRGenerator() {
+  const t = useTranslations('playground.widgets');
   const [text, setText] = useState('https://agentflowm.com');
   const [qr, setQr] = useState<string>('');
 
@@ -286,12 +292,12 @@ export function QRGenerator() {
 
   return (
     <Card>
-      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">QR Code</div>
+      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">{t('qrCode')}</div>
       <input
         type="text"
         value={text}
         onChange={e => setText(e.target.value)}
-        placeholder="URL oder Text..."
+        placeholder={t('urlOrText')}
         className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#FC682C]/50 transition-colors mb-4"
       />
       {qr && (
@@ -311,6 +317,7 @@ export function QRGenerator() {
 
 // DICE ROLLER - Elegant with Animation
 export function DiceRoller() {
+  const t = useTranslations('playground.widgets');
   const [result, setResult] = useState<any>(null);
   const [rolling, setRolling] = useState(false);
 
@@ -327,7 +334,7 @@ export function DiceRoller() {
 
   return (
     <Card gradient>
-      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">Würfel</div>
+      <div className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">{t('dice')}</div>
       <div className="flex items-center justify-center gap-4 mb-4 h-20">
         {result?.rolls?.map((roll: number, i: number) => (
           <motion.div
@@ -340,12 +347,12 @@ export function DiceRoller() {
             {diceEmoji[roll - 1]}
           </motion.div>
         )) || (
-          <div className="text-white/20 text-sm">Klick zum Würfeln</div>
+          <div className="text-white/20 text-sm">{t('clickToRoll')}</div>
         )}
       </div>
       {result && !rolling && (
         <div className="text-center text-white/60 text-sm mb-3">
-          Summe: <span className="text-white font-semibold">{result.total}</span>
+          {t('sum')}: <span className="text-white font-semibold">{result.total}</span>
         </div>
       )}
       <motion.button
@@ -355,7 +362,7 @@ export function DiceRoller() {
         whileTap={{ scale: 0.98 }}
         className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-semibold disabled:opacity-50 transition-all"
       >
-        {rolling ? 'Würfelt...' : 'Würfeln'}
+        {rolling ? t('rolling') : t('roll')}
       </motion.button>
     </Card>
   );
@@ -363,6 +370,7 @@ export function DiceRoller() {
 
 // COLOR PICKER - Elegant
 export function ColorPicker() {
+  const t = useTranslations('playground.widgets');
   const [color, setColor] = useState<any>(null);
   const [copied, setCopied] = useState(false);
 
@@ -382,7 +390,7 @@ export function ColorPicker() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <div className="text-xs font-medium text-white/40 uppercase tracking-wider">Zufällige Farbe</div>
+        <div className="text-xs font-medium text-white/40 uppercase tracking-wider">{t('randomColor')}</div>
         <motion.button 
           onClick={generate}
           whileHover={{ scale: 1.1, rotate: 180 }}
@@ -422,7 +430,7 @@ export function ColorPicker() {
                 exit={{ opacity: 0 }}
                 className="text-xs text-emerald-400 text-center mt-2"
               >
-                Kopiert ✓
+                {t('copied')} ✓
               </motion.div>
             )}
           </AnimatePresence>

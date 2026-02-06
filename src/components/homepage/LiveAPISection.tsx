@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 // ═══════════════════════════════════════════════════════════════
-//           🎨 LIVE API SECTION - Elegant Design
-//           Matches AgentFlowM visual language
+//           🎨 LIVE API SECTION - Elegant Design with i18n
 // ═══════════════════════════════════════════════════════════════
 
 const fadeInUp = {
@@ -24,6 +24,7 @@ const stagger = {
 };
 
 export default function LiveAPISection() {
+  const t = useTranslations('liveAPI');
   const [crypto, setCrypto] = useState<any>(null);
   const [fearGreed, setFearGreed] = useState<any>(null);
   const [quote, setQuote] = useState<any>(null);
@@ -39,6 +40,15 @@ export default function LiveAPISection() {
       setQuote(q);
     });
   }, []);
+
+  const categories = [
+    { icon: '💰', label: t('categories.finance'), count: 5 },
+    { icon: '🔧', label: t('categories.devTools'), count: 12 },
+    { icon: '🎲', label: t('categories.fun'), count: 8 },
+    { icon: '🌍', label: t('categories.geo'), count: 6 },
+    { icon: '🎨', label: t('categories.media'), count: 8 },
+    { icon: '🔐', label: t('categories.security'), count: 7 },
+  ];
 
   return (
     <section className="relative py-24 overflow-hidden">
@@ -65,17 +75,17 @@ export default function LiveAPISection() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FC682C] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FC682C]"></span>
             </span>
-            <span className="text-sm font-medium text-white/70">Live Daten</span>
+            <span className="text-sm font-medium text-white/70">{t('badge')}</span>
           </motion.div>
           
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-            70+ APIs.{" "}
+            {t('title')}{" "}
             <span className="bg-gradient-to-r from-[#FC682C] via-[#FFB347] to-[#FC682C] bg-clip-text text-transparent">
-              Echtzeit.
+              {t('titleHighlight')}
             </span>
           </h2>
           <p className="text-lg text-white/50 max-w-2xl mx-auto">
-            Von Crypto-Preisen bis Wetterdaten – alles was du brauchst, in einem System.
+            {t('description')}
           </p>
         </motion.div>
 
@@ -99,7 +109,7 @@ export default function LiveAPISection() {
                   <span className="text-[#F7931A] font-bold">₿</span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-white">Bitcoin</div>
+                  <div className="text-sm font-medium text-white">{t('btc')}</div>
                   <div className="text-xs text-white/40">BTC</div>
                 </div>
               </div>
@@ -128,7 +138,7 @@ export default function LiveAPISection() {
                   <span className="text-[#627EEA] font-bold">Ξ</span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-white">Ethereum</div>
+                  <div className="text-sm font-medium text-white">{t('eth')}</div>
                   <div className="text-xs text-white/40">ETH</div>
                 </div>
               </div>
@@ -157,8 +167,8 @@ export default function LiveAPISection() {
                   <span className="text-lg">{fearGreed?.emoji || '📊'}</span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-white">Market Mood</div>
-                  <div className="text-xs text-white/40">Fear & Greed</div>
+                  <div className="text-sm font-medium text-white">{t('marketMood')}</div>
+                  <div className="text-xs text-white/40">{t('fearGreed')}</div>
                 </div>
               </div>
               {fearGreed ? (
@@ -182,7 +192,7 @@ export default function LiveAPISection() {
                   <span className="text-[#00FFA3] font-bold">◎</span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-white">Solana</div>
+                  <div className="text-sm font-medium text-white">{t('sol')}</div>
                   <div className="text-xs text-white/40">SOL</div>
                 </div>
               </div>
@@ -229,14 +239,7 @@ export default function LiveAPISection() {
           whileInView="animate"
           viewport={{ once: true }}
         >
-          {[
-            { icon: '💰', label: 'Finance', count: 5 },
-            { icon: '🔧', label: 'Dev Tools', count: 12 },
-            { icon: '🎲', label: 'Fun', count: 8 },
-            { icon: '🌍', label: 'Geo', count: 6 },
-            { icon: '🎨', label: 'Media', count: 8 },
-            { icon: '🔐', label: 'Security', count: 7 },
-          ].map((cat, i) => (
+          {categories.map((cat, i) => (
             <motion.div
               key={i}
               variants={fadeInUp}
@@ -264,14 +267,14 @@ export default function LiveAPISection() {
               whileTap={{ scale: 0.98 }}
               className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-semibold text-lg shadow-[0_0_30px_rgba(252,104,44,0.3)] transition-all duration-300"
             >
-              <span>API Playground öffnen</span>
+              <span>{t('openPlayground')}</span>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </motion.button>
           </Link>
           <p className="text-sm text-white/30 mt-4">
-            100% kostenlos • Keine Rate Limits
+            {t('freeNoLimits')}
           </p>
         </motion.div>
       </div>

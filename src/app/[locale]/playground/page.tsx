@@ -4,20 +4,21 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import InsaneDashboard from "@/components/InsaneDashboard";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 // ═══════════════════════════════════════════════════════════════
-//           🎨 API PLAYGROUND - Elegant Design
-//           Matches AgentFlowM visual language
+//           🎨 API PLAYGROUND - Elegant Design with i18n
 // ═══════════════════════════════════════════════════════════════
-
-const tabs = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { id: 'tools', label: 'Dev Tools', icon: '🔧' },
-  { id: 'generator', label: 'Generatoren', icon: '✨' },
-];
 
 export default function PlaygroundPage() {
+  const t = useTranslations('playground');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+
+  const tabs = [
+    { id: 'dashboard', label: t('tabs.dashboard'), icon: '📊' },
+    { id: 'tools', label: t('tabs.devTools'), icon: '🔧' },
+    { id: 'generator', label: t('tabs.generators'), icon: '✨' },
+  ];
 
   return (
     <div className="min-h-screen bg-[#030308]">
@@ -40,7 +41,7 @@ export default function PlaygroundPage() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Zurück
+              {t('back')}
             </motion.div>
           </Link>
 
@@ -61,17 +62,17 @@ export default function PlaygroundPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
               </span>
-              <span className="text-sm font-medium text-white/70">70+ APIs Live</span>
+              <span className="text-sm font-medium text-white/70">{t('hero.badge')}</span>
             </motion.div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-              API{" "}
+              {t('hero.title')}{" "}
               <span className="bg-gradient-to-r from-[#FC682C] via-[#FFB347] to-[#FC682C] bg-clip-text text-transparent">
-                Playground
+                {t('hero.titleHighlight')}
               </span>
             </h1>
             <p className="text-lg text-white/40 max-w-xl mx-auto">
-              Teste alle unsere APIs live. Crypto, Tools, Generatoren – alles in Echtzeit.
+              {t('hero.description')}
             </p>
           </motion.div>
 
@@ -83,10 +84,10 @@ export default function PlaygroundPage() {
             transition={{ delay: 0.3 }}
           >
             {[
-              { value: '70+', label: 'APIs', color: '#FC682C' },
-              { value: '100%', label: 'Kostenlos', color: '#22C55E' },
-              { value: '<100ms', label: 'Response', color: '#3B82F6' },
-              { value: '∞', label: 'Requests', color: '#A855F7' },
+              { value: '70+', label: t('stats.apis'), color: '#FC682C' },
+              { value: '100%', label: t('stats.free'), color: '#22C55E' },
+              { value: '<100ms', label: t('stats.response'), color: '#3B82F6' },
+              { value: '∞', label: t('stats.requests'), color: '#A855F7' },
             ].map((stat, i) => (
               <motion.div
                 key={i}
@@ -162,15 +163,16 @@ export default function PlaygroundPage() {
 
 // DEV TOOLS SECTION
 function DevToolsSection() {
+  const t = useTranslations('playground.tools');
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <HashGenerator />
-        <Base64Tool />
-        <SlugGenerator />
-        <TextStatsWidget />
-        <UUIDWidget />
-        <TimestampWidget />
+        <HashGenerator t={t} />
+        <Base64Tool t={t} />
+        <SlugGenerator t={t} />
+        <TextStatsWidget t={t} />
+        <UUIDWidget t={t} />
+        <TimestampWidget t={t} />
       </div>
     </div>
   );
@@ -178,15 +180,16 @@ function DevToolsSection() {
 
 // GENERATOR SECTION
 function GeneratorSection() {
+  const t = useTranslations('playground.tools');
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetaTagGenerator />
-        <LoremGenerator />
-        <PlaceholderGenerator />
-        <WifiQRGenerator />
-        <RobotsGenerator />
-        <CountryLookup />
+        <MetaTagGenerator t={t} />
+        <LoremGenerator t={t} />
+        <PlaceholderGenerator t={t} />
+        <WifiQRGenerator t={t} />
+        <RobotsGenerator t={t} />
+        <CountryLookup t={t} />
       </div>
     </div>
   );
@@ -203,7 +206,7 @@ function Card({ children, title }: { children: React.ReactNode; title: string })
   );
 }
 
-function HashGenerator() {
+function HashGenerator({ t }: { t: any }) {
   const [input, setInput] = useState('');
   const [hash, setHash] = useState('');
 
@@ -215,15 +218,15 @@ function HashGenerator() {
   };
 
   return (
-    <Card title="SHA-256 Hash">
+    <Card title={t('sha256Hash')}>
       <input
         value={input}
         onChange={e => setInput(e.target.value)}
-        placeholder="Text eingeben..."
+        placeholder={t('enterText')}
         className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#FC682C]/50 mb-3"
       />
       <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">
-        Generieren
+        {t('generate')}
       </button>
       {hash && (
         <div className="bg-black/30 rounded-xl p-3 text-xs font-mono text-emerald-400 break-all border border-white/5">
@@ -234,7 +237,7 @@ function HashGenerator() {
   );
 }
 
-function Base64Tool() {
+function Base64Tool({ t }: { t: any }) {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [action, setAction] = useState<'encode' | 'decode'>('encode');
@@ -246,7 +249,7 @@ function Base64Tool() {
   };
 
   return (
-    <Card title="Base64">
+    <Card title={t('base64')}>
       <div className="flex gap-2 mb-3">
         {['encode', 'decode'].map((a) => (
           <button
@@ -256,18 +259,18 @@ function Base64Tool() {
               action === a ? 'bg-[#FC682C] text-white' : 'bg-white/5 text-white/50 hover:bg-white/10'
             }`}
           >
-            {a.charAt(0).toUpperCase() + a.slice(1)}
+            {a === 'encode' ? t('encode') : t('decode')}
           </button>
         ))}
       </div>
       <input
         value={input}
         onChange={e => setInput(e.target.value)}
-        placeholder="Text..."
+        placeholder={t('enterText')}
         className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#FC682C]/50 mb-3"
       />
       <button onClick={convert} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium mb-3 border border-white/5">
-        Konvertieren
+        {t('convert')}
       </button>
       {output && (
         <div className="bg-black/30 rounded-xl p-3 text-xs font-mono text-blue-400 break-all border border-white/5">
@@ -278,7 +281,7 @@ function Base64Tool() {
   );
 }
 
-function SlugGenerator() {
+function SlugGenerator({ t }: { t: any }) {
   const [input, setInput] = useState('');
   const [slug, setSlug] = useState('');
 
@@ -290,11 +293,11 @@ function SlugGenerator() {
   };
 
   return (
-    <Card title="URL Slug">
+    <Card title={t('urlSlug')}>
       <input
         value={input}
         onChange={e => { setInput(e.target.value); generate(); }}
-        placeholder="Titel eingeben..."
+        placeholder={t('enterTitle')}
         className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#FC682C]/50 mb-3"
       />
       {slug && (
@@ -306,7 +309,7 @@ function SlugGenerator() {
   );
 }
 
-function TextStatsWidget() {
+function TextStatsWidget({ t }: { t: any }) {
   const [text, setText] = useState('');
   const [stats, setStats] = useState<any>(null);
 
@@ -317,21 +320,21 @@ function TextStatsWidget() {
   };
 
   return (
-    <Card title="Text Statistiken">
+    <Card title={t('textStats')}>
       <textarea
         value={text}
         onChange={e => { setText(e.target.value); analyze(); }}
-        placeholder="Text eingeben..."
+        placeholder={t('enterText')}
         rows={3}
         className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#FC682C]/50 resize-none mb-3"
       />
       {stats && (
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: 'Zeichen', value: stats.characters },
-            { label: 'Wörter', value: stats.words },
-            { label: 'Sätze', value: stats.sentences },
-            { label: 'Lesezeit', value: stats.readingTime },
+            { label: t('characters'), value: stats.characters },
+            { label: t('words'), value: stats.words },
+            { label: t('sentences'), value: stats.sentences },
+            { label: t('readingTime'), value: stats.readingTime },
           ].map((s, i) => (
             <div key={i} className="bg-black/30 rounded-lg p-2 border border-white/5">
               <div className="text-xs text-white/40">{s.label}</div>
@@ -344,9 +347,10 @@ function TextStatsWidget() {
   );
 }
 
-function UUIDWidget() {
+function UUIDWidget({ t }: { t: any }) {
   const [uuid, setUuid] = useState('');
   const [copied, setCopied] = useState(false);
+  const tw = useTranslations('playground.widgets');
 
   const generate = async () => {
     const res = await fetch('/api/insane?tool=uuid');
@@ -361,9 +365,9 @@ function UUIDWidget() {
   };
 
   return (
-    <Card title="UUID Generator">
+    <Card title={t('uuidGenerator')}>
       <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">
-        Generieren
+        {t('generate')}
       </button>
       {uuid && (
         <div 
@@ -372,7 +376,7 @@ function UUIDWidget() {
         >
           {uuid}
           <span className="block text-right text-white/30 text-[10px] mt-1">
-            {copied ? 'Kopiert ✓' : 'Klick zum Kopieren'}
+            {copied ? tw('copied') + ' ✓' : tw('clickToCopy')}
           </span>
         </div>
       )}
@@ -380,7 +384,7 @@ function UUIDWidget() {
   );
 }
 
-function TimestampWidget() {
+function TimestampWidget({ t }: { t: any }) {
   const [result, setResult] = useState<any>(null);
 
   const load = async () => {
@@ -389,16 +393,16 @@ function TimestampWidget() {
   };
 
   return (
-    <Card title="Unix Timestamp">
+    <Card title={t('unixTimestamp')}>
       <button onClick={load} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium mb-3 border border-white/5">
-        Jetzt anzeigen
+        {t('showNow')}
       </button>
       {result && (
         <div className="space-y-2">
           {[
             { label: 'Unix', value: result.unix },
             { label: 'ISO', value: result.iso },
-            { label: 'Lokal', value: result.local },
+            { label: t('local'), value: result.local },
           ].map((r, i) => (
             <div key={i} className="flex justify-between bg-black/30 rounded-lg px-3 py-2 border border-white/5">
               <span className="text-xs text-white/40">{r.label}</span>
@@ -411,7 +415,7 @@ function TimestampWidget() {
   );
 }
 
-function MetaTagGenerator() {
+function MetaTagGenerator({ t }: { t: any }) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [tags, setTags] = useState<any>(null);
@@ -422,21 +426,21 @@ function MetaTagGenerator() {
   };
 
   return (
-    <Card title="Meta Tags">
-      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Titel..." className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-2" />
-      <input value={desc} onChange={e => setDesc(e.target.value)} placeholder="Beschreibung..." className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-3" />
-      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">Generieren</button>
+    <Card title={t('metaTags')}>
+      <input value={title} onChange={e => setTitle(e.target.value)} placeholder={t('title')} className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-2" />
+      <input value={desc} onChange={e => setDesc(e.target.value)} placeholder={t('description')} className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-3" />
+      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">{t('generate')}</button>
       {tags && (
         <div className="bg-black/30 rounded-xl p-3 text-[10px] font-mono text-white/50 max-h-32 overflow-auto border border-white/5">
-          {tags.basic?.map((t: string, i: number) => <div key={i}>{t}</div>)}
-          {tags.openGraph?.map((t: string, i: number) => <div key={`og-${i}`}>{t}</div>)}
+          {tags.basic?.map((tag: string, i: number) => <div key={i}>{tag}</div>)}
+          {tags.openGraph?.map((tag: string, i: number) => <div key={`og-${i}`}>{tag}</div>)}
         </div>
       )}
     </Card>
   );
 }
 
-function LoremGenerator() {
+function LoremGenerator({ t }: { t: any }) {
   const [count, setCount] = useState(2);
   const [text, setText] = useState('');
 
@@ -447,18 +451,18 @@ function LoremGenerator() {
   };
 
   return (
-    <Card title="Lorem Ipsum">
+    <Card title={t('loremIpsum')}>
       <div className="flex gap-2 items-center mb-3">
         <input type="number" value={count} onChange={e => setCount(parseInt(e.target.value) || 1)} min={1} max={10} className="w-16 bg-black/30 border border-white/5 rounded-lg px-3 py-2 text-sm text-white" />
-        <span className="text-sm text-white/40">Absätze</span>
+        <span className="text-sm text-white/40">{t('paragraphs')}</span>
       </div>
-      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">Generieren</button>
+      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">{t('generate')}</button>
       {text && <div className="bg-black/30 rounded-xl p-3 text-xs text-white/50 max-h-32 overflow-auto border border-white/5">{text}</div>}
     </Card>
   );
 }
 
-function PlaceholderGenerator() {
+function PlaceholderGenerator({ t }: { t: any }) {
   const [w, setW] = useState(400);
   const [h, setH] = useState(300);
   const [url, setUrl] = useState('');
@@ -468,19 +472,19 @@ function PlaceholderGenerator() {
   };
 
   return (
-    <Card title="Placeholder Bild">
+    <Card title={t('placeholderImage')}>
       <div className="flex gap-2 mb-3">
         <input type="number" value={w} onChange={e => setW(parseInt(e.target.value) || 100)} className="w-20 bg-black/30 border border-white/5 rounded-lg px-2 py-2 text-sm text-white" />
         <span className="text-white/30">×</span>
         <input type="number" value={h} onChange={e => setH(parseInt(e.target.value) || 100)} className="w-20 bg-black/30 border border-white/5 rounded-lg px-2 py-2 text-sm text-white" />
       </div>
-      <button onClick={generate} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium mb-3 border border-white/5">Generieren</button>
+      <button onClick={generate} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium mb-3 border border-white/5">{t('generate')}</button>
       {url && <img src={url} alt="Placeholder" className="w-full rounded-xl" />}
     </Card>
   );
 }
 
-function WifiQRGenerator() {
+function WifiQRGenerator({ t }: { t: any }) {
   const [ssid, setSsid] = useState('');
   const [pass, setPass] = useState('');
   const [qr, setQr] = useState('');
@@ -493,16 +497,16 @@ function WifiQRGenerator() {
   };
 
   return (
-    <Card title="WiFi QR Code">
-      <input value={ssid} onChange={e => setSsid(e.target.value)} placeholder="WLAN Name..." className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-2" />
-      <input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="Passwort..." className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-3" />
-      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">QR erstellen</button>
+    <Card title={t('wifiQrCode')}>
+      <input value={ssid} onChange={e => setSsid(e.target.value)} placeholder={t('wifiName')} className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-2" />
+      <input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder={t('password')} className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none mb-3" />
+      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">{t('createQr')}</button>
       {qr && <div className="flex justify-center"><div className="bg-white rounded-2xl p-3"><img src={qr} alt="WiFi QR" className="w-32 h-32" /></div></div>}
     </Card>
   );
 }
 
-function RobotsGenerator() {
+function RobotsGenerator({ t }: { t: any }) {
   const [robots, setRobots] = useState('');
 
   const generate = async () => {
@@ -512,14 +516,14 @@ function RobotsGenerator() {
   };
 
   return (
-    <Card title="robots.txt">
-      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">Generieren</button>
+    <Card title={t('robotsTxt')}>
+      <button onClick={generate} className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium mb-3">{t('generate')}</button>
       {robots && <pre className="bg-black/30 rounded-xl p-3 text-xs font-mono text-emerald-400 whitespace-pre-wrap border border-white/5">{robots}</pre>}
     </Card>
   );
 }
 
-function CountryLookup() {
+function CountryLookup({ t }: { t: any }) {
   const [code, setCode] = useState('DE');
   const [data, setData] = useState<any>(null);
 
@@ -529,10 +533,10 @@ function CountryLookup() {
   };
 
   return (
-    <Card title="Land Info">
+    <Card title={t('countryInfo')}>
       <div className="flex gap-2 mb-3">
         <input value={code} onChange={e => setCode(e.target.value.toUpperCase())} maxLength={2} className="w-16 bg-black/30 border border-white/5 rounded-lg px-3 py-2 text-sm text-white uppercase text-center" />
-        <button onClick={lookup} className="flex-1 py-2 rounded-lg bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium">Suchen</button>
+        <button onClick={lookup} className="flex-1 py-2 rounded-lg bg-gradient-to-r from-[#FC682C] to-[#FFB347] text-white font-medium">{t('search')}</button>
       </div>
       {data && !data.error && (
         <div className="space-y-2">
@@ -545,11 +549,11 @@ function CountryLookup() {
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="bg-black/30 rounded-lg p-2 border border-white/5">
-              <div className="text-white/40">Hauptstadt</div>
+              <div className="text-white/40">{t('capital')}</div>
               <div className="text-white">{data.capital}</div>
             </div>
             <div className="bg-black/30 rounded-lg p-2 border border-white/5">
-              <div className="text-white/40">Einwohner</div>
+              <div className="text-white/40">{t('population')}</div>
               <div className="text-white">{(data.population / 1000000).toFixed(1)}M</div>
             </div>
           </div>
@@ -561,10 +565,11 @@ function CountryLookup() {
 
 // API REFERENCE
 function APIReference() {
+  const t = useTranslations('playground');
   return (
     <section className="py-16 bg-gradient-to-b from-transparent to-black/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-white text-center mb-8">API Reference</h2>
+        <h2 className="text-2xl font-bold text-white text-center mb-8">{t('apiReference')}</h2>
         <div className="grid gap-4 md:grid-cols-3">
           {[
             { endpoint: '/api/tools', tools: ['weather', 'geo', 'exchange', 'quote', 'qr', 'holidays'] },
@@ -574,12 +579,12 @@ function APIReference() {
             <div key={i} className="rounded-2xl p-5 bg-white/[0.02] border border-white/[0.06]">
               <code className="text-sm text-[#FC682C] font-mono">{api.endpoint}</code>
               <div className="flex flex-wrap gap-1.5 mt-3">
-                {api.tools.map(t => (
-                  <span key={t} className="px-2 py-1 rounded-lg bg-black/30 text-xs text-white/50 font-mono">
-                    {t}
+                {api.tools.map(tool => (
+                  <span key={tool} className="px-2 py-1 rounded-lg bg-black/30 text-xs text-white/50 font-mono">
+                    {tool}
                   </span>
                 ))}
-                <span className="px-2 py-1 rounded-lg bg-white/5 text-xs text-white/30">+mehr</span>
+                <span className="px-2 py-1 rounded-lg bg-white/5 text-xs text-white/30">{t('more')}</span>
               </div>
             </div>
           ))}
