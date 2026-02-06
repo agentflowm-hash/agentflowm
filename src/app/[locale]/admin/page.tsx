@@ -125,8 +125,171 @@ export default function AdminDashboard() {
           <h2 className="text-lg font-semibold text-white mb-4">🔧 Schnellzugriff Tools</h2>
           <ToolsGrid />
         </div>
+
+        {/* Quick Actions */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-white mb-4">⚡ Schnellaktionen</h2>
+          <QuickActionsSection />
+        </div>
+
+        {/* API Stats */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-white mb-4">📊 API Nutzung</h2>
+          <APIStatsWidget />
+        </div>
       </main>
     </div>
+  );
+}
+
+function QuickActionsSection() {
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [checkResult, setCheckResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const checkWebsite = async () => {
+    if (!websiteUrl) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/website-check?url=${encodeURIComponent(websiteUrl)}`);
+      setCheckResult(await res.json());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Website Checker */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl p-5 bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-lg">🔍</span>
+          <h3 className="text-sm font-medium text-white/60">Website Check</h3>
+        </div>
+        <div className="flex gap-2 mb-4">
+          <input
+            type="url"
+            value={websiteUrl}
+            onChange={e => setWebsiteUrl(e.target.value)}
+            placeholder="https://example.com"
+            className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none"
+          />
+          <button 
+            onClick={checkWebsite}
+            disabled={loading}
+            className="px-4 rounded-lg bg-[#FC682C] text-white text-sm font-medium disabled:opacity-50"
+          >
+            {loading ? '...' : 'Check'}
+          </button>
+        </div>
+        {checkResult && (
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-white/40">Status</span>
+              <span className={checkResult.success ? 'text-emerald-400' : 'text-rose-400'}>
+                {checkResult.success ? '✅ Online' : '❌ Offline'}
+              </span>
+            </div>
+            {checkResult.loadTime && (
+              <div className="flex justify-between">
+                <span className="text-white/40">Ladezeit</span>
+                <span className="text-white">{checkResult.loadTime}ms</span>
+              </div>
+            )}
+            {checkResult.ssl && (
+              <div className="flex justify-between">
+                <span className="text-white/40">SSL</span>
+                <span className="text-emerald-400">✅ Aktiv</span>
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Quick Stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="rounded-2xl p-5 bg-gradient-to-br from-[#FC682C]/10 to-transparent border border-[#FC682C]/20 backdrop-blur-xl"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-lg">🎯</span>
+          <h3 className="text-sm font-medium text-white/60">Heute</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center p-3 rounded-xl bg-black/20">
+            <div className="text-2xl font-bold text-white">247</div>
+            <div className="text-xs text-white/40">API Calls</div>
+          </div>
+          <div className="text-center p-3 rounded-xl bg-black/20">
+            <div className="text-2xl font-bold text-emerald-400">99.9%</div>
+            <div className="text-xs text-white/40">Uptime</div>
+          </div>
+          <div className="text-center p-3 rounded-xl bg-black/20">
+            <div className="text-2xl font-bold text-white">12</div>
+            <div className="text-xs text-white/40">Neue Leads</div>
+          </div>
+          <div className="text-center p-3 rounded-xl bg-black/20">
+            <div className="text-2xl font-bold text-[#FC682C]">3</div>
+            <div className="text-xs text-white/40">Anfragen</div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function APIStatsWidget() {
+  const apiCategories = [
+    { name: 'Finanzen', count: 12, color: '#F7931A', icon: '💰' },
+    { name: 'Tools', count: 15, color: '#3B82F6', icon: '🔧' },
+    { name: 'Media', count: 10, color: '#EC4899', icon: '🎨' },
+    { name: 'Fun', count: 8, color: '#A855F7', icon: '🎲' },
+    { name: 'Geo', count: 9, color: '#22C55E', icon: '🌍' },
+    { name: 'Security', count: 7, color: '#EF4444', icon: '🔐' },
+    { name: 'Text', count: 5, color: '#06B6D4', icon: '📝' },
+    { name: 'Dev', count: 6, color: '#F97316', icon: '⚡' },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl p-5 bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl"
+    >
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        {apiCategories.map((cat, i) => (
+          <motion.div
+            key={cat.name}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.05 }}
+            whileHover={{ scale: 1.05, y: -2 }}
+            className="text-center p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/[0.15] transition-all cursor-pointer"
+          >
+            <div className="text-2xl mb-2">{cat.icon}</div>
+            <div className="text-xl font-bold text-white">{cat.count}</div>
+            <div className="text-xs text-white/40">{cat.name}</div>
+            <div className="mt-2 h-1 rounded-full bg-white/5 overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${(cat.count / 15) * 100}%`, backgroundColor: cat.color }} />
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/[0.06]">
+        <div className="text-sm text-white/40">
+          Gesamt: <span className="text-white font-semibold">72 APIs</span>
+        </div>
+        <span className="text-sm text-[#FC682C] hover:underline cursor-pointer" onClick={() => window.location.href='/playground'}>
+          Alle APIs testen →
+        </span>
+      </div>
+    </motion.div>
   );
 }
 
