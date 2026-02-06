@@ -17,6 +17,44 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get('host')?.split(':')[0] || 'localhost';
 
+  // ═══════════════════════════════════════════════════════════════
+  // DOMAIN-BASED ROUTING
+  // admin-agentflowm.de/com → /de/admin oder /en/admin
+  // portal-agentflowm.de/com → /de/portal oder /en/portal
+  // ═══════════════════════════════════════════════════════════════
+  
+  const isAdminDomain = hostname.includes('admin-agentflowm');
+  const isPortalDomain = hostname.includes('portal-agentflowm');
+  
+  // Determine default locale based on TLD
+  const domainLocale = hostname.endsWith('.de') ? 'de' : 'en';
+  
+  // Admin Domain: Redirect root to admin
+  if (isAdminDomain) {
+    // Root or just locale → redirect to admin
+    if (pathname === '/' || pathname === '/de' || pathname === '/en' || pathname === '/ar') {
+      return NextResponse.redirect(new URL(`/${domainLocale}/admin`, request.url));
+    }
+    // Locale root → redirect to admin
+    if (pathname.match(/^\/(de|en|ar)\/?$/)) {
+      const locale = pathname.replace(/\//g, '') || domainLocale;
+      return NextResponse.redirect(new URL(`/${locale}/admin`, request.url));
+    }
+  }
+  
+  // Portal Domain: Redirect root to portal
+  if (isPortalDomain) {
+    // Root or just locale → redirect to portal
+    if (pathname === '/' || pathname === '/de' || pathname === '/en' || pathname === '/ar') {
+      return NextResponse.redirect(new URL(`/${domainLocale}/portal`, request.url));
+    }
+    // Locale root → redirect to portal
+    if (pathname.match(/^\/(de|en|ar)\/?$/)) {
+      const locale = pathname.replace(/\//g, '') || domainLocale;
+      return NextResponse.redirect(new URL(`/${locale}/portal`, request.url));
+    }
+  }
+
   // Skip for API routes, admin, portal, and static files
   if (
     pathname.startsWith('/api') ||
