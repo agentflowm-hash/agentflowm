@@ -68,7 +68,11 @@ export default function AIInsights({
   const visibleInsights = insights.filter((i) => !dismissed.has(i.id));
 
   const handleDismiss = (id: string) => {
-    setDismissed((prev) => new Set([...prev, id]));
+    setDismissed((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(id);
+      return newSet;
+    });
     onDismiss?.(id);
   };
 
