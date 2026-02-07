@@ -154,6 +154,29 @@ export default function Dashboard() {
     fetchData();
   }, [fetchData]);
 
+  // Real-time polling for updates every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
+  // Check for milestone completion and trigger confetti
+  useEffect(() => {
+    if (data) {
+      const justCompleted = data.milestones.filter(m => m.status === "done").length;
+      const stored = sessionStorage.getItem("completedMilestones");
+      const previousCount = stored ? parseInt(stored, 10) : 0;
+      
+      if (justCompleted > previousCount && previousCount > 0) {
+        setShowConfetti(true);
+        showToast("success", "🎉 Meilenstein abgeschlossen!");
+      }
+      sessionStorage.setItem("completedMilestones", justCompleted.toString());
+    }
+  }, [data, showToast]);
+
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     router.push("/");
@@ -191,6 +214,11 @@ export default function Dashboard() {
     setUploading(false);
     setUploadProgress(0);
     fetchData(); // Refresh to show new files
+    
+    // Toast notification
+    if (uploaded > 0) {
+      showToast("success", `✅ ${uploaded} ${uploaded === 1 ? "Datei" : "Dateien"} hochgeladen`);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -236,9 +264,12 @@ export default function Dashboard() {
             : null,
         );
         setNewMessage("");
+        showToast("success", "✉️ Nachricht gesendet");
+      } else {
+        showToast("error", "Nachricht konnte nicht gesendet werden");
       }
     } catch {
-      // ignore
+      showToast("error", "Verbindungsfehler");
     } finally {
       setSending(false);
     }
@@ -537,21 +568,20 @@ export default function Dashboard() {
                 </span>
               </div>
 
-              {/* Progress */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-white/50">
-                    {tDash("overallProgress")}
-                  </span>
-                  <span className="text-2xl font-bold text-white">
-                    {project.progress}%
-                  </span>
-                </div>
-                <div className="h-4 bg-white/[0.05] rounded-full overflow-hidden border border-white/[0.08]">
-                  <div
-                    className="progress-bar transition-all duration-1000 ease-out"
-                    style={{ width: `${project.progress}%` }}
-                  />
+              {/* Progress - Animated Ring */}
+              <div className="mb-8 flex flex-col sm:flex-row items-center gap-6">
+                <AnimatedProgress value={project.progress} size="lg" />
+                <div className="flex-1 text-center sm:text-left">
+                  <p className="text-sm text-white/50 mb-2">{tDash("overallProgress")}</p>
+                  <div className="h-3 bg-white/[0.05] rounded-full overflow-hidden border border-white/[0.08]">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${project.progress}%` }}
+                    />
+                  </div>
+                  {project.progress >= 100 && (
+                    <p className="text-emerald-400 text-sm mt-2 font-medium">🎉 {tDash("completed")}!</p>
+                  )}
                 </div>
               </div>
 
@@ -583,9 +613,21 @@ export default function Dashboard() {
             {/* Milestones Timeline */}
             <div className="portal-card">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-white">
-                  {tDash("projectTimeline")}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-bold text-white">
+                    {tDash("projectTimeline")}
+                  </h3>
+                  {/* Calendar Export for Go-Live date */}
+                  {project.estimatedEnd && (
+                    <CalendarExport
+                      event={{
+                        title: `${project.name} - Go-Live`,
+                        description: `Geplanter Launch für ${project.name}`,
+                        startDate: project.estimatedEnd,
+                      }}
+                    />
+                  )}
+                </div>
                 <span className="text-sm text-white/40">
                   {completedMilestones} {tDash("of")} {milestones.length} {tDash("completed")}
                 </span>
@@ -743,6 +785,14 @@ export default function Dashboard() {
                 className="portal-input flex-1"
                 disabled={sending}
               />
+              {/* Voice Recorder */}
+              <VoiceRecorder
+                disabled={sending}
+                onSend={async (audioBlob, duration) => {
+                  // TODO: Upload voice message to API
+                  showToast("info", `🎤 Voice message (${duration}s) - Coming soon!`);
+                }}
+              />
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
@@ -886,6 +936,7 @@ export default function Dashboard() {
                   return (
                     <div
                       key={file.id}
+                      onClick={() => file.type === "image" && setPreviewFile(idx)}
                       className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.12] transition-all cursor-pointer group hover-lift"
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
@@ -904,13 +955,32 @@ export default function Dashboard() {
                           </p>
                         </div>
                       </div>
-                      <button className="px-4 py-2 text-sm font-medium text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors">
-                        {tCommon("download")}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {file.type === "image" && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setPreviewFile(idx); }}
+                            className="px-3 py-2 text-sm font-medium text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                          >
+                            <EyeIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button className="px-4 py-2 text-sm font-medium text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors">
+                          {tCommon("download")}
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
               </div>
+            )}
+
+            {/* File Preview Lightbox */}
+            {previewFile !== null && (
+              <FilePreview
+                files={files.map(f => ({ ...f, url: `/api/files/${f.id}` }))}
+                initialIndex={previewFile}
+                onClose={() => setPreviewFile(null)}
+              />
             )}
           </div>
         )}
