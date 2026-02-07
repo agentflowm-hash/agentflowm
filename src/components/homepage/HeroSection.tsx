@@ -10,6 +10,50 @@ import {
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 
+// Orange Particle Field
+function OrangeParticles({ count = 50 }: { count?: number }) {
+  const particles = Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1,
+    duration: Math.random() * 12 + 8,
+    delay: Math.random() * 5,
+    color: ['#FC682C', '#FF8C5A', '#FFB347', '#FF6B35'][Math.floor(Math.random() * 4)],
+  }));
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            background: p.color,
+            boxShadow: `0 0 ${p.size * 4}px ${p.color}`,
+          }}
+          animate={{
+            y: [0, -80, 0],
+            x: [0, Math.random() * 30 - 15, 0],
+            opacity: [0, 0.7, 0],
+            scale: [0, 1.2, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            repeat: Infinity,
+            delay: p.delay,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // Enhanced 3D Sphere Visualization
 function HeroVisualization() {
   return (
@@ -246,6 +290,9 @@ export function HeroSection() {
           transition={{ duration: 10, repeat: Infinity }}
         />
       </div>
+
+      {/* Orange Particles */}
+      <OrangeParticles count={40} />
 
       {/* Grid pattern */}
       <div
