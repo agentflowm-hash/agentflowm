@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   KeyIcon,
   ArrowRightIcon,
@@ -17,19 +17,23 @@ export default function PortalLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations("login");
   const tCommon = useTranslations("common");
+
+  // Build locale-aware dashboard path
+  const dashboardPath = locale === "de" ? "/dashboard" : `/${locale}/dashboard`;
 
   // Check if already logged in
   useEffect(() => {
     fetch("/api/project", { credentials: "include" })
       .then((res) => {
         if (res.ok) {
-          router.push("/dashboard");
+          router.push(dashboardPath);
         }
       })
       .catch(() => {});
-  }, [router]);
+  }, [router, dashboardPath]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +51,7 @@ export default function PortalLoginPage() {
       });
 
       if (res.ok) {
-        router.push("/dashboard");
+        router.push(dashboardPath);
         router.refresh();
       } else {
         const data = await res.json();

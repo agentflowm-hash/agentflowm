@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 // ═══════════════════════════════════════════════════════════════
 //         PORTAL ROOT - Redirect to login or dashboard
@@ -10,7 +10,12 @@ import { useTranslations } from "next-intl";
 
 export default function PortalRoot() {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations("redirect");
+
+  // Build locale-aware paths (.de = no prefix, .com = /en or /ar prefix)
+  const dashboardPath = locale === "de" ? "/dashboard" : `/${locale}/dashboard`;
+  const loginPath = locale === "de" ? "/login" : `/${locale}/login`;
 
   useEffect(() => {
     // Check if already logged in
@@ -18,16 +23,16 @@ export default function PortalRoot() {
       .then((res) => {
         if (res.ok) {
           // Already logged in - go to dashboard
-          router.push("/dashboard");
+          router.push(dashboardPath);
         } else {
           // Not logged in - go to login page
-          router.push("/login");
+          router.push(loginPath);
         }
       })
       .catch(() => {
-        router.push("/login");
+        router.push(loginPath);
       });
-  }, [router]);
+  }, [router, dashboardPath, loginPath]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#09090b]">

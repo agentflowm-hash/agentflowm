@@ -1,13 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+// Translations
+const translations = {
+  de: {
+    title: "Admin Dashboard",
+    password: "Passwort",
+    placeholder: "••••••••",
+    submit: "Anmelden",
+    loading: "Anmelden...",
+    error: "Falsches Passwort",
+    connectionError: "Verbindungsfehler",
+    back: "← Zurück zur Website",
+  },
+  en: {
+    title: "Admin Dashboard",
+    password: "Password",
+    placeholder: "••••••••",
+    submit: "Sign in",
+    loading: "Signing in...",
+    error: "Wrong password",
+    connectionError: "Connection error",
+    back: "← Back to website",
+  },
+};
 
 export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [locale, setLocale] = useState<"de" | "en">("de");
   const router = useRouter();
+
+  // Detect locale from domain
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    if (hostname.includes(".com")) {
+      setLocale("en");
+    } else {
+      setLocale("de");
+    }
+  }, []);
+
+  const t = translations[locale];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,10 +63,10 @@ export default function LoginPage() {
         router.push("/");
         router.refresh();
       } else {
-        setError("Falsches Passwort");
+        setError(t.error);
       }
     } catch {
-      setError("Verbindungsfehler");
+      setError(t.connectionError);
     } finally {
       setLoading(false);
     }
@@ -45,7 +82,7 @@ export default function LoginPage() {
             alt="AgentFlow"
             className="h-12 w-auto mx-auto mb-4"
           />
-          <p className="text-white/40 text-sm">Admin Dashboard</p>
+          <p className="text-white/40 text-sm">{t.title}</p>
         </div>
 
         {/* Login Form */}
@@ -55,7 +92,7 @@ export default function LoginPage() {
               htmlFor="password"
               className="block text-xs text-white/50 mb-2 uppercase tracking-wider"
             >
-              Passwort
+              {t.password}
             </label>
             <input
               id="password"
@@ -63,7 +100,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="admin-input"
-              placeholder="••••••••"
+              placeholder={t.placeholder}
               autoFocus
               required
             />
@@ -97,10 +134,10 @@ export default function LoginPage() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                Anmelden...
+                {t.loading}
               </span>
             ) : (
-              "Anmelden"
+              t.submit
             )}
           </button>
         </form>
@@ -108,10 +145,10 @@ export default function LoginPage() {
         {/* Back link */}
         <p className="text-center mt-6">
           <a
-            href={process.env.NEXT_PUBLIC_BASE_URL || "/"}
+            href={locale === "en" ? "https://agentflowm.com" : "https://agentflowm.de"}
             className="text-white/30 text-xs hover:text-white/50 transition-colors"
           >
-            ← Zurück zur Website
+            {t.back}
           </a>
         </p>
       </div>
