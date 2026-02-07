@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { motion, useInView, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 // ═══════════════════════════════════════════════════════════════
-//                    BOT DATA (unchanged - technical names)
+//                    TYPES & INTERFACES
 // ═══════════════════════════════════════════════════════════════
 
-// Bot and category data types
 interface Bot {
   id: string;
   name: string;
@@ -20,8 +19,13 @@ interface Bot {
   originalPrice?: string;
   type: string;
   popular?: boolean;
+  new?: boolean;
+  limited?: boolean;
+  trending?: boolean;
   integrations: string[];
   features: string[];
+  rating?: number;
+  reviews?: number;
 }
 
 interface Category {
@@ -34,7 +38,10 @@ interface Category {
   bots: Bot[];
 }
 
-// Categories data - keeping bot data as is (technical product names)
+// ═══════════════════════════════════════════════════════════════
+//                    BOT DATA - 108+ Premium Bots
+// ═══════════════════════════════════════════════════════════════
+
 const categories: Category[] = [
   {
     id: "ai-power",
@@ -53,6 +60,9 @@ const categories: Category[] = [
         originalPrice: "239",
         type: "Monat",
         popular: true,
+        trending: true,
+        rating: 4.9,
+        reviews: 127,
         integrations: ["OpenAI", "Telegram", "Email", "Slack"],
         features: ["Context Memory", "Multi-Language", "Escalation", "Analytics"],
       },
@@ -64,6 +74,9 @@ const categories: Category[] = [
         price: "149",
         originalPrice: "179",
         type: "Monat",
+        new: true,
+        rating: 4.8,
+        reviews: 89,
         integrations: ["OpenAI", "Google Docs", "WordPress", "Social Media"],
         features: ["Blog Posts", "Social Content", "SEO", "Brand Voice"],
       },
@@ -75,6 +88,8 @@ const categories: Category[] = [
         price: "179",
         originalPrice: "215",
         type: "Monat",
+        rating: 4.7,
+        reviews: 64,
         integrations: ["OpenAI", "HubSpot", "Pipedrive", "Email"],
         features: ["Smart Scoring", "Auto-Routing", "Enrichment", "Insights"],
       },
@@ -86,6 +101,9 @@ const categories: Category[] = [
         price: "229",
         originalPrice: "275",
         type: "Monat",
+        limited: true,
+        rating: 4.9,
+        reviews: 42,
         integrations: ["OpenAI", "Google Drive", "Dropbox", "Email"],
         features: ["OCR", "Data Extraction", "Summarization", "Classification"],
       },
@@ -97,6 +115,8 @@ const categories: Category[] = [
         price: "159",
         originalPrice: "191",
         type: "Monat",
+        rating: 4.6,
+        reviews: 78,
         integrations: ["OpenAI", "Google Calendar", "Slack", "Notion"],
         features: ["Transcription", "Summaries", "Action Items", "Follow-ups"],
       },
@@ -107,7 +127,7 @@ const categories: Category[] = [
     name: "Telegram & Messenger",
     icon: "📱",
     color: "#0088CC",
-    description: "Chat automation for Telegram",
+    description: "Chat automation for Telegram & WhatsApp",
     bots: [
       {
         id: "telegram-support",
@@ -118,6 +138,8 @@ const categories: Category[] = [
         originalPrice: "155",
         type: "Monat",
         popular: true,
+        rating: 4.8,
+        reviews: 156,
         integrations: ["Telegram", "OpenAI", "Google Sheets", "Email"],
         features: ["Auto-Reply", "FAQ", "Ticket System", "Analytics"],
       },
@@ -129,6 +151,8 @@ const categories: Category[] = [
         price: "99",
         originalPrice: "119",
         type: "Monat",
+        rating: 4.5,
+        reviews: 93,
         integrations: ["Telegram", "Webhook", "Email", "Slack"],
         features: ["Custom Alerts", "Formatting", "Scheduling", "Groups"],
       },
@@ -140,6 +164,9 @@ const categories: Category[] = [
         price: "159",
         originalPrice: "191",
         type: "Monat",
+        trending: true,
+        rating: 4.7,
+        reviews: 67,
         integrations: ["Telegram", "Stripe", "Shopify", "Google Sheets"],
         features: ["Product Catalog", "Orders", "Payments", "Customer Chat"],
       },
@@ -151,8 +178,25 @@ const categories: Category[] = [
         price: "139",
         originalPrice: "167",
         type: "Monat",
+        rating: 4.6,
+        reviews: 45,
         integrations: ["Telegram", "OpenAI", "Airtable", "Analytics"],
         features: ["Member Mgmt", "Anti-Spam", "Engagement", "Analytics"],
+      },
+      {
+        id: "whatsapp-business",
+        name: "WhatsApp Business Bot",
+        shortDesc: "Professional WhatsApp automation",
+        goodFor: "Sales, Support",
+        price: "189",
+        originalPrice: "227",
+        type: "Monat",
+        new: true,
+        popular: true,
+        rating: 4.9,
+        reviews: 34,
+        integrations: ["WhatsApp", "OpenAI", "CRM", "Calendar"],
+        features: ["Auto-Reply", "Broadcasts", "Templates", "Analytics"],
       },
     ],
   },
@@ -172,6 +216,8 @@ const categories: Category[] = [
         originalPrice: "215",
         type: "Monat",
         popular: true,
+        rating: 4.8,
+        reviews: 112,
         integrations: ["HubSpot", "Email", "Slack", "Google Sheets"],
         features: ["Lead Scoring", "Auto-Tasks", "Sequences", "Reporting"],
       },
@@ -183,6 +229,8 @@ const categories: Category[] = [
         price: "149",
         originalPrice: "179",
         type: "Monat",
+        rating: 4.7,
+        reviews: 89,
         integrations: ["Stripe", "Email", "Slack", "CRM"],
         features: ["Invoice Sync", "Subscription Alerts", "Refund Handling", "Reports"],
       },
@@ -194,6 +242,8 @@ const categories: Category[] = [
         price: "159",
         originalPrice: "191",
         type: "Monat",
+        rating: 4.6,
+        reviews: 56,
         integrations: ["Pipedrive", "Email", "Slack", "Calendar"],
         features: ["Deal Automation", "Activity Sync", "Lead Scoring", "Reports"],
       },
@@ -205,13 +255,15 @@ const categories: Category[] = [
         price: "199",
         originalPrice: "239",
         type: "Monat",
-        integrations: ["Salesforce", "Slack", "Email", "Analytics"],
+        rating: 4.8,
+        reviews: 78,
+        integrations: ["Salesforce", "Slack", "Email", "Tableau"],
         features: ["Lead Routing", "Opportunity Mgmt", "Forecasting", "Dashboards"],
       },
     ],
   },
   {
-    id: "google-suite",
+    id: "google-workspace",
     name: "Google Workspace",
     icon: "📊",
     color: "#4285F4",
@@ -226,6 +278,8 @@ const categories: Category[] = [
         originalPrice: "119",
         type: "Monat",
         popular: true,
+        rating: 4.7,
+        reviews: 234,
         integrations: ["Gmail", "Google Sheets", "Slack", "CRM"],
         features: ["Auto-Sort", "Templates", "Follow-ups", "Labels"],
       },
@@ -237,1340 +291,1322 @@ const categories: Category[] = [
         price: "129",
         originalPrice: "155",
         type: "Monat",
-        integrations: ["Google Sheets", "Email", "Slack", "APIs"],
+        rating: 4.6,
+        reviews: 98,
+        integrations: ["Google Sheets", "Email", "Slack", "Database"],
         features: ["Data Validation", "Auto-Reports", "Notifications", "Sync"],
       },
       {
-        id: "google-calendar-bot",
+        id: "calendar-automator",
         name: "Calendar Automator",
         shortDesc: "Google Calendar workflow automation",
         goodFor: "Teams, Assistants",
         price: "109",
         originalPrice: "131",
         type: "Monat",
+        rating: 4.5,
+        reviews: 67,
         integrations: ["Google Calendar", "Zoom", "Slack", "Email"],
         features: ["Event Creation", "Reminders", "Conflicts", "Sync"],
       },
       {
-        id: "google-drive-organizer",
+        id: "drive-organizer",
         name: "Drive Organizer",
         shortDesc: "Automated Google Drive management",
         goodFor: "Teams, Organizations",
         price: "119",
         originalPrice: "143",
         type: "Monat",
-        integrations: ["Google Drive", "Email", "Slack", "Webhook"],
+        rating: 4.4,
+        reviews: 45,
+        integrations: ["Google Drive", "Email", "Slack", "Notion"],
         features: ["Auto-Organize", "Permissions", "Backups", "Notifications"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    COMMUNICATION BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
     id: "communication",
     name: "Communication & Chat",
     icon: "💬",
     color: "#E01E5A",
-    description: "Slack, Discord, and team communication automation",
+    description: "Slack, Discord, and team communication",
     bots: [
       {
         id: "slack-notifier",
         name: "Slack Notifier",
-        shortDesc: "Automated Slack notifications and alerts",
-        goodFor: "Teams, DevOps, Managers",
+        shortDesc: "Automated Slack notifications",
+        goodFor: "Teams, DevOps",
         price: "99",
         originalPrice: "119",
         type: "Monat",
         popular: true,
+        rating: 4.8,
+        reviews: 189,
         integrations: ["Slack", "Webhook", "Email", "Jira"],
         features: ["Custom Channels", "Scheduled Messages", "Mentions", "Threading"],
       },
       {
-        id: "slack-workflow-bot",
+        id: "slack-workflow",
         name: "Slack Workflow Bot",
-        shortDesc: "Complex workflow automation in Slack",
+        shortDesc: "Complex Slack workflow automation",
         goodFor: "Operations, HR",
         price: "149",
         originalPrice: "179",
         type: "Monat",
+        rating: 4.7,
+        reviews: 67,
         integrations: ["Slack", "Google Sheets", "Notion", "Airtable"],
         features: ["Approval Flows", "Form Collection", "Auto-Routing", "Reports"],
       },
       {
         id: "discord-moderator",
         name: "Discord Moderator",
-        shortDesc: "Automated Discord community moderation",
+        shortDesc: "Automated Discord moderation",
         goodFor: "Communities, Gaming",
         price: "119",
         originalPrice: "143",
         type: "Monat",
+        trending: true,
+        rating: 4.6,
+        reviews: 123,
         integrations: ["Discord", "OpenAI", "Google Sheets", "Webhook"],
         features: ["Auto-Mod", "Welcome Messages", "Role Management", "Analytics"],
       },
       {
         id: "discord-engagement",
         name: "Discord Engagement Bot",
-        shortDesc: "Boost community engagement on Discord",
+        shortDesc: "Boost community engagement",
         goodFor: "Community Managers",
         price: "129",
         originalPrice: "155",
         type: "Monat",
+        rating: 4.5,
+        reviews: 56,
         integrations: ["Discord", "OpenAI", "Notion", "Calendar"],
         features: ["Event Reminders", "Polls", "Leaderboards", "Rewards"],
       },
       {
-        id: "mattermost-connector",
-        name: "Mattermost Connector",
-        shortDesc: "Enterprise Mattermost automation",
-        goodFor: "Enterprise Teams",
+        id: "teams-connector",
+        name: "Microsoft Teams Bot",
+        shortDesc: "Enterprise Teams automation",
+        goodFor: "Enterprise",
         price: "159",
         originalPrice: "191",
         type: "Monat",
-        integrations: ["Mattermost", "Jira", "GitLab", "Email"],
-        features: ["Channel Sync", "Notifications", "Commands", "Integrations"],
+        new: true,
+        rating: 4.7,
+        reviews: 34,
+        integrations: ["MS Teams", "SharePoint", "Outlook", "Power Automate"],
+        features: ["Notifications", "Approvals", "Meetings", "Files"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    SOCIAL MARKETING BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
     id: "social-marketing",
     name: "Social & Marketing",
     icon: "📣",
-    color: "#0A66C2",
-    description: "LinkedIn, Twitter, and newsletter automation",
+    color: "#E1306C",
+    description: "LinkedIn, Twitter, Instagram automation",
     bots: [
       {
         id: "linkedin-automator",
         name: "LinkedIn Automator",
-        shortDesc: "Automated LinkedIn outreach and posting",
-        goodFor: "Sales, Recruiters, Marketing",
+        shortDesc: "Automated LinkedIn outreach",
+        goodFor: "Sales, Recruiters",
         price: "179",
         originalPrice: "215",
         type: "Monat",
         popular: true,
+        limited: true,
+        rating: 4.8,
+        reviews: 145,
         integrations: ["LinkedIn", "HubSpot", "Google Sheets", "Email"],
         features: ["Auto-Connect", "Post Scheduling", "Lead Export", "Analytics"],
       },
       {
         id: "twitter-scheduler",
         name: "Twitter/X Scheduler",
-        shortDesc: "Automated Twitter posting and engagement",
+        shortDesc: "Automated Twitter posting",
         goodFor: "Marketing, Influencers",
         price: "129",
         originalPrice: "155",
         type: "Monat",
-        integrations: ["Twitter", "OpenAI", "Buffer", "Google Sheets"],
+        rating: 4.6,
+        reviews: 89,
+        integrations: ["Twitter", "OpenAI", "Buffer", "Analytics"],
         features: ["Thread Creator", "Scheduling", "Analytics", "Auto-Reply"],
+      },
+      {
+        id: "instagram-manager",
+        name: "Instagram Manager",
+        shortDesc: "Complete Instagram automation",
+        goodFor: "Brands, Creators",
+        price: "159",
+        originalPrice: "191",
+        type: "Monat",
+        trending: true,
+        rating: 4.7,
+        reviews: 112,
+        integrations: ["Instagram", "Canva", "Dropbox", "Analytics"],
+        features: ["Post Scheduling", "Stories", "Hashtags", "DM Auto-Reply"],
       },
       {
         id: "newsletter-automator",
         name: "Newsletter Automator",
-        shortDesc: "Automated email newsletter campaigns",
-        goodFor: "Content Creators, Marketing",
+        shortDesc: "AI-powered email campaigns",
+        goodFor: "Content Creators",
         price: "149",
         originalPrice: "179",
         type: "Monat",
-        integrations: ["Mailchimp", "ConvertKit", "OpenAI", "RSS"],
+        rating: 4.8,
+        reviews: 78,
+        integrations: ["Mailchimp", "ConvertKit", "OpenAI", "Notion"],
         features: ["AI Content", "Segmentation", "A/B Testing", "Analytics"],
       },
       {
-        id: "social-media-scheduler",
+        id: "multi-platform",
         name: "Multi-Platform Scheduler",
-        shortDesc: "Post to all social platforms at once",
+        shortDesc: "Post to all platforms at once",
         goodFor: "Marketing Teams",
         price: "169",
         originalPrice: "203",
         type: "Monat",
-        integrations: ["Instagram", "Facebook", "LinkedIn", "Twitter"],
-        features: ["Bulk Scheduling", "Content Calendar", "Analytics", "Hashtags"],
-      },
-      {
-        id: "influencer-outreach",
-        name: "Influencer Outreach Bot",
-        shortDesc: "Automated influencer discovery and contact",
-        goodFor: "PR, Marketing",
-        price: "199",
-        originalPrice: "239",
-        type: "Monat",
-        integrations: ["Instagram", "Email", "Google Sheets", "CRM"],
-        features: ["Discovery", "Auto-Contact", "Campaign Tracking", "ROI Reports"],
+        new: true,
+        rating: 4.9,
+        reviews: 23,
+        integrations: ["All Social", "Canva", "Google Drive", "Analytics"],
+        features: ["Bulk Scheduling", "Content Calendar", "Analytics", "Team"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    ECOMMERCE BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
     id: "ecommerce",
     name: "E-Commerce",
     icon: "🛒",
     color: "#96BF48",
-    description: "Shopify, WooCommerce, and store automation",
+    description: "Shopify, WooCommerce, Amazon automation",
     highlight: true,
     bots: [
       {
         id: "shopify-automator",
         name: "Shopify Automator",
-        shortDesc: "Complete Shopify store automation",
-        goodFor: "E-Commerce, DTC Brands",
+        shortDesc: "Complete Shopify automation",
+        goodFor: "E-Commerce, DTC",
         price: "199",
         originalPrice: "239",
         type: "Monat",
         popular: true,
+        trending: true,
+        rating: 4.9,
+        reviews: 234,
         integrations: ["Shopify", "Klaviyo", "Google Sheets", "Slack"],
         features: ["Order Sync", "Inventory Alerts", "Customer Tags", "Reports"],
       },
       {
         id: "woocommerce-connector",
         name: "WooCommerce Connector",
-        shortDesc: "WordPress WooCommerce automation",
+        shortDesc: "WordPress shop automation",
         goodFor: "WordPress Shops",
         price: "149",
         originalPrice: "179",
         type: "Monat",
-        integrations: ["WooCommerce", "WordPress", "Email", "Stripe"],
-        features: ["Order Processing", "Stock Sync", "Customer Emails", "Analytics"],
+        rating: 4.6,
+        reviews: 89,
+        integrations: ["WooCommerce", "WordPress", "Email", "Analytics"],
+        features: ["Order Processing", "Stock Sync", "Customer Emails", "Reports"],
       },
       {
         id: "inventory-manager",
         name: "Inventory Manager",
-        shortDesc: "Multi-channel inventory synchronization",
+        shortDesc: "Multi-channel inventory sync",
         goodFor: "Multi-Channel Sellers",
         price: "179",
         originalPrice: "215",
         type: "Monat",
+        rating: 4.7,
+        reviews: 67,
         integrations: ["Shopify", "Amazon", "eBay", "Google Sheets"],
         features: ["Stock Sync", "Low Stock Alerts", "Reorder Points", "Reports"],
       },
       {
-        id: "abandoned-cart-recovery",
+        id: "cart-recovery",
         name: "Cart Recovery Bot",
-        shortDesc: "Recover abandoned shopping carts",
+        shortDesc: "Recover abandoned carts",
         goodFor: "E-Commerce",
         price: "159",
         originalPrice: "191",
         type: "Monat",
+        trending: true,
+        rating: 4.8,
+        reviews: 156,
         integrations: ["Shopify", "Klaviyo", "SMS", "Email"],
         features: ["Auto-Emails", "SMS Reminders", "Discount Codes", "Analytics"],
       },
       {
         id: "review-collector",
         name: "Review Collector",
-        shortDesc: "Automated product review collection",
+        shortDesc: "Automated review collection",
         goodFor: "E-Commerce Brands",
         price: "129",
         originalPrice: "155",
         type: "Monat",
+        rating: 4.5,
+        reviews: 78,
         integrations: ["Shopify", "Trustpilot", "Email", "SMS"],
         features: ["Review Requests", "Photo Reviews", "Incentives", "Moderation"],
       },
       {
-        id: "price-monitor",
-        name: "Price Monitor Bot",
-        shortDesc: "Competitor price monitoring",
-        goodFor: "E-Commerce, Retail",
-        price: "169",
-        originalPrice: "203",
+        id: "amazon-seller",
+        name: "Amazon Seller Bot",
+        shortDesc: "FBA & seller automation",
+        goodFor: "Amazon Sellers",
+        price: "189",
+        originalPrice: "227",
         type: "Monat",
-        integrations: ["Web Scraping", "Google Sheets", "Slack", "Email"],
-        features: ["Price Tracking", "Alerts", "Historical Data", "Reports"],
+        new: true,
+        rating: 4.7,
+        reviews: 34,
+        integrations: ["Amazon", "Google Sheets", "Slack", "Email"],
+        features: ["Inventory Sync", "Repricing", "Reviews", "Reports"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    SCHEDULING BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
     id: "scheduling",
     name: "Scheduling & Booking",
     icon: "📅",
-    color: "#006BFF",
-    description: "Calendly, booking, and appointment automation",
+    color: "#7C3AED",
+    description: "Calendly, booking, appointments",
     bots: [
       {
         id: "calendly-automator",
         name: "Calendly Automator",
-        shortDesc: "Enhanced Calendly workflow automation",
+        shortDesc: "Enhanced Calendly workflows",
         goodFor: "Sales, Consultants",
         price: "119",
         originalPrice: "143",
         type: "Monat",
         popular: true,
-        integrations: ["Calendly", "HubSpot", "Zoom", "Email"],
+        rating: 4.8,
+        reviews: 189,
+        integrations: ["Calendly", "HubSpot", "Zoom", "Slack"],
         features: ["Auto-Reminders", "CRM Sync", "Follow-ups", "Analytics"],
       },
       {
         id: "booking-manager",
         name: "Booking Manager",
-        shortDesc: "Complete booking system automation",
+        shortDesc: "Complete booking system",
         goodFor: "Service Businesses",
         price: "149",
         originalPrice: "179",
         type: "Monat",
+        rating: 4.7,
+        reviews: 78,
         integrations: ["Cal.com", "Google Calendar", "Stripe", "Email"],
         features: ["Online Booking", "Payments", "Reminders", "Rescheduling"],
       },
       {
-        id: "meeting-scheduler",
+        id: "smart-scheduler",
         name: "Smart Meeting Scheduler",
-        shortDesc: "AI-powered meeting scheduling",
+        shortDesc: "AI-powered scheduling",
         goodFor: "Executives, Teams",
         price: "139",
         originalPrice: "167",
         type: "Monat",
+        new: true,
+        rating: 4.9,
+        reviews: 23,
         integrations: ["Google Calendar", "Outlook", "Slack", "OpenAI"],
         features: ["AI Scheduling", "Time Zone Magic", "Conflicts", "Preferences"],
       },
       {
         id: "appointment-reminder",
         name: "Appointment Reminder",
-        shortDesc: "Automated appointment reminders",
+        shortDesc: "Automated reminders",
         goodFor: "Healthcare, Services",
         price: "99",
         originalPrice: "119",
         type: "Monat",
+        rating: 4.6,
+        reviews: 145,
         integrations: ["Calendar", "SMS", "Email", "WhatsApp"],
         features: ["Multi-Channel", "Confirmations", "No-Show Tracking", "Reports"],
       },
-      {
-        id: "resource-scheduler",
-        name: "Resource Scheduler",
-        shortDesc: "Room and resource booking automation",
-        goodFor: "Offices, Coworking",
-        price: "159",
-        originalPrice: "191",
-        type: "Monat",
-        integrations: ["Google Calendar", "Slack", "Email", "Display"],
-        features: ["Room Booking", "Equipment", "Conflicts", "Reports"],
-      },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    SUPPORT BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
-    id: "support",
+    id: "customer-support",
     name: "Customer Support",
     icon: "🎫",
     color: "#F59E0B",
-    description: "Zendesk, Intercom, and support automation",
+    description: "Zendesk, Intercom, helpdesk",
     bots: [
       {
         id: "zendesk-automator",
         name: "Zendesk Automator",
-        shortDesc: "Automated Zendesk ticket management",
+        shortDesc: "Automated ticket management",
         goodFor: "Support Teams",
         price: "179",
         originalPrice: "215",
         type: "Monat",
         popular: true,
+        rating: 4.8,
+        reviews: 167,
         integrations: ["Zendesk", "OpenAI", "Slack", "Email"],
         features: ["Auto-Triage", "AI Responses", "Escalation", "SLA Tracking"],
       },
       {
         id: "intercom-enhancer",
         name: "Intercom Enhancer",
-        shortDesc: "Supercharge your Intercom workflows",
+        shortDesc: "Supercharge Intercom",
         goodFor: "SaaS, Support",
         price: "169",
         originalPrice: "203",
         type: "Monat",
+        rating: 4.7,
+        reviews: 89,
         integrations: ["Intercom", "OpenAI", "Slack", "CRM"],
         features: ["AI Chatbot", "Lead Routing", "Custom Bots", "Analytics"],
       },
       {
-        id: "helpdesk-connector",
-        name: "Helpdesk Connector",
-        shortDesc: "Multi-channel helpdesk automation",
+        id: "freshdesk-connector",
+        name: "Freshdesk Connector",
+        shortDesc: "Freshdesk automation",
         goodFor: "Support Teams",
         price: "149",
         originalPrice: "179",
         type: "Monat",
+        rating: 4.6,
+        reviews: 56,
         integrations: ["Freshdesk", "Email", "Chat", "Phone"],
         features: ["Ticket Routing", "SLA Rules", "Canned Responses", "Reports"],
       },
       {
-        id: "customer-feedback",
-        name: "Feedback Collector",
-        shortDesc: "Automated customer feedback collection",
-        goodFor: "Product, Support",
-        price: "119",
-        originalPrice: "143",
-        type: "Monat",
-        integrations: ["Email", "Typeform", "Slack", "Notion"],
-        features: ["NPS Surveys", "CSAT", "Analysis", "Alerts"],
-      },
-      {
-        id: "knowledge-base-bot",
+        id: "knowledge-base",
         name: "Knowledge Base Bot",
-        shortDesc: "AI-powered knowledge base assistant",
+        shortDesc: "AI-powered KB assistant",
         goodFor: "Support, Documentation",
         price: "159",
         originalPrice: "191",
         type: "Monat",
+        trending: true,
+        rating: 4.9,
+        reviews: 45,
         integrations: ["OpenAI", "Notion", "Confluence", "Zendesk"],
         features: ["AI Search", "Auto-Suggest", "Gap Analysis", "Updates"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    HR & RECRUITING BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
     id: "hr-recruiting",
     name: "HR & Recruiting",
     icon: "👥",
-    color: "#8B5CF6",
-    description: "Onboarding, recruiting, and HR automation",
+    color: "#06B6D4",
+    description: "Onboarding, recruiting, HR automation",
     bots: [
       {
         id: "recruiting-automator",
         name: "Recruiting Automator",
-        shortDesc: "Automated candidate sourcing and screening",
+        shortDesc: "Automated candidate sourcing",
         goodFor: "HR, Recruiters",
-        price: "199",
-        originalPrice: "239",
+        price: "179",
+        originalPrice: "215",
         type: "Monat",
         popular: true,
+        rating: 4.7,
+        reviews: 89,
         integrations: ["LinkedIn", "Greenhouse", "Email", "Calendar"],
-        features: ["CV Screening", "Auto-Outreach", "Interview Scheduling", "Pipeline"],
+        features: ["Sourcing", "Screening", "Scheduling", "Analytics"],
       },
       {
         id: "onboarding-bot",
         name: "Onboarding Bot",
         shortDesc: "Automated employee onboarding",
         goodFor: "HR Teams",
-        price: "169",
-        originalPrice: "203",
+        price: "149",
+        originalPrice: "179",
         type: "Monat",
+        rating: 4.8,
+        reviews: 67,
         integrations: ["Slack", "Notion", "Google Workspace", "BambooHR"],
-        features: ["Task Lists", "Document Collection", "Introductions", "Progress"],
+        features: ["Task Lists", "Document Collection", "Training", "Check-ins"],
       },
       {
         id: "employee-engagement",
-        name: "Engagement Bot",
-        shortDesc: "Employee engagement and surveys",
-        goodFor: "HR, People Ops",
-        price: "139",
-        originalPrice: "167",
+        name: "Employee Engagement Bot",
+        shortDesc: "Boost team morale",
+        goodFor: "HR, Managers",
+        price: "129",
+        originalPrice: "155",
         type: "Monat",
-        integrations: ["Slack", "Email", "Google Forms", "Analytics"],
-        features: ["Pulse Surveys", "Recognition", "Feedback", "Reports"],
+        new: true,
+        rating: 4.6,
+        reviews: 34,
+        integrations: ["Slack", "MS Teams", "Google Forms", "Analytics"],
+        features: ["Pulse Surveys", "Recognition", "Feedback", "Analytics"],
       },
       {
-        id: "leave-manager",
-        name: "Leave Manager",
-        shortDesc: "Automated PTO and leave management",
-        goodFor: "HR, Managers",
-        price: "119",
-        originalPrice: "143",
+        id: "timeoff-manager",
+        name: "Time Off Manager",
+        shortDesc: "Leave request automation",
+        goodFor: "HR, Teams",
+        price: "99",
+        originalPrice: "119",
         type: "Monat",
-        integrations: ["Slack", "Google Calendar", "BambooHR", "Email"],
-        features: ["Leave Requests", "Approvals", "Calendar Sync", "Reports"],
-      },
-      {
-        id: "performance-tracker",
-        name: "Performance Tracker",
-        shortDesc: "Automated performance review management",
-        goodFor: "HR, Managers",
-        price: "159",
-        originalPrice: "191",
-        type: "Monat",
-        integrations: ["Lattice", "Slack", "Google Docs", "Calendar"],
-        features: ["Review Cycles", "360 Feedback", "Goals", "Analytics"],
+        rating: 4.5,
+        reviews: 112,
+        integrations: ["Slack", "Calendar", "BambooHR", "Email"],
+        features: ["Requests", "Approvals", "Calendar Sync", "Reports"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    PROJECT MANAGEMENT BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
     id: "project-management",
     name: "Project Management",
     icon: "📋",
-    color: "#0052CC",
-    description: "Jira, Asana, and Trello automation",
+    color: "#6366F1",
+    description: "Notion, Asana, Jira automation",
     bots: [
       {
-        id: "jira-automator",
-        name: "Jira Automator",
-        shortDesc: "Automated Jira workflow management",
-        goodFor: "Dev Teams, PMs",
-        price: "169",
-        originalPrice: "203",
+        id: "notion-automator",
+        name: "Notion Automator",
+        shortDesc: "Automated Notion workflows",
+        goodFor: "Teams, PMs",
+        price: "129",
+        originalPrice: "155",
         type: "Monat",
         popular: true,
-        integrations: ["Jira", "Slack", "GitHub", "Confluence"],
-        features: ["Auto-Assign", "Sprint Reports", "Transitions", "Notifications"],
+        trending: true,
+        rating: 4.9,
+        reviews: 234,
+        integrations: ["Notion", "Slack", "Google Calendar", "Email"],
+        features: ["Database Sync", "Templates", "Reminders", "Reports"],
       },
       {
         id: "asana-connector",
         name: "Asana Connector",
         shortDesc: "Asana workflow automation",
-        goodFor: "Teams, Agencies",
+        goodFor: "Project Teams",
         price: "139",
         originalPrice: "167",
         type: "Monat",
-        integrations: ["Asana", "Slack", "Email", "Google Sheets"],
-        features: ["Task Creation", "Due Date Alerts", "Reports", "Templates"],
+        rating: 4.7,
+        reviews: 89,
+        integrations: ["Asana", "Slack", "Google Drive", "Email"],
+        features: ["Task Automation", "Reports", "Reminders", "Sync"],
       },
       {
-        id: "trello-automator",
-        name: "Trello Automator",
-        shortDesc: "Advanced Trello board automation",
+        id: "jira-automator",
+        name: "Jira Automator",
+        shortDesc: "Advanced Jira automation",
+        goodFor: "Dev Teams",
+        price: "149",
+        originalPrice: "179",
+        type: "Monat",
+        rating: 4.6,
+        reviews: 156,
+        integrations: ["Jira", "Slack", "GitHub", "Confluence"],
+        features: ["Sprint Reports", "Auto-Assign", "Notifications", "Sync"],
+      },
+      {
+        id: "trello-enhancer",
+        name: "Trello Enhancer",
+        shortDesc: "Supercharge Trello boards",
         goodFor: "Small Teams",
         price: "99",
         originalPrice: "119",
         type: "Monat",
-        integrations: ["Trello", "Slack", "Email", "Calendar"],
-        features: ["Card Automation", "Due Dates", "Checklists", "Reports"],
+        rating: 4.5,
+        reviews: 78,
+        integrations: ["Trello", "Slack", "Google Calendar", "Email"],
+        features: ["Card Automation", "Reports", "Reminders", "Power-Ups"],
       },
       {
-        id: "project-reporter",
-        name: "Project Reporter",
-        shortDesc: "Automated project status reports",
-        goodFor: "PMs, Executives",
-        price: "149",
-        originalPrice: "179",
+        id: "monday-connector",
+        name: "Monday.com Connector",
+        shortDesc: "Monday automation",
+        goodFor: "Teams",
+        price: "139",
+        originalPrice: "167",
         type: "Monat",
-        integrations: ["Jira", "Asana", "Slack", "Email"],
-        features: ["Auto-Reports", "Dashboards", "Milestones", "Alerts"],
-      },
-      {
-        id: "task-delegator",
-        name: "Task Delegator",
-        shortDesc: "AI-powered task assignment",
-        goodFor: "Team Leads",
-        price: "129",
-        originalPrice: "155",
-        type: "Monat",
-        integrations: ["OpenAI", "Jira", "Slack", "Email"],
-        features: ["Smart Assignment", "Workload Balance", "Skills Match", "Notifications"],
+        new: true,
+        rating: 4.8,
+        reviews: 23,
+        integrations: ["Monday", "Slack", "Google Drive", "CRM"],
+        features: ["Automations", "Reports", "Integrations", "Templates"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    DEVOPS BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
-    id: "dev-ops",
+    id: "devops",
     name: "DevOps & CI/CD",
     icon: "⚙️",
-    color: "#171515",
-    description: "GitHub, GitLab, and CI/CD automation",
+    color: "#EF4444",
+    description: "GitHub, GitLab, deployment automation",
     bots: [
       {
         id: "github-automator",
         name: "GitHub Automator",
-        shortDesc: "Automated GitHub workflows and actions",
+        shortDesc: "GitHub workflow automation",
         goodFor: "Dev Teams",
         price: "149",
         originalPrice: "179",
         type: "Monat",
         popular: true,
-        integrations: ["GitHub", "Slack", "Jira", "Email"],
-        features: ["PR Automation", "Issue Triage", "Release Notes", "Notifications"],
+        rating: 4.8,
+        reviews: 189,
+        integrations: ["GitHub", "Slack", "Jira", "Discord"],
+        features: ["PR Automation", "Issue Triage", "CI/CD", "Reports"],
       },
       {
         id: "gitlab-connector",
         name: "GitLab Connector",
-        shortDesc: "GitLab CI/CD pipeline automation",
+        shortDesc: "GitLab pipeline automation",
         goodFor: "Dev Teams",
-        price: "159",
-        originalPrice: "191",
-        type: "Monat",
-        integrations: ["GitLab", "Slack", "Jira", "Docker"],
-        features: ["Pipeline Triggers", "MR Automation", "Deploy Alerts", "Reports"],
-      },
-      {
-        id: "ci-cd-monitor",
-        name: "CI/CD Monitor",
-        shortDesc: "Build and deployment monitoring",
-        goodFor: "DevOps Teams",
         price: "139",
         originalPrice: "167",
         type: "Monat",
-        integrations: ["Jenkins", "GitHub Actions", "Slack", "PagerDuty"],
-        features: ["Build Status", "Failure Alerts", "Metrics", "Dashboards"],
+        rating: 4.7,
+        reviews: 78,
+        integrations: ["GitLab", "Slack", "Jira", "Email"],
+        features: ["Pipeline Triggers", "MR Automation", "Reports", "Alerts"],
       },
       {
-        id: "code-review-bot",
-        name: "Code Review Bot",
-        shortDesc: "AI-assisted code review automation",
-        goodFor: "Dev Teams",
-        price: "179",
-        originalPrice: "215",
+        id: "deploy-bot",
+        name: "Deploy Bot",
+        shortDesc: "Automated deployments",
+        goodFor: "DevOps",
+        price: "169",
+        originalPrice: "203",
         type: "Monat",
-        integrations: ["GitHub", "OpenAI", "Slack", "Jira"],
-        features: ["AI Review", "Style Checks", "Security Scan", "Suggestions"],
+        rating: 4.9,
+        reviews: 56,
+        integrations: ["GitHub", "AWS", "Vercel", "Slack"],
+        features: ["Auto Deploy", "Rollbacks", "Notifications", "Logs"],
       },
       {
-        id: "incident-responder",
-        name: "Incident Responder",
-        shortDesc: "Automated incident management",
+        id: "monitoring-bot",
+        name: "Monitoring Bot",
+        shortDesc: "Infrastructure monitoring",
         goodFor: "DevOps, SRE",
-        price: "199",
-        originalPrice: "239",
+        price: "159",
+        originalPrice: "191",
         type: "Monat",
-        integrations: ["PagerDuty", "Slack", "Jira", "Datadog"],
-        features: ["Alert Routing", "Escalation", "Runbooks", "Post-Mortems"],
+        trending: true,
+        rating: 4.8,
+        reviews: 67,
+        integrations: ["Datadog", "PagerDuty", "Slack", "Email"],
+        features: ["Alerts", "Incidents", "Reports", "Escalation"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    DATA SYNC BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
-    id: "data-sync",
+    id: "data-integration",
     name: "Data & Integration",
     icon: "🔄",
-    color: "#14B8A6",
-    description: "Database, API, and webhook automation",
+    color: "#8B5CF6",
+    description: "ETL, sync, data pipelines",
     bots: [
       {
-        id: "database-sync",
-        name: "Database Sync Bot",
-        shortDesc: "Automated database synchronization",
+        id: "data-sync",
+        name: "Data Sync Bot",
+        shortDesc: "Multi-system data sync",
         goodFor: "Data Teams",
         price: "179",
         originalPrice: "215",
         type: "Monat",
         popular: true,
-        integrations: ["PostgreSQL", "MySQL", "MongoDB", "BigQuery"],
-        features: ["Real-time Sync", "Transformations", "Scheduling", "Monitoring"],
+        rating: 4.7,
+        reviews: 89,
+        integrations: ["Airtable", "Google Sheets", "Database", "API"],
+        features: ["Real-time Sync", "Transformations", "Scheduling", "Logs"],
       },
       {
         id: "api-connector",
         name: "API Connector",
-        shortDesc: "Connect any API with no-code",
-        goodFor: "Developers, Ops",
-        price: "149",
-        originalPrice: "179",
-        type: "Monat",
-        integrations: ["REST APIs", "GraphQL", "Webhook", "Database"],
-        features: ["API Builder", "Auth Support", "Rate Limiting", "Logs"],
-      },
-      {
-        id: "webhook-manager",
-        name: "Webhook Manager",
-        shortDesc: "Centralized webhook management",
-        goodFor: "Dev Teams",
-        price: "119",
-        originalPrice: "143",
-        type: "Monat",
-        integrations: ["Any Webhook", "Slack", "Email", "Database"],
-        features: ["Routing", "Transformation", "Retry Logic", "Logs"],
-      },
-      {
-        id: "etl-automator",
-        name: "ETL Automator",
-        shortDesc: "Extract, transform, load automation",
-        goodFor: "Data Engineers",
-        price: "199",
-        originalPrice: "239",
-        type: "Monat",
-        integrations: ["Snowflake", "BigQuery", "S3", "APIs"],
-        features: ["Data Pipelines", "Scheduling", "Monitoring", "Alerts"],
-      },
-      {
-        id: "data-validator",
-        name: "Data Validator",
-        shortDesc: "Automated data quality checks",
-        goodFor: "Data Teams",
-        price: "139",
-        originalPrice: "167",
-        type: "Monat",
-        integrations: ["Database", "Google Sheets", "Email", "Slack"],
-        features: ["Quality Rules", "Anomaly Detection", "Alerts", "Reports"],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    FINANCE BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "finance",
-    name: "Finance & Accounting",
-    icon: "💰",
-    color: "#059669",
-    description: "Invoice, expense, and financial automation",
-    bots: [
-      {
-        id: "invoice-automator",
-        name: "Invoice Automator",
-        shortDesc: "Automated invoice processing",
-        goodFor: "Finance Teams",
-        price: "169",
-        originalPrice: "203",
-        type: "Monat",
-        popular: true,
-        integrations: ["QuickBooks", "Xero", "Stripe", "Email"],
-        features: ["Auto-Create", "Payment Tracking", "Reminders", "Reports"],
-      },
-      {
-        id: "expense-manager",
-        name: "Expense Manager",
-        shortDesc: "Automated expense tracking and approval",
-        goodFor: "Finance, Employees",
-        price: "139",
-        originalPrice: "167",
-        type: "Monat",
-        integrations: ["Receipt Bank", "Slack", "QuickBooks", "Email"],
-        features: ["Receipt Scan", "Approvals", "Categorization", "Reports"],
-      },
-      {
-        id: "payment-reconciler",
-        name: "Payment Reconciler",
-        shortDesc: "Automated payment reconciliation",
-        goodFor: "Finance Teams",
-        price: "189",
-        originalPrice: "227",
-        type: "Monat",
-        integrations: ["Stripe", "Bank APIs", "QuickBooks", "Excel"],
-        features: ["Auto-Match", "Discrepancy Alerts", "Reports", "Audit Trail"],
-      },
-      {
-        id: "budget-tracker",
-        name: "Budget Tracker",
-        shortDesc: "Automated budget monitoring",
-        goodFor: "Finance, Managers",
-        price: "129",
-        originalPrice: "155",
-        type: "Monat",
-        integrations: ["QuickBooks", "Google Sheets", "Slack", "Email"],
-        features: ["Budget Alerts", "Forecasting", "Reports", "Dashboards"],
-      },
-      {
-        id: "financial-reporter",
-        name: "Financial Reporter",
-        shortDesc: "Automated financial reports",
-        goodFor: "CFOs, Finance",
-        price: "199",
-        originalPrice: "239",
-        type: "Monat",
-        integrations: ["QuickBooks", "Xero", "Google Sheets", "Email"],
-        features: ["P&L Reports", "Cash Flow", "KPIs", "Scheduling"],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    ENTERPRISE BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "enterprise",
-    name: "Enterprise Solutions",
-    icon: "🏢",
-    color: "#1E3A8A",
-    description: "Custom enterprise-grade automation",
-    highlight: true,
-    bots: [
-      {
-        id: "enterprise-integration",
-        name: "Enterprise Integration Hub",
-        shortDesc: "Connect all enterprise systems",
-        goodFor: "Enterprise IT",
-        price: "299",
-        originalPrice: "359",
-        type: "Monat",
-        popular: true,
-        integrations: ["SAP", "Salesforce", "Oracle", "Custom APIs"],
-        features: ["System Integration", "Data Sync", "Security", "Compliance"],
-      },
-      {
-        id: "compliance-bot",
-        name: "Compliance Bot",
-        shortDesc: "Automated compliance monitoring",
-        goodFor: "Legal, Compliance",
-        price: "249",
-        originalPrice: "299",
-        type: "Monat",
-        integrations: ["Document Storage", "Email", "Slack", "Audit Systems"],
-        features: ["Policy Checks", "Audit Trails", "Alerts", "Reports"],
-      },
-      {
-        id: "sso-connector",
-        name: "SSO Connector",
-        shortDesc: "Single sign-on integration",
-        goodFor: "Enterprise IT",
-        price: "199",
-        originalPrice: "239",
-        type: "Monat",
-        integrations: ["Okta", "Azure AD", "SAML", "LDAP"],
-        features: ["User Sync", "Provisioning", "Access Control", "Audit"],
-      },
-      {
-        id: "workflow-orchestrator",
-        name: "Workflow Orchestrator",
-        shortDesc: "Enterprise workflow management",
-        goodFor: "Operations",
-        price: "279",
-        originalPrice: "335",
-        type: "Monat",
-        integrations: ["Multiple Systems", "APIs", "Database", "Email"],
-        features: ["Complex Workflows", "Approvals", "SLAs", "Analytics"],
-      },
-      {
-        id: "audit-logger",
-        name: "Audit Logger",
-        shortDesc: "Comprehensive audit logging",
-        goodFor: "Security, Compliance",
-        price: "169",
-        originalPrice: "203",
-        type: "Monat",
-        integrations: ["All Systems", "SIEM", "Email", "Database"],
-        features: ["Event Logging", "Tamper-Proof", "Search", "Reports"],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    NO-CODE DATABASE BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "no-code-databases",
-    name: "No-Code Databases",
-    icon: "🗃️",
-    color: "#F472B6",
-    description: "Airtable, Notion, and Supabase automation",
-    bots: [
-      {
-        id: "airtable-automator",
-        name: "Airtable Automator",
-        shortDesc: "Advanced Airtable automation",
-        goodFor: "Teams, Operations",
-        price: "129",
-        originalPrice: "155",
-        type: "Monat",
-        popular: true,
-        integrations: ["Airtable", "Slack", "Email", "Zapier"],
-        features: ["Record Automation", "Views", "Notifications", "Sync"],
-      },
-      {
-        id: "notion-connector",
-        name: "Notion Connector",
-        shortDesc: "Notion database automation",
-        goodFor: "Teams, PMs",
-        price: "119",
-        originalPrice: "143",
-        type: "Monat",
-        integrations: ["Notion", "Slack", "Google Calendar", "Email"],
-        features: ["Page Creation", "Database Sync", "Reminders", "Templates"],
-      },
-      {
-        id: "supabase-automator",
-        name: "Supabase Automator",
-        shortDesc: "Supabase backend automation",
+        shortDesc: "Connect any API",
         goodFor: "Developers",
         price: "149",
         originalPrice: "179",
         type: "Monat",
-        integrations: ["Supabase", "Webhook", "Email", "Slack"],
-        features: ["Database Triggers", "Auth Events", "Storage", "Functions"],
+        rating: 4.8,
+        reviews: 67,
+        integrations: ["Any REST API", "GraphQL", "Webhook", "Database"],
+        features: ["Custom Requests", "Auth", "Transformations", "Scheduling"],
       },
       {
-        id: "coda-connector",
-        name: "Coda Connector",
-        shortDesc: "Coda document automation",
-        goodFor: "Teams",
-        price: "109",
-        originalPrice: "131",
-        type: "Monat",
-        integrations: ["Coda", "Slack", "Gmail", "Calendar"],
-        features: ["Doc Automation", "Pack Integration", "Notifications", "Sync"],
-      },
-      {
-        id: "baserow-automator",
-        name: "Baserow Automator",
-        shortDesc: "Open-source database automation",
-        goodFor: "Privacy-Focused Teams",
-        price: "99",
-        originalPrice: "119",
-        type: "Monat",
-        integrations: ["Baserow", "Webhook", "Email", "Slack"],
-        features: ["Row Triggers", "Automations", "API", "Self-Hosted"],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    MICROSOFT ENTERPRISE BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "microsoft-enterprise",
-    name: "Microsoft 365",
-    icon: "🪟",
-    color: "#00A4EF",
-    description: "Outlook, Teams, and Excel automation",
-    bots: [
-      {
-        id: "outlook-automator",
-        name: "Outlook Automator",
-        shortDesc: "Microsoft Outlook email automation",
-        goodFor: "Enterprise",
-        price: "139",
-        originalPrice: "167",
-        type: "Monat",
-        popular: true,
-        integrations: ["Outlook", "Teams", "SharePoint", "OneDrive"],
-        features: ["Email Rules", "Calendar Sync", "Auto-Reply", "Filing"],
-      },
-      {
-        id: "teams-bot",
-        name: "Teams Bot",
-        shortDesc: "Microsoft Teams automation",
-        goodFor: "Enterprise Teams",
-        price: "149",
-        originalPrice: "179",
-        type: "Monat",
-        integrations: ["Teams", "SharePoint", "Outlook", "Power Automate"],
-        features: ["Channel Posts", "Meetings", "Notifications", "Commands"],
-      },
-      {
-        id: "excel-processor",
-        name: "Excel Processor",
-        shortDesc: "Automated Excel data processing",
-        goodFor: "Finance, Operations",
+        id: "airtable-automator",
+        name: "Airtable Automator",
+        shortDesc: "Advanced Airtable automation",
+        goodFor: "Teams, Ops",
         price: "129",
         originalPrice: "155",
         type: "Monat",
-        integrations: ["Excel", "SharePoint", "Email", "Power BI"],
-        features: ["Data Processing", "Reports", "Macros", "Sync"],
+        trending: true,
+        rating: 4.9,
+        reviews: 145,
+        integrations: ["Airtable", "Slack", "Google Sheets", "Email"],
+        features: ["Record Automation", "Views", "Reports", "Sync"],
       },
       {
-        id: "sharepoint-connector",
-        name: "SharePoint Connector",
-        shortDesc: "SharePoint document automation",
-        goodFor: "Enterprise",
-        price: "159",
-        originalPrice: "191",
-        type: "Monat",
-        integrations: ["SharePoint", "Teams", "Email", "Power Automate"],
-        features: ["Document Flows", "Approvals", "Metadata", "Search"],
-      },
-      {
-        id: "power-automate-enhancer",
-        name: "Power Automate Enhancer",
-        shortDesc: "Enhanced Power Automate workflows",
-        goodFor: "IT, Operations",
+        id: "database-connector",
+        name: "Database Connector",
+        shortDesc: "SQL/NoSQL automation",
+        goodFor: "Data Engineers",
         price: "169",
         originalPrice: "203",
         type: "Monat",
-        integrations: ["Power Automate", "All Microsoft", "APIs", "Database"],
-        features: ["Advanced Flows", "Error Handling", "Monitoring", "Templates"],
+        rating: 4.6,
+        reviews: 45,
+        integrations: ["PostgreSQL", "MongoDB", "MySQL", "Redis"],
+        features: ["Queries", "Sync", "Backups", "Alerts"],
       },
     ],
   },
-  // ═══════════════════════════════════════════════════════════════
-  //                    PROJECT TOOLS EXTENDED BOTS
-  // ═══════════════════════════════════════════════════════════════
   {
-    id: "project-tools-extended",
-    name: "Extended PM Tools",
-    icon: "🎯",
-    color: "#FF4F64",
-    description: "Monday.com, ClickUp, and more PM tools",
+    id: "finance",
+    name: "Finance & Accounting",
+    icon: "💰",
+    color: "#10B981",
+    description: "Invoicing, expenses, reports",
     bots: [
       {
-        id: "monday-automator",
-        name: "Monday.com Automator",
-        shortDesc: "Advanced Monday.com automation",
-        goodFor: "Teams, Agencies",
-        price: "149",
-        originalPrice: "179",
-        type: "Monat",
-        popular: true,
-        integrations: ["Monday.com", "Slack", "Email", "Google Sheets"],
-        features: ["Board Automation", "Status Updates", "Notifications", "Reports"],
-      },
-      {
-        id: "clickup-connector",
-        name: "ClickUp Connector",
-        shortDesc: "ClickUp workflow automation",
-        goodFor: "Teams",
-        price: "139",
-        originalPrice: "167",
-        type: "Monat",
-        integrations: ["ClickUp", "Slack", "GitHub", "Email"],
-        features: ["Task Automation", "Time Tracking", "Goals", "Reports"],
-      },
-      {
-        id: "basecamp-automator",
-        name: "Basecamp Automator",
-        shortDesc: "Basecamp project automation",
-        goodFor: "Agencies, Teams",
-        price: "119",
-        originalPrice: "143",
-        type: "Monat",
-        integrations: ["Basecamp", "Email", "Slack", "Calendar"],
-        features: ["Todo Automation", "Schedules", "Check-ins", "Reports"],
-      },
-      {
-        id: "wrike-connector",
-        name: "Wrike Connector",
-        shortDesc: "Wrike workflow automation",
-        goodFor: "Enterprise Teams",
-        price: "159",
-        originalPrice: "191",
-        type: "Monat",
-        integrations: ["Wrike", "Slack", "Salesforce", "Email"],
-        features: ["Request Forms", "Approvals", "Blueprints", "Reports"],
-      },
-      {
-        id: "teamwork-automator",
-        name: "Teamwork Automator",
-        shortDesc: "Teamwork.com project automation",
-        goodFor: "Agencies",
+        id: "invoice-automator",
+        name: "Invoice Automator",
+        shortDesc: "Automated invoicing",
+        goodFor: "Finance, Freelancers",
         price: "129",
         originalPrice: "155",
         type: "Monat",
-        integrations: ["Teamwork", "Slack", "Email", "Calendar"],
-        features: ["Task Templates", "Time Logs", "Client Portal", "Reports"],
+        popular: true,
+        rating: 4.8,
+        reviews: 167,
+        integrations: ["Stripe", "QuickBooks", "Email", "Google Sheets"],
+        features: ["Auto-Generate", "Reminders", "Payment Links", "Reports"],
       },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    FORMS & SURVEYS BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "forms-surveys",
-    name: "Forms & Surveys",
-    icon: "📝",
-    color: "#7C3AED",
-    description: "Typeform, Jotform, and survey automation",
-    bots: [
       {
-        id: "typeform-automator",
-        name: "Typeform Automator",
-        shortDesc: "Advanced Typeform response handling",
-        goodFor: "Marketing, Research",
+        id: "expense-tracker",
+        name: "Expense Tracker",
+        shortDesc: "Automated expense management",
+        goodFor: "Teams, Finance",
         price: "119",
         originalPrice: "143",
         type: "Monat",
-        popular: true,
-        integrations: ["Typeform", "Google Sheets", "CRM", "Email"],
-        features: ["Response Routing", "Scoring", "Notifications", "Analysis"],
+        rating: 4.7,
+        reviews: 89,
+        integrations: ["Receipt Bank", "QuickBooks", "Slack", "Email"],
+        features: ["Receipt Scanning", "Categorization", "Approvals", "Reports"],
       },
       {
-        id: "jotform-connector",
-        name: "Jotform Connector",
-        shortDesc: "Jotform submission automation",
-        goodFor: "Operations, HR",
-        price: "109",
-        originalPrice: "131",
-        type: "Monat",
-        integrations: ["Jotform", "Google Sheets", "Slack", "Email"],
-        features: ["Auto-Process", "Approvals", "PDF Generation", "Notifications"],
-      },
-      {
-        id: "google-forms-enhancer",
-        name: "Google Forms Enhancer",
-        shortDesc: "Enhanced Google Forms automation",
-        goodFor: "Everyone",
-        price: "89",
-        originalPrice: "107",
-        type: "Monat",
-        integrations: ["Google Forms", "Sheets", "Email", "Slack"],
-        features: ["Response Alerts", "Analysis", "Follow-ups", "Reports"],
-      },
-      {
-        id: "survey-analyzer",
-        name: "Survey Analyzer",
-        shortDesc: "AI-powered survey analysis",
-        goodFor: "Research, Product",
+        id: "quickbooks-connector",
+        name: "QuickBooks Connector",
+        shortDesc: "QuickBooks automation",
+        goodFor: "Accountants",
         price: "149",
         originalPrice: "179",
         type: "Monat",
-        integrations: ["Any Survey Tool", "OpenAI", "Google Sheets", "Slack"],
-        features: ["Sentiment Analysis", "Themes", "Reports", "Alerts"],
+        rating: 4.6,
+        reviews: 78,
+        integrations: ["QuickBooks", "Stripe", "Bank", "Email"],
+        features: ["Sync", "Reconciliation", "Reports", "Alerts"],
       },
       {
-        id: "quiz-automator",
-        name: "Quiz Automator",
-        shortDesc: "Automated quiz and assessment handling",
-        goodFor: "Education, Training",
-        price: "99",
-        originalPrice: "119",
-        type: "Monat",
-        integrations: ["Quiz Tools", "Email", "LMS", "Certificates"],
-        features: ["Auto-Grade", "Certificates", "Progress Tracking", "Reports"],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    SMS & TELEPHONY BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "sms-telephony",
-    name: "SMS & Telephony",
-    icon: "📞",
-    color: "#DC2626",
-    description: "Twilio, SMS, and phone automation",
-    bots: [
-      {
-        id: "twilio-automator",
-        name: "Twilio Automator",
-        shortDesc: "Complete Twilio communication automation",
-        goodFor: "Support, Marketing",
-        price: "169",
-        originalPrice: "203",
-        type: "Monat",
-        popular: true,
-        integrations: ["Twilio", "CRM", "Webhook", "Database"],
-        features: ["SMS Campaigns", "Voice Calls", "WhatsApp", "Analytics"],
-      },
-      {
-        id: "sms-marketing",
-        name: "SMS Marketing Bot",
-        shortDesc: "Automated SMS marketing campaigns",
-        goodFor: "Marketing, E-Commerce",
-        price: "149",
-        originalPrice: "179",
-        type: "Monat",
-        integrations: ["Twilio", "Shopify", "CRM", "Email"],
-        features: ["Campaigns", "Segmentation", "Scheduling", "Analytics"],
-      },
-      {
-        id: "voicemail-transcriber",
-        name: "Voicemail Transcriber",
-        shortDesc: "Automated voicemail transcription",
-        goodFor: "Sales, Support",
-        price: "119",
-        originalPrice: "143",
-        type: "Monat",
-        integrations: ["Phone Systems", "OpenAI", "Email", "CRM"],
-        features: ["Transcription", "Summaries", "Routing", "Follow-ups"],
-      },
-      {
-        id: "call-tracker",
-        name: "Call Tracker",
-        shortDesc: "Automated call tracking and logging",
-        goodFor: "Sales Teams",
-        price: "139",
-        originalPrice: "167",
-        type: "Monat",
-        integrations: ["Phone Systems", "CRM", "Slack", "Analytics"],
-        features: ["Call Logging", "Recording Sync", "Lead Attribution", "Reports"],
-      },
-      {
-        id: "ivr-builder",
-        name: "IVR Builder Bot",
-        shortDesc: "Automated IVR system management",
-        goodFor: "Support, Call Centers",
-        price: "189",
-        originalPrice: "227",
-        type: "Monat",
-        integrations: ["Twilio", "CRM", "Zendesk", "Database"],
-        features: ["Menu Builder", "Routing Logic", "Analytics", "Updates"],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    ANALYTICS & REPORTING BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "analytics-reporting",
-    name: "Analytics & Reporting",
-    icon: "📈",
-    color: "#F97316",
-    description: "Analytics, dashboards, and reporting automation",
-    bots: [
-      {
-        id: "analytics-aggregator",
-        name: "Analytics Aggregator",
-        shortDesc: "Combine data from all analytics sources",
-        goodFor: "Marketing, Data Teams",
+        id: "financial-reports",
+        name: "Financial Reports Bot",
+        shortDesc: "Automated financial reporting",
+        goodFor: "CFOs, Finance",
         price: "179",
         originalPrice: "215",
         type: "Monat",
-        popular: true,
-        integrations: ["Google Analytics", "Mixpanel", "Amplitude", "BigQuery"],
-        features: ["Data Merge", "Dashboards", "Alerts", "Exports"],
+        new: true,
+        rating: 4.9,
+        reviews: 34,
+        integrations: ["QuickBooks", "Xero", "Google Sheets", "Email"],
+        features: ["P&L", "Cash Flow", "Forecasts", "Dashboards"],
       },
+    ],
+  },
+  {
+    id: "analytics",
+    name: "Analytics & Reporting",
+    icon: "📈",
+    color: "#EC4899",
+    description: "Dashboards, metrics, insights",
+    bots: [
       {
-        id: "dashboard-builder",
-        name: "Dashboard Builder",
-        shortDesc: "Automated dashboard creation",
-        goodFor: "Data Teams, Executives",
+        id: "analytics-dashboard",
+        name: "Analytics Dashboard",
+        shortDesc: "Automated dashboards",
+        goodFor: "Managers, Analysts",
         price: "159",
         originalPrice: "191",
         type: "Monat",
-        integrations: ["Data Sources", "Google Sheets", "Slack", "Email"],
-        features: ["Auto-Dashboards", "Real-time", "Sharing", "Scheduling"],
+        popular: true,
+        rating: 4.8,
+        reviews: 123,
+        integrations: ["Google Analytics", "Mixpanel", "Slack", "Email"],
+        features: ["Auto-Reports", "Alerts", "Visualizations", "Sharing"],
       },
       {
         id: "kpi-tracker",
         name: "KPI Tracker",
-        shortDesc: "Automated KPI monitoring and alerts",
-        goodFor: "Managers, Executives",
-        price: "139",
-        originalPrice: "167",
+        shortDesc: "Track key metrics",
+        goodFor: "Leaders, Teams",
+        price: "129",
+        originalPrice: "155",
         type: "Monat",
-        integrations: ["Any Data Source", "Slack", "Email", "SMS"],
-        features: ["KPI Alerts", "Trends", "Forecasting", "Reports"],
+        rating: 4.7,
+        reviews: 89,
+        integrations: ["Multiple Sources", "Slack", "Google Sheets", "Email"],
+        features: ["Scorecards", "Alerts", "Trends", "Forecasts"],
       },
       {
-        id: "report-scheduler",
-        name: "Report Scheduler",
-        shortDesc: "Automated report generation and delivery",
-        goodFor: "Operations, Finance",
-        price: "119",
-        originalPrice: "143",
-        type: "Monat",
-        integrations: ["Data Sources", "Email", "Slack", "Google Drive"],
-        features: ["Auto-Reports", "Scheduling", "Multi-Format", "Distribution"],
-      },
-      {
-        id: "attribution-tracker",
-        name: "Attribution Tracker",
-        shortDesc: "Marketing attribution automation",
-        goodFor: "Marketing Teams",
-        price: "189",
-        originalPrice: "227",
-        type: "Monat",
-        integrations: ["Ad Platforms", "CRM", "Analytics", "Database"],
-        features: ["Multi-Touch", "ROI Tracking", "Reports", "Optimization"],
-      },
-    ],
-  },
-  // ═══════════════════════════════════════════════════════════════
-  //                    CONTENT & CMS BOTS
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: "content-cms",
-    name: "Content & CMS",
-    icon: "🌐",
-    color: "#21759B",
-    description: "WordPress, Webflow, and CMS automation",
-    bots: [
-      {
-        id: "wordpress-automator",
-        name: "WordPress Automator",
-        shortDesc: "Complete WordPress content automation",
-        goodFor: "Content Teams, Bloggers",
-        price: "139",
-        originalPrice: "167",
-        type: "Monat",
-        popular: true,
-        integrations: ["WordPress", "OpenAI", "Google Sheets", "Social Media"],
-        features: ["Auto-Publish", "SEO", "Image Handling", "Scheduling"],
-      },
-      {
-        id: "webflow-connector",
-        name: "Webflow Connector",
-        shortDesc: "Webflow CMS automation",
-        goodFor: "Designers, Agencies",
+        id: "custom-reports",
+        name: "Custom Reports Bot",
+        shortDesc: "AI-generated reports",
+        goodFor: "Analysts",
         price: "149",
         originalPrice: "179",
         type: "Monat",
-        integrations: ["Webflow", "Airtable", "Google Sheets", "Email"],
-        features: ["CMS Sync", "Form Handling", "E-commerce", "Notifications"],
+        trending: true,
+        rating: 4.9,
+        reviews: 56,
+        integrations: ["Any Data Source", "OpenAI", "Google Sheets", "Email"],
+        features: ["AI Insights", "Scheduling", "Templates", "Export"],
       },
       {
-        id: "contentful-automator",
-        name: "Contentful Automator",
-        shortDesc: "Headless CMS content automation",
-        goodFor: "Dev Teams, Content",
-        price: "169",
-        originalPrice: "203",
+        id: "seo-tracker",
+        name: "SEO Tracker",
+        shortDesc: "SEO monitoring automation",
+        goodFor: "Marketing, SEO",
+        price: "139",
+        originalPrice: "167",
         type: "Monat",
-        integrations: ["Contentful", "GitHub", "Slack", "Translation APIs"],
-        features: ["Content Sync", "Localization", "Workflows", "Publishing"],
-      },
-      {
-        id: "ghost-connector",
-        name: "Ghost Connector",
-        shortDesc: "Ghost blog automation",
-        goodFor: "Publishers, Bloggers",
-        price: "109",
-        originalPrice: "131",
-        type: "Monat",
-        integrations: ["Ghost", "Email", "Social Media", "Analytics"],
-        features: ["Auto-Publish", "Newsletter", "Member Sync", "Analytics"],
-      },
-      {
-        id: "seo-automator",
-        name: "SEO Automator",
-        shortDesc: "Automated SEO optimization",
-        goodFor: "Marketing, Content",
-        price: "159",
-        originalPrice: "191",
-        type: "Monat",
-        integrations: ["WordPress", "Ahrefs", "Google Search Console", "OpenAI"],
-        features: ["Keyword Tracking", "Content Optimization", "Audits", "Reports"],
+        rating: 4.6,
+        reviews: 78,
+        integrations: ["Google Search Console", "Ahrefs", "Slack", "Email"],
+        features: ["Rankings", "Backlinks", "Alerts", "Reports"],
       },
     ],
   },
 ];
 
-// Stats from workflow analysis
+// Stats
 const stats = {
   totalWorkflows: "2.061",
+  totalCategories: categories.length.toString(),
   totalIntegrations: "187+",
-  totalCategories: "22",
-  activeBots: "107+",
 };
 
 // ═══════════════════════════════════════════════════════════════
-//                    CHECKOUT MODAL COMPONENT
+//                    UTILITY HOOKS & FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
-interface CheckoutModalProps {
+function useFavorites() {
+  const [favorites, setFavorites] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem("botFavorites");
+    if (saved) setFavorites(JSON.parse(saved));
+  }, []);
+  
+  const toggle = useCallback((id: string) => {
+    setFavorites(prev => {
+      const newFavs = prev.includes(id) 
+        ? prev.filter(f => f !== id)
+        : [...prev, id];
+      localStorage.setItem("botFavorites", JSON.stringify(newFavs));
+      return newFavs;
+    });
+  }, []);
+  
+  return { favorites, toggle, isFavorite: (id: string) => favorites.includes(id) };
+}
+
+function useCompare() {
+  const [compareList, setCompareList] = useState<Bot[]>([]);
+  
+  const toggle = useCallback((bot: Bot) => {
+    setCompareList(prev => {
+      if (prev.find(b => b.id === bot.id)) {
+        return prev.filter(b => b.id !== bot.id);
+      }
+      if (prev.length >= 3) return prev;
+      return [...prev, bot];
+    });
+  }, []);
+  
+  const clear = useCallback(() => setCompareList([]), []);
+  
+  return { compareList, toggle, clear, isComparing: (id: string) => compareList.some(b => b.id === id) };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    PARTICLE SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+function ParticleField() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(50)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            backgroundColor: ["#FC682C", "#8B5CF6", "#10B981", "#0088CC"][Math.floor(Math.random() * 4)],
+          }}
+          animate={{
+            y: [0, -30, 0],
+            opacity: [0, 0.6, 0],
+            scale: [0, 1, 0],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 4,
+            repeat: Infinity,
+            delay: Math.random() * 5,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    FLOATING ELEMENTS
+// ═══════════════════════════════════════════════════════════════
+
+function FloatingElements() {
+  const icons = ["🤖", "⚡", "🚀", "💎", "✨", "🔥", "💫", "🎯"];
+  
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {icons.map((icon, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-2xl opacity-20"
+          style={{
+            left: `${10 + (i * 12)}%`,
+            top: `${20 + Math.sin(i) * 30}%`,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            rotate: [0, 10, -10, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 5 + i,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          {icon}
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    GLASSMORPHISM CARD
+// ═══════════════════════════════════════════════════════════════
+
+function GlassCard({ children, className = "", glow = false }: { children: React.ReactNode; className?: string; glow?: boolean }) {
+  return (
+    <div className={`relative group ${className}`}>
+      {glow && (
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FC682C] via-[#8B5CF6] to-[#10B981] rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
+      )}
+      <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    NEON BADGE
+// ═══════════════════════════════════════════════════════════════
+
+function NeonBadge({ children, color = "#FC682C", pulse = false }: { children: React.ReactNode; color?: string; pulse?: boolean }) {
+  return (
+    <span 
+      className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${pulse ? "animate-pulse" : ""}`}
+      style={{
+        background: `linear-gradient(135deg, ${color}30, ${color}10)`,
+        border: `1px solid ${color}50`,
+        color: color,
+        boxShadow: `0 0 10px ${color}30`,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    STAR RATING
+// ═══════════════════════════════════════════════════════════════
+
+function StarRating({ rating, reviews }: { rating: number; reviews: number }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="flex">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <svg
+            key={star}
+            className={`w-3.5 h-3.5 ${star <= rating ? "text-yellow-400" : "text-white/20"}`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+      </div>
+      <span className="text-xs text-white/50">({reviews})</span>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    3D BOT CARD
+// ═══════════════════════════════════════════════════════════════
+
+function BotCard3D({ 
+  bot, 
+  categoryColor, 
+  onCheckout,
+  isFavorite,
+  onFavoriteToggle,
+  isComparing,
+  onCompareToggle,
+}: { 
+  bot: Bot; 
+  categoryColor: string;
+  onCheckout: (bot: Bot, type: "rent" | "buy") => void;
+  isFavorite: boolean;
+  onFavoriteToggle: () => void;
+  isComparing: boolean;
+  onCompareToggle: () => void;
+}) {
+  const t = useTranslations("pages.workflows");
+  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), { stiffness: 300, damping: 30 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), { stiffness: 300, damping: 30 });
+  
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+    setIsHovered(false);
+  };
+
+  const buyPrice = Math.round(parseFloat(bot.price) * 10);
+  const discount = bot.originalPrice ? Math.round((1 - parseFloat(bot.price) / parseFloat(bot.originalPrice)) * 100) : 0;
+
+  return (
+    <motion.div
+      ref={cardRef}
+      className="relative group"
+      style={{ perspective: 1000 }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+    >
+      {/* Glow Effect */}
+      <motion.div
+        className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${categoryColor}40, transparent 70%)`,
+          filter: "blur(20px)",
+        }}
+      />
+      
+      <motion.div
+        className="relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/[0.1] rounded-2xl overflow-hidden"
+        style={{
+          rotateX: isHovered ? rotateX : 0,
+          rotateY: isHovered ? rotateY : 0,
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {/* Top Badges Row */}
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
+          <div className="flex flex-wrap gap-1">
+            {bot.popular && <NeonBadge color="#FC682C" pulse>{t("badges.popular")}</NeonBadge>}
+            {bot.new && <NeonBadge color="#10B981">{t("badges.new")}</NeonBadge>}
+            {bot.trending && <NeonBadge color="#8B5CF6">{t("badges.trending")}</NeonBadge>}
+            {bot.limited && <NeonBadge color="#EF4444" pulse>{t("badges.limited")}</NeonBadge>}
+            {discount > 0 && <NeonBadge color="#F59E0B">-{discount}%</NeonBadge>}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-1">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => { e.stopPropagation(); onFavoriteToggle(); }}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                isFavorite 
+                  ? "bg-red-500/20 text-red-500 border border-red-500/30" 
+                  : "bg-white/5 text-white/40 border border-white/10 hover:text-red-400"
+              }`}
+            >
+              <svg className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => { e.stopPropagation(); onCompareToggle(); }}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                isComparing 
+                  ? "bg-[#FC682C]/20 text-[#FC682C] border border-[#FC682C]/30" 
+                  : "bg-white/5 text-white/40 border border-white/10 hover:text-[#FC682C]"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </motion.button>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-5 pt-14">
+          {/* Header */}
+          <div className="mb-4">
+            <h4 className="text-lg font-bold text-white mb-1 group-hover:text-[#FC682C] transition-colors">
+              {bot.name}
+            </h4>
+            <p className="text-sm text-white/60 line-clamp-2">{bot.shortDesc}</p>
+          </div>
+          
+          {/* Rating */}
+          {bot.rating && bot.reviews && (
+            <div className="mb-4">
+              <StarRating rating={bot.rating} reviews={bot.reviews} />
+            </div>
+          )}
+          
+          {/* Good For */}
+          <div className="mb-4">
+            <span className="text-xs text-white/40">{t("card.goodFor")} </span>
+            <span className="text-xs text-white/70">{bot.goodFor}</span>
+          </div>
+          
+          {/* Integrations */}
+          <div className="mb-4">
+            <span className="text-xs text-white/40 block mb-2">{t("card.integrations")}</span>
+            <div className="flex flex-wrap gap-1.5">
+              {bot.integrations.slice(0, 3).map((int, i) => (
+                <span 
+                  key={i} 
+                  className="px-2 py-1 rounded-md text-[10px] bg-white/5 border border-white/10 text-white/70"
+                >
+                  {int}
+                </span>
+              ))}
+              {bot.integrations.length > 3 && (
+                <span className="px-2 py-1 rounded-md text-[10px] bg-white/5 border border-white/10 text-white/50">
+                  +{bot.integrations.length - 3}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Features */}
+          <div className="mb-5">
+            <div className="flex flex-wrap gap-1.5">
+              {bot.features.map((feat, i) => (
+                <span 
+                  key={i} 
+                  className="px-2 py-1 rounded-full text-[10px] text-white/60"
+                  style={{ backgroundColor: `${categoryColor}15` }}
+                >
+                  {feat}
+                </span>
+              ))}
+            </div>
+          </div>
+          
+          {/* Pricing */}
+          <div className="pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-white">{bot.price}€</span>
+                <span className="text-xs text-white/40">/{bot.type}</span>
+                {bot.originalPrice && (
+                  <span className="text-sm text-white/30 line-through">{bot.originalPrice}€</span>
+                )}
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-white/40">{t("card.buyOnce")}</div>
+                <div className="text-sm font-semibold text-white">{buyPrice}€</div>
+              </div>
+            </div>
+            
+            {/* CTA Buttons */}
+            <div className="flex gap-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onCheckout(bot, "rent")}
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white text-sm font-semibold shadow-lg shadow-[#FC682C]/25 hover:shadow-[#FC682C]/40 transition-shadow"
+              >
+                {t("card.rent")}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onCheckout(bot, "buy")}
+                className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold hover:bg-white/10 transition-colors"
+              >
+                {t("card.buy")}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Shine Effect on Hover */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.03) 45%, transparent 50%)",
+            transform: isHovered ? "translateX(100%)" : "translateX(-100%)",
+          }}
+          animate={{ transform: isHovered ? "translateX(100%)" : "translateX(-100%)" }}
+          transition={{ duration: 0.6 }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    COMPARE MODAL
+// ═══════════════════════════════════════════════════════════════
+
+function CompareModal({ bots, onClose }: { bots: Bot[]; onClose: () => void }) {
+  const t = useTranslations("pages.workflows");
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="w-full max-w-5xl max-h-[90vh] overflow-auto bg-[#0a0a0f] border border-white/10 rounded-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-white/10 bg-[#0a0a0f]">
+          <h2 className="text-xl font-bold text-white">{t("compare.title")}</h2>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="p-6">
+          <div className={`grid gap-4 ${bots.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+            {bots.map((bot) => (
+              <div key={bot.id} className="bg-white/[0.03] border border-white/10 rounded-xl p-4">
+                <h3 className="text-lg font-bold text-white mb-2">{bot.name}</h3>
+                <p className="text-sm text-white/60 mb-4">{bot.shortDesc}</p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-xs text-white/40 block mb-1">{t("card.price")}</span>
+                    <span className="text-xl font-bold text-[#FC682C]">{bot.price}€<span className="text-sm text-white/40">/{bot.type}</span></span>
+                  </div>
+                  
+                  {bot.rating && (
+                    <div>
+                      <span className="text-xs text-white/40 block mb-1">{t("compare.rating")}</span>
+                      <StarRating rating={bot.rating} reviews={bot.reviews || 0} />
+                    </div>
+                  )}
+                  
+                  <div>
+                    <span className="text-xs text-white/40 block mb-1">{t("card.integrations")}</span>
+                    <div className="flex flex-wrap gap-1">
+                      {bot.integrations.map((int, i) => (
+                        <span key={i} className="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white/70">{int}</span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <span className="text-xs text-white/40 block mb-1">{t("compare.features")}</span>
+                    <ul className="space-y-1">
+                      {bot.features.map((feat, i) => (
+                        <li key={i} className="flex items-center gap-2 text-xs text-white/70">
+                          <svg className="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          {feat}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    CHECKOUT MODAL
+// ═══════════════════════════════════════════════════════════════
+
+function CheckoutModal({
+  bot,
+  purchaseType,
+  onClose,
+}: {
   bot: Bot;
   purchaseType: "rent" | "buy";
   onClose: () => void;
-}
-
-function CheckoutModal({ bot, purchaseType, onClose }: CheckoutModalProps) {
-  const t = useTranslations("pages.workflows.checkout");
+}) {
+  const t = useTranslations("pages.workflows");
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    customerName: "",
-    customerEmail: "",
-    customerPhone: "",
-    customerCompany: "",
-    message: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const price = purchaseType === "rent" ? bot.price : Math.round(parseFloat(bot.price) * 10).toString();
 
-  const basePrice = parseInt(bot.price.replace(/[^\d]/g, "")) || 0;
-  const finalPrice = purchaseType === "buy" ? basePrice * 10 : basePrice;
-  const priceLabel =
-    purchaseType === "rent"
-      ? `${finalPrice} € ${t("perMonth")}`
-      : `${finalPrice} € ${t("oneTime")}`;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/bot-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          botId: bot.id,
-          botName: bot.name,
-          botPrice: bot.price,
-          purchaseType,
-          integrations: bot.integrations,
-          ...formData,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || t("error"));
-      }
-
-      router.push(data.redirectUrl);
-    } catch (err: any) {
-      setError(err.message || t("error"));
-      setIsSubmitting(false);
-    }
+  const handleCheckout = () => {
+    const params = new URLSearchParams({
+      bot: bot.id,
+      name: bot.name,
+      type: purchaseType,
+      price: price,
+    });
+    router.push(`/checkout?${params.toString()}`);
   };
 
   return (
@@ -1582,355 +1618,256 @@ function CheckoutModal({ bot, purchaseType, onClose }: CheckoutModalProps) {
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="relative w-full max-w-lg bg-[#0a0a0f] rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="w-full max-w-md bg-gradient-to-br from-[#0a0a0f] to-[#0f0f18] border border-white/10 rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="relative p-6 border-b border-white/10 bg-gradient-to-r from-[#FC682C]/10 to-transparent">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          <div className="flex items-center gap-3">
-            <div
-              className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                purchaseType === "rent"
-                  ? "bg-[#FFB347]/20 text-[#FFB347]"
-                  : "bg-[#06b6d4]/20 text-[#06b6d4]"
-              }`}
-            >
-              {purchaseType === "rent" ? t("rent") : t("buy")}
-            </div>
-            <div className="text-xl font-bold text-white">{priceLabel}</div>
-          </div>
-
-          <h2 className="text-lg font-bold text-white mt-3">{bot.name}</h2>
-          <p className="text-sm text-white/60 mt-1">{bot.shortDesc}</p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-xs text-white/60 mb-1">{t("form.name")}</label>
-            <input
-              type="text"
-              required
-              value={formData.customerName}
-              onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-              placeholder={t("form.namePlaceholder")}
-              className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FC682C]/50"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs text-white/60 mb-1">{t("form.email")}</label>
-            <input
-              type="email"
-              required
-              value={formData.customerEmail}
-              onChange={(e) => setFormData({ ...formData, customerEmail: e.target.value })}
-              placeholder={t("form.emailPlaceholder")}
-              className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FC682C]/50"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        {/* Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#FC682C]/20 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="relative p-6">
+          <div className="flex justify-between items-start mb-6">
             <div>
-              <label className="block text-xs text-white/60 mb-1">{t("form.phone")}</label>
-              <input
-                type="tel"
-                value={formData.customerPhone}
-                onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                placeholder={t("form.phonePlaceholder")}
-                className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FC682C]/50"
-              />
+              <NeonBadge color={purchaseType === "rent" ? "#FC682C" : "#10B981"}>
+                {purchaseType === "rent" ? t("checkout.rental") : t("checkout.purchase")}
+              </NeonBadge>
+              <h3 className="text-xl font-bold text-white mt-3">{bot.name}</h3>
+              <p className="text-sm text-white/60 mt-1">{bot.shortDesc}</p>
             </div>
-            <div>
-              <label className="block text-xs text-white/60 mb-1">{t("form.company")}</label>
-              <input
-                type="text"
-                value={formData.customerCompany}
-                onChange={(e) => setFormData({ ...formData, customerCompany: e.target.value })}
-                placeholder={t("form.companyPlaceholder")}
-                className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FC682C]/50"
-              />
-            </div>
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
-          <div>
-            <label className="block text-xs text-white/60 mb-1">{t("form.message")}</label>
-            <textarea
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              placeholder={t("form.messagePlaceholder")}
-              rows={3}
-              className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#FC682C]/50 resize-none"
-            />
-          </div>
-
-          {/* Integrations */}
-          <div className="pt-2">
-            <span className="text-xs text-white/40">{t("form.integrations")}</span>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {bot.integrations.map((integration, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-0.5 rounded text-[10px] bg-white/5 text-white/60 border border-white/5"
-                >
-                  {integration}
+          <div className="space-y-4 mb-6">
+            <div className="flex justify-between p-4 rounded-xl bg-white/[0.03] border border-white/10">
+              <span className="text-white/60">{t("checkout.price")}</span>
+              <span className="text-2xl font-bold text-white">
+                {price}€
+                <span className="text-sm text-white/40 ml-1">
+                  {purchaseType === "rent" ? `/${bot.type}` : t("checkout.oneTime")}
                 </span>
-              ))}
+              </span>
             </div>
+
+            {purchaseType === "rent" && (
+              <div className="p-4 rounded-xl bg-[#FC682C]/10 border border-[#FC682C]/20">
+                <div className="flex items-center gap-2 text-sm text-[#FC682C]">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  {t("checkout.cancelAnytime")}
+                </div>
+              </div>
+            )}
           </div>
 
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`w-full py-3 rounded-xl font-semibold text-white transition-all ${
-              purchaseType === "rent"
-                ? "bg-gradient-to-r from-[#FFB347] to-[#e5a03f] hover:opacity-90"
-                : "bg-gradient-to-r from-[#FC682C] to-[#e55a1f] hover:opacity-90"
-            } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {isSubmitting
-              ? t("form.processing")
-              : purchaseType === "rent"
-              ? t("form.submit.rent")
-              : t("form.submit.buy")}
-          </button>
-
-          <p className="text-xs text-white/40 text-center">
-            {t("form.note")}
-          </p>
-        </form>
+          <div className="space-y-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleCheckout}
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white font-semibold text-lg shadow-lg shadow-[#FC682C]/30 hover:shadow-[#FC682C]/50 transition-shadow"
+            >
+              {t("checkout.proceed")}
+            </motion.button>
+            <button onClick={onClose} className="w-full py-3 text-white/60 hover:text-white transition-colors text-sm">
+              {t("checkout.cancel")}
+            </button>
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-//                    BOT PRODUCT CARD
+//                    SEARCH SPOTLIGHT
 // ═══════════════════════════════════════════════════════════════
 
-function BotProductCard({
-  bot,
-  categoryColor,
-  onCheckout,
-}: {
-  bot: Bot;
-  categoryColor: string;
-  onCheckout: (bot: Bot, type: "rent" | "buy") => void;
-}) {
-  const t = useTranslations("pages.workflows.botCard");
-  const basePrice = parseInt(bot.price.replace(/[^\d]/g, "")) || 0;
-  const buyPrice = basePrice * 10;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className={`group relative rounded-xl border transition-all duration-300 overflow-hidden h-full flex flex-col ${
-        bot.popular
-          ? "bg-gradient-to-br from-[#FC682C]/10 to-[#FFB347]/5 border-[#FC682C]/30"
-          : "bg-white/[0.02] border-white/[0.06]"
-      }`}
-    >
-      {bot.popular && (
-        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#FC682C] text-white text-[10px] font-semibold z-10">
-          {t("popular")}
-        </div>
-      )}
-
-      <div className="p-5 flex flex-col flex-1">
-        <div className="mb-3">
-          <h4 className="text-sm font-bold text-white group-hover:text-[#FC682C] transition-colors pr-16">
-            {bot.name}
-          </h4>
-          <p className="text-xs text-white/70 mt-1 leading-relaxed">
-            {bot.shortDesc}
-          </p>
-        </div>
-
-        <div className="mb-3 p-2 rounded-lg bg-white/[0.03] border border-white/5">
-          <span className="text-[9px] uppercase tracking-wider text-[#FC682C] font-semibold">
-            {t("goodFor")}
-          </span>
-          <p className="text-[11px] text-white/60 mt-0.5">{bot.goodFor}</p>
-        </div>
-
-        <div className="mb-2">
-          <span className="text-[9px] uppercase tracking-wider text-white/40 font-semibold">
-            {t("connects")}
-          </span>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {bot.integrations.slice(0, 3).map((integration, i) => (
-              <span
-                key={i}
-                className="px-1.5 py-0.5 rounded text-[9px] bg-white/5 text-white/60 border border-white/5"
-              >
-                {integration}
-              </span>
-            ))}
-            {bot.integrations.length > 3 && (
-              <span className="px-1.5 py-0.5 rounded text-[9px] bg-white/5 text-white/40">
-                +{bot.integrations.length - 3}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-1 mb-3 flex-1">
-          {bot.features.slice(0, 4).map((f, i) => (
-            <span
-              key={i}
-              className="px-1.5 py-0.5 rounded text-[9px] bg-white/5 text-white/50"
-            >
-              {f}
-            </span>
-          ))}
-        </div>
-
-        <div className="pt-2 border-t border-white/5 mt-auto">
-          {bot.price === "Auf Anfrage" || bot.price === "On Request" ? (
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white">{t("onRequest")}</span>
-              <Link
-                href="/termin"
-                className="px-3 py-1.5 rounded-lg bg-[#FC682C]/10 border border-[#FC682C]/30 text-[#FC682C] text-[10px] font-semibold hover:bg-[#FC682C] hover:text-white transition-all"
-              >
-                {t("inquire")}
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-[10px]">
-                <div className="flex items-center gap-2">
-                  <div>
-                    <span className="text-white/40">{t("rentPrice")}</span>
-                    <span className="ml-1 text-white font-semibold">
-                      {bot.price} €{t("perMonth")}
-                    </span>
-                  </div>
-                  <div className="text-white/20">|</div>
-                  <div>
-                    <span className="text-white/40">{t("buyPrice")}</span>
-                    <span className="ml-1 text-white font-semibold">
-                      {buyPrice.toLocaleString("de-DE")} €
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onCheckout(bot, "rent")}
-                  className="flex-1 py-2 rounded-lg bg-[#FFB347]/10 border border-[#FFB347]/30 text-[#FFB347] text-[10px] font-semibold hover:bg-[#FFB347] hover:text-black transition-all"
-                >
-                  {t("rent")}
-                </button>
-                <button
-                  onClick={() => onCheckout(bot, "buy")}
-                  className="flex-1 py-2 rounded-lg bg-[#FC682C]/10 border border-[#FC682C]/30 text-[#FC682C] text-[10px] font-semibold hover:bg-[#FC682C] hover:text-white transition-all"
-                >
-                  {t("buy")}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-//                    CATEGORY SECTION
-// ═══════════════════════════════════════════════════════════════
-
-function CategorySection({
-  category,
-  index,
-  onCheckout,
-}: {
-  category: Category;
-  index: number;
-  onCheckout: (bot: Bot, type: "rent" | "buy") => void;
+function SearchSpotlight({ 
+  value, 
+  onChange, 
+  onClear,
+  resultCount,
+}: { 
+  value: string; 
+  onChange: (value: string) => void;
+  onClear: () => void;
+  resultCount: number;
 }) {
   const t = useTranslations("pages.workflows");
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        inputRef.current?.blur();
+        onClear();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClear]);
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5 }}
-      className="relative"
-    >
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-            style={{ backgroundColor: `${category.color}20` }}
-          >
-            {category.icon}
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-xl sm:text-2xl font-bold text-white">
-                {category.name}
-              </h3>
-              {category.highlight && (
-                <span className="px-2 py-0.5 rounded bg-gradient-to-r from-[#8B5CF6]/20 to-[#EC4899]/20 border border-[#8B5CF6]/30 text-[10px] text-[#A78BFA] font-semibold uppercase">
-                  {t("categoryLabels.hot")}
-                </span>
-              )}
-              <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] text-white/50">
-                {category.bots.length} {t("categoryLabels.bots")}
-              </span>
-            </div>
-            <p className="text-sm text-white/60 mt-0.5">
-              {category.description}
-            </p>
-          </div>
+    <div className="relative">
+      <motion.div
+        animate={{ 
+          boxShadow: isFocused 
+            ? "0 0 0 2px rgba(252,104,44,0.3), 0 0 30px rgba(252,104,44,0.2)" 
+            : "0 0 0 1px rgba(255,255,255,0.05)" 
+        }}
+        className="relative flex items-center bg-white/[0.03] backdrop-blur-xl rounded-2xl overflow-hidden"
+      >
+        <div className="pl-4 text-white/40">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {category.bots.map((bot) => (
-          <BotProductCard
-            key={bot.id}
-            bot={bot}
-            categoryColor={category.color}
-            onCheckout={onCheckout}
-          />
-        ))}
-      </div>
-    </motion.div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder={t("search.placeholder")}
+          className="flex-1 px-4 py-4 bg-transparent text-white placeholder-white/40 outline-none text-sm"
+        />
+        {value ? (
+          <button onClick={onClear} className="pr-4 text-white/40 hover:text-white transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        ) : (
+          <div className="pr-4 flex items-center gap-1">
+            <kbd className="px-2 py-1 rounded bg-white/10 text-[10px] text-white/50 font-mono">⌘</kbd>
+            <kbd className="px-2 py-1 rounded bg-white/10 text-[10px] text-white/50 font-mono">K</kbd>
+          </div>
+        )}
+      </motion.div>
+      
+      {value && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-full left-0 right-0 mt-2 p-3 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl"
+        >
+          <span className="text-xs text-white/60">
+            {resultCount} {t("search.results")} "{value}"
+          </span>
+        </motion.div>
+      )}
+    </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-//                    HERO VISUALIZATION
+//                    CATEGORY FILTER PILLS
 // ═══════════════════════════════════════════════════════════════
 
-function HeroVisualization() {
+function CategoryPills({ 
+  categories, 
+  activeFilter, 
+  onFilterChange,
+  showFavorites,
+  onFavoritesToggle,
+  favoritesCount,
+}: { 
+  categories: Category[];
+  activeFilter: string | null;
+  onFilterChange: (id: string | null) => void;
+  showFavorites: boolean;
+  onFavoritesToggle: () => void;
+  favoritesCount: number;
+}) {
+  const t = useTranslations("pages.workflows");
+  const totalBots = categories.reduce((acc, c) => acc + c.bots.length, 0);
+  
+  return (
+    <div className="flex flex-wrap gap-2">
+      {/* All Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => onFilterChange(null)}
+        className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+          !activeFilter && !showFavorites
+            ? "bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white shadow-lg shadow-[#FC682C]/25"
+            : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+        }`}
+      >
+        {t("filters.all")} ({totalBots})
+      </motion.button>
+      
+      {/* Favorites Button */}
+      {favoritesCount > 0 && (
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onFavoritesToggle}
+          className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+            showFavorites
+              ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/25"
+              : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+          }`}
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          {t("filters.favorites")} ({favoritesCount})
+        </motion.button>
+      )}
+      
+      {/* Category Buttons */}
+      {categories.map((cat) => (
+        <motion.button
+          key={cat.id}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onFilterChange(cat.id)}
+          className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+            activeFilter === cat.id
+              ? "text-white shadow-lg"
+              : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+          }`}
+          style={{
+            background: activeFilter === cat.id 
+              ? `linear-gradient(135deg, ${cat.color}, ${cat.color}dd)` 
+              : undefined,
+            boxShadow: activeFilter === cat.id 
+              ? `0 10px 30px ${cat.color}40` 
+              : undefined,
+          }}
+        >
+          <span>{cat.icon}</span>
+          <span className="hidden sm:inline">{cat.name}</span>
+          <span className="text-xs opacity-70">({cat.bots.length})</span>
+        </motion.button>
+      ))}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    HERO SECTION
+// ═══════════════════════════════════════════════════════════════
+
+function HeroSection() {
+  const t = useTranslations("pages.workflows");
+  const totalBots = categories.reduce((acc, c) => acc + c.bots.length, 0);
+  
   const integrations = [
     { icon: "🧠", label: "OpenAI", color: "#10a37f" },
     { icon: "📱", label: "Telegram", color: "#0088CC" },
@@ -1939,127 +1876,406 @@ function HeroVisualization() {
     { icon: "🔗", label: "HubSpot", color: "#FF7A59" },
     { icon: "📧", label: "Gmail", color: "#EA4335" },
     { icon: "🛒", label: "Shopify", color: "#96BF48" },
-    { icon: "📅", label: "Calendar", color: "#4285F4" },
+    { icon: "📅", label: "Calendar", color: "#7C3AED" },
     { icon: "💼", label: "LinkedIn", color: "#0A66C2" },
     { icon: "🎫", label: "Zendesk", color: "#F59E0B" },
   ];
 
   return (
-    <div className="relative w-full h-[300px] sm:h-[380px] flex items-center justify-center">
-      <motion.div
-        className="absolute w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(252,104,44,0.15) 0%, transparent 70%)",
-        }}
-        animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.7, 0.5] }}
-        transition={{ duration: 5, repeat: Infinity }}
-      />
+    <section className="relative pt-24 pb-16 overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#FC682C]/20 via-transparent to-transparent" />
+        <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-[#8B5CF6]/10 rounded-full blur-[150px]" />
+        <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-[#0088CC]/10 rounded-full blur-[120px]" />
+      </div>
+      
+      <ParticleField />
+      <FloatingElements />
+      
+      <div className="container relative z-10 px-4 sm:px-6">
+        <div className="flex flex-col lg:flex-row items-center gap-12">
+          {/* Text Content */}
+          <div className="flex-1 text-center lg:text-left">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#FC682C]/20 via-[#8B5CF6]/20 to-[#10B981]/20 border border-[#FC682C]/30 mb-6"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FC682C] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FC682C]"></span>
+              </span>
+              <span className="text-sm text-white/80 font-medium">
+                {t("hero.badge", { totalBots })}
+              </span>
+            </motion.div>
 
-      <motion.div
-        className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br from-[#FC682C] to-[#FF8C5A] flex items-center justify-center shadow-2xl shadow-[#FC682C]/40"
-        animate={{ scale: [1, 1.05, 1], y: [0, -5, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <span className="text-4xl sm:text-5xl">🤖</span>
-        <motion.div
-          className="absolute inset-0 rounded-2xl border-2 border-[#FC682C]"
-          animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-        />
-      </motion.div>
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight"
+            >
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FC682C] via-[#FF8C5A] to-[#FFA07A]">
+                {totalBots}+ Premium Bots
+              </span>
+              <br />
+              <span className="text-white">für echte Automatisierung</span>
+            </motion.h1>
 
-      {integrations.map((integration, i) => {
-        const angle = (i * 360) / integrations.length - 90;
-        const radius = 120;
-        const x = Math.cos((angle * Math.PI) / 180) * radius;
-        const y = Math.sin((angle * Math.PI) / 180) * radius;
+            {/* Subheadline */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-lg text-white/60 max-w-xl mx-auto lg:mx-0 mb-8"
+            >
+              Sofort einsetzbare Bots zum Mieten oder Kaufen. Basierend auf {stats.totalWorkflows} echten n8n-Workflows.
+            </motion.p>
 
-        return (
+            {/* Stats Grid */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="grid grid-cols-4 gap-3 mb-8 max-w-lg mx-auto lg:mx-0"
+            >
+              {[
+                { value: `${totalBots}+`, label: "Bots", icon: "🤖" },
+                { value: stats.totalCategories, label: "Kategorien", icon: "📁" },
+                { value: stats.totalIntegrations, label: "Integrationen", icon: "🔗" },
+                { value: stats.totalWorkflows, label: "Workflows", icon: "⚡" },
+              ].map((stat, i) => (
+                <GlassCard key={i} className="text-center p-3">
+                  <span className="text-xl mb-1 block">{stat.icon}</span>
+                  <div className="text-xl font-bold text-white">{stat.value}</div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-wider">{stat.label}</div>
+                </GlassCard>
+              ))}
+            </motion.div>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 mb-8"
+            >
+              <Link
+                href="#bots"
+                className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white font-bold text-lg shadow-2xl shadow-[#FC682C]/30 hover:shadow-[#FC682C]/50 transition-shadow flex items-center justify-center gap-2 group"
+              >
+                Alle {totalBots} Bots entdecken
+                <motion.svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  animate={{ y: [0, 3, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </motion.svg>
+              </Link>
+              <Link
+                href="/termin"
+                className="px-8 py-4 rounded-xl bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+              >
+                Kostenlose Beratung
+              </Link>
+            </motion.div>
+
+            {/* Trust Badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2"
+            >
+              {[
+                { icon: "✓", text: "DSGVO-konform" },
+                { icon: "✓", text: "Deutsche Server" },
+                { icon: "✓", text: "Sofort aktivierbar" },
+                { icon: "✓", text: "Support inklusive" },
+              ].map((item) => (
+                <span key={item.text} className="flex items-center gap-2 text-sm text-white/50">
+                  <span className="text-green-500">{item.icon}</span>
+                  {item.text}
+                </span>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Hero Visualization */}
           <motion.div
-            key={i}
-            className="absolute w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex flex-col items-center justify-center backdrop-blur-sm border border-white/10"
-            style={{
-              left: `calc(50% + ${x}px - 22px)`,
-              top: `calc(50% + ${y}px - 22px)`,
-              backgroundColor: `${integration.color}15`,
-            }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: [0, -4, 0],
-            }}
-            transition={{
-              opacity: { duration: 0.5, delay: 0.5 + i * 0.08 },
-              scale: { duration: 0.5, delay: 0.5 + i * 0.08 },
-              y: { duration: 3, repeat: Infinity, delay: i * 0.15 },
-            }}
+            className="flex-1 w-full max-w-lg"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <span className="text-base sm:text-lg">{integration.icon}</span>
-            <span className="text-[7px] sm:text-[8px] text-white/50 mt-0.5">
-              {integration.label}
-            </span>
-          </motion.div>
-        );
-      })}
+            <div className="relative w-full h-[400px] flex items-center justify-center">
+              {/* Pulsing Background */}
+              <motion.div
+                className="absolute w-[350px] h-[350px] rounded-full"
+                style={{ background: "radial-gradient(circle, rgba(252,104,44,0.2) 0%, transparent 70%)" }}
+                animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
 
-      {[...Array(15)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 rounded-full bg-[#FC682C]/60"
-          style={{
-            left: `${15 + Math.random() * 70}%`,
-            top: `${15 + Math.random() * 70}%`,
-          }}
-          animate={{
-            y: [0, -25, 0],
-            opacity: [0.2, 0.8, 0.2],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-          }}
-        />
-      ))}
-    </div>
+              {/* Central Bot Icon */}
+              <motion.div
+                className="relative z-10 w-32 h-32 rounded-3xl bg-gradient-to-br from-[#FC682C] to-[#FF8C5A] flex items-center justify-center shadow-2xl"
+                style={{ boxShadow: "0 0 60px rgba(252,104,44,0.5)" }}
+                animate={{ scale: [1, 1.05, 1], y: [0, -8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="text-6xl">🤖</span>
+                <motion.div
+                  className="absolute inset-0 rounded-3xl border-2 border-[#FC682C]"
+                  animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0, 0.8] }}
+                  transition={{ duration: 2.5, repeat: Infinity }}
+                />
+              </motion.div>
+
+              {/* Orbiting Integrations */}
+              {integrations.map((integration, i) => {
+                const angle = (i * 360) / integrations.length - 90;
+                const radius = 140;
+                const x = Math.cos((angle * Math.PI) / 180) * radius;
+                const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+                return (
+                  <motion.div
+                    key={i}
+                    className="absolute w-12 h-12 rounded-xl flex flex-col items-center justify-center backdrop-blur-sm border border-white/10"
+                    style={{
+                      left: `calc(50% + ${x}px - 24px)`,
+                      top: `calc(50% + ${y}px - 24px)`,
+                      backgroundColor: `${integration.color}20`,
+                    }}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                      y: [0, -5, 0],
+                    }}
+                    transition={{
+                      opacity: { duration: 0.5, delay: 0.5 + i * 0.08 },
+                      scale: { duration: 0.5, delay: 0.5 + i * 0.08 },
+                      y: { duration: 3, repeat: Infinity, delay: i * 0.2 },
+                    }}
+                  >
+                    <span className="text-lg">{integration.icon}</span>
+                    <span className="text-[8px] text-white/50 mt-0.5">{integration.label}</span>
+                  </motion.div>
+                );
+              })}
+
+              {/* Connection Lines */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400">
+                {integrations.map((_, i) => {
+                  const angle = (i * 360) / integrations.length - 90;
+                  const x = 200 + Math.cos((angle * Math.PI) / 180) * 140;
+                  const y = 200 + Math.sin((angle * Math.PI) / 180) * 140;
+                  return (
+                    <motion.line
+                      key={i}
+                      x1="200"
+                      y1="200"
+                      x2={x}
+                      y2={y}
+                      stroke="url(#gradient)"
+                      strokeWidth="1"
+                      strokeDasharray="4 4"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 0.3 }}
+                      transition={{ duration: 1, delay: 0.5 + i * 0.05 }}
+                    />
+                  );
+                })}
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#FC682C" />
+                    <stop offset="100%" stopColor="#8B5CF6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-//                    INTEGRATION LOGOS
+//                    STICKY FILTER BAR
 // ═══════════════════════════════════════════════════════════════
 
-function IntegrationLogos() {
-  const logos = [
-    { name: "OpenAI", icon: "🧠" },
-    { name: "Telegram", icon: "📱" },
-    { name: "Slack", icon: "💬" },
-    { name: "HubSpot", icon: "🟠" },
-    { name: "Shopify", icon: "🛒" },
-    { name: "Stripe", icon: "💳" },
-    { name: "Zendesk", icon: "🎫" },
-    { name: "Google", icon: "📊" },
-    { name: "GitHub", icon: "⚙️" },
-    { name: "WhatsApp", icon: "📞" },
-  ];
+function StickyFilterBar({ 
+  searchQuery,
+  onSearchChange,
+  onSearchClear,
+  resultCount,
+  categories,
+  activeFilter,
+  onFilterChange,
+  showFavorites,
+  onFavoritesToggle,
+  favoritesCount,
+  compareCount,
+  onCompareClick,
+}: {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onSearchClear: () => void;
+  resultCount: number;
+  categories: Category[];
+  activeFilter: string | null;
+  onFilterChange: (id: string | null) => void;
+  showFavorites: boolean;
+  onFavoritesToggle: () => void;
+  favoritesCount: number;
+  compareCount: number;
+  onCompareClick: () => void;
+}) {
+  const { scrollY } = useScroll();
+  const [isSticky, setIsSticky] = useState(false);
+  
+  useEffect(() => {
+    return scrollY.onChange((latest) => {
+      setIsSticky(latest > 600);
+    });
+  }, [scrollY]);
 
   return (
-    <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-      {logos.map((logo, i) => (
-        <motion.div
-          key={i}
-          className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 + i * 0.04 }}
+    <motion.div
+      id="bots"
+      className={`sticky top-0 z-40 transition-all duration-300 ${
+        isSticky 
+          ? "py-3 bg-[#030308]/90 backdrop-blur-xl border-b border-white/10 shadow-2xl" 
+          : "py-6 bg-transparent"
+      }`}
+    >
+      <div className="container px-4 sm:px-6">
+        <div className="flex flex-col gap-4">
+          {/* Search + Compare Button */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <SearchSpotlight
+                value={searchQuery}
+                onChange={onSearchChange}
+                onClear={onSearchClear}
+                resultCount={resultCount}
+              />
+            </div>
+            {compareCount > 0 && (
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onCompareClick}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#8B5CF6] text-white font-semibold flex items-center gap-2 shadow-lg"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Vergleichen ({compareCount})
+              </motion.button>
+            )}
+          </div>
+          
+          {/* Category Pills */}
+          <div className="overflow-x-auto pb-2 -mb-2 scrollbar-hide">
+            <CategoryPills
+              categories={categories}
+              activeFilter={activeFilter}
+              onFilterChange={onFilterChange}
+              showFavorites={showFavorites}
+              onFavoritesToggle={onFavoritesToggle}
+              favoritesCount={favoritesCount}
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    BACK TO TOP BUTTON
+// ═══════════════════════════════════════════════════════════════
+
+function BackToTop() {
+  const { scrollY } = useScroll();
+  const [show, setShow] = useState(false);
+  
+  useEffect(() => {
+    return scrollY.onChange((latest) => setShow(latest > 1000));
+  }, [scrollY]);
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white shadow-2xl shadow-[#FC682C]/30 flex items-center justify-center"
         >
-          <span className="text-sm">{logo.icon}</span>
-          <span className="text-xs text-white/60">{logo.name}</span>
-        </motion.div>
-      ))}
-    </div>
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    FLOATING CTA
+// ═══════════════════════════════════════════════════════════════
+
+function FloatingCTA() {
+  const t = useTranslations("pages.workflows");
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 100 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 2 }}
+      className="fixed bottom-6 left-6 z-50"
+    >
+      <GlassCard glow className="p-4 max-w-xs">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#FC682C]/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-xl">💬</span>
+          </div>
+          <div>
+            <p className="text-sm text-white font-medium mb-2">Fragen zu den Bots?</p>
+            <Link
+              href="/termin"
+              className="text-xs text-[#FC682C] hover:underline flex items-center gap-1"
+            >
+              Kostenlose Beratung buchen
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </GlassCard>
+    </motion.div>
   );
 }
 
@@ -2071,611 +2287,213 @@ export default function WorkflowsPage() {
   const t = useTranslations("pages.workflows");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+  const [checkoutModal, setCheckoutModal] = useState<{ bot: Bot; purchaseType: "rent" | "buy" } | null>(null);
 
-  const [checkoutModal, setCheckoutModal] = useState<{
-    bot: Bot;
-    purchaseType: "rent" | "buy";
-  } | null>(null);
+  const { favorites, toggle: toggleFavorite, isFavorite } = useFavorites();
+  const { compareList, toggle: toggleCompare, clear: clearCompare, isComparing } = useCompare();
 
-  const handleCheckout = useCallback(
-    (bot: Bot, type: "rent" | "buy") => {
-      setCheckoutModal({ bot, purchaseType: type });
-    },
-    [],
-  );
-
-  const closeCheckout = useCallback(() => {
-    setCheckoutModal(null);
+  const handleCheckout = useCallback((bot: Bot, type: "rent" | "buy") => {
+    setCheckoutModal({ bot, purchaseType: type });
   }, []);
 
-  const filteredCategories = categories.filter((category) => {
-    if (activeFilter && category.id !== activeFilter) return false;
+  const closeCheckout = useCallback(() => setCheckoutModal(null), []);
+
+  // Get all bots flat
+  const allBots = useMemo(() => categories.flatMap(c => c.bots.map(b => ({ ...b, categoryColor: c.color, categoryId: c.id }))), []);
+  
+  // Filter logic
+  const filteredBots = useMemo(() => {
+    let bots = allBots;
+    
+    if (showFavorites) {
+      bots = bots.filter(b => favorites.includes(b.id));
+    } else if (activeFilter) {
+      bots = bots.filter(b => b.categoryId === activeFilter);
+    }
+    
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const matchesCategory =
-        category.name.toLowerCase().includes(query) ||
-        category.description.toLowerCase().includes(query);
-      const matchesBots = category.bots.some(
-        (bot) =>
-          bot.name.toLowerCase().includes(query) ||
-          bot.shortDesc.toLowerCase().includes(query) ||
-          bot.integrations.some((i) => i.toLowerCase().includes(query)),
+      bots = bots.filter(b =>
+        b.name.toLowerCase().includes(query) ||
+        b.shortDesc.toLowerCase().includes(query) ||
+        b.goodFor.toLowerCase().includes(query) ||
+        b.integrations.some(i => i.toLowerCase().includes(query)) ||
+        b.features.some(f => f.toLowerCase().includes(query))
       );
-      return matchesCategory || matchesBots;
     }
-    return true;
-  });
+    
+    return bots;
+  }, [allBots, activeFilter, searchQuery, showFavorites, favorites]);
 
-  const totalBots = categories.reduce((acc, c) => acc + c.bots.length, 0);
+  // Group by category for display
+  const groupedBots = useMemo(() => {
+    if (showFavorites || searchQuery) {
+      // Show flat list
+      return null;
+    }
+    
+    if (activeFilter) {
+      return categories.filter(c => c.id === activeFilter);
+    }
+    
+    return categories;
+  }, [activeFilter, searchQuery, showFavorites]);
 
   return (
     <main className="bg-[#030308] min-h-screen">
-      {/* HERO SECTION */}
-      <section className="relative pt-20 sm:pt-24 pb-12 sm:pb-16 border-b border-white/5 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-[#FC682C]/10 rounded-full blur-[180px]" />
-          <div className="absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-[#8B5CF6]/10 rounded-full blur-[150px]" />
-          <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-[#0088CC]/5 rounded-full blur-[120px]" />
-        </div>
-
-        <div className="container relative z-10 px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-            <div className="flex-1 text-center lg:text-left">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#FC682C]/20 to-[#8B5CF6]/20 border border-[#FC682C]/30 mb-5"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#FC682C] animate-pulse" />
-                <span className="text-xs sm:text-sm text-white/80 font-medium">
-                  {t("hero.badge", { totalBots })}
-                </span>
-              </motion.div>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight"
-              >
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FC682C] to-[#FF8C5A]">
-                  {t("hero.headline1", { totalBots })}
-                </span>
-                <br />
-                <span className="text-white">{t("hero.headline2")}</span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-sm sm:text-base text-white/70 max-w-xl mx-auto lg:mx-0 mb-5"
-              >
-                {t("hero.subheadline")}
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="grid grid-cols-4 gap-2 mb-5 max-w-md mx-auto lg:mx-0"
-              >
-                {[
-                  { value: `${totalBots}+`, label: t("hero.stats.bots") },
-                  { value: stats.totalCategories, label: t("hero.stats.categories") },
-                  { value: stats.totalIntegrations, label: t("hero.stats.integrations") },
-                  { value: stats.totalWorkflows, label: t("hero.stats.workflows") },
-                ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="text-center lg:text-left p-2 rounded-lg bg-white/[0.03] border border-white/5"
-                  >
-                    <div className="text-sm sm:text-lg font-bold text-white">
-                      {stat.value}
-                    </div>
-                    <div className="text-[7px] sm:text-[9px] text-white/40 uppercase tracking-wider">
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="flex flex-col sm:flex-row justify-center lg:justify-start gap-2 mb-5"
-              >
-                <Link
-                  href="#bots"
-                  className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#FC682C] to-[#e55a1f] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FC682C]/25 text-center flex items-center justify-center gap-2"
-                >
-                  {t("hero.cta.discover", { totalBots })}
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </Link>
-                <Link
-                  href="/termin"
-                  className="px-4 py-2.5 rounded-lg border border-white/20 text-white text-xs font-semibold hover:bg-white/5 transition-all text-center"
-                >
-                  {t("hero.cta.consultation")}
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="flex flex-wrap justify-center lg:justify-start gap-x-4 gap-y-2 text-xs text-white/50"
-              >
-                {[
-                  t("hero.trust.gdpr"),
-                  t("hero.trust.servers"),
-                  t("hero.trust.instant"),
-                  t("hero.trust.support"),
-                ].map((item) => (
-                  <span key={item} className="flex items-center gap-1.5">
-                    <svg
-                      className="w-4 h-4 text-green-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {item}
-                  </span>
-                ))}
-              </motion.div>
-            </div>
-
-            <motion.div
-              className="flex-1 w-full max-w-md lg:max-w-lg"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
-              <HeroVisualization />
-            </motion.div>
-          </div>
-
-          <motion.div
-            className="mt-10 pt-8 border-t border-white/5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            <p className="text-center text-xs text-white/40 mb-4 uppercase tracking-wider">
-              {t("hero.integrationNote")}
-            </p>
-            <IntegrationLogos />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS SECTION */}
-      <section className="py-12 sm:py-16 border-b border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-gradient-to-r from-[#FC682C]/5 via-[#8B5CF6]/5 to-[#10B981]/5 blur-[80px] rounded-full" />
-        </div>
-
-        <div className="container px-4 sm:px-6 relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <motion.div
-              className="text-center mb-8 sm:mb-10"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4"
-              >
-                <span className="text-xs">⚡</span>
-                <span className="text-xs text-white/70">
-                  {t("howItWorks.badge")}
-                </span>
-              </motion.div>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3">
-                {t("howItWorks.headline")}
-              </h2>
-              <p className="text-sm sm:text-base text-white/60 max-w-xl mx-auto">
-                {t("howItWorks.subheadline")}
-              </p>
-            </motion.div>
-
-            <div className="relative">
-              <div className="hidden md:block absolute top-[60px] left-[16.67%] right-[16.67%] h-0.5">
+      {/* Hero */}
+      <HeroSection />
+      
+      {/* Sticky Filter Bar */}
+      <StickyFilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSearchClear={() => setSearchQuery("")}
+        resultCount={filteredBots.length}
+        categories={categories}
+        activeFilter={activeFilter}
+        onFilterChange={(id) => { setActiveFilter(id); setShowFavorites(false); }}
+        showFavorites={showFavorites}
+        onFavoritesToggle={() => { setShowFavorites(!showFavorites); setActiveFilter(null); }}
+        favoritesCount={favorites.length}
+        compareCount={compareList.length}
+        onCompareClick={() => setShowCompareModal(true)}
+      />
+      
+      {/* Bot Grid */}
+      <section className="py-12">
+        <div className="container px-4 sm:px-6">
+          {groupedBots ? (
+            // Grouped by category
+            <div className="space-y-16">
+              {groupedBots.map((category, i) => (
                 <motion.div
-                  className="h-full rounded-full"
-                  style={{
-                    background:
-                      "linear-gradient(90deg, #FC682C, #8B5CF6, #10B981)",
-                  }}
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
+                  key={category.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 1, delay: 0.5 }}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-4">
-                {[
-                  {
-                    num: "1",
-                    title: t("howItWorks.steps.1.title"),
-                    desc: t("howItWorks.steps.1.desc"),
-                    icon: "🎯",
-                    color: "#FC682C",
-                    details: t.raw("howItWorks.steps.1.details") as string[],
-                  },
-                  {
-                    num: "2",
-                    title: t("howItWorks.steps.2.title"),
-                    desc: t("howItWorks.steps.2.desc"),
-                    icon: "🔗",
-                    color: "#8B5CF6",
-                    details: t.raw("howItWorks.steps.2.details") as string[],
-                  },
-                  {
-                    num: "3",
-                    title: t("howItWorks.steps.3.title"),
-                    desc: t("howItWorks.steps.3.desc"),
-                    icon: "✅",
-                    color: "#10B981",
-                    details: t.raw("howItWorks.steps.3.details") as string[],
-                  },
-                ].map((step, i) => (
-                  <motion.div
-                    key={i}
-                    className="relative"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                  >
-                    <div className="relative p-5 rounded-xl bg-white/[0.02] border border-white/[0.06] h-full">
-                      <div
-                        className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs z-10"
-                        style={{
-                          background: `linear-gradient(135deg, ${step.color}, ${step.color}dd)`,
-                        }}
-                      >
-                        {step.num}
-                      </div>
-
-                      <div
-                        className="w-12 h-12 rounded-xl mx-auto mt-3 mb-3 flex items-center justify-center text-2xl"
-                        style={{ backgroundColor: `${step.color}15` }}
-                      >
-                        {step.icon}
-                      </div>
-
-                      <h3 className="text-sm font-bold text-white text-center mb-2">
-                        {step.title}
-                      </h3>
-
-                      <p className="text-[11px] text-white/60 text-center mb-3 leading-relaxed">
-                        {step.desc}
-                      </p>
-
-                      <div className="flex flex-wrap justify-center gap-1">
-                        {step.details.map((detail, j) => (
-                          <span
-                            key={j}
-                            className="px-2 py-0.5 rounded-full text-[9px] font-medium border"
-                            style={{
-                              borderColor: `${step.color}40`,
-                              color: step.color,
-                              backgroundColor: `${step.color}10`,
-                            }}
-                          >
-                            {detail}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            <motion.div
-              className="mt-16 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6 }}
-            >
-              <Link
-                href="#bots"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#FC682C] to-[#e55a1f] text-white font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FC682C]/25 group"
-              >
-                <span>{t("howItWorks.cta")}</span>
-                <motion.svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  animate={{ y: [0, 3, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
+                  transition={{ delay: i * 0.1 }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </motion.svg>
-              </Link>
-              <p className="mt-4 text-sm text-white/40">
-                {t("howItWorks.ctaNote")}
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* SEARCH & FILTER BAR */}
-      <section
-        id="bots"
-        className="sticky top-0 z-40 bg-[#030308]/95 backdrop-blur-lg border-b border-white/5 py-4"
-      >
-        <div className="container px-4 sm:px-6">
-          <div className="mb-3">
-            <div className="relative max-w-md">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                placeholder={t("search.placeholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-[#FC682C]/50 transition-colors"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-            <button
-              onClick={() => setActiveFilter(null)}
-              className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                activeFilter === null
-                  ? "bg-[#FC682C] text-white"
-                  : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              {t("search.all")} ({totalBots})
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveFilter(cat.id)}
-                className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 ${
-                  activeFilter === cat.id
-                    ? "bg-[#FC682C] text-white"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                <span>{cat.icon}</span>
-                <span className="hidden sm:inline">{cat.name}</span>
-                <span className="text-[10px] opacity-60">
-                  ({cat.bots.length})
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CATEGORIES & BOTS */}
-      <section className="py-12 sm:py-16">
-        <div className="container px-4 sm:px-6">
-          <div className="space-y-20">
-            <AnimatePresence mode="wait">
-              {filteredCategories.length > 0 ? (
-                filteredCategories.map((category, index) => (
-                  <CategorySection
-                    key={category.id}
-                    category={category}
-                    index={index}
-                    onCheckout={handleCheckout}
-                  />
-                ))
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-20"
-                >
-                  <span className="text-4xl mb-4 block">🔍</span>
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    {t("search.noResults.title")}
-                  </h3>
-                  <p className="text-white/60">
-                    {t("search.noResults.desc")}
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSearchQuery("");
-                      setActiveFilter(null);
-                    }}
-                    className="mt-4 px-4 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors"
-                  >
-                    {t("search.noResults.reset")}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </section>
-
-      {/* TRUST SECTION */}
-      <section className="py-10 sm:py-12 border-t border-white/5 bg-gradient-to-b from-transparent to-[#FC682C]/5">
-        <div className="container px-4 sm:px-6">
-          <div className="text-center mb-8">
-            <span className="inline-block px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-medium mb-3">
-              {t("trust.badge")}
-            </span>
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{t("trust.headline")}</h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {[
-              { value: "108+", label: t("trust.stats.bots") },
-              { value: "2.061", label: t("trust.stats.workflows") },
-              { value: "187+", label: t("trust.stats.integrations") },
-              { value: "⭐ 5.0", label: t("trust.stats.rating") },
-            ].map((stat, i) => (
-              <div key={i} className="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                <div className="text-2xl sm:text-3xl font-bold text-[#FC682C] mb-1">{stat.value}</div>
-                <div className="text-xs text-white/50">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-white/40">
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {t("trust.badges.noCode")}
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {t("trust.badges.hosted")}
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {t("trust.badges.gdpr")}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ SECTION */}
-      <section className="py-12 sm:py-16 border-t border-white/5">
-        <div className="container px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-8">
-              <span className="inline-block px-3 py-1 rounded-full bg-[#FC682C]/10 text-[#FC682C] text-xs font-medium mb-3">
-                {t("faq.badge")}
-              </span>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">{t("faq.headline")}</h2>
-              <p className="text-sm text-white/60">{t("faq.subheadline")}</p>
-            </div>
-
-            <div className="space-y-3">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <details key={i} className="group rounded-xl bg-white/[0.02] border border-white/5 overflow-hidden">
-                  <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/[0.02] transition-colors">
-                    <span className="text-sm font-medium text-white pr-4">{t(`faq.items.${i}.q`)}</span>
-                    <svg
-                      className="w-5 h-5 text-[#FC682C] flex-shrink-0 transition-transform group-open:rotate-180"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                  {/* Category Header */}
+                  <div className="flex items-center gap-4 mb-8">
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
+                      style={{ backgroundColor: `${category.color}20` }}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="px-4 pb-4">
-                    <p className="text-sm text-white/60 leading-relaxed">{t(`faq.items.${i}.a`)}</p>
+                      {category.icon}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold text-white">{category.name}</h2>
+                        {category.highlight && <NeonBadge color="#8B5CF6">HOT</NeonBadge>}
+                        <span className="text-sm text-white/40">({category.bots.length} Bots)</span>
+                      </div>
+                      <p className="text-white/60">{category.description}</p>
+                    </div>
                   </div>
-                </details>
+                  
+                  {/* Bot Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {category.bots.map((bot) => (
+                      <BotCard3D
+                        key={bot.id}
+                        bot={bot}
+                        categoryColor={category.color}
+                        onCheckout={handleCheckout}
+                        isFavorite={isFavorite(bot.id)}
+                        onFavoriteToggle={() => toggleFavorite(bot.id)}
+                        isComparing={isComparing(bot.id)}
+                        onCompareToggle={() => toggleCompare(bot)}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FINAL CTA */}
-      <section className="py-16 sm:py-20 border-t border-white/5 bg-gradient-to-t from-[#FC682C]/5 to-transparent">
-        <div className="container px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <span className="text-3xl mb-3 block">🚀</span>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3">
-                {t("finalCta.headline")}
-              </h2>
-              <p className="text-sm sm:text-base text-white/60 mb-6">
-                {t("finalCta.subheadline")}
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-3">
-                <Link
-                  href="/termin"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-[#FC682C] to-[#e55a1f] text-white text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#FC682C]/25"
-                >
-                  {t("finalCta.cta")}
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17 8l4 4m0 0l-4 4m4-4H3"
-                    />
-                  </svg>
-                </Link>
-                <Link
-                  href="#bots"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border border-white/20 text-white text-sm font-semibold hover:bg-white/5 transition-all"
-                >
-                  {t("finalCta.ctaSecondary", { totalBots })}
-                </Link>
+          ) : (
+            // Flat list (search or favorites)
+            <div>
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-white">
+                  {showFavorites ? `Deine Favoriten (${filteredBots.length})` : `Suchergebnisse (${filteredBots.length})`}
+                </h2>
               </div>
-            </motion.div>
-          </div>
+              
+              {filteredBots.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredBots.map((bot) => (
+                    <BotCard3D
+                      key={bot.id}
+                      bot={bot}
+                      categoryColor={bot.categoryColor}
+                      onCheckout={handleCheckout}
+                      isFavorite={isFavorite(bot.id)}
+                      onFavoriteToggle={() => toggleFavorite(bot.id)}
+                      isComparing={isComparing(bot.id)}
+                      onCompareToggle={() => toggleCompare(bot)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <span className="text-6xl mb-4 block">🔍</span>
+                  <h3 className="text-xl font-bold text-white mb-2">Keine Bots gefunden</h3>
+                  <p className="text-white/60">Versuche einen anderen Suchbegriff</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
-
-      {/* CHECKOUT MODAL */}
+      
+      {/* CTA Section */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FC682C]/10 via-[#8B5CF6]/10 to-[#10B981]/10" />
+        <div className="container px-4 sm:px-6 relative z-10">
+          <GlassCard glow className="p-8 sm:p-12 text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Bereit für Automatisierung?
+            </h2>
+            <p className="text-lg text-white/60 mb-8 max-w-2xl mx-auto">
+              Lass uns gemeinsam den perfekten Bot für dein Business finden. Kostenlose Beratung, keine Verpflichtungen.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link
+                href="/termin"
+                className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white font-bold text-lg shadow-2xl shadow-[#FC682C]/30 hover:shadow-[#FC682C]/50 transition-shadow"
+              >
+                Kostenlose Beratung
+              </Link>
+              <Link
+                href="/kontakt"
+                className="px-8 py-4 rounded-xl bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-all"
+              >
+                Kontakt aufnehmen
+              </Link>
+            </div>
+          </GlassCard>
+        </div>
+      </section>
+      
+      {/* Floating Elements */}
+      <BackToTop />
+      <FloatingCTA />
+      
+      {/* Modals */}
       <AnimatePresence>
         {checkoutModal && (
           <CheckoutModal
             bot={checkoutModal.bot}
             purchaseType={checkoutModal.purchaseType}
             onClose={closeCheckout}
+          />
+        )}
+        {showCompareModal && compareList.length > 0 && (
+          <CompareModal
+            bots={compareList}
+            onClose={() => setShowCompareModal(false)}
           />
         )}
       </AnimatePresence>
