@@ -3391,67 +3391,163 @@ function CategoryPills({
   const t = useTranslations("pages.workflows");
   const totalBots = categories.reduce((acc, c) => acc + c.bots.length, 0);
   
+  const featuredCategories = categories.filter(c => c.highlight);
+  const regularCategories = categories.filter(c => !c.highlight);
+  
   return (
-    <div className="flex flex-wrap gap-2">
-      {/* All Button */}
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => onFilterChange(null)}
-        className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-          !activeFilter && !showFavorites
-            ? "bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white shadow-lg shadow-[#FC682C]/25"
-            : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
-        }`}
-      >
-        {t("filters.all")} ({totalBots})
-      </motion.button>
-      
-      {/* Favorites Button */}
-      {favoritesCount > 0 && (
+    <div className="space-y-4">
+      {/* Top Row: All + Favorites + Featured Categories */}
+      <div className="flex flex-wrap gap-2">
+        {/* All Button - Premium Style */}
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={onFavoritesToggle}
-          className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-            showFavorites
-              ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/25"
-              : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
-          }`}
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-          {t("filters.favorites")} ({favoritesCount})
-        </motion.button>
-      )}
-      
-      {/* Category Buttons */}
-      {categories.map((cat) => (
-        <motion.button
-          key={cat.id}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onFilterChange(cat.id)}
-          className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-            activeFilter === cat.id
-              ? "text-white shadow-lg"
-              : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10"
+          whileHover={{ scale: 1.03, y: -2 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => onFilterChange(null)}
+          className={`relative px-5 py-3 rounded-2xl text-sm font-semibold transition-all overflow-hidden ${
+            !activeFilter && !showFavorites
+              ? "text-white"
+              : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10 hover:border-white/20"
           }`}
           style={{
-            background: activeFilter === cat.id 
-              ? `linear-gradient(135deg, ${cat.color}, ${cat.color}dd)` 
+            background: !activeFilter && !showFavorites 
+              ? "linear-gradient(135deg, #FC682C 0%, #FF8C5A 50%, #FFB088 100%)"
               : undefined,
-            boxShadow: activeFilter === cat.id 
-              ? `0 10px 30px ${cat.color}40` 
+            boxShadow: !activeFilter && !showFavorites 
+              ? "0 8px 32px rgba(252, 104, 44, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset"
               : undefined,
           }}
         >
-          <span>{cat.icon}</span>
-          <span className="hidden sm:inline">{cat.name}</span>
-          <span className="text-xs opacity-70">({cat.bots.length})</span>
+          {!activeFilter && !showFavorites && (
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
+          )}
+          <span className="relative flex items-center gap-2">
+            <span className="text-lg">✨</span>
+            <span>{t("filters.all")}</span>
+            <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-bold">{totalBots}</span>
+          </span>
         </motion.button>
-      ))}
+        
+        {/* Favorites Button */}
+        {favoritesCount > 0 && (
+          <motion.button
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onFavoritesToggle}
+            className={`relative px-5 py-3 rounded-2xl text-sm font-semibold transition-all overflow-hidden ${
+              showFavorites
+                ? "text-white"
+                : "bg-white/5 text-white/70 hover:bg-white/10 border border-white/10 hover:border-white/20"
+            }`}
+            style={{
+              background: showFavorites 
+                ? "linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)"
+                : undefined,
+              boxShadow: showFavorites 
+                ? "0 8px 32px rgba(236, 72, 153, 0.4)"
+                : undefined,
+            }}
+          >
+            <span className="relative flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span>{t("filters.favorites")}</span>
+              <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-bold">{favoritesCount}</span>
+            </span>
+          </motion.button>
+        )}
+
+        {/* Featured Categories - Larger Cards */}
+        {featuredCategories.map((cat) => (
+          <motion.button
+            key={cat.id}
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onFilterChange(cat.id)}
+            className={`relative px-5 py-3 rounded-2xl text-sm font-semibold transition-all overflow-hidden group ${
+              activeFilter === cat.id
+                ? "text-white"
+                : "bg-gradient-to-br from-white/10 to-white/5 text-white/90 border border-white/10 hover:border-white/30"
+            }`}
+            style={{
+              background: activeFilter === cat.id 
+                ? `linear-gradient(135deg, ${cat.color} 0%, ${cat.color}cc 100%)`
+                : undefined,
+              boxShadow: activeFilter === cat.id 
+                ? `0 8px 32px ${cat.color}50, 0 0 0 1px ${cat.color}40 inset`
+                : undefined,
+            }}
+          >
+            {/* Hover glow effect */}
+            <div 
+              className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity rounded-2xl"
+              style={{ background: `radial-gradient(circle at center, ${cat.color}, transparent 70%)` }}
+            />
+            <span className="relative flex items-center gap-2.5">
+              <span className="text-xl">{cat.icon}</span>
+              <span className="hidden sm:inline">{cat.name}</span>
+              <span 
+                className="px-2 py-0.5 rounded-full text-xs font-bold"
+                style={{ 
+                  background: activeFilter === cat.id ? 'rgba(255,255,255,0.2)' : `${cat.color}30`,
+                  color: activeFilter === cat.id ? 'white' : cat.color 
+                }}
+              >
+                {cat.bots.length}
+              </span>
+            </span>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Regular Categories - Grid Layout */}
+      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
+        {regularCategories.map((cat) => (
+          <motion.button
+            key={cat.id}
+            whileHover={{ scale: 1.08, y: -3 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onFilterChange(cat.id)}
+            className={`relative aspect-square rounded-xl p-2 flex flex-col items-center justify-center gap-1 transition-all group overflow-hidden ${
+              activeFilter === cat.id
+                ? "text-white"
+                : "bg-white/5 text-white/80 hover:bg-white/10 border border-white/10 hover:border-white/25"
+            }`}
+            style={{
+              background: activeFilter === cat.id 
+                ? `linear-gradient(135deg, ${cat.color} 0%, ${cat.color}bb 100%)`
+                : undefined,
+              boxShadow: activeFilter === cat.id 
+                ? `0 8px 24px ${cat.color}50`
+                : undefined,
+            }}
+          >
+            {/* Animated glow on hover */}
+            <div 
+              className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300"
+              style={{ 
+                background: `radial-gradient(circle at center, ${cat.color}, transparent 60%)`,
+              }}
+            />
+            <span className="text-2xl relative z-10 group-hover:scale-110 transition-transform">{cat.icon}</span>
+            <span 
+              className="text-[10px] font-bold relative z-10 px-1.5 py-0.5 rounded-full"
+              style={{ 
+                background: activeFilter === cat.id ? 'rgba(255,255,255,0.25)' : `${cat.color}25`,
+                color: activeFilter === cat.id ? 'white' : cat.color 
+              }}
+            >
+              {cat.bots.length}
+            </span>
+            {/* Category name tooltip on hover */}
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-bottom-6 transition-all duration-200 pointer-events-none z-20">
+              <div className="bg-black/90 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-lg whitespace-nowrap border border-white/10">
+                {cat.name}
+              </div>
+            </div>
+          </motion.button>
+        ))}
+      </div>
     </div>
   );
 }
