@@ -110,8 +110,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Exclude static files, API routes, and public assets
+  // Only match routes that need i18n/auth, skip all static assets
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|icon-.*\\.png|apple-touch-icon.png|robots.txt|.*\\..*).*)",
+    // Include all paths except static assets and API
+    "/((?!api|_next/static|_next/image|favicon|manifest|icon-|apple-touch|robots|.*\\.(?:ico|png|jpg|jpeg|gif|svg|json|txt|webp|woff|woff2|ttf|eot)).*)",
   ],
 };
