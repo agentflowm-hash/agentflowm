@@ -59,6 +59,9 @@ import {
   FireIcon as FireSolid,
 } from "@heroicons/react/24/solid";
 
+// Next-Level Components
+import { Confetti, KeyboardShortcuts, useToast } from "@/components";
+
 // ═══════════════════════════════════════════════════════════════
 //                    TYPES
 // ═══════════════════════════════════════════════════════════════
@@ -195,7 +198,9 @@ export function Dashboard() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const fetchStats = useCallback(async () => {
     setRefreshing(true);
@@ -350,6 +355,16 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#09090b] flex">
+      {/* Keyboard Shortcuts */}
+      <KeyboardShortcuts
+        onTabChange={(tab) => setActiveTab(tab as Tab)}
+        onRefresh={fetchStats}
+        onToggleProfile={() => setShowNotifications((prev) => !prev)}
+      />
+
+      {/* Confetti Celebration */}
+      <Confetti trigger={showConfetti} onComplete={() => setShowConfetti(false)} />
+
       {/* Command Palette */}
       {commandPaletteOpen && (
         <CommandPalette
