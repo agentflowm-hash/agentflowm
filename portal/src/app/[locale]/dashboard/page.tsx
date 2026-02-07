@@ -45,6 +45,7 @@ import {
   AnimatedProgress,
   CalendarExport,
   FilePreview,
+  KeyboardShortcuts,
   useToast,
 } from "@/components";
 
@@ -373,6 +374,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#09090b]">
+      {/* Keyboard Shortcuts */}
+      <KeyboardShortcuts
+        onTabChange={(tab) => setActiveTab(tab as Tab)}
+        onRefresh={fetchData}
+        onToggleProfile={() => setShowProfileModal((prev) => !prev)}
+      />
+
       {/* Confetti Celebration */}
       <Confetti trigger={showConfetti} onComplete={() => setShowConfetti(false)} />
 
