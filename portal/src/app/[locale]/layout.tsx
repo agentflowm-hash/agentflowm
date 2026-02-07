@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   title: "Kundenportal | AgentFlowMarketing",
   description: "Ihr Projektportal - Status, Dateien & Kommunikation",
   robots: "noindex, nofollow",
+  manifest: "/manifest.json",
+  themeColor: "#FC682C",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "AgentFlow",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
