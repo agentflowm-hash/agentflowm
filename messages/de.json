@@ -2383,6 +2383,46 @@
         "onRequest": "Auf Anfrage",
         "inquire": "Anfragen"
       },
+      "card": {
+        "goodFor": "Gut für:",
+        "integrations": "Integrationen:",
+        "buyOnce": "Einmal kaufen:",
+        "rent": "Mieten",
+        "buy": "Kaufen",
+        "price": "Preis"
+      },
+      "badges": {
+        "popular": "Beliebt",
+        "new": "Neu",
+        "trending": "Trending",
+        "limited": "Limitiert"
+      },
+      "filters": {
+        "all": "Alle",
+        "favorites": "Favoriten"
+      },
+      "search": {
+        "placeholder": "Bot, Integration oder Anwendungsfall suchen...",
+        "results": "Ergebnisse für"
+      },
+      "compare": {
+        "title": "Bots vergleichen",
+        "rating": "Bewertung",
+        "features": "Features"
+      },
+      "checkout": {
+        "rental": "Mieten",
+        "purchase": "Kaufen",
+        "price": "Preis",
+        "oneTime": "einmalig",
+        "cancelAnytime": "Jederzeit kündbar - keine versteckten Kosten",
+        "proceed": "Weiter zur Zahlung",
+        "cancel": "Abbrechen"
+      },
+      "categoryLabels": {
+        "hot": "HOT",
+        "bots": "Bots"
+      },
       "categories": {
         "ai-power": {
           "name": "KI & Intelligenz",

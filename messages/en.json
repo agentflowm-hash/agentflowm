@@ -2383,6 +2383,46 @@
         "onRequest": "On Request",
         "inquire": "Inquire"
       },
+      "card": {
+        "goodFor": "Good for:",
+        "integrations": "Integrations:",
+        "buyOnce": "Buy once:",
+        "rent": "Rent",
+        "buy": "Buy",
+        "price": "Price"
+      },
+      "badges": {
+        "popular": "Popular",
+        "new": "New",
+        "trending": "Trending",
+        "limited": "Limited"
+      },
+      "filters": {
+        "all": "All",
+        "favorites": "Favorites"
+      },
+      "search": {
+        "placeholder": "Search bot, integration or use case...",
+        "results": "results for"
+      },
+      "compare": {
+        "title": "Compare Bots",
+        "rating": "Rating",
+        "features": "Features"
+      },
+      "checkout": {
+        "rental": "Rent",
+        "purchase": "Purchase",
+        "price": "Price",
+        "oneTime": "one-time",
+        "cancelAnytime": "Cancel anytime - no hidden costs",
+        "proceed": "Proceed to Payment",
+        "cancel": "Cancel"
+      },
+      "categoryLabels": {
+        "hot": "HOT",
+        "bots": "Bots"
+      },
       "categories": {
         "ai-power": {
           "name": "AI & Intelligence",
