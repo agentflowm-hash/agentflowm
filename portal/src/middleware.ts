@@ -110,5 +110,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  // Exclude static files, API routes, and public assets
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|icon-.*\\.png|apple-touch-icon.png|robots.txt|.*\\..*).*)",
+  ],
 };
