@@ -9,3 +9,12 @@ export { default as Skeleton, SkeletonText, SkeletonCard, SkeletonPage } from ".
 export { default as VoiceRecorder } from "./VoiceRecorder";
 export { default as Providers } from "./Providers";
 export { ToastProvider, useToast } from "./Toast";
+
+// Admin-Specific Killer Features
+export { default as QuickActions } from "./QuickActions";
+export { default as Sparkline } from "./Sparkline";
+export { default as ActivityFeed } from "./ActivityFeed";
+export { default as AIInsights } from "./AIInsights";
+export { default as StatCard } from "./StatCard";
+export { default as ThemeToggle } from "./ThemeToggle";
+export { default as SearchSpotlight } from "./SearchSpotlight";
