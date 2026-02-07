@@ -19,7 +19,10 @@
     "download": "Download",
     "upload": "Upload",
     "send": "Send",
-    "sending": "Sending..."
+    "sending": "Sending...",
+    "new": "New",
+    "viewAll": "View All",
+    "learnMore": "Learn More"
   },
   "navigation": {
     "overview": "Overview",
@@ -55,13 +58,31 @@
     "projectTimeline": "Project Timeline",
     "completed": "completed",
     "of": "of",
-    "milestonesCompleted": "Milestones completed"
+    "milestonesCompleted": "Milestones completed",
+    "recentActivity": "Recent Activity",
+    "nextMilestone": "Next Milestone",
+    "daysRemaining": "{days} days remaining",
+    "onTrack": "On Track",
+    "needsAttention": "Needs Attention",
+    "ahead": "Ahead of Schedule"
   },
   "messages": {
     "title": "Messages",
     "count": "{count} messages",
     "noMessages": "No messages yet",
-    "placeholder": "Write a message..."
+    "placeholder": "Write a message...",
+    "voiceMessage": "Voice Message",
+    "attachFile": "Attach File",
+    "sendFailed": "Failed to send message",
+    "recordVoice": "Record voice message"
+  },
+  "voiceMessage": {
+    "startRecording": "Record voice message",
+    "stopRecording": "Stop recording",
+    "send": "Send",
+    "discard": "Discard",
+    "recording": "Recording...",
+    "micPermission": "Microphone access required"
   },
   "files": {
     "title": "Project Files",
@@ -74,7 +95,10 @@
     "all": "All",
     "images": "Images",
     "documents": "Documents",
-    "other": "Other"
+    "other": "Other",
+    "preview": "Preview",
+    "uploadSuccess": "File uploaded successfully",
+    "uploadError": "Upload failed"
   },
   "approvals": {
     "title": "Approvals",
@@ -96,7 +120,9 @@
     "approvedOn": "Approved on",
     "design": "Design",
     "content": "Content",
-    "final": "Final Approval"
+    "final": "Final Approval",
+    "annotate": "Add Annotation",
+    "drawFeedback": "Draw your feedback"
   },
   "preview": {
     "title": "Live Preview",
@@ -130,6 +156,28 @@
     "viewProfile": "View profile",
     "viewProfileDesc": "Check your data",
     "done": "Done"
+  },
+  "calendar": {
+    "addToCalendar": "Add to Calendar",
+    "downloadICS": "Download .ics",
+    "googleCalendar": "Google Calendar",
+    "appleCalendar": "Apple Calendar",
+    "outlookCalendar": "Outlook Calendar",
+    "eventAdded": "Event added to calendar"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications",
+    "newMessage": "New message from {name}",
+    "milestoneComplete": "Milestone \"{title}\" completed!",
+    "approvalNeeded": "Your approval is needed",
+    "fileUploaded": "New file uploaded: {name}",
+    "markAllRead": "Mark all as read"
+  },
+  "celebration": {
+    "milestoneComplete": "🎉 Milestone Complete!",
+    "projectLaunched": "🚀 Your Project is Live!",
+    "allApproved": "✅ All Approvals Complete!"
   },
   "footer": {
     "questions": "Questions?",

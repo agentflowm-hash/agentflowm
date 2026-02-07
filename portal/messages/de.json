@@ -8,7 +8,7 @@
     "messages": "Nachrichten",
     "settings": "Einstellungen",
     "logout": "Abmelden",
-    "loading": "Wird geladen...",
+    "loading": "Laden...",
     "error": "Fehler",
     "retry": "Erneut versuchen",
     "close": "Schließen",
@@ -16,10 +16,13 @@
     "cancel": "Abbrechen",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "download": "Download",
+    "download": "Herunterladen",
     "upload": "Hochladen",
     "send": "Senden",
-    "sending": "Senden..."
+    "sending": "Wird gesendet...",
+    "new": "Neu",
+    "viewAll": "Alle anzeigen",
+    "learnMore": "Mehr erfahren"
   },
   "navigation": {
     "overview": "Übersicht",
@@ -30,21 +33,21 @@
   },
   "login": {
     "title": "Willkommen",
-    "subtitle": "Geben Sie Ihren Zugangscode ein",
-    "accessCode": "Ihr Zugangscode",
+    "subtitle": "Gib deinen Zugangscode ein",
+    "accessCode": "Dein Zugangscode",
     "placeholder": "XXXX-0000",
-    "codeHint": "Sie haben den Code per Telegram oder E-Mail erhalten",
-    "loginButton": "Einloggen",
-    "checking": "Prüfen...",
+    "codeHint": "Du hast den Code per Telegram oder E-Mail erhalten",
+    "loginButton": "Anmelden",
+    "checking": "Wird geprüft...",
     "noCode": "Keinen Code erhalten?",
-    "contactUs": "Kontaktieren Sie uns",
-    "codeInfo": "Den Zugangscode erhalten Sie nach einer Anfrage oder Bestellung.",
+    "contactUs": "Kontaktiere uns",
+    "codeInfo": "Du erhältst den Zugangscode nach einer Anfrage oder Bestellung.",
     "invalidCode": "Ungültiger Zugangscode",
     "connectionError": "Verbindungsfehler"
   },
   "dashboard": {
     "welcomeBack": "Willkommen, {name}!",
-    "projectStatus": "Hier ist der aktuelle Stand Ihres Projekts.",
+    "projectStatus": "Hier ist der aktuelle Stand deines Projekts.",
     "project": "Projekt",
     "package": "Paket",
     "overallProgress": "Gesamtfortschritt",
@@ -53,54 +56,77 @@
     "milestones": "Meilensteine",
     "contactPerson": "Ansprechpartner",
     "projectTimeline": "Projekt-Timeline",
-    "completed": "erledigt",
+    "completed": "abgeschlossen",
     "of": "von",
-    "milestonesCompleted": "Meilensteine erledigt"
+    "milestonesCompleted": "Meilensteine abgeschlossen",
+    "recentActivity": "Letzte Aktivität",
+    "nextMilestone": "Nächster Meilenstein",
+    "daysRemaining": "{days} Tage verbleibend",
+    "onTrack": "Im Zeitplan",
+    "needsAttention": "Braucht Aufmerksamkeit",
+    "ahead": "Vor dem Zeitplan"
   },
   "messages": {
     "title": "Nachrichten",
     "count": "{count} Nachrichten",
     "noMessages": "Noch keine Nachrichten",
-    "placeholder": "Nachricht schreiben..."
+    "placeholder": "Schreibe eine Nachricht...",
+    "voiceMessage": "Sprachnachricht",
+    "attachFile": "Datei anhängen",
+    "sendFailed": "Nachricht konnte nicht gesendet werden",
+    "recordVoice": "Sprachnachricht aufnehmen"
+  },
+  "voiceMessage": {
+    "startRecording": "Sprachnachricht aufnehmen",
+    "stopRecording": "Aufnahme stoppen",
+    "send": "Senden",
+    "discard": "Verwerfen",
+    "recording": "Aufnahme läuft...",
+    "micPermission": "Mikrofonzugriff erforderlich"
   },
   "files": {
     "title": "Projektdateien",
     "noFiles": "Noch keine Dateien hochgeladen",
-    "dragHint": "Ziehen Sie Dateien in den Bereich oben",
+    "dragHint": "Ziehe Dateien in den Bereich oben",
     "dropHere": "Dateien hier ablegen",
     "dragFiles": "Dateien hierher ziehen",
-    "maxSize": "oder klicken Sie auf \"Hochladen\" · Max. 10MB pro Datei",
+    "maxSize": "oder klicke auf \"Hochladen\" · Max. 10MB pro Datei",
     "uploading": "Wird hochgeladen...",
     "all": "Alle",
     "images": "Bilder",
     "documents": "Dokumente",
-    "other": "Sonstige"
+    "other": "Andere",
+    "preview": "Vorschau",
+    "uploadSuccess": "Datei erfolgreich hochgeladen",
+    "uploadError": "Upload fehlgeschlagen"
   },
   "approvals": {
     "title": "Freigaben",
     "pending": "Ausstehende Freigaben",
-    "waitingCount": "{count} warten auf Ihre Freigabe",
-    "changesRequested": "Änderungen angefragt",
-    "workingOnChanges": "Wir arbeiten an Ihren Änderungswünschen",
+    "waitingCount": "{count} warten auf deine Freigabe",
+    "changesRequested": "Änderungen angefordert",
+    "workingOnChanges": "Wir arbeiten an deinen Änderungswünschen",
     "completedTitle": "Abgeschlossen",
     "approvalsGiven": "{count} Freigaben erteilt",
     "allDone": "Alles erledigt!",
-    "noApprovals": "Aktuell gibt es keine ausstehenden Freigaben. Wir benachrichtigen Sie, sobald etwas zur Freigabe bereit ist.",
+    "noApprovals": "Es gibt keine ausstehenden Freigaben. Wir benachrichtigen dich, wenn etwas zur Freigabe bereit ist.",
     "reviewApprove": "Prüfen & Freigeben",
     "approve": "Freigeben",
     "requestChange": "Änderung",
-    "feedbackPlaceholder": "Ihr Feedback (optional bei Freigabe)...",
-    "describeChanges": "Bitte beschreiben Sie die gewünschten Änderungen.",
-    "yourFeedback": "Ihr Feedback:",
+    "feedbackPlaceholder": "Dein Feedback (optional für Freigabe)...",
+    "describeChanges": "Bitte beschreibe die gewünschten Änderungen.",
+    "yourFeedback": "Dein Feedback:",
     "created": "Erstellt:",
     "approvedOn": "Freigegeben am",
     "design": "Design",
     "content": "Inhalt",
-    "final": "Finale Abnahme"
+    "final": "Finale Freigabe",
+    "annotate": "Anmerkung hinzufügen",
+    "drawFeedback": "Zeichne dein Feedback"
   },
   "preview": {
     "title": "Live-Vorschau",
-    "mobile": "Mobile",
+    "mobile": "Mobil",
     "tablet": "Tablet",
     "desktop": "Desktop",
     "refresh": "Aktualisieren",
@@ -118,21 +144,43 @@
     "progress": "Fortschritt"
   },
   "quickStart": {
-    "title": "Quick Start",
+    "title": "Schnellstart",
     "subtitle": "Erste Schritte",
     "setup": "Einrichtung",
     "checkStatus": "Projektstatus prüfen",
-    "checkStatusDesc": "Sehen Sie den aktuellen Fortschritt",
+    "checkStatusDesc": "Sieh den aktuellen Fortschritt",
     "sendMessage": "Nachricht senden",
-    "sendMessageDesc": "Stellen Sie eine Frage an unser Team",
+    "sendMessageDesc": "Stelle unserem Team eine Frage",
     "uploadFiles": "Dateien hochladen",
-    "uploadFilesDesc": "Teilen Sie wichtige Dokumente",
+    "uploadFilesDesc": "Teile wichtige Dokumente",
     "viewProfile": "Profil ansehen",
-    "viewProfileDesc": "Überprüfen Sie Ihre Daten",
+    "viewProfileDesc": "Prüfe deine Daten",
     "done": "Erledigt"
   },
+  "calendar": {
+    "addToCalendar": "Zum Kalender hinzufügen",
+    "downloadICS": ".ics herunterladen",
+    "googleCalendar": "Google Kalender",
+    "appleCalendar": "Apple Kalender",
+    "outlookCalendar": "Outlook Kalender",
+    "eventAdded": "Termin zum Kalender hinzugefügt"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Keine neuen Benachrichtigungen",
+    "newMessage": "Neue Nachricht von {name}",
+    "milestoneComplete": "Meilenstein \"{title}\" abgeschlossen!",
+    "approvalNeeded": "Deine Freigabe wird benötigt",
+    "fileUploaded": "Neue Datei hochgeladen: {name}",
+    "markAllRead": "Alle als gelesen markieren"
+  },
+  "celebration": {
+    "milestoneComplete": "🎉 Meilenstein erreicht!",
+    "projectLaunched": "🚀 Dein Projekt ist live!",
+    "allApproved": "✅ Alle Freigaben erteilt!"
+  },
   "footer": {
-    "questions": "Bei Fragen:",
+    "questions": "Fragen?",
     "copyright": "Alle Rechte vorbehalten."
   },
   "status": {
@@ -145,8 +193,8 @@
     "redirecting": "Weiterleitung..."
   },
   "error": {
-    "loadingError": "Fehler beim Laden",
-    "somethingWentWrong": "Etwas ist schief gelaufen",
+    "loadingError": "Ladefehler",
+    "somethingWentWrong": "Etwas ist schiefgelaufen",
     "couldNotLoad": "Daten konnten nicht geladen werden",
     "dashboardLoading": "Dashboard wird geladen..."
   }
