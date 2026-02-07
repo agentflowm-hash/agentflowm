@@ -85,17 +85,26 @@ export default function PortalLoginPage() {
             <p className="text-white/40">{tCommon("portal")}</p>
           </div>
 
-          {/* Login Card */}
-          <div className="portal-card">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-[#FC682C]/10 border border-[#FC682C]/20 flex items-center justify-center">
-                <KeyIcon className="w-5 h-5 text-[#FC682C]" />
+          {/* Login Card - Animated Border */}
+          <div className="relative group">
+            {/* Animated gradient border */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FC682C] via-purple-500 to-[#FC682C] rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity animate-pulse" />
+            
+            <div className="relative portal-card">
+              {/* Version Badge */}
+              <div className="absolute -top-3 -right-3 px-2 py-1 bg-gradient-to-r from-[#FC682C] to-purple-500 rounded-full text-[10px] font-bold text-white shadow-lg">
+                v2.0 ✨
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
-                <p className="text-sm text-white/40">{t("subtitle")}</p>
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-[#FC682C]/10 border border-[#FC682C]/20 flex items-center justify-center">
+                  <KeyIcon className="w-5 h-5 text-[#FC682C]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">{t("title")}</h2>
+                  <p className="text-sm text-white/40">{t("subtitle")}</p>
+                </div>
               </div>
-            </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
@@ -150,6 +159,7 @@ export default function PortalLoginPage() {
               <p className="text-center text-xs text-white/30">
                 {t("codeInfo")}
               </p>
+            </div>
             </div>
           </div>
 

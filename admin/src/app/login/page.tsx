@@ -76,17 +76,23 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+          {/* Version Badge */}
+          <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-[#FC682C] to-purple-500 rounded-full text-[10px] font-bold text-white shadow-lg animate-pulse">
+            v2.0 UPGRADE ✨
+          </div>
           <img
             src="/logo-dark.png"
             alt="AgentFlow"
-            className="h-12 w-auto mx-auto mb-4"
+            className="h-12 w-auto mx-auto mb-4 mt-4"
           />
           <p className="text-white/40 text-sm">{t.title}</p>
         </div>
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Login Form - with glow border */}
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#FC682C] via-purple-500 to-[#FC682C] rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity" />
+        <form onSubmit={handleSubmit} className="relative space-y-4 p-6 bg-[#0a0a0a] rounded-xl border border-white/10">
           <div>
             <label
               htmlFor="password"
@@ -141,6 +147,7 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+        </div>
 
         {/* Back link */}
         <p className="text-center mt-6">
