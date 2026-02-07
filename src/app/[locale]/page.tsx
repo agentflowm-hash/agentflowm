@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  HeroSection,
+  HeroSectionV2,
   ProblemSection,
   AuswirkungSection,
   ZielgruppeSection,
@@ -18,7 +18,7 @@ import { ParallaxBackground } from "@/components/ui/ParallaxBackground";
 export default function Home() {
   return (
     <div className="bg-[#030308] overflow-hidden">
-      <HeroSection />
+      <HeroSectionV2 />
       <ParallaxBackground className="relative">
         <ProblemSection />
         <AuswirkungSection />

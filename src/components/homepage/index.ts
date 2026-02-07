@@ -1,4 +1,5 @@
 export { HeroSection } from './HeroSection';
+export { HeroSectionV2 } from './HeroSectionV2';
 export { ProblemSection } from './ProblemSection';
 export { AuswirkungSection } from './AuswirkungSection';
 export { ZielgruppeSection } from './ZielgruppeSection';
