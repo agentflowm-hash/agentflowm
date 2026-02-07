@@ -37,6 +37,17 @@ import {
   UserCircleIcon as UserCircleSolid,
 } from "@heroicons/react/24/solid";
 
+// Next-Level Components
+import {
+  LanguageSwitcher,
+  VoiceRecorder,
+  Confetti,
+  AnimatedProgress,
+  CalendarExport,
+  FilePreview,
+  useToast,
+} from "@/components";
+
 type Tab = "overview" | "messages" | "files" | "approvals" | "preview";
 
 interface ProjectData {
@@ -102,7 +113,11 @@ export default function Dashboard() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showQuickStart, setShowQuickStart] = useState(true);
+  // Next-Level state
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [previewFile, setPreviewFile] = useState<number | null>(null);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const t = useTranslations();
   const tNav = useTranslations("navigation");
@@ -327,6 +342,9 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#09090b]">
+      {/* Confetti Celebration */}
+      <Confetti trigger={showConfetti} onComplete={() => setShowConfetti(false)} />
+
       {/* Header */}
       <header className="border-b border-white/[0.06] bg-[#0f0f12]/80 backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
@@ -339,6 +357,9 @@ export default function Dashboard() {
               />
             </div>
             <div className="flex items-center gap-3 sm:gap-4">
+              {/* Language Switcher (only on .com) */}
+              <LanguageSwitcher />
+
               {/* Notifications */}
               <button className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all">
                 <BellIcon className="w-5 h-5" />

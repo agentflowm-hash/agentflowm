@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales, isRtl, type Locale } from "@/i18n/config";
+import Providers from "@/components/Providers";
 import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -52,7 +53,7 @@ export default async function LocaleLayout({
     <html lang={locale} dir={isRtl(locale as Locale) ? "rtl" : "ltr"}>
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>
     </html>
