@@ -2584,6 +2584,7 @@
       },
       "compare": {
         "title": "مقارنة البوتات",
+        "button": "مقارنة",
         "rating": "التقييم",
         "features": "المميزات"
       },
@@ -2599,6 +2600,9 @@
       "categoryLabels": {
         "hot": "ساخن",
         "bots": "بوتات"
+      },
+      "types": {
+        "month": "شهر"
       },
       "floatingCta": {
         "question": "أسئلة حول البوتات؟",

@@ -2407,6 +2407,7 @@
       },
       "compare": {
         "title": "Bots vergleichen",
+        "button": "Vergleichen",
         "rating": "Bewertung",
         "features": "Features"
       },
@@ -2422,6 +2423,9 @@
       "categoryLabels": {
         "hot": "HOT",
         "bots": "Bots"
+      },
+      "types": {
+        "month": "Monat"
       },
       "floatingCta": {
         "question": "Fragen zu den Bots?",
