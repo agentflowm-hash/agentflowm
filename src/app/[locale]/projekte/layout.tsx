@@ -1,17 +1,40 @@
-import { Metadata } from 'next';
-import { pageSEO, generatePageMetadata } from '@/lib/seo';
+import { Metadata } from "next";
+import { projectsSEO, getCanonicalUrl, getOgLocale, SupportedLocale } from "@/lib/seo-config";
 
-type Props = {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ locale: string }>;
-  children: React.ReactNode;
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+}): Promise<Metadata> {
   const { locale } = await params;
-  const seo = pageSEO.projekte[locale] || pageSEO.projekte.de;
-  return generatePageMetadata({ ...seo, path: '/projekte', locale });
+  const seo = projectsSEO[locale as SupportedLocale] || projectsSEO.en;
+  const canonicalUrl = getCanonicalUrl(locale, "/projekte");
+  
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        de: "https://agentflowm.de/de/projekte",
+        en: "https://agentflowm.com/en/projects",
+        ar: "https://agentflowm.com/ar/projects",
+      },
+    },
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      url: canonicalUrl,
+      siteName: "AgentFlowMarketing",
+      locale: getOgLocale(locale),
+      type: "website",
+      images: [{ url: "/brand/banner-dark-1024x576.png", width: 1200, height: 630, alt: seo.title }],
+    },
+    twitter: { card: "summary_large_image", title: seo.title, description: seo.description },
+  };
 }
 
-export default function Layout({ children }: Props) {
-  return children;
+export default function ProjectsLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

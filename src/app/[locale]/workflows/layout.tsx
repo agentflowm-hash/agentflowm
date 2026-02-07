@@ -1,9 +1,7 @@
 import { Metadata } from "next";
-import { getMessages } from "next-intl/server";
+import { workflowsSEO, getCanonicalUrl, getOgLocale, SupportedLocale } from "@/lib/seo-config";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://agentflowm.de";
-
-// SEO-optimized metadata for workflows page
+// Extended SEO content for workflows page
 const seoContent = {
   de: {
     title: "169+ Premium Automation Bots & n8n Workflows kaufen | AgentFlowMarketing",
