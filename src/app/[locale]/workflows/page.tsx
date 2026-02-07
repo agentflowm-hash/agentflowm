@@ -1920,10 +1920,10 @@ function HeroSection() {
               className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight"
             >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FC682C] via-[#FF8C5A] to-[#FFA07A]">
-                {totalBots}+ Premium Bots
+                {t("hero.headline1", { totalBots })}
               </span>
               <br />
-              <span className="text-white">für echte Automatisierung</span>
+              <span className="text-white">{t("hero.headline2")}</span>
             </motion.h1>
 
             {/* Subheadline */}
@@ -1933,7 +1933,7 @@ function HeroSection() {
               transition={{ delay: 0.2 }}
               className="text-lg text-white/60 max-w-xl mx-auto lg:mx-0 mb-8"
             >
-              Sofort einsetzbare Bots zum Mieten oder Kaufen. Basierend auf {stats.totalWorkflows} echten n8n-Workflows.
+              {t("hero.subheadline", { workflows: stats.totalWorkflows })}
             </motion.p>
 
             {/* Stats Grid */}
@@ -1944,10 +1944,10 @@ function HeroSection() {
               className="grid grid-cols-4 gap-3 mb-8 max-w-lg mx-auto lg:mx-0"
             >
               {[
-                { value: `${totalBots}+`, label: "Bots", icon: "🤖" },
-                { value: stats.totalCategories, label: "Kategorien", icon: "📁" },
-                { value: stats.totalIntegrations, label: "Integrationen", icon: "🔗" },
-                { value: stats.totalWorkflows, label: "Workflows", icon: "⚡" },
+                { value: `${totalBots}+`, label: t("hero.stats.bots"), icon: "🤖" },
+                { value: stats.totalCategories, label: t("hero.stats.categories"), icon: "📁" },
+                { value: stats.totalIntegrations, label: t("hero.stats.integrations"), icon: "🔗" },
+                { value: stats.totalWorkflows, label: t("hero.stats.workflows"), icon: "⚡" },
               ].map((stat, i) => (
                 <GlassCard key={i} className="text-center p-3">
                   <span className="text-xl mb-1 block">{stat.icon}</span>
@@ -1968,7 +1968,7 @@ function HeroSection() {
                 href="#bots"
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white font-bold text-lg shadow-2xl shadow-[#FC682C]/30 hover:shadow-[#FC682C]/50 transition-shadow flex items-center justify-center gap-2 group"
               >
-                Alle {totalBots} Bots entdecken
+                {t("hero.cta.discover", { totalBots })}
                 <motion.svg
                   className="w-5 h-5"
                   fill="none"
@@ -1985,7 +1985,7 @@ function HeroSection() {
                 href="/termin"
                 className="px-8 py-4 rounded-xl bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
               >
-                Kostenlose Beratung
+                {t("hero.cta.consultation")}
               </Link>
             </motion.div>
 
@@ -1997,12 +1997,12 @@ function HeroSection() {
               className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2"
             >
               {[
-                { icon: "✓", text: "DSGVO-konform" },
-                { icon: "✓", text: "Deutsche Server" },
-                { icon: "✓", text: "Sofort aktivierbar" },
-                { icon: "✓", text: "Support inklusive" },
-              ].map((item) => (
-                <span key={item.text} className="flex items-center gap-2 text-sm text-white/50">
+                { icon: "✓", text: t("hero.trust.gdpr") },
+                { icon: "✓", text: t("hero.trust.servers") },
+                { icon: "✓", text: t("hero.trust.instant") },
+                { icon: "✓", text: t("hero.trust.support") },
+              ].map((item, i) => (
+                <span key={i} className="flex items-center gap-2 text-sm text-white/50">
                   <span className="text-green-500">{item.icon}</span>
                   {item.text}
                 </span>
@@ -2262,12 +2262,12 @@ function FloatingCTA() {
             <span className="text-xl">💬</span>
           </div>
           <div>
-            <p className="text-sm text-white font-medium mb-2">Fragen zu den Bots?</p>
+            <p className="text-sm text-white font-medium mb-2">{t("floatingCta.question")}</p>
             <Link
               href="/termin"
               className="text-xs text-[#FC682C] hover:underline flex items-center gap-1"
             >
-              Kostenlose Beratung buchen
+              {t("floatingCta.book")}
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -2417,7 +2417,7 @@ export default function WorkflowsPage() {
             <div>
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-white">
-                  {showFavorites ? `Deine Favoriten (${filteredBots.length})` : `Suchergebnisse (${filteredBots.length})`}
+                  {showFavorites ? t("results.favorites", { count: filteredBots.length }) : t("results.search", { count: filteredBots.length })}
                 </h2>
               </div>
               
@@ -2439,8 +2439,8 @@ export default function WorkflowsPage() {
               ) : (
                 <div className="text-center py-20">
                   <span className="text-6xl mb-4 block">🔍</span>
-                  <h3 className="text-xl font-bold text-white mb-2">Keine Bots gefunden</h3>
-                  <p className="text-white/60">Versuche einen anderen Suchbegriff</p>
+                  <h3 className="text-xl font-bold text-white mb-2">{t("noResults.title")}</h3>
+                  <p className="text-white/60">{t("noResults.desc")}</p>
                 </div>
               )}
             </div>
@@ -2454,23 +2454,23 @@ export default function WorkflowsPage() {
         <div className="container px-4 sm:px-6 relative z-10">
           <GlassCard glow className="p-8 sm:p-12 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Bereit für Automatisierung?
+              {t("cta.headline")}
             </h2>
             <p className="text-lg text-white/60 mb-8 max-w-2xl mx-auto">
-              Lass uns gemeinsam den perfekten Bot für dein Business finden. Kostenlose Beratung, keine Verpflichtungen.
+              {t("cta.subheadline")}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
                 href="/termin"
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#FC682C] to-[#FF8C5A] text-white font-bold text-lg shadow-2xl shadow-[#FC682C]/30 hover:shadow-[#FC682C]/50 transition-shadow"
               >
-                Kostenlose Beratung
+                {t("cta.consultation")}
               </Link>
               <Link
                 href="/kontakt"
                 className="px-8 py-4 rounded-xl bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-all"
               >
-                Kontakt aufnehmen
+                {t("cta.contact")}
               </Link>
             </div>
           </GlassCard>

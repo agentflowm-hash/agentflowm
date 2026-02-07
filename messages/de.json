@@ -2423,6 +2423,24 @@
         "hot": "HOT",
         "bots": "Bots"
       },
+      "floatingCta": {
+        "question": "Fragen zu den Bots?",
+        "book": "Kostenlose Beratung buchen"
+      },
+      "results": {
+        "favorites": "Deine Favoriten ({count})",
+        "search": "Suchergebnisse ({count})"
+      },
+      "noResults": {
+        "title": "Keine Bots gefunden",
+        "desc": "Versuche einen anderen Suchbegriff"
+      },
+      "cta": {
+        "headline": "Bereit für Automatisierung?",
+        "subheadline": "Lass uns gemeinsam den perfekten Bot für dein Business finden. Kostenlose Beratung, keine Verpflichtungen.",
+        "consultation": "Kostenlose Beratung",
+        "contact": "Kontakt aufnehmen"
+      },
       "categories": {
         "ai-power": {
           "name": "KI & Intelligenz",

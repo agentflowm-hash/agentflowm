@@ -2423,6 +2423,24 @@
         "hot": "HOT",
         "bots": "Bots"
       },
+      "floatingCta": {
+        "question": "Questions about bots?",
+        "book": "Book free consultation"
+      },
+      "results": {
+        "favorites": "Your Favorites ({count})",
+        "search": "Search Results ({count})"
+      },
+      "noResults": {
+        "title": "No bots found",
+        "desc": "Try a different search term"
+      },
+      "cta": {
+        "headline": "Ready for automation?",
+        "subheadline": "Let's find the perfect bot for your business together. Free consultation, no obligations.",
+        "consultation": "Free Consultation",
+        "contact": "Get in Touch"
+      },
       "categories": {
         "ai-power": {
           "name": "AI & Intelligence",

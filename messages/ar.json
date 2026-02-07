@@ -2560,6 +2560,64 @@
         "onRequest": "عند الطلب",
         "inquire": "استفسر"
       },
+      "card": {
+        "goodFor": "مناسب لـ:",
+        "integrations": "التكاملات:",
+        "buyOnce": "شراء لمرة واحدة:",
+        "rent": "إيجار",
+        "buy": "شراء",
+        "price": "السعر"
+      },
+      "badges": {
+        "popular": "شائع",
+        "new": "جديد",
+        "trending": "رائج",
+        "limited": "محدود"
+      },
+      "filters": {
+        "all": "الكل",
+        "favorites": "المفضلة"
+      },
+      "search": {
+        "placeholder": "ابحث عن بوت أو تكامل أو حالة استخدام...",
+        "results": "نتائج لـ"
+      },
+      "compare": {
+        "title": "مقارنة البوتات",
+        "rating": "التقييم",
+        "features": "المميزات"
+      },
+      "checkout": {
+        "rental": "إيجار",
+        "purchase": "شراء",
+        "price": "السعر",
+        "oneTime": "لمرة واحدة",
+        "cancelAnytime": "إلغاء في أي وقت - بدون تكاليف مخفية",
+        "proceed": "المتابعة للدفع",
+        "cancel": "إلغاء"
+      },
+      "categoryLabels": {
+        "hot": "ساخن",
+        "bots": "بوتات"
+      },
+      "floatingCta": {
+        "question": "أسئلة حول البوتات؟",
+        "book": "احجز استشارة مجانية"
+      },
+      "results": {
+        "favorites": "المفضلة لديك ({count})",
+        "search": "نتائج البحث ({count})"
+      },
+      "noResults": {
+        "title": "لم يتم العثور على بوتات",
+        "desc": "جرب مصطلح بحث مختلف"
+      },
+      "cta": {
+        "headline": "مستعد للأتمتة؟",
+        "subheadline": "دعنا نجد البوت المثالي لعملك معاً. استشارة مجانية، بدون التزامات.",
+        "consultation": "استشارة مجانية",
+        "contact": "تواصل معنا"
+      },
       "categories": {
         "ai-power": {
           "name": "الذكاء الاصطناعي",
