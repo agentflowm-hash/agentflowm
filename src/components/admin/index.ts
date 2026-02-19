@@ -3,3 +3,8 @@ export { RevenueWidget } from "./RevenueWidget";
 export { ChatAnalyticsWidget } from "./ChatAnalyticsWidget";
 export { QuickNotifyWidget } from "./QuickNotifyWidget";
 export { InvoicesWidget } from "./InvoicesWidget";
+export { LiveActivityFeed } from "./LiveActivityFeed";
+export { AnimatedStatsCards } from "./AnimatedStatsCards";
+export { GoalsWidget } from "./GoalsWidget";
+export { CommandPalette } from "./CommandPalette";
+export { AIInsightsWidget } from "./AIInsightsWidget";
