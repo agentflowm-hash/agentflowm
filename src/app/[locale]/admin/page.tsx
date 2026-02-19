@@ -15,7 +15,9 @@ import {
   AnimatedStatsCards,
   GoalsWidget,
   CommandPalette,
-  AIInsightsWidget
+  AIInsightsWidget,
+  GoogleAnalyticsWidget,
+  WebsiteAnalyticsWidget
 } from "@/components/admin";
 
 // ═══════════════════════════════════════════════════════════════
@@ -146,6 +148,17 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <LiveActivityFeed />
           <AIInsightsWidget />
+        </div>
+
+        {/* Analytics Section */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="text-2xl">📊</span> Analytics & Traffic
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <GoogleAnalyticsWidget />
+            <WebsiteAnalyticsWidget />
+          </div>
         </div>
 
         {/* Business Widgets */}

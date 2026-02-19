@@ -8,3 +8,5 @@ export { AnimatedStatsCards } from "./AnimatedStatsCards";
 export { GoalsWidget } from "./GoalsWidget";
 export { CommandPalette } from "./CommandPalette";
 export { AIInsightsWidget } from "./AIInsightsWidget";
+export { GoogleAnalyticsWidget } from "./GoogleAnalyticsWidget";
+export { WebsiteAnalyticsWidget } from "./WebsiteAnalyticsWidget";
