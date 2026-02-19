@@ -165,7 +165,7 @@ export function ModernProcess() {
         {/* CTA */}
         <div className="text-center mt-16">
           <a
-            href="https://calendly.com/agentflowm/30min"
+            href="https://calendly.com/agentflowm/15min"
             target="_blank"
             rel="noopener"
             className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 text-white rounded-full transition-colors border border-white/10"

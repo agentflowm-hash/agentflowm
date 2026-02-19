@@ -398,7 +398,7 @@ export default function TerminPage() {
                   <h3 className="text-xl font-bold mb-2">{t("calendar.title")}</h3>
                   <p className="text-white/50 text-sm mb-6">{t("calendar.subtitle")}</p>
                   <a
-                    href="https://calendly.com/agentflowm/30min"
+                    href="https://calendly.com/agentflowm/15min"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex w-full justify-center py-3.5 px-6 rounded-xl bg-[#FC682C] hover:bg-[#e55a1f] text-white font-semibold transition-all shadow-lg shadow-[#FC682C]/20"

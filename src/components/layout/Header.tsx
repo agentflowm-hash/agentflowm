@@ -217,7 +217,7 @@ export function Header({ locale = "en" }: HeaderProps) {
               <Button
                 variant="primary"
                 size="sm"
-                href="https://calendly.com/agentflowm/30min"
+                href="https://calendly.com/agentflowm/15min"
                 external
               >
                 {t("bookAppointment")}
@@ -306,7 +306,7 @@ export function Header({ locale = "en" }: HeaderProps) {
                 <Button variant="outline" href="/website-check" className="w-full">
                   Website Check
                 </Button>
-                <Button variant="primary" href="https://calendly.com/agentflowm/30min" external className="w-full">
+                <Button variant="primary" href="https://calendly.com/agentflowm/15min" external className="w-full">
                   {t("bookAppointment")}
                 </Button>
               </div>

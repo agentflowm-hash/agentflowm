@@ -1000,7 +1000,7 @@ export default function WebsiteCheckPage() {
                   </Button>
                   <Button
                     variant="primary"
-                    href="https://calendly.com/agentflowm/30min"
+                    href="https://calendly.com/agentflowm/15min"
                     external
                     className="flex-1"
                   >

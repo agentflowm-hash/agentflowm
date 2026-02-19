@@ -59,7 +59,7 @@ export function ModernCTA() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="https://calendly.com/agentflowm/30min"
+              href="https://calendly.com/agentflowm/15min"
               target="_blank"
               rel="noopener"
               className="group px-6 py-3 bg-[#FC682C] text-white text-sm font-semibold rounded-full hover:bg-[#e55a1f] hover:scale-105 transition-all"

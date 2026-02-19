@@ -251,7 +251,7 @@ export function PremiumServices() {
             Freigabe.
           </p>
           <a
-            href="https://calendly.com/agentflowm/30min"
+            href="https://calendly.com/agentflowm/15min"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white/5 border border-white/10 rounded-full text-white font-medium hover:bg-white/10 hover:border-white/20 transition-all duration-300"

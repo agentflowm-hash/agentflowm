@@ -140,7 +140,7 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
         chatId,
         `📅 *Termin buchen*\n\n` +
           `Buche ein kostenloses Beratungsgespräch:\n` +
-          `👉 https://calendly.com/agentflowm/30min\n\n` +
+          `👉 https://calendly.com/agentflowm/15min\n\n` +
           `Wir besprechen deine Anforderungen und zeigen dir, wie Automatisierung dein Business voranbringt.`,
       );
       break;
@@ -183,7 +183,7 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
         chatId,
         `📞 *Kontakt*\n\n` +
           `*E-Mail:* kontakt@agentflowm.com\n` +
-          `*Termin:* https://calendly.com/agentflowm/30min\n` +
+          `*Termin:* https://calendly.com/agentflowm/15min\n` +
           `*Website:* https://agentflowm.de\n\n` +
           `Oder schreib einfach hier im Chat!`,
       );
@@ -486,7 +486,7 @@ async function processMessage(message: any): Promise<void> {
       chatId,
       `📅 *Termin buchen*\n\n` +
         `Buche ein kostenloses Beratungsgespräch:\n` +
-        `👉 https://calendly.com/agentflowm/30min\n\n` +
+        `👉 https://calendly.com/agentflowm/15min\n\n` +
         `Wir besprechen deine Anforderungen und zeigen dir, wie Automatisierung dein Business voranbringt.`,
     );
     return;
@@ -498,7 +498,7 @@ async function processMessage(message: any): Promise<void> {
       chatId,
       `📞 *Kontakt*\n\n` +
         `*E-Mail:* kontakt@agentflowm.com\n` +
-        `*Termin:* https://calendly.com/agentflowm/30min\n` +
+        `*Termin:* https://calendly.com/agentflowm/15min\n` +
         `*Website:* https://agentflowm.de\n\n` +
         `Oder schreib einfach hier im Chat!`,
     );
