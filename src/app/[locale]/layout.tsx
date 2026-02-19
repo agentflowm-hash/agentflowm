@@ -12,6 +12,7 @@ import {
   WebsiteJsonLd,
 } from "@/components/seo";
 import { GoogleAnalytics } from "@/components/analytics";
+import { ChatWidget } from "@/components/ChatWidget";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const notoArabic = Noto_Sans_Arabic({
@@ -165,6 +166,9 @@ export default async function LocaleLayout({
           </a>
 
           <LayoutWrapper locale={locale as Locale}>{children}</LayoutWrapper>
+          
+          {/* AI Chat Widget */}
+          <ChatWidget />
         </NextIntlClientProvider>
       </body>
     </html>
