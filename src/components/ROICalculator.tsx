@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import { Link } from "@/i18n/routing";
 
 interface ROIResult {
   hoursPerMonth: number;
@@ -191,7 +192,7 @@ export function ROICalculator() {
 
           {/* CTA */}
           <div className="mt-8 text-center">
-            <a
+            <Link
               href="/pakete"
               className="inline-flex items-center gap-2 px-8 py-4 bg-[#FC682C] hover:bg-[#FC682C]/90 text-white font-semibold rounded-xl transition-all hover:scale-105"
             >
@@ -199,7 +200,7 @@ export function ROICalculator() {
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
