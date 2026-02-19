@@ -61,6 +61,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const metadata = session.metadata || {};
   const leadId = metadata.lead_id;
   const packageName = metadata.package_name;
+  const packageId = metadata.package_id;
   const customerName = metadata.customer_name;
 
   console.log("Checkout completed:", {
@@ -95,6 +96,48 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     payment_status: "paid",
     created_at: new Date().toISOString(),
   });
+
+  // Generate invoice
+  try {
+    const { PACKAGES } = await import("@/lib/stripe");
+    const pkg = packageId && PACKAGES[packageId as keyof typeof PACKAGES];
+    
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://agentflowm.com";
+    const invoiceResponse = await fetch(`${baseUrl}/api/invoice/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customer: {
+          name: customerName || session.customer_details?.name,
+          company: metadata.customer_company,
+          address: session.customer_details?.address?.line1 || "Wird nachgereicht",
+          zip: session.customer_details?.address?.postal_code || "",
+          city: session.customer_details?.address?.city || "",
+          country: session.customer_details?.address?.country || "Deutschland",
+          email: session.customer_email,
+        },
+        items: [
+          {
+            description: `AgentFlow ${packageName}`,
+            details: pkg?.features || [],
+            quantity: 1,
+            unitPrice: (session.amount_total! / 100) / 1.19, // Netto
+          },
+        ],
+        vatRate: 19,
+        paymentStatus: "paid",
+        paidDate: new Date().toISOString(),
+        paymentMethod: session.payment_method_types?.[0] || "card",
+        stripeSessionId: session.id,
+        notes: `Stripe Session: ${session.id}`,
+      }),
+    });
+    
+    const invoiceData = await invoiceResponse.json();
+    console.log("Invoice generated:", invoiceData.invoiceNumber);
+  } catch (invoiceError) {
+    console.error("Invoice generation error:", invoiceError);
+  }
 
   // Send success notification
   try {
