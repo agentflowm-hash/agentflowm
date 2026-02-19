@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout";
 import { type Locale } from "@/i18n/config";
+import { LeadsWidget, RevenueWidget, ChatAnalyticsWidget, QuickNotifyWidget, InvoicesWidget } from "@/components/admin";
 
 // ═══════════════════════════════════════════════════════════════
 //     🔥 ADMIN DASHBOARD - Powerful Tools for Agency Management
@@ -126,6 +127,22 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Quick Stats Row */}
         <QuickStatsRow />
+
+        {/* Business Widgets - NEW */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="text-2xl">📈</span> Business Dashboard
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <LeadsWidget />
+            <RevenueWidget />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            <ChatAnalyticsWidget />
+            <QuickNotifyWidget />
+            <InvoicesWidget />
+          </div>
+        </div>
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
