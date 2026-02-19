@@ -18,3 +18,11 @@ export { default as AIInsights } from "./AIInsights";
 export { default as StatCard } from "./StatCard";
 export { default as ThemeToggle } from "./ThemeToggle";
 export { default as SearchSpotlight } from "./SearchSpotlight";
+
+// NEW: Analytics Widgets
+export { GoogleAnalyticsWidget } from "./GoogleAnalyticsWidget";
+export { WebsiteAnalyticsWidget } from "./WebsiteAnalyticsWidget";
+export { LiveActivityFeed } from "./LiveActivityFeed";
+export { AnimatedStatsCards } from "./AnimatedStatsCards";
+export { GoalsWidget } from "./GoalsWidget";
+export { AIInsightsWidget } from "./AIInsightsWidget";

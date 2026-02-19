@@ -60,7 +60,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 // Next-Level Components
-import { Confetti, KeyboardShortcuts, useToast } from "@/components";
+import { Confetti, KeyboardShortcuts, useToast, GoogleAnalyticsWidget, WebsiteAnalyticsWidget, LiveActivityFeed, AnimatedStatsCards, GoalsWidget, AIInsightsWidget } from "@/components";
 
 // ═══════════════════════════════════════════════════════════════
 //                    TYPES
@@ -3879,6 +3879,19 @@ function AnalyticsTab({ stats }: { stats: Stats | null }) {
 
   return (
     <div className="space-y-6">
+      {/* NEW: Premium Analytics Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GoogleAnalyticsWidget />
+        <WebsiteAnalyticsWidget />
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LiveActivityFeed />
+        <AIInsightsWidget />
+      </div>
+      
+      <GoalsWidget />
+
       {/* Time Range Selector */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Übersicht & Trends</h2>
