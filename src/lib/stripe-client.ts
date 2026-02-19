@@ -1,6 +1,7 @@
 "use client";
 
-import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import type { Stripe } from "@stripe/stripe-js";
 
 let stripePromise: Promise<Stripe | null>;
 
@@ -20,9 +21,10 @@ export async function redirectToCheckout(sessionId: string) {
     throw new Error("Stripe not loaded");
   }
   
-  const { error } = await stripe.redirectToCheckout({ sessionId });
-  if (error) {
-    throw error;
+  // Use the new checkout redirect method
+  const result = await stripe.redirectToCheckout({ sessionId });
+  if (result.error) {
+    throw result.error;
   }
 }
 

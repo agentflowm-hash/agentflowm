@@ -100,7 +100,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   // Generate invoice
   try {
     const { PACKAGES } = await import("@/lib/stripe");
-    const pkg = packageId && PACKAGES[packageId as keyof typeof PACKAGES];
+    const pkg = packageId ? PACKAGES[packageId as keyof typeof PACKAGES] : null;
+    const features = pkg && typeof pkg === 'object' && 'features' in pkg ? pkg.features : [];
     
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://agentflowm.com";
     const invoiceResponse = await fetch(`${baseUrl}/api/invoice/generate`, {
@@ -119,7 +120,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         items: [
           {
             description: `AgentFlow ${packageName}`,
-            details: pkg?.features || [],
+            details: features as string[],
             quantity: 1,
             unitPrice: (session.amount_total! / 100) / 1.19, // Netto
           },

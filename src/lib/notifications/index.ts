@@ -10,7 +10,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://agentflow.de';
 // ═══════════════════════════════════════════════════════════════
 
 interface TelegramMessage {
-  type: 'lead' | 'referral' | 'subscriber' | 'website-check';
+  type: 'lead' | 'referral' | 'subscriber' | 'website-check' | 'checkout_started' | 'payment_success' | 'payment_failed';
   data: Record<string, any>;
 }
 
