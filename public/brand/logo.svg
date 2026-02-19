@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 50" fill="none">
+  <!-- Agent Icon -->
+  <g>
+    <!-- Head outline -->
+    <path d="M8 42V20C8 10.059 16.059 2 26 2H26C35.941 2 44 10.059 44 20V42" stroke="white" stroke-width="4" stroke-linecap="round"/>
+    <!-- Left eye -->
+    <circle cx="19" cy="28" r="6" fill="#FC682C"/>
+    <!-- Right eye -->
+    <circle cx="33" cy="28" r="6" fill="#FC682C"/>
+  </g>
+  
+  <!-- Text: AgentFlow -->
+  <text x="56" y="35" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="700" fill="white">
+    Agent<tspan fill="#FC682C">Flow</tspan>
+  </text>
+</svg>

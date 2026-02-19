@@ -44,15 +44,10 @@ export function Header({ locale = "en" }: HeaderProps) {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Image
-              src="/brand/logo-primary-dark.png"
-              alt="AgentFlowMarketing"
-              width={212}
-              height={40}
-              className="h-8 md:h-10 w-auto object-contain"
-              priority
-              quality={100}
-              unoptimized
+            <img
+              src="/brand/logo.svg"
+              alt="AgentFlow"
+              className="h-9 md:h-11 w-auto"
             />
           </Link>
 

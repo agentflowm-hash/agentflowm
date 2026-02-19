@@ -44,13 +44,10 @@ export function Footer({ locale = "en" }: FooterProps) {
           {/* Brand */}
           <div className="col-span-2 sm:col-span-2 md:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-block mb-3 sm:mb-4">
-              <Image
-                src="/brand/logo-primary-dark.png"
-                alt="AgentFlowMarketing"
-                width={160}
-                height={40}
-                className="h-7 sm:h-9 w-auto"
-                loading="lazy"
+              <img
+                src="/brand/logo.svg"
+                alt="AgentFlow"
+                className="h-8 sm:h-10 w-auto"
               />
             </Link>
             <p className="text-xs sm:text-sm text-white/50 mb-3 sm:mb-4">
