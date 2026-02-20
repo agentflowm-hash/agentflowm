@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 
 interface GAStats {
@@ -21,19 +21,7 @@ export function GoogleAnalyticsWidget() {
   const [timeframe, setTimeframe] = useState<"today" | "7d" | "30d">("7d");
   const [realTimeUsers, setRealTimeUsers] = useState(0);
 
-  useEffect(() => {
-    fetchStats();
-  }, [timeframe]);
-
-  // Simulate real-time users
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRealTimeUsers((prev) => Math.max(0, prev + Math.floor(Math.random() * 5) - 2));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/analytics/google?timeframe=${timeframe}`);
@@ -69,7 +57,19 @@ export function GoogleAnalyticsWidget() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeframe]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  // Simulate real-time users
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRealTimeUsers((prev) => Math.max(0, prev + Math.floor(Math.random() * 5) - 2));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const StatBox = ({ label, value, subtext, trend }: { label: string; value: string | number; subtext?: string; trend?: number }) => (
     <div className="bg-white/5 rounded-xl p-3">
