@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 interface ROIResult {
   hoursPerMonth: number;
@@ -12,6 +13,7 @@ interface ROIResult {
 }
 
 export function ROICalculator() {
+  const t = useTranslations("roi");
   const [teamSize, setTeamSize] = useState(5);
   const [hoursPerWeek, setHoursPerWeek] = useState(10);
   const [hourlyRate, setHourlyRate] = useState(50);
@@ -39,13 +41,13 @@ export function ROICalculator() {
         {/* Header */}
         <div className="text-center mb-10">
           <span className="inline-block px-4 py-1.5 bg-[#FC682C]/20 text-[#FC682C] rounded-full text-sm font-medium mb-4">
-            💰 ROI Rechner
+            {t("badge")}
           </span>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            Wie viel sparst du mit Automation?
+            {t("title")}
           </h2>
           <p className="text-white/60 max-w-xl mx-auto">
-            Berechne dein Einsparpotenzial durch automatisierte Workflows
+            {t("description")}
           </p>
         </div>
 
@@ -54,8 +56,8 @@ export function ROICalculator() {
           {/* Team Size */}
           <div>
             <div className="flex justify-between mb-2">
-              <label className="text-white/80 font-medium">Team-Größe</label>
-              <span className="text-[#FC682C] font-bold">{teamSize} Personen</span>
+              <label className="text-white/80 font-medium">{t("teamSize")}</label>
+              <span className="text-[#FC682C] font-bold">{teamSize} {t("persons")}</span>
             </div>
             <input
               type="range"
@@ -74,8 +76,8 @@ export function ROICalculator() {
           {/* Hours per Week */}
           <div>
             <div className="flex justify-between mb-2">
-              <label className="text-white/80 font-medium">Manuelle Stunden/Woche</label>
-              <span className="text-[#FC682C] font-bold">{hoursPerWeek}h pro Person</span>
+              <label className="text-white/80 font-medium">{t("hoursPerWeek")}</label>
+              <span className="text-[#FC682C] font-bold">{hoursPerWeek}h {t("perPerson")}</span>
             </div>
             <input
               type="range"
@@ -94,7 +96,7 @@ export function ROICalculator() {
           {/* Hourly Rate */}
           <div>
             <div className="flex justify-between mb-2">
-              <label className="text-white/80 font-medium">Stundensatz</label>
+              <label className="text-white/80 font-medium">{t("hourlyRate")}</label>
               <span className="text-[#FC682C] font-bold">{hourlyRate} €/h</span>
             </div>
             <input
@@ -115,7 +117,7 @@ export function ROICalculator() {
           {/* Automation Efficiency */}
           <div>
             <div className="flex justify-between mb-2">
-              <label className="text-white/80 font-medium">Automatisierungsgrad</label>
+              <label className="text-white/80 font-medium">{t("automationLevel")}</label>
               <span className="text-[#FC682C] font-bold">{automationEfficiency}%</span>
             </div>
             <input
@@ -139,7 +141,7 @@ export function ROICalculator() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {/* Current Cost */}
             <div className="text-center">
-              <p className="text-white/50 text-sm mb-1">Aktuelle Kosten/Monat</p>
+              <p className="text-white/50 text-sm mb-1">{t("currentCost")}</p>
               <motion.p
                 key={result.costPerMonth}
                 initial={{ scale: 1.1, opacity: 0 }}
@@ -152,7 +154,7 @@ export function ROICalculator() {
 
             {/* Hours Saved */}
             <div className="text-center">
-              <p className="text-white/50 text-sm mb-1">Stunden gespart/Monat</p>
+              <p className="text-white/50 text-sm mb-1">{t("hoursSaved")}</p>
               <motion.p
                 key={result.hoursPerMonth}
                 initial={{ scale: 1.1, opacity: 0 }}
@@ -165,7 +167,7 @@ export function ROICalculator() {
 
             {/* Annual Savings */}
             <div className="text-center">
-              <p className="text-white/50 text-sm mb-1">Ersparnis/Jahr</p>
+              <p className="text-white/50 text-sm mb-1">{t("annualSavings")}</p>
               <motion.p
                 key={result.savingsPerYear}
                 initial={{ scale: 1.1, opacity: 0 }}
@@ -178,7 +180,7 @@ export function ROICalculator() {
 
             {/* ROI */}
             <div className="text-center">
-              <p className="text-white/50 text-sm mb-1">ROI im 1. Jahr</p>
+              <p className="text-white/50 text-sm mb-1">{t("roiFirstYear")}</p>
               <motion.p
                 key={result.roi}
                 initial={{ scale: 1.1, opacity: 0 }}
@@ -196,7 +198,7 @@ export function ROICalculator() {
               href="/pakete"
               className="inline-flex items-center gap-2 px-8 py-4 bg-[#FC682C] hover:bg-[#FC682C]/90 text-white font-semibold rounded-xl transition-all hover:scale-105"
             >
-              <span>Jetzt {result.savingsPerYear.toLocaleString("de-DE")} € sparen</span>
+              <span>{t("saveNow", { amount: result.savingsPerYear.toLocaleString("de-DE") + " €" })}</span>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

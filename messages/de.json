@@ -3189,5 +3189,21 @@
     },
     "openPlayground": "API Playground öffnen",
     "freeNoLimits": "100% kostenlos • Keine Rate Limits"
+  },
+  "roi": {
+    "badge": "💰 ROI Rechner",
+    "title": "Wie viel sparst du mit Automation?",
+    "description": "Berechne dein Einsparpotenzial durch automatisierte Workflows",
+    "teamSize": "Team-Größe",
+    "persons": "Personen",
+    "hoursPerWeek": "Manuelle Stunden/Woche",
+    "perPerson": "pro Person",
+    "hourlyRate": "Stundensatz",
+    "automationLevel": "Automatisierungsgrad",
+    "currentCost": "Aktuelle Kosten/Monat",
+    "hoursSaved": "Stunden gespart/Monat",
+    "annualSavings": "Ersparnis/Jahr",
+    "roiFirstYear": "ROI im 1. Jahr",
+    "saveNow": "Jetzt {amount} sparen"
   }
 }

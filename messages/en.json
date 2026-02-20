@@ -3189,5 +3189,21 @@
     },
     "openPlayground": "Open API Playground",
     "freeNoLimits": "100% free • No rate limits"
+  },
+  "roi": {
+    "badge": "💰 ROI Calculator",
+    "title": "How much can you save with automation?",
+    "description": "Calculate your savings potential through automated workflows",
+    "teamSize": "Team Size",
+    "persons": "Persons",
+    "hoursPerWeek": "Manual Hours/Week",
+    "perPerson": "per Person",
+    "hourlyRate": "Hourly Rate",
+    "automationLevel": "Automation Level",
+    "currentCost": "Current Cost/Month",
+    "hoursSaved": "Hours Saved/Month",
+    "annualSavings": "Annual Savings",
+    "roiFirstYear": "ROI in 1st Year",
+    "saveNow": "Save {amount} now"
   }
 }
