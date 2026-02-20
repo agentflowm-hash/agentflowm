@@ -1,9 +1,27 @@
 import Stripe from "stripe";
 
-// Server-side Stripe instance
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-12-15.clover",
-  typescript: true,
+// Lazy-initialized Stripe instance
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error("STRIPE_SECRET_KEY is not configured");
+    }
+    stripeInstance = new Stripe(secretKey, {
+      apiVersion: "2025-12-15.clover",
+      typescript: true,
+    });
+  }
+  return stripeInstance;
+}
+
+// Proxy for lazy initialization
+export const stripe = new Proxy({} as Stripe, {
+  get(_, prop) {
+    return (getStripe() as any)[prop];
+  }
 });
 
 // Package definitions with Stripe Price IDs (to be created in Stripe Dashboard)
@@ -87,8 +105,10 @@ export async function createCheckoutSession({
     throw new Error(`Invalid package: ${packageId}`);
   }
 
+  const stripeClient = getStripe();
+
   // Create checkout session with ad-hoc price
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripeClient.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card", "sepa_debit", "klarna", "giropay"],
     customer_email: customerEmail,
@@ -142,6 +162,9 @@ export function verifyWebhookSignature(
   payload: string | Buffer,
   signature: string
 ) {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-  return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    throw new Error("STRIPE_WEBHOOK_SECRET is not configured");
+  }
+  return getStripe().webhooks.constructEvent(payload, signature, webhookSecret);
 }
