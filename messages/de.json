@@ -3182,6 +3182,11 @@
       "media": "Medien",
       "security": "Sicherheit"
     },
+    "stats": {
+      "apis": "APIs",
+      "countries": "Länder",
+      "dataPoints": "Datenpunkte"
+    },
     "openPlayground": "API Playground öffnen",
     "freeNoLimits": "100% kostenlos • Keine Rate Limits"
   }

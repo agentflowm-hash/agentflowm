@@ -3182,6 +3182,11 @@
       "media": "الوسائط",
       "security": "الأمان"
     },
+    "stats": {
+      "apis": "واجهات برمجة",
+      "countries": "دول",
+      "dataPoints": "نقاط بيانات"
+    },
     "openPlayground": "فتح ساحة API",
     "freeNoLimits": "مجاني 100% • بدون حدود"
   }
