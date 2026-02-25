@@ -2424,10 +2424,10 @@
         "headline2": "للأتمتة الحقيقية",
         "subheadline": "بوتات جاهزة للإيجار أو الشراء. مبنية على 2,061 سير عمل n8n حقيقي. من دعم واتساب بالذكاء الاصطناعي إلى أتمتة CRM الكاملة.",
         "stats": {
-          "bots": "بوتات",
+          "bots": "بوتات مميزة",
           "categories": "فئات",
           "integrations": "تكاملات",
-          "workflows": "سير عمل"
+          "workflows": "سيرورات عمل"
         },
         "cta": {
           "discover": "اكتشف جميع البوتات الـ {totalBots}",
@@ -2436,8 +2436,8 @@
         "trust": {
           "gdpr": "متوافق مع GDPR",
           "servers": "خوادم ألمانية",
-          "instant": "قابل للتفعيل فوراً",
-          "support": "الدعم مشمول"
+          "instant": "جاهز للنشر فوراً",
+          "support": "دعم 24/7"
         },
         "integrationNote": "يتصل بأكثر من 187 أداة"
       },
@@ -2540,12 +2540,7 @@
       },
       "search": {
         "placeholder": "ابحث عن بوت أو تكامل أو حالة استخدام...",
-        "all": "الكل",
-        "noResults": {
-          "title": "لم يتم العثور على بوتات",
-          "desc": "جرب مصطلح بحث مختلف",
-          "reset": "إعادة تعيين الفلتر"
-        }
+        "results": "نتائج لـ"
       },
       "botCard": {
         "popular": "شائع",
@@ -2578,10 +2573,6 @@
         "all": "الكل",
         "favorites": "المفضلة"
       },
-      "search": {
-        "placeholder": "ابحث عن بوت أو تكامل أو حالة استخدام...",
-        "results": "نتائج لـ"
-      },
       "compare": {
         "title": "مقارنة البوتات",
         "button": "مقارنة",
@@ -2589,16 +2580,39 @@
         "features": "المميزات"
       },
       "checkout": {
-        "rental": "إيجار",
+        "rent": "إيجار",
+        "buy": "شراء",
+        "perMonth": "/ شهر",
+        "oneTime": "لمرة واحدة",
+        "form": {
+          "name": "الاسم *",
+          "namePlaceholder": "محمد أحمد",
+          "email": "البريد الإلكتروني *",
+          "emailPlaceholder": "mohamed@company.com",
+          "phone": "الهاتف",
+          "phonePlaceholder": "+966 12 345 6789",
+          "company": "الشركة",
+          "companyPlaceholder": "شركة مثال",
+          "message": "رسالة (اختياري)",
+          "messagePlaceholder": "متطلبات خاصة أو أسئلة...",
+          "integrations": "التكاملات:",
+          "submit": {
+            "rent": "استأجر الآن",
+            "buy": "اشترِ الآن"
+          },
+          "processing": "جارٍ المعالجة...",
+          "note": "بعد الطلب، سنتواصل معك خلال 24 ساعة للإعداد."
+        },
+        "error": "فشل الطلب",
+        "rental": "استئجار",
         "purchase": "شراء",
         "price": "السعر",
-        "oneTime": "لمرة واحدة",
-        "cancelAnytime": "إلغاء في أي وقت - بدون تكاليف مخفية",
-        "proceed": "المتابعة للدفع",
+        "cancelAnytime": "⚡ إلغاء في أي وقت",
+        "proceed": "اطلب الآن",
         "cancel": "إلغاء"
       },
       "categoryLabels": {
-        "hot": "ساخن",
+        "hot": "رائج",
         "bots": "بوتات"
       },
       "types": {
@@ -2712,41 +2726,11 @@
           "description": "WordPress وWebflow وRSS - إدارة المحتوى تلقائياً"
         }
       },
-      "categoryLabels": {
-        "hot": "رائج",
-        "bots": "بوتات"
-      },
       "finalCta": {
         "headline": "مستعد للأتمتة الحقيقية؟",
         "subheadline": "دعنا نناقش في 15 دقيقة أي البوتات ستوفر لك أكثر وقت.",
         "cta": "استشارة أولية مجانية",
         "ctaSecondary": "عرض جميع البوتات الـ {totalBots}"
-      },
-      "checkout": {
-        "rent": "إيجار",
-        "buy": "شراء",
-        "perMonth": "/ شهر",
-        "oneTime": "لمرة واحدة",
-        "form": {
-          "name": "الاسم *",
-          "namePlaceholder": "محمد أحمد",
-          "email": "البريد الإلكتروني *",
-          "emailPlaceholder": "mohamed@company.com",
-          "phone": "الهاتف",
-          "phonePlaceholder": "+966 12 345 6789",
-          "company": "الشركة",
-          "companyPlaceholder": "شركة مثال",
-          "message": "رسالة (اختياري)",
-          "messagePlaceholder": "متطلبات خاصة أو أسئلة...",
-          "integrations": "التكاملات:",
-          "submit": {
-            "rent": "استأجر الآن",
-            "buy": "اشترِ الآن"
-          },
-          "processing": "جارٍ المعالجة...",
-          "note": "بعد الطلب، سنتواصل معك خلال 24 ساعة للإعداد."
-        },
-        "error": "فشل الطلب"
       },
       "erfolg": {
         "headline": "تم الطلب بنجاح!",

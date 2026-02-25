@@ -2247,20 +2247,20 @@
         "headline2": "for real automation",
         "subheadline": "Ready-to-use bots for rent or purchase. Based on 2,061 real n8n workflows. From AI-powered WhatsApp support to complete CRM automation.",
         "stats": {
-          "bots": "Bots",
+          "bots": "Premium Bots",
           "categories": "Categories",
           "integrations": "Integrations",
           "workflows": "Workflows"
         },
         "cta": {
           "discover": "Discover all {totalBots} Bots",
-          "consultation": "Free Consultation"
+          "consultation": "Free consultation"
         },
         "trust": {
           "gdpr": "GDPR compliant",
-          "servers": "German Servers",
-          "instant": "Instantly activatable",
-          "support": "Support included"
+          "servers": "German servers",
+          "instant": "Ready to deploy",
+          "support": "24/7 Support"
         },
         "integrationNote": "Connects with over 187 tools"
       },
@@ -2363,12 +2363,7 @@
       },
       "search": {
         "placeholder": "Search bot, integration or use case...",
-        "all": "All",
-        "noResults": {
-          "title": "No bots found",
-          "desc": "Try a different search term",
-          "reset": "Reset filter"
-        }
+        "results": "results for"
       },
       "botCard": {
         "popular": "Popular",
@@ -2401,10 +2396,6 @@
         "all": "All",
         "favorites": "Favorites"
       },
-      "search": {
-        "placeholder": "Search bot, integration or use case...",
-        "results": "results for"
-      },
       "compare": {
         "title": "Compare Bots",
         "button": "Compare",
@@ -2412,12 +2403,35 @@
         "features": "Features"
       },
       "checkout": {
-        "rental": "Rent",
-        "purchase": "Purchase",
-        "price": "Price",
+        "rent": "Rent",
+        "buy": "Buy",
+        "perMonth": "/ Month",
         "oneTime": "one-time",
-        "cancelAnytime": "Cancel anytime - no hidden costs",
-        "proceed": "Proceed to Payment",
+        "form": {
+          "name": "Name *",
+          "namePlaceholder": "John Doe",
+          "email": "Email *",
+          "emailPlaceholder": "john@company.com",
+          "phone": "Phone",
+          "phonePlaceholder": "+1 123 456789",
+          "company": "Company",
+          "companyPlaceholder": "Company Inc.",
+          "message": "Message (optional)",
+          "messagePlaceholder": "Special requirements or questions...",
+          "integrations": "Integrations:",
+          "submit": {
+            "rent": "Rent Now",
+            "buy": "Buy Now"
+          },
+          "processing": "Processing...",
+          "note": "After ordering, we will contact you within 24h for setup."
+        },
+        "error": "Order failed",
+        "rental": "Rent",
+        "purchase": "Buy",
+        "price": "Price",
+        "cancelAnytime": "⚡ Cancel anytime",
+        "proceed": "Order now",
         "cancel": "Cancel"
       },
       "categoryLabels": {
@@ -2535,41 +2549,11 @@
           "description": "WordPress, Webflow, RSS - automatically manage content"
         }
       },
-      "categoryLabels": {
-        "hot": "HOT",
-        "bots": "Bots"
-      },
       "finalCta": {
         "headline": "Ready for real automation?",
         "subheadline": "Let us discuss in 15 minutes which bots will save you the most time.",
         "cta": "Free Initial Consultation",
         "ctaSecondary": "View all {totalBots} bots"
-      },
-      "checkout": {
-        "rent": "Rent",
-        "buy": "Buy",
-        "perMonth": "/ Month",
-        "oneTime": "one-time",
-        "form": {
-          "name": "Name *",
-          "namePlaceholder": "John Doe",
-          "email": "Email *",
-          "emailPlaceholder": "john@company.com",
-          "phone": "Phone",
-          "phonePlaceholder": "+1 123 456789",
-          "company": "Company",
-          "companyPlaceholder": "Company Inc.",
-          "message": "Message (optional)",
-          "messagePlaceholder": "Special requirements or questions...",
-          "integrations": "Integrations:",
-          "submit": {
-            "rent": "Rent Now",
-            "buy": "Buy Now"
-          },
-          "processing": "Processing...",
-          "note": "After ordering, we will contact you within 24h for setup."
-        },
-        "error": "Order failed"
       },
       "erfolg": {
         "headline": "Order successful!",

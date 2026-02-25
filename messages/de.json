@@ -2247,7 +2247,7 @@
         "headline2": "für echte Automatisierung",
         "subheadline": "Sofort einsetzbare Bots zum Mieten oder Kaufen. Basierend auf 2.061 echten n8n-Workflows. Von KI-gestütztem WhatsApp-Support bis zur kompletten CRM-Automatisierung.",
         "stats": {
-          "bots": "Bots",
+          "bots": "Premium Bots",
           "categories": "Kategorien",
           "integrations": "Integrationen",
           "workflows": "Workflows"
@@ -2257,10 +2257,10 @@
           "consultation": "Kostenlose Beratung"
         },
         "trust": {
-          "gdpr": "DSGVO-konform",
+          "gdpr": "DSGVO konform",
           "servers": "Deutsche Server",
-          "instant": "Sofort aktivierbar",
-          "support": "Support inklusive"
+          "instant": "Sofort einsatzbereit",
+          "support": "24/7 Support"
         },
         "integrationNote": "Verbindet sich mit über 187 Tools"
       },
@@ -2363,12 +2363,7 @@
       },
       "search": {
         "placeholder": "Bot, Integration oder Anwendungsfall suchen...",
-        "all": "Alle",
-        "noResults": {
-          "title": "Keine Bots gefunden",
-          "desc": "Versuche einen anderen Suchbegriff",
-          "reset": "Filter zurücksetzen"
-        }
+        "results": "Ergebnisse für"
       },
       "botCard": {
         "popular": "Beliebt",
@@ -2401,10 +2396,6 @@
         "all": "Alle",
         "favorites": "Favoriten"
       },
-      "search": {
-        "placeholder": "Bot, Integration oder Anwendungsfall suchen...",
-        "results": "Ergebnisse für"
-      },
       "compare": {
         "title": "Bots vergleichen",
         "button": "Vergleichen",
@@ -2412,12 +2403,35 @@
         "features": "Features"
       },
       "checkout": {
+        "rent": "Mieten",
+        "buy": "Kaufen",
+        "perMonth": "/ Monat",
+        "oneTime": "einmalig",
+        "form": {
+          "name": "Name *",
+          "namePlaceholder": "Max Mustermann",
+          "email": "E-Mail *",
+          "emailPlaceholder": "max@firma.de",
+          "phone": "Telefon",
+          "phonePlaceholder": "+49 123 456789",
+          "company": "Unternehmen",
+          "companyPlaceholder": "Firma GmbH",
+          "message": "Nachricht (optional)",
+          "messagePlaceholder": "Besondere Anforderungen oder Fragen...",
+          "integrations": "Integrationen:",
+          "submit": {
+            "rent": "Jetzt mieten",
+            "buy": "Jetzt kaufen"
+          },
+          "processing": "Wird verarbeitet...",
+          "note": "Nach der Bestellung kontaktieren wir dich innerhalb von 24h für das Setup."
+        },
+        "error": "Bestellung fehlgeschlagen",
         "rental": "Mieten",
         "purchase": "Kaufen",
         "price": "Preis",
-        "oneTime": "einmalig",
-        "cancelAnytime": "Jederzeit kündbar - keine versteckten Kosten",
-        "proceed": "Weiter zur Zahlung",
+        "cancelAnytime": "⚡ Jederzeit kündbar",
+        "proceed": "Jetzt bestellen",
         "cancel": "Abbrechen"
       },
       "categoryLabels": {
@@ -2535,41 +2549,11 @@
           "description": "WordPress, Webflow, RSS - Content automatisch verwalten"
         }
       },
-      "categoryLabels": {
-        "hot": "HOT",
-        "bots": "Bots"
-      },
       "finalCta": {
         "headline": "Bereit für echte Automatisierung?",
         "subheadline": "Lass uns in 15 Minuten besprechen, welche Bots dir am meisten Zeit sparen.",
         "cta": "Kostenloses Erstgespräch",
         "ctaSecondary": "Alle {totalBots} Bots ansehen"
-      },
-      "checkout": {
-        "rent": "Mieten",
-        "buy": "Kaufen",
-        "perMonth": "/ Monat",
-        "oneTime": "einmalig",
-        "form": {
-          "name": "Name *",
-          "namePlaceholder": "Max Mustermann",
-          "email": "E-Mail *",
-          "emailPlaceholder": "max@firma.de",
-          "phone": "Telefon",
-          "phonePlaceholder": "+49 123 456789",
-          "company": "Unternehmen",
-          "companyPlaceholder": "Firma GmbH",
-          "message": "Nachricht (optional)",
-          "messagePlaceholder": "Besondere Anforderungen oder Fragen...",
-          "integrations": "Integrationen:",
-          "submit": {
-            "rent": "Jetzt mieten",
-            "buy": "Jetzt kaufen"
-          },
-          "processing": "Wird verarbeitet...",
-          "note": "Nach der Bestellung kontaktieren wir dich innerhalb von 24h für das Setup."
-        },
-        "error": "Bestellung fehlgeschlagen"
       },
       "erfolg": {
         "headline": "Bestellung erfolgreich!",
