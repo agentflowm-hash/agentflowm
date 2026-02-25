@@ -69,6 +69,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
+    if (!['approve', 'request_changes'].includes(action)) {
+      return NextResponse.json({ error: 'Ungültige Aktion' }, { status: 400 });
+    }
+
+    if (feedback && typeof feedback === 'string' && feedback.length > 2000) {
+      return NextResponse.json({ error: 'Feedback zu lang (max. 2000 Zeichen)' }, { status: 400 });
+    }
+
     // Verify approval belongs to client's project
     const { data: approval, error: approvalError } = await db
       .from('portal_approvals')

@@ -94,7 +94,7 @@ export async function getPortalClientByTelegram(telegramUsername: string): Promi
   const { data } = await supabaseAdmin
     .from('portal_clients')
     .select('id, name, email, company, telegram_username, telegram_id, access_code')
-    .or(`telegram_username.ilike.${cleanUsername},email.ilike.telegram:${cleanUsername}`)
+    .ilike('telegram_username', cleanUsername)
     .single();
 
   return data || null;

@@ -80,6 +80,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (message.length > 5000) {
+      return NextResponse.json(
+        { error: "Nachricht zu lang (max. 5000 Zeichen)" },
+        { status: 400 },
+      );
+    }
+
     const project = await getClientProject(client.id);
 
     if (!project) {

@@ -201,7 +201,7 @@ export async function POST(
       .eq("project_id", projectId)
       .order("sort_order", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     const sortOrder = (maxSortData?.sort_order || 0) + 1;
 

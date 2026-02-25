@@ -160,10 +160,10 @@ export async function POST(request: NextRequest) {
 
 function determinePriority(data: { packageInterest?: string; budget?: string; message: string }): string {
   // Höhere Priorität für größere Pakete/Budgets
-  if (data.packageInterest === 'growth' || data.budget === 'ueber-10000') {
+  if (data.packageInterest === 'enterprise' || data.packageInterest === 'webapp' || data.packageInterest === 'mobile' || data.budget === 'ueber-10000') {
     return 'high';
   }
-  if (data.packageInterest === 'business' || data.budget === '5000-10000') {
+  if (data.packageInterest === 'business' || data.packageInterest === 'workflows' || data.budget === '5000-10000') {
     return 'high';
   }
   if (data.message.length > 200) {

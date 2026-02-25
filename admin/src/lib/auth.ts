@@ -21,20 +21,12 @@ export function verifyPassword(inputPassword: string): boolean {
   }
 
   // Timing-safe comparison to prevent timing attacks
-  if (inputPassword.length !== adminPassword.length) {
-    // Use constant-time comparison even for length mismatch
-    crypto.timingSafeEqual(
-      Buffer.from(inputPassword.padEnd(64, '\0')),
-      Buffer.from(adminPassword.padEnd(64, '\0'))
-    );
-    return false;
-  }
-
   try {
-    return crypto.timingSafeEqual(
-      Buffer.from(inputPassword),
-      Buffer.from(adminPassword)
-    );
+    const a = Buffer.from(inputPassword.padEnd(64, '\0').slice(0, 64));
+    const b = Buffer.from(adminPassword.padEnd(64, '\0').slice(0, 64));
+    crypto.timingSafeEqual(a, b); // constant-time even for different lengths
+    if (inputPassword.length !== adminPassword.length) return false;
+    return crypto.timingSafeEqual(Buffer.from(inputPassword), Buffer.from(adminPassword));
   } catch {
     return false;
   }

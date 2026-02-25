@@ -234,7 +234,7 @@ export function contactConfirmationTemplate(data: ContactData): string {
         Haben Sie dringende Fragen? Rufen Sie uns an oder schreiben Sie uns auf WhatsApp:
       </p>
       <p style="${styles.p}">
-        <a href="tel:+4915678123456" style="color: #FC682C;">+49 156 78123456</a>
+        <a href="tel:+491799498247" style="color: #FC682C;">+49 179 9498247</a>
       </p>
     </div>
     <div style="${styles.footer}">

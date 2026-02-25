@@ -49,7 +49,7 @@ export const leadSchema = z.object({
   phone: phoneSchema,
   company: safeString(0, 100).optional().or(z.literal('')),
   message: safeString(10, 2000),
-  packageInterest: z.enum(['one-page', 'business', 'growth', '']).optional(),
+  packageInterest: z.enum(['launch', 'business', 'webapp', 'mobile', 'konfigurator', 'enterprise', 'workflows', 'consulting', '']).optional(),
   budget: z.enum(['unter-2000', '2000-5000', '5000-10000', 'ueber-10000', '']).optional(),
   source: z.enum(['website', 'referral', 'calendly', 'other']).default('website'),
   

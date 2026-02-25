@@ -36,7 +36,7 @@ async function checkRateLimit(ip: string): Promise<boolean> {
     }
     return true;
   } catch {
-    return true; // Bei DB-Fehler durchlassen
+    return false; // Bei DB-Fehler blockieren (fail secure)
   }
 }
 

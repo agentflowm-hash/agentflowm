@@ -149,7 +149,6 @@ export async function POST(request: NextRequest) {
         id: client.id,
         name: client.name,
         username: loginCode.telegram_username,
-        accessCode: client.access_code,
       },
     });
   } catch (error) {

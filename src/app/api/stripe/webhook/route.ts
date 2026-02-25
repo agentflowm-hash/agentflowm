@@ -138,6 +138,17 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     console.log("Invoice generated:", invoiceData.invoiceNumber);
   } catch (invoiceError) {
     console.error("Invoice generation error:", invoiceError);
+    // Notify admin about invoice failure
+    try {
+      const { sendNotification } = await import("@/lib/notifications");
+      await sendNotification({
+        type: "payment_failed",
+        data: {
+          paymentIntentId: session.id,
+          error: `Rechnungserstellung fehlgeschlagen für Session ${session.id} (${customerName || session.customer_email}): ${invoiceError instanceof Error ? invoiceError.message : String(invoiceError)}`,
+        },
+      });
+    } catch {}
   }
 
   // Send success notification
