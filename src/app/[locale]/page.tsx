@@ -14,14 +14,12 @@ import {
   LiveAPISection,
 } from "@/components/homepage";
 import { ParallaxBackground } from "@/components/ui/ParallaxBackground";
-import { AnimatedStats } from "@/components/AnimatedStats";
 import { ROICalculator } from "@/components/ROICalculator";
 
 export default function Home() {
   return (
     <div className="bg-[#030308] overflow-hidden">
       <HeroSection />
-      <AnimatedStats />
       <ParallaxBackground className="relative">
         <ProblemSection />
         <AuswirkungSection />
