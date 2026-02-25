@@ -110,7 +110,7 @@ export async function createCheckoutSession({
   // Create checkout session with ad-hoc price
   const session = await stripeClient.checkout.sessions.create({
     mode: "payment",
-    payment_method_types: ["card", "sepa_debit", "klarna", "giropay"],
+    payment_method_types: ["card", "sepa_debit", "klarna"],
     customer_email: customerEmail,
     line_items: [
       {

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { getClientProject, getProjectFiles, addFile, formatFileSize } from '@/lib/db';
+import { supabaseAdmin } from '@/lib/supabase';
 
-// GET - Get files for client's project
+// GET - Dateien des Kunden-Projekts abrufen
 export async function GET() {
   try {
     const client = await getSession();
@@ -37,7 +38,7 @@ export async function GET() {
   }
 }
 
-// Allowed file extensions (whitelist)
+// Erlaubte Dateitypen
 const ALLOWED_EXTENSIONS = [
   '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
   '.txt', '.rtf', '.csv',
@@ -45,7 +46,6 @@ const ALLOWED_EXTENSIONS = [
   '.zip', '.rar', '.7z'
 ];
 
-// Allowed MIME types
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
   'application/msword',
@@ -59,17 +59,13 @@ const ALLOWED_MIME_TYPES = [
   'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed'
 ];
 
-// Sanitize filename to prevent path traversal and other attacks
 function sanitizeFilename(filename: string): string {
-  // Remove path components
   const name = filename.split(/[\\/]/).pop() || 'file';
-  // Remove null bytes and other dangerous characters
   const sanitized = name
     .replace(/[\x00-\x1f\x80-\x9f]/g, '')
     .replace(/[<>:"|?*]/g, '_')
     .replace(/\.{2,}/g, '.')
     .trim();
-  // Limit length
   const maxLength = 255;
   if (sanitized.length > maxLength) {
     const ext = sanitized.slice(sanitized.lastIndexOf('.'));
@@ -78,7 +74,7 @@ function sanitizeFilename(filename: string): string {
   return sanitized || 'file';
 }
 
-// POST - Upload file (placeholder - actual upload would need storage service)
+// POST - Datei hochladen (Supabase Storage)
 export async function POST(request: NextRequest) {
   try {
     const client = await getSession();
@@ -100,43 +96,56 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Keine Datei hochgeladen' }, { status: 400 });
     }
 
-    // Sanitize filename
     const sanitizedName = sanitizeFilename(file.name);
-
-    // Validate file extension
     const ext = sanitizedName.slice(sanitizedName.lastIndexOf('.')).toLowerCase();
+
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
       return NextResponse.json({
         error: `Dateityp nicht erlaubt. Erlaubt: ${ALLOWED_EXTENSIONS.join(', ')}`
       }, { status: 400 });
     }
 
-    // Validate MIME type
     const mimeType = file.type || 'application/octet-stream';
     if (mimeType !== 'application/octet-stream' && !ALLOWED_MIME_TYPES.includes(mimeType)) {
-      return NextResponse.json({
-        error: 'Dateityp nicht erlaubt'
-      }, { status: 400 });
+      return NextResponse.json({ error: 'Dateityp nicht erlaubt' }, { status: 400 });
     }
 
-    // Check file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       return NextResponse.json({ error: 'Datei zu groß (max. 10MB)' }, { status: 400 });
     }
 
-    // Generate safe filename with timestamp to avoid collisions
+    // Datei-Bytes lesen
+    const fileBuffer = await file.arrayBuffer();
+    const fileBytes = new Uint8Array(fileBuffer);
+
+    // Supabase Storage: Pfad = portal-files/project_{id}/timestamp_name
     const timestamp = Date.now();
-    const safeFilename = `${timestamp}_${sanitizedName}`;
+    const storagePath = `project_${project.id}/${timestamp}_${sanitizedName}`;
 
-    // In production, this would upload to Supabase Storage or similar
-    // For now, just record the file info
-    const fileUrl = `/uploads/${safeFilename}`; // Placeholder URL
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('portal-files')
+      .upload(storagePath, fileBytes, {
+        contentType: mimeType,
+        upsert: false,
+      });
 
-    // Save to database
+    if (uploadError) {
+      console.error('Supabase Storage upload error:', uploadError);
+      return NextResponse.json({ error: 'Upload fehlgeschlagen' }, { status: 500 });
+    }
+
+    // Öffentliche URL generieren
+    const { data: urlData } = supabaseAdmin.storage
+      .from('portal-files')
+      .getPublicUrl(storagePath);
+
+    const fileUrl = urlData.publicUrl;
+
+    // In Datenbank speichern
     const newFile = await addFile(
       project.id,
-      sanitizedName, // Store original (sanitized) name for display
+      sanitizedName,
       fileUrl,
       file.size,
       mimeType,
@@ -163,7 +172,7 @@ export async function POST(request: NextRequest) {
 function getFileType(mimeType: string | null): string {
   if (!mimeType) return 'file';
   if (mimeType.startsWith('image/')) return 'image';
-  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'archive';
+  if (mimeType.includes('zip') || mimeType.includes('archive') || mimeType.includes('rar')) return 'archive';
   if (mimeType.includes('pdf')) return 'pdf';
   if (mimeType.includes('word') || mimeType.includes('document')) return 'doc';
   return 'file';

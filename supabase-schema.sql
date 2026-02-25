@@ -7,6 +7,34 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ═══════════════════════════════════════════════════════════════
+--                    CUSTOMERS (Stripe Käufer)
+-- ═══════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS customers (
+  id SERIAL PRIMARY KEY,
+  name TEXT,
+  email TEXT,
+  phone TEXT,
+  company TEXT,
+  stripe_customer_id TEXT,
+  stripe_session_id TEXT UNIQUE,
+  package TEXT,
+  amount_paid DECIMAL(10,2),
+  payment_status TEXT DEFAULT 'paid',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
+CREATE INDEX IF NOT EXISTS idx_customers_stripe_session ON customers(stripe_session_id);
+CREATE INDEX IF NOT EXISTS idx_customers_created_at ON customers(created_at DESC);
+
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+
+CREATE TRIGGER update_customers_updated_at
+  BEFORE UPDATE ON customers
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ═══════════════════════════════════════════════════════════════
 --                    LEADS / KONTAKTANFRAGEN
 -- ═══════════════════════════════════════════════════════════════
 
