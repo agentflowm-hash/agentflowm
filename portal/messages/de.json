@@ -141,7 +141,12 @@
     "company": "Unternehmen",
     "privateCustomer": "Privatkunde",
     "currentProject": "Aktuelles Projekt",
-    "progress": "Fortschritt"
+    "progress": "Fortschritt",
+    "savedSuccess": "Profil erfolgreich gespeichert",
+    "saveError": "Fehler beim Speichern",
+    "namePlaceholder": "Name",
+    "companyPlaceholder": "Unternehmen (optional)",
+    "phonePlaceholder": "Telefon (optional)"
   },
   "quickStart": {
     "title": "Schnellstart",

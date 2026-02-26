@@ -105,11 +105,37 @@ export default function Dashboard() {
   const [showQuickStart, setShowQuickStart] = useState(true);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [fileCategory, setFileCategory] = useState<"all" | "image" | "doc" | "other">("all");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", company: "", phone: "" });
+  const [savingProfile, setSavingProfile] = useState(false);
   const router = useRouter();
 
   const showToast = (type: "success" | "error", msg: string) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 4000);
+  };
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileForm),
+        credentials: "include",
+      });
+      if (res.ok) {
+        await fetchData();
+        setEditingProfile(false);
+        showToast("success", "Profil erfolgreich gespeichert");
+      } else {
+        const d = await res.json();
+        showToast("error", d.error || "Fehler beim Speichern");
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler");
+    }
+    setSavingProfile(false);
   };
 
   const fetchData = useCallback(async () => {
@@ -1070,19 +1096,67 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Edit Form */}
+            {editingProfile && (
+              <div className="px-6 pb-4 space-y-3">
+                <div className="border-t border-white/[0.06] pt-4">
+                  <p className="text-xs text-white/40 uppercase tracking-wider mb-3">Profil bearbeiten</p>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      value={profileForm.name}
+                      onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))}
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white text-sm placeholder:text-white/30"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Unternehmen (optional)"
+                      value={profileForm.company}
+                      onChange={(e) => setProfileForm((f) => ({ ...f, company: e.target.value }))}
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white text-sm placeholder:text-white/30"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Telefon (optional)"
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm((f) => ({ ...f, phone: e.target.value }))}
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white text-sm placeholder:text-white/30"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Modal Footer */}
             <div className="p-4 border-t border-white/[0.06] bg-white/[0.02]">
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowProfileModal(false)}
+                  onClick={() => { setShowProfileModal(false); setEditingProfile(false); }}
                   className="flex-1 portal-btn-secondary text-sm"
                 >
                   Schließen
                 </button>
-                <button className="flex-1 portal-btn text-sm flex items-center justify-center gap-2">
-                  <Cog6ToothIcon className="w-4 h-4" />
-                  Bearbeiten
-                </button>
+                {editingProfile ? (
+                  <button
+                    onClick={saveProfile}
+                    disabled={savingProfile}
+                    className="flex-1 portal-btn text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {savingProfile ? "Speichern..." : "Speichern"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setProfileForm({ name: client.name, company: client.company || "", phone: "" });
+                      setEditingProfile(true);
+                    }}
+                    className="flex-1 portal-btn text-sm flex items-center justify-center gap-2"
+                  >
+                    <Cog6ToothIcon className="w-4 h-4" />
+                    Bearbeiten
+                  </button>
+                )}
               </div>
             </div>
           </div>

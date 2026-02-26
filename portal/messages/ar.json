@@ -141,7 +141,12 @@
     "company": "الشركة",
     "privateCustomer": "عميل خاص",
     "currentProject": "المشروع الحالي",
-    "progress": "التقدم"
+    "progress": "التقدم",
+    "savedSuccess": "تم حفظ الملف الشخصي بنجاح",
+    "saveError": "خطأ في حفظ الملف الشخصي",
+    "namePlaceholder": "الاسم",
+    "companyPlaceholder": "الشركة (اختياري)",
+    "phonePlaceholder": "الهاتف (اختياري)"
   },
   "quickStart": {
     "title": "البدء السريع",

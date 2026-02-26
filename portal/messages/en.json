@@ -141,7 +141,12 @@
     "company": "Company",
     "privateCustomer": "Private Customer",
     "currentProject": "Current Project",
-    "progress": "Progress"
+    "progress": "Progress",
+    "savedSuccess": "Profile saved successfully",
+    "saveError": "Error saving profile",
+    "namePlaceholder": "Name",
+    "companyPlaceholder": "Company (optional)",
+    "phonePlaceholder": "Phone (optional)"
   },
   "quickStart": {
     "title": "Quick Start",

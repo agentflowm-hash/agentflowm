@@ -26,7 +26,7 @@ interface ProjectData {
   };
   milestones: { id: number; title: string; status: string; date: string | null }[];
   messages: { id: number; from: string; senderType: string; text: string; time: string; unread: boolean }[];
-  files: { id: number; name: string; size: string; date: string; type: string }[];
+  files: { id: number; name: string; size: string; date: string; type: string; url?: string }[];
   unreadCount: number;
 }
 
@@ -343,9 +343,19 @@ export default function PortalDashboard() {
                         <p className="text-xs text-white/40">{file.size} · {file.date}</p>
                       </div>
                     </div>
-                    <button className="px-3 py-1.5 text-sm text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors">
-                      {t("files.download")}
-                    </button>
+                    {file.url ? (
+                      <a
+                        href={file.url}
+                        download={file.name}
+                        className="px-3 py-1.5 text-sm text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors"
+                      >
+                        {t("files.download")}
+                      </a>
+                    ) : (
+                      <span className="px-3 py-1.5 text-sm text-white/30">
+                        {t("files.download")}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
