@@ -1,18 +1,18 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 // ═══════════════════════════════════════════════════════════════
-//           📱 APP 1: AgentFlowM (Marketing)
-//           Bundle: de.agentflowm.app
-//           URL:    https://agentflowm.de
+//           📱 APP 2: AgentFlowM Portal (Kunden-Portal)
+//           Bundle: de.agentflowm.portal
+//           URL:    https://portal-agentflowm.de
 //           Store:  App Store + Google Play
 // ═══════════════════════════════════════════════════════════════
 
 const config: CapacitorConfig = {
-  appId: "de.agentflowm.app",
-  appName: "AgentFlowM",
+  appId: "de.agentflowm.portal",
+  appName: "AgentFlowM Portal",
   webDir: "out",
   server: {
-    url: "https://agentflowm.de",
+    url: "https://portal-agentflowm.de",
     cleartext: false,
     androidScheme: "https",
   },
@@ -42,7 +42,7 @@ const config: CapacitorConfig = {
       iconColor: "#FC682C",
     },
     App: {
-      appName: "AgentFlowM",
+      appName: "AgentFlowM Portal",
     },
     Browser: {
       windowName: "_self",
@@ -55,18 +55,18 @@ const config: CapacitorConfig = {
     contentInset: "automatic",
     preferredContentMode: "mobile",
     backgroundColor: "#030308",
-    scheme: "agentflowm",
+    scheme: "agentflowmportal",
     limitsNavigationsToAppBoundDomains: true,
-    allowedNavigationHostnames: ["agentflowm.de", "agentflowm.com"],
+    allowedNavigationHostnames: ["portal-agentflowm.de", "portal-agentflowm.com"],
   },
   android: {
     allowMixedContent: false,
     backgroundColor: "#030308",
     flavor: "production",
     buildOptions: {
-      keystorePath: "keystores/marketing.keystore",
+      keystorePath: "keystores/portal.keystore",
       keystorePassword: "KEYSTORE_PASSWORD",
-      keystoreAlias: "agentflowm",
+      keystoreAlias: "agentflowmportal",
       keystoreAliasPassword: "KEYSTORE_PASSWORD",
       releaseType: "AAB",
     },
