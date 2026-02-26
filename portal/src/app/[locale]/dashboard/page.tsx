@@ -86,6 +86,7 @@ interface ProjectData {
     size: string;
     date: string;
     type: string;
+    url?: string;
   }[];
   unreadCount: number;
   approvals?: {
@@ -400,7 +401,10 @@ export default function Dashboard() {
               <LanguageSwitcher />
 
               {/* Notifications */}
-              <button className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all">
+              <button
+                onClick={() => setActiveTab("messages")}
+                className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all"
+              >
                 <BellIcon className="w-5 h-5" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FC682C] text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
@@ -467,11 +471,17 @@ export default function Dashboard() {
                           <UserCircleIcon className="w-5 h-5" />
                           <span>{tProfile("myProfile")}</span>
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left">
+                        <button
+                          onClick={() => { setShowProfileModal(true); setShowProfileMenu(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left"
+                        >
                           <Cog6ToothIcon className="w-5 h-5" />
                           <span>{tCommon("settings")}</span>
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left">
+                        <button
+                          onClick={() => { setActiveTab("messages"); setShowProfileMenu(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left"
+                        >
                           <BellIcon className="w-5 h-5" />
                           <span>{tProfile("notifications")}</span>
                         </button>
@@ -972,9 +982,20 @@ export default function Dashboard() {
                             <EyeIcon className="w-4 h-4" />
                           </button>
                         )}
-                        <button className="px-4 py-2 text-sm font-medium text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors">
-                          {tCommon("download")}
-                        </button>
+                        {file.url ? (
+                          <a
+                            href={file.url}
+                            download={file.name}
+                            onClick={(e) => e.stopPropagation()}
+                            className="px-4 py-2 text-sm font-medium text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors"
+                          >
+                            {tCommon("download")}
+                          </a>
+                        ) : (
+                          <button className="px-4 py-2 text-sm font-medium text-white/30 rounded-lg cursor-not-allowed">
+                            {tCommon("download")}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -1373,7 +1394,7 @@ function ApprovalsTab({
 
   const handleRequestChanges = async (approvalId: number) => {
     if (!feedbackText[approvalId]?.trim()) {
-      alert(t("describeChanges"));
+      showToast("error", t("describeChanges"));
       return;
     }
     setProcessingId(approvalId);

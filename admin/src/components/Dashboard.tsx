@@ -1060,7 +1060,7 @@ function DashboardTab({
             title="Neueste Leads"
             icon={UsersIcon}
             action={
-              <button className="text-xs text-[#FC682C]">
+              <button className="text-xs text-[#FC682C]" onClick={() => onNavigate?.("leads")}>
                 Alle anzeigen →
               </button>
             }
@@ -1391,6 +1391,7 @@ function PipelineTab() {
   const [view, setView] = useState<PipelineView>("kanban");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showNewLeadModal, setShowNewLeadModal] = useState(false);
 
   useEffect(() => {
     fetch("/api/leads", { credentials: "include" })
@@ -1433,6 +1434,7 @@ function PipelineTab() {
   if (loading) return <LoadingState />;
 
   return (
+    <>
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between">
@@ -1450,7 +1452,10 @@ function PipelineTab() {
             <ListBulletIcon className="w-4 h-4" /> Liste
           </button>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors">
+        <button
+          onClick={() => setShowNewLeadModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors"
+        >
           <PlusIcon className="w-4 h-4" /> Neuer Lead
         </button>
       </div>
@@ -1508,6 +1513,18 @@ function PipelineTab() {
         })}
       </div>
     </div>
+    {showNewLeadModal && (
+      <NewLeadModal
+        onClose={() => setShowNewLeadModal(false)}
+        onCreated={() => {
+          fetch("/api/leads", { credentials: "include" })
+            .then((r) => r.json())
+            .then((data) => setLeads(data.leads || []));
+          setShowNewLeadModal(false);
+        }}
+      />
+    )}
+    </>
   );
 }
 
@@ -1887,7 +1904,7 @@ function LeadsTab() {
       )}
 
       {selectedLead && (
-        <LeadModal lead={selectedLead} onClose={() => setSelectedLead(null)} />
+        <LeadModal lead={selectedLead} onClose={() => setSelectedLead(null)} onRefresh={fetchLeads} />
       )}
       {showNewLeadModal && (
         <NewLeadModal
@@ -1917,7 +1934,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function LeadModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
+function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => void; onRefresh?: () => void }) {
   const [status, setStatus] = useState(lead.status);
   const [notes, setNotes] = useState(lead.notes || "");
   const [activeTab, setActiveTab] = useState<"details" | "activity">("details");
@@ -1952,6 +1969,7 @@ function LeadModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
       if (res.ok) {
         setConvertResult(`✅ Client erstellt! Zugangscode: ${data.client.accessCode}`);
         setStatus("won");
+        onRefresh?.();
       } else {
         setConvertResult(`❌ ${data.error || "Fehler beim Konvertieren"}`);
       }
@@ -2612,6 +2630,22 @@ function ChecksTab() {
   const lowScore =
     checks.length > 0 ? Math.min(...checks.map((c) => c.scoreOverall)) : 0;
 
+  const exportChecksToCSV = () => {
+    const rows = [
+      ["URL", "Score", "Performance", "SEO", "Accessibility", "Datum"],
+      ...sortedChecks.map((c) => [
+        c.url, c.scoreOverall, c.scorePerformance, c.scoreSeo, c.scoreAccessibility,
+        new Date(c.createdAt).toLocaleDateString("de-DE"),
+      ]),
+    ];
+    const csv = rows.map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "website-checks.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) return <LoadingState />;
 
   return (
@@ -2682,7 +2716,10 @@ function ChecksTab() {
             <option value="date">Neueste zuerst</option>
             <option value="score">Beste zuerst</option>
           </select>
-          <button className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 flex items-center gap-2">
+          <button
+            onClick={exportChecksToCSV}
+            className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 flex items-center gap-2"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" /> Export
           </button>
         </div>
