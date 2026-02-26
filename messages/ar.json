@@ -3169,7 +3169,10 @@
     "stats": {
       "apis": "واجهات برمجة",
       "countries": "دول",
-      "dataPoints": "نقاط بيانات"
+      "dataPoints": "نقاط بيانات",
+      "free": "مجاني 100%",
+      "response": "أقل من 100ms وقت استجابة",
+      "requests": "طلبات غير محدودة"
     },
     "openPlayground": "فتح ساحة API",
     "freeNoLimits": "مجاني 100% • بدون حدود"

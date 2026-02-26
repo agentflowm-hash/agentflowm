@@ -10,9 +10,9 @@ const packageColors = {
   configurator: "#a855f7",
 };
 
-// 🎉 DISCOUNT CONFIG - 20% für 2 Wochen (bis 20.02.2026)
+// 🎉 DISCOUNT CONFIG - deaktiviert
 const DISCOUNT = {
-  active: true,
+  active: false,
   percent: 20,
   endDate: new Date('2026-02-20T23:59:59'),
   badge: '🔥 -20% LAUNCH RABATT',

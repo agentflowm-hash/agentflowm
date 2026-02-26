@@ -74,6 +74,7 @@ interface ProjectData {
     size: string;
     date: string;
     type: string;
+    url?: string;
   }[];
   unreadCount: number;
   approvals?: {
@@ -102,7 +103,14 @@ export default function Dashboard() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showQuickStart, setShowQuickStart] = useState(true);
+  const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+  const [fileCategory, setFileCategory] = useState<"all" | "image" | "doc" | "other">("all");
   const router = useRouter();
+
+  const showToast = (type: "success" | "error", msg: string) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -139,6 +147,7 @@ export default function Dashboard() {
 
     const fileArray = Array.from(files);
     let uploaded = 0;
+    let failed = 0;
 
     for (const file of fileArray) {
       try {
@@ -154,15 +163,28 @@ export default function Dashboard() {
         if (res.ok) {
           uploaded++;
           setUploadProgress(Math.round((uploaded / fileArray.length) * 100));
+        } else {
+          failed++;
+          const errData = await res.json().catch(() => ({}));
+          console.error("Upload error:", errData.error || res.status);
         }
-      } catch (error) {
-        console.error("Upload error:", error);
+      } catch (err) {
+        failed++;
+        console.error("Upload error:", err);
       }
     }
 
     setUploading(false);
     setUploadProgress(0);
-    fetchData(); // Refresh to show new files
+    fetchData();
+
+    if (uploaded > 0 && failed === 0) {
+      showToast("success", `${uploaded} Datei${uploaded > 1 ? "en" : ""} erfolgreich hochgeladen`);
+    } else if (uploaded > 0 && failed > 0) {
+      showToast("error", `${uploaded} hochgeladen, ${failed} fehlgeschlagen`);
+    } else {
+      showToast("error", "Upload fehlgeschlagen. Bitte versuchen Sie es erneut.");
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -208,9 +230,12 @@ export default function Dashboard() {
             : null,
         );
         setNewMessage("");
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        showToast("error", errData.error || "Nachricht konnte nicht gesendet werden.");
       }
     } catch {
-      // ignore
+      showToast("error", "Verbindungsfehler. Bitte erneut versuchen.");
     } finally {
       setSending(false);
     }
@@ -314,6 +339,23 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#09090b]">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-[100] flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border animate-fade-in transition-all ${
+          toast.type === "success"
+            ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+            : "bg-red-500/20 border-red-500/30 text-red-300"
+        }`}>
+          {toast.type === "success"
+            ? <CheckCircleIcon className="w-5 h-5 flex-shrink-0" />
+            : <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />}
+          <span className="text-sm font-medium">{toast.msg}</span>
+          <button onClick={() => setToast(null)} className="ml-2 opacity-60 hover:opacity-100 transition-opacity">
+            <XMarkIcon className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-white/[0.06] bg-[#0f0f12]/80 backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
@@ -327,7 +369,11 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-3 sm:gap-4">
               {/* Notifications */}
-              <button className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all">
+              <button
+                onClick={() => setActiveTab("messages")}
+                className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                title="Nachrichten"
+              >
                 <BellIcon className="w-5 h-5" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FC682C] text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
@@ -394,13 +440,30 @@ export default function Dashboard() {
                           <UserCircleIcon className="w-5 h-5" />
                           <span>Mein Profil</span>
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left">
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            setShowProfileModal(true);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left"
+                        >
                           <Cog6ToothIcon className="w-5 h-5" />
                           <span>Einstellungen</span>
                         </button>
-                        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left">
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            setActiveTab("messages");
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-all text-left"
+                        >
                           <BellIcon className="w-5 h-5" />
                           <span>Benachrichtigungen</span>
+                          {unreadCount > 0 && (
+                            <span className="ml-auto w-5 h-5 bg-[#FC682C] text-white text-xs font-bold rounded-full flex items-center justify-center">
+                              {unreadCount}
+                            </span>
+                          )}
                         </button>
                       </div>
 
@@ -806,27 +869,16 @@ export default function Dashboard() {
             {/* File Categories */}
             <div className="grid grid-cols-4 gap-2 mb-6">
               {[
-                { label: "Alle", count: files.length, active: true },
-                {
-                  label: "Bilder",
-                  count: files.filter((f) => f.type === "image").length,
-                },
-                {
-                  label: "Dokumente",
-                  count: files.filter((f) => ["pdf", "doc"].includes(f.type))
-                    .length,
-                },
-                {
-                  label: "Sonstige",
-                  count: files.filter(
-                    (f) => !["image", "pdf", "doc"].includes(f.type),
-                  ).length,
-                },
-              ].map((cat, i) => (
+                { label: "Alle", key: "all" as const, count: files.length },
+                { label: "Bilder", key: "image" as const, count: files.filter((f) => f.type === "image").length },
+                { label: "Dokumente", key: "doc" as const, count: files.filter((f) => ["pdf", "doc"].includes(f.type)).length },
+                { label: "Sonstige", key: "other" as const, count: files.filter((f) => !["image", "pdf", "doc"].includes(f.type)).length },
+              ].map((cat) => (
                 <button
-                  key={i}
+                  key={cat.key}
+                  onClick={() => setFileCategory(cat.key)}
                   className={`py-2 px-3 rounded-xl text-xs font-medium transition-colors ${
-                    cat.active
+                    fileCategory === cat.key
                       ? "bg-[#FC682C]/20 text-[#FC682C] border border-[#FC682C]/30"
                       : "bg-white/[0.02] text-white/50 border border-white/[0.06] hover:bg-white/[0.05]"
                   }`}
@@ -846,7 +898,12 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                {files.map((file, idx) => {
+                {files.filter((f) => {
+                  if (fileCategory === "all") return true;
+                  if (fileCategory === "image") return f.type === "image";
+                  if (fileCategory === "doc") return ["pdf", "doc"].includes(f.type);
+                  return !["image", "pdf", "doc"].includes(f.type);
+                }).map((file, idx) => {
                   const fileIcon = getFileIcon(file.type);
                   const FileIcon = fileIcon.icon;
                   return (
@@ -870,9 +927,21 @@ export default function Dashboard() {
                           </p>
                         </div>
                       </div>
-                      <button className="px-4 py-2 text-sm font-medium text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors">
+                      <a
+                        href={file.url || "#"}
+                        download={file.name}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 text-sm font-medium text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors"
+                        onClick={(e) => {
+                          if (!file.url) {
+                            e.preventDefault();
+                            showToast("error", "Download-Link nicht verfügbar.");
+                          }
+                        }}
+                      >
                         Download
-                      </button>
+                      </a>
                     </div>
                   );
                 })}
@@ -886,6 +955,7 @@ export default function Dashboard() {
             approvals={data.approvals || []}
             clientName={client.name}
             onUpdate={fetchData}
+            showToast={showToast}
           />
         )}
 
@@ -1208,10 +1278,12 @@ function ApprovalsTab({
   approvals,
   clientName,
   onUpdate,
+  showToast,
 }: {
   approvals: ProjectData["approvals"];
   clientName: string;
   onUpdate: () => void;
+  showToast: (type: "success" | "error", msg: string) => void;
 }) {
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [feedbackText, setFeedbackText] = useState<{ [key: number]: string }>(
@@ -1242,16 +1314,19 @@ function ApprovalsTab({
       if (res.ok) {
         onUpdate();
         setShowFeedbackFor(null);
+        showToast("success", "Freigabe erteilt!");
+      } else {
+        showToast("error", "Fehler beim Erteilen der Freigabe.");
       }
-    } catch (error) {
-      console.error("Approval error:", error);
+    } catch {
+      showToast("error", "Verbindungsfehler. Bitte erneut versuchen.");
     }
     setProcessingId(null);
   };
 
   const handleRequestChanges = async (approvalId: number) => {
     if (!feedbackText[approvalId]?.trim()) {
-      alert("Bitte beschreiben Sie die gewünschten Änderungen.");
+      showToast("error", "Bitte beschreiben Sie die gewünschten Änderungen.");
       return;
     }
     setProcessingId(approvalId);
@@ -1270,9 +1345,12 @@ function ApprovalsTab({
         onUpdate();
         setShowFeedbackFor(null);
         setFeedbackText({});
+        showToast("success", "Änderungswünsche übermittelt.");
+      } else {
+        showToast("error", "Fehler beim Senden der Änderungswünsche.");
       }
-    } catch (error) {
-      console.error("Request changes error:", error);
+    } catch {
+      showToast("error", "Verbindungsfehler. Bitte erneut versuchen.");
     }
     setProcessingId(null);
   };

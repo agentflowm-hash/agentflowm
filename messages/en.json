@@ -3169,7 +3169,10 @@
     "stats": {
       "apis": "APIs",
       "countries": "Countries",
-      "dataPoints": "Data Points"
+      "dataPoints": "Data Points",
+      "free": "100% free",
+      "response": "< 100ms response time",
+      "requests": "Unlimited requests"
     },
     "openPlayground": "Open API Playground",
     "freeNoLimits": "100% free • No rate limits"

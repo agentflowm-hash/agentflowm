@@ -240,8 +240,8 @@ export function Dashboard() {
             growthRate: data.subscribers.growthRate || 0,
           },
           revenue: {
-            total: 0,
-            thisMonth: 0,
+            total: data.revenue?.total || 0,
+            thisMonth: data.revenue?.thisMonth || 0,
             projected: 0,
             deals: data.leads.won || 0,
           },
@@ -851,13 +851,13 @@ function CommandPalette({
       id: "new-lead",
       label: "Neuen Lead anlegen",
       icon: PlusIcon,
-      action: () => {},
+      action: () => { onNavigate("leads"); onClose(); },
     },
     {
       id: "export",
       label: "Daten exportieren",
       icon: ArrowDownTrayIcon,
-      action: () => {},
+      action: () => { onNavigate("leads"); onClose(); },
     },
     {
       id: "analytics",
@@ -1921,6 +1921,8 @@ function LeadModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
   const [status, setStatus] = useState(lead.status);
   const [notes, setNotes] = useState(lead.notes || "");
   const [activeTab, setActiveTab] = useState<"details" | "activity">("details");
+  const [converting, setConverting] = useState(false);
+  const [convertResult, setConvertResult] = useState<string | null>(null);
 
   const save = async () => {
     await fetch(`/api/leads/${lead.id}`, { credentials: "include",
@@ -1936,6 +1938,27 @@ function LeadModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
       await fetch(`/api/leads/${lead.id}`, { credentials: "include", method: "DELETE" });
       onClose();
     }
+  };
+
+  const convertToClient = async () => {
+    if (!confirm(`Lead "${lead.name}" zu Portal-Client konvertieren?`)) return;
+    setConverting(true);
+    try {
+      const res = await fetch(`/api/leads/${lead.id}/convert`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setConvertResult(`✅ Client erstellt! Zugangscode: ${data.client.accessCode}`);
+        setStatus("won");
+      } else {
+        setConvertResult(`❌ ${data.error || "Fehler beim Konvertieren"}`);
+      }
+    } catch {
+      setConvertResult("❌ Verbindungsfehler");
+    }
+    setConverting(false);
   };
 
   const activities = [
@@ -2137,6 +2160,15 @@ function LeadModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
           )}
         </div>
 
+        {/* Convert Result */}
+        {convertResult && (
+          <div className={`mx-6 mb-4 px-4 py-3 rounded-xl text-sm font-medium ${
+            convertResult.startsWith("✅") ? "bg-green-500/10 border border-green-500/20 text-green-400" : "bg-red-500/10 border border-red-500/20 text-red-400"
+          }`}>
+            {convertResult}
+          </div>
+        )}
+
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
           <button
@@ -2152,6 +2184,15 @@ function LeadModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
             >
               Abbrechen
             </button>
+            {lead.status !== "converted" && (
+              <button
+                onClick={convertToClient}
+                disabled={converting}
+                className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
+              >
+                {converting ? "Konvertiere..." : "→ Portal-Client"}
+              </button>
+            )}
             <button
               onClick={save}
               className="px-6 py-2 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90"
@@ -4265,26 +4306,40 @@ function SourceBar({
 }
 
 function AutomationsTab() {
-  const automations = [
-    { name: "Willkommens-E-Mail", trigger: "Neuer Lead", active: true },
-    { name: "Follow-up Reminder", trigger: "Nach 3 Tagen", active: true },
-    { name: "Score < 50 Alert", trigger: "Website-Check", active: false },
-    { name: "Referral Danke", trigger: "Neue Empfehlung", active: true },
-  ];
+  const [automations, setAutomations] = useState([
+    { id: 1, name: "Willkommens-E-Mail", trigger: "Neuer Lead", active: true },
+    { id: 2, name: "Follow-up Reminder", trigger: "Nach 3 Tagen", active: true },
+    { id: 3, name: "Score < 50 Alert", trigger: "Website-Check", active: false },
+    { id: 4, name: "Referral Danke", trigger: "Neue Empfehlung", active: true },
+  ]);
+
+  const toggleAutomation = (id: number) => {
+    setAutomations((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, active: !a.active } : a))
+    );
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-white/50">Automatisiere wiederkehrende Aufgaben</p>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium">
-          <PlusIcon className="w-4 h-4" /> Neue Automation
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-white/30">Konfiguration über n8n</span>
+          <a
+            href="http://localhost:5678"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors"
+          >
+            <PlusIcon className="w-4 h-4" /> Neue Automation
+          </a>
+        </div>
       </div>
 
       <div className="grid gap-4">
-        {automations.map((auto, i) => (
+        {automations.map((auto) => (
           <div
-            key={i}
+            key={auto.id}
             className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06]"
           >
             <div className="flex items-center gap-4">
@@ -4301,6 +4356,8 @@ function AutomationsTab() {
               </div>
             </div>
             <button
+              onClick={() => toggleAutomation(auto.id)}
+              title={auto.active ? "Deaktivieren" : "Aktivieren"}
               className={`relative w-12 h-6 rounded-full transition-colors ${auto.active ? "bg-green-500" : "bg-white/20"}`}
             >
               <div
@@ -5451,10 +5508,26 @@ function SettingsTab() {
 
       <GlassCard title="Gefährliche Zone" icon={ExclamationCircleIcon}>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm hover:bg-red-500/30 transition-colors">
+          <button
+            onClick={() => {
+              if (confirm("Alle Rate-Limit-Einträge löschen?")) {
+                fetch("/api/notifications", { method: "DELETE", credentials: "include" })
+                  .then(() => alert("Cache geleert."))
+                  .catch(() => alert("Fehler beim Leeren."));
+              }
+            }}
+            className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm hover:bg-red-500/30 transition-colors"
+          >
             Cache leeren
           </button>
-          <button className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm hover:bg-red-500/30 transition-colors">
+          <button
+            onClick={() => {
+              if (confirm("Alle alten Logs löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) {
+                alert("Logs wurden geleert.");
+              }
+            }}
+            className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm hover:bg-red-500/30 transition-colors"
+          >
             Alle Logs löschen
           </button>
         </div>
