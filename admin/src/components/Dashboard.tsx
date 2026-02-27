@@ -61,6 +61,7 @@ import {
 
 // Next-Level Components
 import { Confetti, KeyboardShortcuts, useToast, GoogleAnalyticsWidget, WebsiteAnalyticsWidget, LiveActivityFeed, AnimatedStatsCards, GoalsWidget, AIInsightsWidget } from "@/components";
+import InvoiceManager from "@/components/InvoiceManager";
 
 // ═══════════════════════════════════════════════════════════════
 //                    TYPES
@@ -71,6 +72,7 @@ type Tab =
   | "pipeline"
   | "leads"
   | "clients"
+  | "invoices"
   | "checks"
   | "referrals"
   | "subscribers"
@@ -312,6 +314,13 @@ export function Dashboard() {
       id: "clients" as Tab,
       label: "Portal-Kunden",
       icon: UserGroupIcon,
+      badge: null,
+      new: true,
+    },
+    {
+      id: "invoices" as Tab,
+      label: "Rechnungen",
+      icon: CurrencyEuroIcon,
       badge: null,
       new: true,
     },
@@ -609,6 +618,7 @@ export function Dashboard() {
           {activeTab === "pipeline" && <PipelineTab />}
           {activeTab === "leads" && <LeadsTab />}
           {activeTab === "clients" && <ClientsTab />}
+          {activeTab === "invoices" && <InvoiceManager />}
           {activeTab === "checks" && <ChecksTab />}
           {activeTab === "referrals" && <ReferralsTab />}
           {activeTab === "subscribers" && <SubscribersTab />}
