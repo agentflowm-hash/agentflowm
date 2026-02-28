@@ -1708,7 +1708,7 @@ function KanbanCard({
       )}
 
       <div className="flex items-center justify-between text-[11px] text-white/30">
-        <span>{new Date(lead.createdAt).toLocaleDateString("de-DE")}</span>
+        <span>{formatDate(lead.createdAt)}</span>
         {lead.priority === "high" && (
           <FireSolid className="w-4 h-4 text-red-400" />
         )}
@@ -2015,7 +2015,7 @@ function LeadsTab() {
                     className="px-5 py-4 text-sm text-white/40 cursor-pointer"
                     onClick={() => setSelectedLead(lead)}
                   >
-                    {new Date(lead.createdAt).toLocaleDateString("de-DE")}
+                    {formatDate(lead.createdAt)}
                   </td>
                   <td className="px-5 py-4">
                     <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
