@@ -152,6 +152,9 @@ export async function PATCH(
     if (status !== undefined) {
       updateData.status = status;
     }
+    if (body.telegram_username !== undefined) {
+      updateData.telegram_username = body.telegram_username || "";
+    }
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
@@ -176,6 +179,14 @@ export async function PATCH(
     console.error("Client PATCH error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
+}
+
+// PUT - Alias für PATCH (für Frontend-Kompatibilität)
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  return PATCH(request, context);
 }
 
 // DELETE - Client löschen (mit allen zugehörigen Daten)

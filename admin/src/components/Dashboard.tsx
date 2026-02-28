@@ -4644,6 +4644,96 @@ function ClientDetailModal({
     description: "",
     type: "design",
   });
+  
+  // Admin Edit States
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: client.name,
+    email: client.email,
+    company: client.company || "",
+    phone: client.phone || "",
+    telegram_username: client.telegram_username || "",
+    status: client.status || "active",
+  });
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Save Client Changes
+  const handleSaveClient = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/clients/${client.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(editForm),
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        onUpdate();
+      } else {
+        alert("Fehler beim Speichern");
+      }
+    } catch (error) {
+      alert("Verbindungsfehler");
+    }
+    setSaving(false);
+  };
+
+  // Delete Client
+  const handleDeleteClient = async () => {
+    if (!confirm(`Kunde "${client.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!`)) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/clients/${client.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        onClose();
+        onUpdate();
+      } else {
+        alert("Fehler beim Löschen");
+      }
+    } catch (error) {
+      alert("Verbindungsfehler");
+    }
+    setDeleting(false);
+  };
+
+  // Delete Message
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!confirm("Nachricht wirklich löschen?")) return;
+    try {
+      const res = await fetch(`/api/messages/${messageId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        // Refresh messages
+        const data = await fetch(`/api/projects/${client.project_id}`, { credentials: "include" }).then(r => r.json());
+        setProjectData(data);
+      }
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    }
+  };
+
+  // Delete Approval
+  const handleDeleteApproval = async (approvalId: number) => {
+    if (!confirm("Freigabe-Anfrage wirklich löschen?")) return;
+    try {
+      const res = await fetch(`/api/approvals/${approvalId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setApprovals(approvals.filter(a => a.id !== approvalId));
+      }
+    } catch (error) {
+      console.error("Failed to delete approval:", error);
+    }
+  };
 
   const fetchApprovals = useCallback(async () => {
     if (!client.project_id) return;
@@ -4782,16 +4872,120 @@ function ClientDetailModal({
         >
           {activeTab === "details" && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-white/[0.02] rounded-xl">
-                  <div className="text-xs text-white/40 mb-1">E-Mail</div>
-                  <div className="text-sm text-white">
-                    {client.email || "-"}
+              {/* Admin Action Bar */}
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#FC682C]/10 to-[#9D65C9]/10 rounded-xl border border-[#FC682C]/20">
+                <span className="text-sm text-white/70 font-medium">Admin-Aktionen</span>
+                <div className="flex gap-2">
+                  {!isEditing ? (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white flex items-center gap-1.5 transition-colors"
+                    >
+                      <PencilIcon className="w-3.5 h-3.5" />
+                      Bearbeiten
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setIsEditing(false)}
+                        className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm text-white/70 transition-colors"
+                      >
+                        Abbrechen
+                      </button>
+                      <button
+                        onClick={handleSaveClient}
+                        disabled={saving}
+                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 rounded-lg text-sm text-white flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                      >
+                        <CheckCircleIcon className="w-3.5 h-3.5" />
+                        {saving ? "..." : "Speichern"}
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={handleDeleteClient}
+                    disabled={deleting}
+                    className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/40 rounded-lg text-sm text-red-400 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                  >
+                    <TrashIcon className="w-3.5 h-3.5" />
+                    {deleting ? "..." : "Löschen"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Editable Fields */}
+              {isEditing ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <label className="text-xs text-white/40 mb-1 block">Name *</label>
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+                    />
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <label className="text-xs text-white/40 mb-1 block">E-Mail *</label>
+                    <input
+                      type="email"
+                      value={editForm.email}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+                    />
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <label className="text-xs text-white/40 mb-1 block">Firma</label>
+                    <input
+                      type="text"
+                      value={editForm.company}
+                      onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+                    />
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <label className="text-xs text-white/40 mb-1 block">Telefon</label>
+                    <input
+                      type="tel"
+                      value={editForm.phone}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+                    />
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <label className="text-xs text-white/40 mb-1 block">Telegram Username</label>
+                    <input
+                      type="text"
+                      value={editForm.telegram_username}
+                      onChange={(e) => setEditForm({ ...editForm, telegram_username: e.target.value.replace("@", "") })}
+                      placeholder="ohne @"
+                      className="w-full px-3 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+                    />
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <label className="text-xs text-white/40 mb-1 block">Status</label>
+                    <select
+                      value={editForm.status}
+                      onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/[0.06] border border-white/10 rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+                    >
+                      <option value="active">Aktiv</option>
+                      <option value="inactive">Inaktiv</option>
+                      <option value="paused">Pausiert</option>
+                    </select>
                   </div>
                 </div>
-                <div className="p-3 bg-white/[0.02] rounded-xl">
-                  <div className="text-xs text-white/40 mb-1">Telefon</div>
-                  <div className="text-sm text-white">
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <div className="text-xs text-white/40 mb-1">E-Mail</div>
+                    <div className="text-sm text-white">
+                      {client.email || "-"}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <div className="text-xs text-white/40 mb-1">Telefon</div>
+                    <div className="text-sm text-white">
                     {client.phone || "-"}
                   </div>
                 </div>
@@ -5097,15 +5291,24 @@ function ClientDetailModal({
                   projectData.messages.map((msg: any) => (
                     <div
                       key={msg.id}
-                      className={`p-3 rounded-xl ${msg.sender_type === "admin" ? "bg-[#FC682C]/10 ml-8" : "bg-white/[0.02] mr-8"}`}
+                      className={`p-3 rounded-xl group relative ${msg.sender_type === "admin" ? "bg-[#FC682C]/10 ml-8" : "bg-white/[0.02] mr-8"}`}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-medium text-white/70">
-                          {msg.sender_name}
-                        </span>
-                        <span className="text-xs text-white/30">
-                          {new Date(msg.created_at).toLocaleString("de-DE")}
-                        </span>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-white/70">
+                            {msg.sender_name}
+                          </span>
+                          <span className="text-xs text-white/30">
+                            {new Date(msg.created_at).toLocaleString("de-DE")}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition-all"
+                          title="Nachricht löschen"
+                        >
+                          <TrashIcon className="w-3.5 h-3.5 text-red-400" />
+                        </button>
                       </div>
                       <p className="text-sm text-white/80">{msg.message}</p>
                     </div>
