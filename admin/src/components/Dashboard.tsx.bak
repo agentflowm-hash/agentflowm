@@ -68,18 +68,6 @@ import EmailCenterTab from "@/components/EmailCenterTab";
 import NotificationsTab from "@/components/NotificationsTab";
 
 // ═══════════════════════════════════════════════════════════════
-//                    API RESPONSE HELPER
-// Handles both wrapped {success, data} and direct response formats
-// ═══════════════════════════════════════════════════════════════
-
-function unwrapApiResponse<T>(response: unknown): T {
-  if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
-    return (response as { data: T }).data;
-  }
-  return response as T;
-}
-
-// ═══════════════════════════════════════════════════════════════
 //                    TYPES
 // ═══════════════════════════════════════════════════════════════
 
@@ -1468,7 +1456,7 @@ function PipelineTab() {
     fetch("/api/leads", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []);
+        setLeads(data.leads || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -1590,7 +1578,7 @@ function PipelineTab() {
         onCreated={() => {
           fetch("/api/leads", { credentials: "include" })
             .then((r) => r.json())
-            .then((data) => setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []));
+            .then((data) => setLeads(data.leads || []));
           setShowNewLeadModal(false);
         }}
       />
@@ -1685,7 +1673,7 @@ function LeadsTab() {
     fetch("/api/leads", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []);
+        setLeads(data.leads || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -2667,8 +2655,7 @@ function ChecksTab() {
     fetch("/api/checks", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        const unwrapped = unwrapApiResponse<{checks: WebsiteCheck[]}>(data);
-        const checksList = Array.isArray(unwrapped.checks) ? unwrapped.checks : [];
+        const checksList = Array.isArray(data.checks) ? data.checks : [];
         setChecks(checksList);
         setLoading(false);
       })
@@ -3241,8 +3228,7 @@ function ReferralsTab() {
     fetch("/api/referrals", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        const unwrapped = unwrapApiResponse<{referrals: Referral[]}>(data);
-        setReferrals(unwrapped.referrals || []);
+        setReferrals(data.referrals || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -3634,8 +3620,7 @@ function SubscribersTab() {
     fetch("/api/subscribers", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        const unwrapped = unwrapApiResponse<{subscribers: Subscriber[]}>(data);
-        setSubscribers(unwrapped.subscribers || []);
+        setSubscribers(data.subscribers || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));

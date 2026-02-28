@@ -18,6 +18,14 @@ import {
   FunnelIcon,
 } from "@heroicons/react/24/outline";
 
+// Helper to handle both wrapped {success, data} and direct API responses
+function unwrapApiResponse<T>(response: unknown): T {
+  if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+    return (response as { data: T }).data;
+  }
+  return response as T;
+}
+
 interface Invoice {
   id: number;
   invoice_number: string;
@@ -97,8 +105,9 @@ export default function InvoiceManager() {
       
       const res = await fetch(`/api/invoices?${params}`);
       const data = await res.json();
-      setInvoices(data.invoices || []);
-      setStats(data.stats);
+      const unwrapped = unwrapApiResponse<{invoices: Invoice[], stats: typeof stats}>(data);
+      setInvoices(unwrapped.invoices || []);
+      setStats(unwrapped.stats);
     } catch (error) {
       console.error("Error fetching invoices:", error);
     } finally {
