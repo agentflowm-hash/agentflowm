@@ -224,7 +224,7 @@ export default function InvoiceManager() {
       tax_rate: invoice.tax_rate,
       discount_percent: invoice.discount_percent,
       notes: invoice.notes || "",
-      items: invoice.invoice_items?.length > 0 
+      items: (invoice.invoice_items && invoice.invoice_items.length > 0)
         ? invoice.invoice_items 
         : [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
     });
