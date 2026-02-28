@@ -67,15 +67,18 @@ export const GET = createHandler({
     return { ...inv, client_name: clientName, project_name: projectName };
   }));
 
-  // Calculate stats
+  // Calculate stats (match frontend interface names)
+  const totalRevenue = enrichedInvoices.reduce((sum, i) => sum + (i.total || 0), 0);
+  const paidAmount = enrichedInvoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.total || 0), 0);
+  
   const stats = {
     total: enrichedInvoices.length,
     draft: enrichedInvoices.filter(i => i.status === 'draft').length,
     sent: enrichedInvoices.filter(i => i.status === 'sent').length,
     paid: enrichedInvoices.filter(i => i.status === 'paid').length,
     overdue: enrichedInvoices.filter(i => i.status === 'overdue').length,
-    totalAmount: enrichedInvoices.reduce((sum, i) => sum + (i.total || 0), 0),
-    paidAmount: enrichedInvoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.total || 0), 0),
+    totalRevenue,
+    pendingAmount: totalRevenue - paidAmount,
   };
 
   return { invoices: enrichedInvoices, stats };
