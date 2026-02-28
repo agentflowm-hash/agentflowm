@@ -370,7 +370,7 @@ function CreateEventModal({ onClose, onCreated }: { onClose: () => void; onCreat
     title: "",
     description: "",
     start_date: new Date().toISOString().slice(0, 16),
-    type: "event",
+    type: "meeting",
     all_day: false,
     location: "",
     reminder_minutes: 30,
@@ -381,14 +381,29 @@ function CreateEventModal({ onClose, onCreated }: { onClose: () => void; onCreat
     e.preventDefault();
     setSaving(true);
     try {
+      // Transform form data to match API schema
+      const startDate = new Date(form.start_date);
+      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour default
+      
+      const payload = {
+        title: form.title,
+        description: form.description || undefined,
+        start_time: startDate.toISOString(),
+        end_time: endDate.toISOString(),
+        event_type: form.type === 'event' ? 'meeting' : form.type as 'meeting' | 'deadline' | 'milestone' | 'reminder',
+      };
+      
       const res = await fetch("/api/calendar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         onCreated();
+      } else {
+        const err = await res.json();
+        console.error('Failed to create event:', err);
       }
     } catch (error) {
       console.error(error);
@@ -423,9 +438,9 @@ function CreateEventModal({ onClose, onCreated }: { onClose: () => void; onCreat
               onChange={(e) => setForm({ ...form, type: e.target.value })}
               className="w-full px-3 py-2 bg-white/[0.04] border border-white/10 rounded-lg text-white focus:border-[#FC682C]/50 outline-none"
             >
-              <option value="event">Event</option>
               <option value="meeting">Meeting</option>
               <option value="deadline">Deadline</option>
+              <option value="milestone">Meilenstein</option>
               <option value="reminder">Erinnerung</option>
             </select>
           </div>
