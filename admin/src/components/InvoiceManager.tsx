@@ -42,7 +42,7 @@ interface Invoice {
   discount_amount: number;
   total: number;
   notes?: string;
-  invoice_items: InvoiceItem[];
+  invoice_items?: InvoiceItem[];
   created_at: string;
 }
 
@@ -224,7 +224,7 @@ export default function InvoiceManager() {
       tax_rate: invoice.tax_rate,
       discount_percent: invoice.discount_percent,
       notes: invoice.notes || "",
-      items: invoice.invoice_items.length > 0 
+      items: invoice.invoice_items?.length > 0 
         ? invoice.invoice_items 
         : [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
     });
