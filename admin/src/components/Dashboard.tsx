@@ -215,6 +215,13 @@ export function Dashboard() {
     setRefreshing(true);
     try {
       const res = await fetch("/api/stats", { credentials: "include" });
+      
+      // Handle 401 - redirect to login
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
+      
       if (res.ok) {
         const data = await res.json();
         // Verwende echte Daten aus der API
@@ -256,25 +263,36 @@ export function Dashboard() {
           },
           recentLeads: data.recentLeads || [],
         });
+      } else {
+        console.error("Failed to fetch stats:", res.status);
+        showToast("Fehler beim Laden der Daten", "error");
       }
     } catch (error) {
       console.error("Failed to fetch stats:", error);
+      showToast("Verbindungsfehler", "error");
     }
     setRefreshing(false);
-  }, []);
+  }, [router, showToast]);
 
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch("/api/notifications", { credentials: "include" });
+      
+      // Handle 401 - redirect to login
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
+      
       if (res.ok) {
         const data = await res.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
+        setNotifications(data.data?.notifications || data.notifications || []);
+        setUnreadCount(data.data?.unreadCount || data.unreadCount || 0);
       }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     fetchStats();
@@ -560,7 +578,7 @@ export function Dashboard() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 min-h-screen overflow-x-hidden">
+      <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden">
         {/* Header */}
         <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 lg:px-6 border-b border-white/[0.06] bg-[#09090b]/80 backdrop-blur-xl">
           <div className="flex items-center gap-4">
