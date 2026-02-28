@@ -24,18 +24,7 @@ export const GET = createHandler({
 
   const { data: client, error } = await db
     .from('portal_clients')
-    .select(`
-      *,
-      portal_projects (
-        id,
-        name,
-        package,
-        status,
-        status_label,
-        progress,
-        manager
-      )
-    `)
+    .select('*')
     .eq('id', id)
     .single();
 
@@ -43,7 +32,19 @@ export const GET = createHandler({
     throw new NotFoundError('Client');
   }
 
-  return { client };
+  // Fetch associated project separately
+  let project = null;
+  const { data: projects } = await db
+    .from('portal_projects')
+    .select('id, name, package, status, status_label, progress, manager')
+    .eq('client_id', id)
+    .limit(1);
+  
+  if (projects && projects.length > 0) {
+    project = projects[0];
+  }
+
+  return { client: { ...client, project } };
 });
 
 // ─────────────────────────────────────────────────────────────────
@@ -67,9 +68,7 @@ export const PATCH = createHandler({
     throw new NotFoundError('Client');
   }
 
-  const updateData: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
-  };
+  const updateData: Record<string, unknown> = {};
 
   if (data.name !== undefined) updateData.name = data.name;
   if (data.email !== undefined) updateData.email = data.email;
@@ -101,10 +100,7 @@ export const DELETE = createHandler({
   // Soft delete by setting status to archived
   const { error } = await db
     .from('portal_clients')
-    .update({ 
-      status: 'archived',
-      updated_at: new Date().toISOString(),
-    })
+    .update({ status: 'archived' })
     .eq('id', id);
 
   if (error) throw new DatabaseError(error.message);
