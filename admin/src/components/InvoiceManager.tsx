@@ -444,10 +444,23 @@ export default function InvoiceManager() {
                           </button>
                         )}
                         <button
+                          onClick={() => window.open(`/api/invoices/${invoice.id}/pdf`, '_blank')}
                           className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                          title="Anzeigen"
+                          title="PDF Vorschau"
                         >
                           <EyeIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = `/api/invoices/${invoice.id}/pdf?format=html`;
+                            link.download = `Rechnung-${invoice.invoice_number}.html`;
+                            link.click();
+                          }}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Download"
+                        >
+                          <ArrowDownTrayIcon className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
