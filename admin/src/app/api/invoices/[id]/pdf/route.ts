@@ -51,6 +51,15 @@ export async function GET(
       else paymentDue = `bis ${dueDate.toLocaleDateString('de-DE')}`;
     }
 
+    // Calculate values
+    const subtotal = parseFloat(invoice.subtotal);
+    const discountPercent = parseFloat(invoice.discount_percent || 0);
+    const discountAmount = parseFloat(invoice.discount_amount || 0);
+    const netAfterDiscount = subtotal - discountAmount;
+    const taxRate = parseFloat(invoice.tax_rate);
+    const taxAmount = parseFloat(invoice.tax_amount);
+    const total = parseFloat(invoice.total);
+
     // Generate HTML
     const html = generateInvoiceHTML({
       invoice_number: invoice.invoice_number.replace('AFM-', ''),
@@ -61,10 +70,13 @@ export async function GET(
       client_address: invoice.client_address,
       client_email: invoice.client_email,
       items,
-      subtotal: parseFloat(invoice.subtotal),
-      tax_rate: parseFloat(invoice.tax_rate),
-      tax_amount: parseFloat(invoice.tax_amount),
-      total: parseFloat(invoice.total),
+      subtotal,
+      discount_percent: discountPercent > 0 ? discountPercent : undefined,
+      discount_amount: discountAmount > 0 ? discountAmount : undefined,
+      net_after_discount: netAfterDiscount,
+      tax_rate: taxRate,
+      tax_amount: taxAmount,
+      total,
       payment_due: paymentDue,
       notes: invoice.notes,
     });

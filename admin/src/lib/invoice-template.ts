@@ -20,7 +20,10 @@ interface InvoiceData {
   }[];
   
   // Totals
-  subtotal: number;
+  subtotal: number;          // Summe aller Items
+  discount_percent?: number; // Rabatt in %
+  discount_amount?: number;  // Rabatt-Betrag
+  net_after_discount: number; // Netto nach Rabatt
   tax_rate: number;
   tax_amount: number;
   total: number;
@@ -378,8 +381,18 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       <div class="totals-wrapper">
         <div class="totals">
           <div class="totals-row subtotal">
-            <span>Nettobetrag</span>
+            <span>Zwischensumme</span>
             <span>${formatCurrency(data.subtotal)}</span>
+          </div>
+          ${data.discount_percent && data.discount_amount ? `
+          <div class="totals-row discount">
+            <span>Rabatt ${data.discount_percent}%</span>
+            <span style="color: #ef4444;">-${formatCurrency(data.discount_amount)}</span>
+          </div>
+          ` : ''}
+          <div class="totals-row">
+            <span>Nettobetrag</span>
+            <span>${formatCurrency(data.net_after_discount)}</span>
           </div>
           <div class="totals-row">
             <span>MwSt. ${data.tax_rate}%</span>
