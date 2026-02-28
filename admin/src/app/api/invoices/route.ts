@@ -92,12 +92,12 @@ export const POST = createHandler({
   auth: true,
   schema: CreateInvoiceSchema,
 }, async (data: CreateInvoiceInput) => {
-  const { client_id, project_id, items, tax_rate, due_date, notes } = data;
+  const { client_id, project_id, items, tax_rate, discount_percent = 0, due_date, notes } = data;
 
   // Verify client exists
   const { data: client } = await db
     .from('portal_clients')
-    .select('id, name, email')
+    .select('id, name, email, company')
     .eq('id', client_id)
     .single();
 
@@ -105,14 +105,16 @@ export const POST = createHandler({
     throw new NotFoundError('Client');
   }
 
-  // Calculate totals
-  const amount = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
-  const tax_amount = Math.round(amount * tax_rate) / 100;
-  const total = amount + tax_amount;
+  // Calculate totals with discount
+  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+  const discount_amount = Math.round(subtotal * discount_percent) / 100;
+  const afterDiscount = subtotal - discount_amount;
+  const tax_amount = Math.round(afterDiscount * tax_rate) / 100;
+  const total = afterDiscount + tax_amount;
 
-  // Generate invoice number: INV-YYYYMM-XXXX
+  // Generate invoice number: AFM-YYYY-XXXX
   const now = new Date();
-  const prefix = `INV-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const prefix = `AFM-${now.getFullYear()}`;
   
   const { count } = await db
     .from('invoices')
@@ -128,13 +130,18 @@ export const POST = createHandler({
       client_id,
       project_id: project_id || null,
       invoice_number: invoiceNumber,
-      amount,
+      client_name: client.name,
+      client_email: client.email,
+      client_company: client.company || null,
+      subtotal,
+      discount_percent,
+      discount_amount,
       tax_rate,
       tax_amount,
       total,
       status: 'draft',
-      due_date,
-      items,
+      issue_date: new Date().toISOString().split('T')[0],
+      due_date: due_date.split('T')[0],
       notes: notes || null,
     })
     .select()

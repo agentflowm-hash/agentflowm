@@ -10,7 +10,12 @@ import { z } from 'zod';
 // Common Schemas
 // ─────────────────────────────────────────────────────────────────
 
-export const IdSchema = z.string().uuid('Invalid ID format');
+// Accept both integer IDs and UUID strings
+export const IdSchema = z.union([
+  z.string().uuid(),
+  z.string().regex(/^\d+$/),
+  z.number().int().positive(),
+]).transform(val => typeof val === 'number' ? String(val) : val);
 
 export const EmailSchema = z.string().email('Invalid email address').toLowerCase().trim();
 
@@ -68,6 +73,7 @@ export const CreateInvoiceSchema = z.object({
   project_id: IdSchema.optional().nullable(),
   items: z.array(InvoiceItemSchema).min(1, 'At least one item is required'),
   tax_rate: z.number().min(0).max(100).default(19),
+  discount_percent: z.number().min(0).max(100).default(0),
   due_date: z.string().datetime('Invalid due date'),
   notes: z.string().max(1000).optional(),
 });
