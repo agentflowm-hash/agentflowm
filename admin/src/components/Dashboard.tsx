@@ -265,11 +265,11 @@ export function Dashboard() {
         });
       } else {
         console.error("Failed to fetch stats:", res.status);
-        showToast("Fehler beim Laden der Daten", "error");
+        showToast("error", "Fehler beim Laden der Daten");
       }
     } catch (error) {
       console.error("Failed to fetch stats:", error);
-      showToast("Verbindungsfehler", "error");
+      showToast("error", "Verbindungsfehler");
     }
     setRefreshing(false);
   }, [router, showToast]);
