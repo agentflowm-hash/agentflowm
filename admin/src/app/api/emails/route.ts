@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+// IONOS SMTP Transporter
+const transporter = process.env.SMTP_HOST ? nodemailer.createTransport({
+  host: process.env.SMTP_HOST, // smtp.ionos.de
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: process.env.SMTP_SECURE === "true", // true für 465, false für 587
+  auth: {
+    user: process.env.SMTP_USER, // deine@email.de
+    pass: process.env.SMTP_PASS, // dein Passwort
+  },
+}) : null;
 
 // GET - Email History mit Tracking
 export async function GET(request: NextRequest) {
@@ -126,11 +135,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Email senden (wenn nicht geplant)
-    if (!schedule_at && resend) {
+    if (!schedule_at && transporter) {
       try {
-        const result = await resend.emails.send({
-          from: "AgentFlowMarketing <noreply@agentflowm.de>",
-          to: Array.isArray(to) ? to : [to],
+        const result = await transporter.sendMail({
+          from: process.env.SMTP_FROM || "AgentFlowMarketing <noreply@agentflowm.de>",
+          to: Array.isArray(to) ? to.join(", ") : to,
           subject: emailSubject,
           html: emailHtml,
           text: text || undefined,
@@ -139,15 +148,16 @@ export async function POST(request: NextRequest) {
         // Status aktualisieren
         await db
           .from("portal_emails")
-          .update({ status: "sent", resend_id: result.data?.id })
+          .update({ status: "sent", resend_id: result.messageId })
           .eq("id", emailRecord.id);
 
         return NextResponse.json({ 
           success: true, 
           email: emailRecord,
-          resend_id: result.data?.id 
+          message_id: result.messageId 
         });
       } catch (sendError) {
+        console.error("SMTP send error:", sendError);
         await db
           .from("portal_emails")
           .update({ status: "failed", error: String(sendError) })
