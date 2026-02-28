@@ -28,6 +28,7 @@ import {
   PhoneIcon,
   EnvelopeOpenIcon,
   CalendarIcon,
+  CalendarDaysIcon,
   CurrencyEuroIcon,
   SparklesIcon,
   RocketLaunchIcon,
@@ -62,6 +63,9 @@ import {
 // Next-Level Components
 import { Confetti, KeyboardShortcuts, useToast, GoogleAnalyticsWidget, WebsiteAnalyticsWidget, LiveActivityFeed, AnimatedStatsCards, GoalsWidget, AIInsightsWidget } from "@/components";
 import InvoiceManager from "@/components/InvoiceManager";
+import CalendarTab from "@/components/CalendarTab";
+import EmailCenterTab from "@/components/EmailCenterTab";
+import NotificationsTab from "@/components/NotificationsTab";
 
 // ═══════════════════════════════════════════════════════════════
 //                    TYPES
@@ -78,6 +82,9 @@ type Tab =
   | "subscribers"
   | "analytics"
   | "automations"
+  | "calendar"
+  | "emails"
+  | "notifications"
   | "settings";
 type PipelineView = "kanban" | "list";
 
@@ -355,6 +362,27 @@ export function Dashboard() {
       badge: null,
     },
     {
+      id: "calendar" as Tab,
+      label: "Kalender",
+      icon: CalendarDaysIcon,
+      badge: null,
+      new: true,
+    },
+    {
+      id: "emails" as Tab,
+      label: "Email Center",
+      icon: EnvelopeOpenIcon,
+      badge: null,
+      new: true,
+    },
+    {
+      id: "notifications" as Tab,
+      label: "Notifications",
+      icon: BellIcon,
+      badge: null,
+      new: true,
+    },
+    {
       id: "settings" as Tab,
       label: "Einstellungen",
       icon: Cog6ToothIcon,
@@ -624,6 +652,9 @@ export function Dashboard() {
           {activeTab === "subscribers" && <SubscribersTab />}
           {activeTab === "analytics" && <AnalyticsTab stats={stats} />}
           {activeTab === "automations" && <AutomationsTab />}
+          {activeTab === "calendar" && <CalendarTab />}
+          {activeTab === "emails" && <EmailCenterTab />}
+          {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "settings" && <SettingsTab />}
         </div>
 

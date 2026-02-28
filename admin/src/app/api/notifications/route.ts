@@ -1,143 +1,171 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-export async function GET() {
+// GET - Alle Notifications
+export async function GET(request: NextRequest) {
   const authenticated = await isAuthenticated();
   if (!authenticated) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const notifications: any[] = [];
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { searchParams } = new URL(request.url);
+    const unread = searchParams.get("unread") === "true";
+    const limit = parseInt(searchParams.get("limit") || "50", 10);
 
-    // Neue Leads (letzte 24 Stunden)
-    const { data: recentLeads } = await db
-      .from('leads')
-      .select('id, name, email, created_at')
-      .gte('created_at', yesterday)
-      .order('created_at', { ascending: false })
-      .limit(10);
+    let query = db.from("portal_notifications")
+      .select(`*, project:portal_projects(id, name), client:portal_clients(id, name)`)
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-    for (const lead of recentLeads || []) {
-      notifications.push({
-        id: `lead-${lead.id}`,
-        type: "lead",
-        title: "Neuer Lead",
-        description: `${lead.name} hat sich gemeldet`,
-        time: formatRelativeTime(lead.created_at),
-        createdAt: lead.created_at,
-        link: `/leads/${lead.id}`,
-      });
+    if (unread) {
+      query = query.is("read_at", null);
     }
 
-    // Neue Website-Checks (letzte 24 Stunden)
-    const { data: recentChecks } = await db
-      .from('website_checks')
-      .select('id, url, score_overall, created_at')
-      .gte('created_at', yesterday)
-      .order('created_at', { ascending: false })
-      .limit(10);
+    const { data: notifications, error } = await query;
 
-    for (const check of recentChecks || []) {
-      const domain = check.url.replace(/^https?:\/\//, "").split("/")[0];
-      notifications.push({
-        id: `check-${check.id}`,
-        type: "check",
-        title: "Website-Check",
-        description: `${domain} Score: ${check.score_overall}`,
-        time: formatRelativeTime(check.created_at),
-        createdAt: check.created_at,
-        link: `/checks/${check.id}`,
-      });
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
-    // Neue Empfehlungen (letzte 24 Stunden)
-    const { data: recentReferrals } = await db
-      .from('referrals')
-      .select('id, referrer_name, referred_name, created_at')
-      .gte('created_at', yesterday)
-      .order('created_at', { ascending: false })
-      .limit(10);
+    const unreadCount = notifications?.filter(n => !n.read_at).length || 0;
 
-    for (const referral of recentReferrals || []) {
-      notifications.push({
-        id: `referral-${referral.id}`,
-        type: "referral",
-        title: "Neue Empfehlung",
-        description: `Von ${referral.referrer_name}`,
-        time: formatRelativeTime(referral.created_at),
-        createdAt: referral.created_at,
-        link: `/referrals/${referral.id}`,
-      });
-    }
-
-    // Ungelesene Kundennachrichten
-    const { data: unreadMessages } = await db
-      .from('portal_messages')
-      .select(`
-        id,
-        message,
-        sender_name,
-        created_at,
-        project_id,
-        portal_projects (
-          id,
-          name
-        )
-      `)
-      .eq('sender_type', 'client')
-      .eq('is_read', false)
-      .order('created_at', { ascending: false })
-      .limit(10);
-
-    for (const msg of unreadMessages || []) {
-      const project = (msg as any).portal_projects;
-      notifications.push({
-        id: `message-${msg.id}`,
-        type: "message",
-        title: "Neue Kundennachricht",
-        description: `${msg.sender_name}: ${msg.message.substring(0, 50)}${msg.message.length > 50 ? "..." : ""}`,
-        time: formatRelativeTime(msg.created_at),
-        createdAt: msg.created_at,
-        link: `/clients?project=${msg.project_id}`,
-        projectId: msg.project_id,
-      });
-    }
-
-    // Sortiere nach Erstellungsdatum (neueste zuerst)
-    notifications.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-
-    // Zähle ungelesene Nachrichten
-    const unreadCount = (unreadMessages || []).length;
-
-    return NextResponse.json({
-      notifications: notifications.slice(0, 20),
-      unreadCount,
-      total: notifications.length,
+    return NextResponse.json({ 
+      notifications: notifications || [],
+      unread_count: unreadCount
     });
   } catch (error) {
-    console.error("Notifications error:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
+}
+
+// POST - Notification erstellen & senden
+export async function POST(request: NextRequest) {
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { 
+      title, 
+      message, 
+      type, // info, warning, success, error, deadline, message, approval
+      channels, // ["telegram", "email", "push", "whatsapp"]
+      project_id,
+      client_id,
+      action_url,
+      priority, // low, normal, high, urgent
+      telegram_chat_id,
+      email_to
+    } = body;
+
+    if (!title || !message) {
+      return NextResponse.json({ error: "Title and message required" }, { status: 400 });
+    }
+
+    // Notification in DB speichern
+    const { data: notification, error } = await db
+      .from("portal_notifications")
+      .insert({
+        title,
+        message,
+        type: type || "info",
+        channels: channels || ["push"],
+        project_id: project_id || null,
+        client_id: client_id || null,
+        action_url: action_url || null,
+        priority: priority || "normal",
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
+    }
+
+    const results: Record<string, any> = { notification };
+
+    // Telegram senden
+    if (channels?.includes("telegram") && process.env.TELEGRAM_BOT_TOKEN) {
+      const chatId = telegram_chat_id || process.env.TELEGRAM_ADMIN_CHAT_ID;
+      if (chatId) {
+        try {
+          const emoji = type === "success" ? "✅" : type === "warning" ? "⚠️" : type === "error" ? "❌" : type === "deadline" ? "⏰" : "📢";
+          const text = `${emoji} *${title}*\n\n${message}${action_url ? `\n\n🔗 [Öffnen](${action_url})` : ""}`;
+          
+          const tgRes = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text,
+              parse_mode: "Markdown",
+              disable_web_page_preview: true,
+            }),
+          });
+          results.telegram = await tgRes.json();
+        } catch (e) {
+          results.telegram = { error: String(e) };
+        }
+      }
+    }
+
+    // WhatsApp senden (via ClawdBot Gateway)
+    if (channels?.includes("whatsapp") && process.env.CLAWDBOT_GATEWAY_URL) {
+      try {
+        const waRes = await fetch(`${process.env.CLAWDBOT_GATEWAY_URL}/api/whatsapp/send`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.CLAWDBOT_TOKEN}`
+          },
+          body: JSON.stringify({
+            to: body.whatsapp_to || process.env.WHATSAPP_ADMIN_NUMBER,
+            message: `${title}\n\n${message}`,
+          }),
+        });
+        results.whatsapp = await waRes.json();
+      } catch (e) {
+        results.whatsapp = { error: String(e) };
+      }
+    }
+
+    return NextResponse.json({ success: true, ...results });
+  } catch (error) {
+    console.error("Notification POST error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 
-function formatRelativeTime(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
+// PATCH - Notifications als gelesen markieren
+export async function PATCH(request: NextRequest) {
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  if (diffMins < 1) return "Gerade eben";
-  if (diffMins < 60) return `Vor ${diffMins} Min`;
-  if (diffHours < 24) return `Vor ${diffHours} Std`;
-  if (diffDays === 1) return "Gestern";
-  if (diffDays < 7) return `Vor ${diffDays} Tagen`;
-  return date.toLocaleDateString("de-DE");
+  try {
+    const body = await request.json();
+    const { ids, all } = body;
+
+    if (all) {
+      await db
+        .from("portal_notifications")
+        .update({ read_at: new Date().toISOString() })
+        .is("read_at", null);
+    } else if (ids?.length) {
+      await db
+        .from("portal_notifications")
+        .update({ read_at: new Date().toISOString() })
+        .in("id", ids);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
 }
