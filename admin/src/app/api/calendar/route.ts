@@ -25,41 +25,57 @@ export const GET = createHandler({
   const clientId = searchParams.get('clientId');
   const eventType = searchParams.get('eventType');
 
+  // Simple select without FK joins
   let query = db
     .from('calendar_events')
-    .select(`
-      *,
-      portal_clients (
-        id,
-        name,
-        company
-      ),
-      portal_projects (
-        id,
-        name
-      )
-    `)
-    .order('start_time', { ascending: true });
+    .select('*')
+    .order('start_date', { ascending: true });
 
   // Apply filters
   if (startDate) {
-    query = query.gte('start_time', startDate);
+    query = query.gte('start_date', startDate);
   }
   if (endDate) {
-    query = query.lte('end_time', endDate);
+    query = query.lte('end_date', endDate);
   }
   if (clientId) {
     query = query.eq('client_id', clientId);
   }
   if (eventType) {
-    query = query.eq('event_type', eventType);
+    query = query.eq('type', eventType);
   }
 
   const { data: events, error } = await query;
 
   if (error) throw new DatabaseError(error.message);
 
-  return { events: events || [] };
+  // Enrich with client/project names
+  const enrichedEvents = await Promise.all((events || []).map(async (event) => {
+    let clientName = null;
+    let projectName = null;
+    
+    if (event.client_id) {
+      const { data: client } = await db
+        .from('portal_clients')
+        .select('name, company')
+        .eq('id', event.client_id)
+        .single();
+      if (client) clientName = client.name;
+    }
+    
+    if (event.project_id) {
+      const { data: project } = await db
+        .from('portal_projects')
+        .select('name')
+        .eq('id', event.project_id)
+        .single();
+      if (project) projectName = project.name;
+    }
+    
+    return { ...event, client_name: clientName, project_name: projectName };
+  }));
+
+  return { events: enrichedEvents };
 });
 
 // ─────────────────────────────────────────────────────────────────
@@ -78,7 +94,6 @@ export const POST = createHandler({
     client_id,
     project_id,
     event_type,
-    color,
   } = data;
 
   const { data: event, error } = await db
@@ -86,12 +101,11 @@ export const POST = createHandler({
     .insert({
       title,
       description: description || null,
-      start_time,
-      end_time,
+      start_date: start_time,
+      end_date: end_time || null,
       client_id: client_id || null,
       project_id: project_id || null,
-      event_type,
-      color: color || getDefaultColor(event_type),
+      type: event_type || 'event',
     })
     .select()
     .single();
