@@ -1,171 +1,95 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
-import { db } from "@/lib/db";
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *                    NOTIFICATIONS API
+ * ═══════════════════════════════════════════════════════════════
+ */
 
-// GET - Alle Notifications
-export async function GET(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+import { db } from '@/lib/db';
+import {
+  createHandler,
+  CreateNotificationSchema,
+  DatabaseError,
+  type CreateNotificationInput,
+} from '@/lib/api';
+
+// ─────────────────────────────────────────────────────────────────
+// GET /api/notifications - List notifications
+// ─────────────────────────────────────────────────────────────────
+
+export const GET = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const searchParams = request.nextUrl.searchParams;
+  const unreadOnly = searchParams.get('unread') === 'true';
+  const limit = parseInt(searchParams.get('limit') || '50', 10);
+
+  let query = db
+    .from('notifications')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (unreadOnly) {
+    query = query.eq('is_read', false);
   }
 
-  try {
-    const { searchParams } = new URL(request.url);
-    const unread = searchParams.get("unread") === "true";
-    const limit = parseInt(searchParams.get("limit") || "50", 10);
+  const { data: notifications, error } = await query;
 
-    let query = db.from("portal_notifications")
-      .select(`*, project:portal_projects(id, name), client:portal_clients(id, name)`)
-      .order("created_at", { ascending: false })
-      .limit(limit);
+  if (error) throw new DatabaseError(error.message);
 
-    if (unread) {
-      query = query.is("read_at", null);
-    }
+  // Get unread count
+  const { count: unreadCount } = await db
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_read', false);
 
-    const { data: notifications, error } = await query;
+  return {
+    notifications: notifications || [],
+    unreadCount: unreadCount || 0,
+  };
+});
 
-    if (error) {
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
+// ─────────────────────────────────────────────────────────────────
+// POST /api/notifications - Create notification
+// ─────────────────────────────────────────────────────────────────
 
-    const unreadCount = notifications?.filter(n => !n.read_at).length || 0;
+export const POST = createHandler({
+  auth: true,
+  schema: CreateNotificationSchema,
+}, async (data: CreateNotificationInput) => {
+  const { title, message, type, link, metadata } = data;
 
-    return NextResponse.json({ 
-      notifications: notifications || [],
-      unread_count: unreadCount
-    });
-  } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
-}
+  const { data: notification, error } = await db
+    .from('notifications')
+    .insert({
+      title,
+      message,
+      type,
+      link: link || null,
+      metadata: metadata || null,
+      is_read: false,
+    })
+    .select()
+    .single();
 
-// POST - Notification erstellen & senden
-export async function POST(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (error) throw new DatabaseError(error.message);
 
-  try {
-    const body = await request.json();
-    const { 
-      title, 
-      message, 
-      type, // info, warning, success, error, deadline, message, approval
-      channels, // ["telegram", "email", "push", "whatsapp"]
-      project_id,
-      client_id,
-      action_url,
-      priority, // low, normal, high, urgent
-      telegram_chat_id,
-      email_to
-    } = body;
+  return { notification };
+});
 
-    if (!title || !message) {
-      return NextResponse.json({ error: "Title and message required" }, { status: 400 });
-    }
+// ─────────────────────────────────────────────────────────────────
+// PATCH /api/notifications - Mark all as read
+// ─────────────────────────────────────────────────────────────────
 
-    // Notification in DB speichern
-    const { data: notification, error } = await db
-      .from("portal_notifications")
-      .insert({
-        title,
-        message,
-        type: type || "info",
-        channels: channels || ["push"],
-        project_id: project_id || null,
-        client_id: client_id || null,
-        action_url: action_url || null,
-        priority: priority || "normal",
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+export const PATCH = createHandler({
+  auth: true,
+}, async () => {
+  const { error } = await db
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('is_read', false);
 
-    if (error) {
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
+  if (error) throw new DatabaseError(error.message);
 
-    const results: Record<string, any> = { notification };
-
-    // Telegram senden
-    if (channels?.includes("telegram") && process.env.TELEGRAM_BOT_TOKEN) {
-      const chatId = telegram_chat_id || process.env.TELEGRAM_ADMIN_CHAT_ID;
-      if (chatId) {
-        try {
-          const emoji = type === "success" ? "✅" : type === "warning" ? "⚠️" : type === "error" ? "❌" : type === "deadline" ? "⏰" : "📢";
-          const text = `${emoji} *${title}*\n\n${message}${action_url ? `\n\n🔗 [Öffnen](${action_url})` : ""}`;
-          
-          const tgRes = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text,
-              parse_mode: "Markdown",
-              disable_web_page_preview: true,
-            }),
-          });
-          results.telegram = await tgRes.json();
-        } catch (e) {
-          results.telegram = { error: String(e) };
-        }
-      }
-    }
-
-    // WhatsApp senden (via ClawdBot Gateway)
-    if (channels?.includes("whatsapp") && process.env.CLAWDBOT_GATEWAY_URL) {
-      try {
-        const waRes = await fetch(`${process.env.CLAWDBOT_GATEWAY_URL}/api/whatsapp/send`, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.CLAWDBOT_TOKEN}`
-          },
-          body: JSON.stringify({
-            to: body.whatsapp_to || process.env.WHATSAPP_ADMIN_NUMBER,
-            message: `${title}\n\n${message}`,
-          }),
-        });
-        results.whatsapp = await waRes.json();
-      } catch (e) {
-        results.whatsapp = { error: String(e) };
-      }
-    }
-
-    return NextResponse.json({ success: true, ...results });
-  } catch (error) {
-    console.error("Notification POST error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}
-
-// PATCH - Notifications als gelesen markieren
-export async function PATCH(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  try {
-    const body = await request.json();
-    const { ids, all } = body;
-
-    if (all) {
-      await db
-        .from("portal_notifications")
-        .update({ read_at: new Date().toISOString() })
-        .is("read_at", null);
-    } else if (ids?.length) {
-      await db
-        .from("portal_notifications")
-        .update({ read_at: new Date().toISOString() })
-        .in("id", ids);
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
-}
+  return { success: true };
+});

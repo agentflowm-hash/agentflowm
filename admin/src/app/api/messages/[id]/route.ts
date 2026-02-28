@@ -1,38 +1,85 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
-import { db } from "@/lib/db";
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *                    MESSAGE BY ID API
+ * ═══════════════════════════════════════════════════════════════
+ */
 
-// DELETE - Nachricht löschen
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+import { db } from '@/lib/db';
+import { createHandler, NotFoundError, DatabaseError, ValidationError } from '@/lib/api';
+
+// ─────────────────────────────────────────────────────────────────
+// GET /api/messages/[id] - Get single message
+// ─────────────────────────────────────────────────────────────────
+
+export const GET = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
+  const messageId = parseInt(id || '', 10);
+
+  if (isNaN(messageId)) {
+    throw new ValidationError('Invalid message ID');
   }
 
-  try {
-    const { id } = await params;
-    const messageId = parseInt(id, 10);
+  const { data: message, error } = await db
+    .from('portal_messages')
+    .select('*')
+    .eq('id', messageId)
+    .single();
 
-    if (isNaN(messageId)) {
-      return NextResponse.json({ error: "Invalid message ID" }, { status: 400 });
-    }
-
-    const { error } = await db
-      .from("portal_messages")
-      .delete()
-      .eq("id", messageId);
-
-    if (error) {
-      console.error("Delete message error:", error);
-      return NextResponse.json({ error: "Failed to delete message" }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Message DELETE error:", error);
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  if (error || !message) {
+    throw new NotFoundError('Message');
   }
-}
+
+  return { message };
+});
+
+// ─────────────────────────────────────────────────────────────────
+// PATCH /api/messages/[id] - Mark message as read
+// ─────────────────────────────────────────────────────────────────
+
+export const PATCH = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
+  const messageId = parseInt(id || '', 10);
+
+  if (isNaN(messageId)) {
+    throw new ValidationError('Invalid message ID');
+  }
+
+  const { data: message, error } = await db
+    .from('portal_messages')
+    .update({ is_read: true })
+    .eq('id', messageId)
+    .select()
+    .single();
+
+  if (error) throw new DatabaseError(error.message);
+
+  return { message };
+});
+
+// ─────────────────────────────────────────────────────────────────
+// DELETE /api/messages/[id] - Delete message
+// ─────────────────────────────────────────────────────────────────
+
+export const DELETE = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
+  const messageId = parseInt(id || '', 10);
+
+  if (isNaN(messageId)) {
+    throw new ValidationError('Invalid message ID');
+  }
+
+  const { error } = await db
+    .from('portal_messages')
+    .delete()
+    .eq('id', messageId);
+
+  if (error) throw new DatabaseError(error.message);
+
+  return { deleted: true };
+});

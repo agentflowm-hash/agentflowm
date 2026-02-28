@@ -1,108 +1,115 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
-import { db } from "@/lib/db";
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *                    CALENDAR EVENT BY ID API
+ * ═══════════════════════════════════════════════════════════════
+ */
 
-// GET - Einzelnes Event
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+import { db } from '@/lib/db';
+import {
+  createHandler,
+  UpdateEventSchema,
+  NotFoundError,
+  DatabaseError,
+  type UpdateEventInput,
+} from '@/lib/api';
+
+// ─────────────────────────────────────────────────────────────────
+// GET /api/calendar/[id] - Get single event
+// ─────────────────────────────────────────────────────────────────
+
+export const GET = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
+
+  const { data: event, error } = await db
+    .from('calendar_events')
+    .select(`
+      *,
+      portal_clients (
+        id,
+        name,
+        company
+      ),
+      portal_projects (
+        id,
+        name
+      )
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error || !event) {
+    throw new NotFoundError('Event');
   }
 
-  try {
-    const { id } = await params;
-    const eventId = parseInt(id, 10);
+  return { event };
+});
 
-    const { data: event, error } = await db
-      .from("portal_calendar_events")
-      .select(`*, project:portal_projects(*), client:portal_clients(*)`)
-      .eq("id", eventId)
-      .single();
+// ─────────────────────────────────────────────────────────────────
+// PATCH /api/calendar/[id] - Update event
+// ─────────────────────────────────────────────────────────────────
 
-    if (error || !event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+export const PATCH = createHandler({
+  auth: true,
+  schema: UpdateEventSchema,
+}, async (data: UpdateEventInput, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
+
+  // Check if event exists
+  const { data: existing } = await db
+    .from('calendar_events')
+    .select('id')
+    .eq('id', id)
+    .single();
+
+  if (!existing) {
+    throw new NotFoundError('Event');
+  }
+
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  // Only include defined fields
+  const fields = [
+    'title', 'description', 'start_time', 'end_time',
+    'client_id', 'project_id', 'event_type', 'color'
+  ] as const;
+  
+  for (const field of fields) {
+    if (data[field] !== undefined) {
+      updateData[field] = data[field];
     }
-
-    return NextResponse.json({ event });
-  } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
-}
-
-// PATCH - Event aktualisieren
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    const { id } = await params;
-    const eventId = parseInt(id, 10);
-    const body = await request.json();
+  const { data: event, error } = await db
+    .from('calendar_events')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
 
-    const allowedFields = [
-      "title", "description", "start_date", "end_date", "type",
-      "project_id", "client_id", "color", "all_day", "reminder_minutes",
-      "location", "attendees", "completed"
-    ];
+  if (error) throw new DatabaseError(error.message);
 
-    const updateData: Record<string, any> = {};
-    for (const field of allowedFields) {
-      if (body[field] !== undefined) {
-        updateData[field] = body[field];
-      }
-    }
-    updateData.updated_at = new Date().toISOString();
+  return { event };
+});
 
-    const { data: event, error } = await db
-      .from("portal_calendar_events")
-      .update(updateData)
-      .eq("id", eventId)
-      .select()
-      .single();
+// ─────────────────────────────────────────────────────────────────
+// DELETE /api/calendar/[id] - Delete event
+// ─────────────────────────────────────────────────────────────────
 
-    if (error) {
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
+export const DELETE = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
 
-    return NextResponse.json({ success: true, event });
-  } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
-}
+  const { error } = await db
+    .from('calendar_events')
+    .delete()
+    .eq('id', id);
 
-// DELETE - Event löschen
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (error) throw new DatabaseError(error.message);
 
-  try {
-    const { id } = await params;
-    const eventId = parseInt(id, 10);
-
-    const { error } = await db
-      .from("portal_calendar_events")
-      .delete()
-      .eq("id", eventId);
-
-    if (error) {
-      return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
-}
+  return { deleted: true };
+});

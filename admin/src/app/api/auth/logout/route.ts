@@ -1,7 +1,23 @@
-import { NextResponse } from 'next/server';
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *                    LOGOUT API
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+import { createHandler } from '@/lib/api';
 import { destroySession } from '@/lib/auth';
 
-export async function POST() {
+// ─────────────────────────────────────────────────────────────────
+// POST /api/auth/logout - Destroy session
+// ─────────────────────────────────────────────────────────────────
+
+export const POST = createHandler({
+  auth: false, // Allow logout even if session is invalid
+}, async () => {
   await destroySession();
-  return NextResponse.json({ success: true });
-}
+
+  return { 
+    success: true,
+    message: 'Logged out successfully',
+  };
+});

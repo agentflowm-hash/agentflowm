@@ -1,129 +1,126 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
-import { db } from "@/lib/db";
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *                    REFERRAL BY ID API
+ * ═══════════════════════════════════════════════════════════════
+ */
 
-const ALLOWED_STATUS = [
-  "pending",
-  "contacted",
-  "converted",
-  "rejected",
-] as const;
-const MAX_NOTES_LENGTH = 2000;
+import { db } from '@/lib/db';
+import {
+  createHandler,
+  UpdateReferralSchema,
+  NotFoundError,
+  DatabaseError,
+  type UpdateReferralInput,
+} from '@/lib/api';
 
-// PATCH - Referral aktualisieren
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+// ─────────────────────────────────────────────────────────────────
+// GET /api/referrals/[id] - Get single referral
+// ─────────────────────────────────────────────────────────────────
+
+export const GET = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
+
+  const { data: referral, error } = await db
+    .from('referrals')
+    .select(`
+      *,
+      referrer:portal_clients!referrer_id (
+        id,
+        name,
+        email,
+        company
+      )
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error || !referral) {
+    throw new NotFoundError('Referral');
   }
 
-  try {
-    const { id } = await params;
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId) || numericId <= 0) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-    }
+  return { referral };
+});
 
-    const body = await request.json();
-    const { status, notes } = body;
+// ─────────────────────────────────────────────────────────────────
+// PATCH /api/referrals/[id] - Update referral status
+// ─────────────────────────────────────────────────────────────────
 
-    const updateData: Record<string, string> = {};
+export const PATCH = createHandler({
+  auth: true,
+  schema: UpdateReferralSchema,
+}, async (data: UpdateReferralInput, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
 
-    if (status !== undefined) {
-      if (!ALLOWED_STATUS.includes(status)) {
-        return NextResponse.json(
-          { error: `Invalid status. Allowed: ${ALLOWED_STATUS.join(", ")}` },
-          { status: 400 },
-        );
-      }
-      updateData.status = status;
-    }
-    if (notes !== undefined) {
-      if (typeof notes !== "string" || notes.length > MAX_NOTES_LENGTH) {
-        return NextResponse.json(
-          {
-            error: `Notes must be a string with max ${MAX_NOTES_LENGTH} characters`,
-          },
-          { status: 400 },
-        );
-      }
-      updateData.notes = notes;
-    }
+  // Check if referral exists
+  const { data: existing } = await db
+    .from('referrals')
+    .select('id, status, referrer_id')
+    .eq('id', id)
+    .single();
 
-    if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: "No fields to update" },
-        { status: 400 },
-      );
-    }
-
-    const { data, error } = await db
-      .from("referrals")
-      .update(updateData)
-      .eq("id", numericId)
-      .select();
-
-    if (error) {
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
-
-    if (!data || data.length === 0) {
-      return NextResponse.json(
-        { error: "Referral not found" },
-        { status: 404 },
-      );
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Referral PATCH error:", error);
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
-}
-
-// DELETE
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!existing) {
+    throw new NotFoundError('Referral');
   }
 
-  try {
-    const { id } = await params;
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId) || numericId <= 0) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (data.status !== undefined) {
+    updateData.status = data.status;
+    
+    // If converted, set conversion date
+    if (data.status === 'converted') {
+      updateData.converted_at = new Date().toISOString();
+      
+      // Create notification
+      await db.from('notifications').insert({
+        title: 'Empfehlung konvertiert',
+        message: 'Eine Empfehlung wurde erfolgreich konvertiert',
+        type: 'success',
+        link: `/referrals/${id}`,
+        is_read: false,
+      });
     }
-
-    // First check if the referral exists
-    const { data: existing } = await db
-      .from("referrals")
-      .select("id")
-      .eq("id", numericId)
-      .single();
-
-    if (!existing) {
-      return NextResponse.json(
-        { error: "Referral not found" },
-        { status: 404 },
-      );
-    }
-
-    const { error } = await db.from("referrals").delete().eq("id", numericId);
-
-    if (error) {
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Referral DELETE error:", error);
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
-}
+
+  if (data.reward_status !== undefined) {
+    updateData.reward_status = data.reward_status;
+    
+    if (data.reward_status === 'paid') {
+      updateData.reward_paid_at = new Date().toISOString();
+    }
+  }
+
+  const { data: referral, error } = await db
+    .from('referrals')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new DatabaseError(error.message);
+
+  return { referral };
+});
+
+// ─────────────────────────────────────────────────────────────────
+// DELETE /api/referrals/[id] - Delete referral
+// ─────────────────────────────────────────────────────────────────
+
+export const DELETE = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const id = request.nextUrl.pathname.split('/').pop();
+
+  const { error } = await db
+    .from('referrals')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new DatabaseError(error.message);
+
+  return { deleted: true };
+});

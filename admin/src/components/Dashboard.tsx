@@ -4559,7 +4559,7 @@ function ClientsTab() {
 
   const handleBulkDelete = async () => {
     if (!confirm(`${selectedIds.size} Kunden wirklich löschen?`)) return;
-    for (const id of selectedIds) {
+    for (const id of Array.from(selectedIds)) {
       await fetch(`/api/clients/${id}`, { method: "DELETE", credentials: "include" });
     }
     setSelectedIds(new Set());
@@ -4567,7 +4567,7 @@ function ClientsTab() {
   };
 
   const handleBulkStatusChange = async (status: string) => {
-    for (const id of selectedIds) {
+    for (const id of Array.from(selectedIds)) {
       await fetch(`/api/clients/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -5288,24 +5288,25 @@ function ClientDetailModal({
                   <div className="p-3 bg-white/[0.02] rounded-xl">
                     <div className="text-xs text-white/40 mb-1">Telefon</div>
                     <div className="text-sm text-white">
-                    {client.phone || "-"}
+                      {client.phone || "-"}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <div className="text-xs text-white/40 mb-1">Telegram</div>
+                    <div className="text-sm text-white">
+                      {client.telegram_username
+                        ? `@${client.telegram_username}`
+                        : "-"}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white/[0.02] rounded-xl">
+                    <div className="text-xs text-white/40 mb-1">Zugangscode</div>
+                    <div className="text-sm font-mono text-[#FC682C]">
+                      {client.access_code}
+                    </div>
                   </div>
                 </div>
-                <div className="p-3 bg-white/[0.02] rounded-xl">
-                  <div className="text-xs text-white/40 mb-1">Telegram</div>
-                  <div className="text-sm text-white">
-                    {client.telegram_username
-                      ? `@${client.telegram_username}`
-                      : "-"}
-                  </div>
-                </div>
-                <div className="p-3 bg-white/[0.02] rounded-xl">
-                  <div className="text-xs text-white/40 mb-1">Zugangscode</div>
-                  <div className="text-sm font-mono text-[#FC682C]">
-                    {client.access_code}
-                  </div>
-                </div>
-              </div>
+              )}
 
               {/* Telegram Actions */}
               <div className="space-y-2">

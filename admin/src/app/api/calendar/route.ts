@@ -1,127 +1,116 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
-import { db } from "@/lib/db";
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *                    CALENDAR API
+ * ═══════════════════════════════════════════════════════════════
+ */
 
-// GET - Alle Kalender-Events
-export async function GET(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+import { db } from '@/lib/db';
+import {
+  createHandler,
+  CreateEventSchema,
+  DatabaseError,
+  type CreateEventInput,
+} from '@/lib/api';
 
-  try {
-    const { searchParams } = new URL(request.url);
-    const start = searchParams.get("start");
-    const end = searchParams.get("end");
-    const type = searchParams.get("type"); // deadline, meeting, reminder, milestone
+// ─────────────────────────────────────────────────────────────────
+// GET /api/calendar - List events with optional filters
+// ─────────────────────────────────────────────────────────────────
 
-    let query = db.from("portal_calendar_events").select(`
+export const GET = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const searchParams = request.nextUrl.searchParams;
+  const startDate = searchParams.get('startDate');
+  const endDate = searchParams.get('endDate');
+  const clientId = searchParams.get('clientId');
+  const eventType = searchParams.get('eventType');
+
+  let query = db
+    .from('calendar_events')
+    .select(`
       *,
-      project:portal_projects(id, name, client_id),
-      client:portal_clients(id, name, email, company)
-    `);
+      portal_clients (
+        id,
+        name,
+        company
+      ),
+      portal_projects (
+        id,
+        name
+      )
+    `)
+    .order('start_time', { ascending: true });
 
-    if (start) {
-      query = query.gte("start_date", start);
-    }
-    if (end) {
-      query = query.lte("start_date", end);
-    }
-    if (type) {
-      query = query.eq("type", type);
-    }
-
-    const { data: events, error } = await query.order("start_date", { ascending: true });
-
-    if (error) {
-      console.error("Calendar GET error:", error);
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
-
-    // Also get project deadlines
-    const { data: projects } = await db
-      .from("portal_projects")
-      .select("id, name, estimated_end, client_id, status")
-      .not("estimated_end", "is", null)
-      .neq("status", "abgeschlossen");
-
-    // Convert project deadlines to events
-    const deadlineEvents = (projects || []).map(p => ({
-      id: `deadline-${p.id}`,
-      title: `📅 Deadline: ${p.name}`,
-      start_date: p.estimated_end,
-      type: "deadline",
-      project_id: p.id,
-      color: "#FC682C",
-      all_day: true,
-    }));
-
-    return NextResponse.json({ 
-      events: [...(events || []), ...deadlineEvents],
-      count: (events?.length || 0) + deadlineEvents.length
-    });
-  } catch (error) {
-    console.error("Calendar GET error:", error);
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  // Apply filters
+  if (startDate) {
+    query = query.gte('start_time', startDate);
   }
-}
-
-// POST - Neues Event erstellen
-export async function POST(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (endDate) {
+    query = query.lte('end_time', endDate);
+  }
+  if (clientId) {
+    query = query.eq('client_id', clientId);
+  }
+  if (eventType) {
+    query = query.eq('event_type', eventType);
   }
 
-  try {
-    const body = await request.json();
-    const { 
-      title, 
-      description, 
-      start_date, 
-      end_date, 
-      type, 
-      project_id, 
-      client_id,
-      color,
-      all_day,
-      reminder_minutes,
-      location,
-      attendees
-    } = body;
+  const { data: events, error } = await query;
 
-    if (!title || !start_date) {
-      return NextResponse.json({ error: "Title and start_date required" }, { status: 400 });
-    }
+  if (error) throw new DatabaseError(error.message);
 
-    const { data: event, error } = await db
-      .from("portal_calendar_events")
-      .insert({
-        title,
-        description: description || null,
-        start_date,
-        end_date: end_date || start_date,
-        type: type || "event",
-        project_id: project_id || null,
-        client_id: client_id || null,
-        color: color || "#FC682C",
-        all_day: all_day || false,
-        reminder_minutes: reminder_minutes || 30,
-        location: location || null,
-        attendees: attendees || null,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+  return { events: events || [] };
+});
 
-    if (error) {
-      console.error("Calendar POST error:", error);
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
+// ─────────────────────────────────────────────────────────────────
+// POST /api/calendar - Create new event
+// ─────────────────────────────────────────────────────────────────
 
-    return NextResponse.json({ success: true, event });
-  } catch (error) {
-    console.error("Calendar POST error:", error);
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
+export const POST = createHandler({
+  auth: true,
+  schema: CreateEventSchema,
+}, async (data: CreateEventInput) => {
+  const {
+    title,
+    description,
+    start_time,
+    end_time,
+    client_id,
+    project_id,
+    event_type,
+    color,
+  } = data;
+
+  const { data: event, error } = await db
+    .from('calendar_events')
+    .insert({
+      title,
+      description: description || null,
+      start_time,
+      end_time,
+      client_id: client_id || null,
+      project_id: project_id || null,
+      event_type,
+      color: color || getDefaultColor(event_type),
+    })
+    .select()
+    .single();
+
+  if (error) throw new DatabaseError(error.message);
+
+  return { event };
+});
+
+// ─────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────
+
+function getDefaultColor(eventType: string): string {
+  const colors: Record<string, string> = {
+    meeting: '#3B82F6',   // blue
+    deadline: '#EF4444',  // red
+    milestone: '#10B981', // green
+    reminder: '#F59E0B',  // amber
+  };
+  return colors[eventType] || '#6B7280';
 }

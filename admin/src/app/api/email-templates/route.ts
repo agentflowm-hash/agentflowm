@@ -1,70 +1,107 @@
-import { NextRequest, NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/auth";
-import { db } from "@/lib/db";
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *                    EMAIL TEMPLATES API
+ * ═══════════════════════════════════════════════════════════════
+ */
 
-// GET - Alle Email Templates
-export async function GET(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+import { db } from '@/lib/db';
+import {
+  createHandler,
+  CreateEmailTemplateSchema,
+  ConflictError,
+  DatabaseError,
+  type CreateEmailTemplateInput,
+} from '@/lib/api';
+
+// ─────────────────────────────────────────────────────────────────
+// GET /api/email-templates - List all templates
+// ─────────────────────────────────────────────────────────────────
+
+export const GET = createHandler({
+  auth: true,
+}, async (_data, _ctx, request) => {
+  const searchParams = request.nextUrl.searchParams;
+  const category = searchParams.get('category');
+
+  let query = db
+    .from('email_templates')
+    .select('*')
+    .order('category', { ascending: true })
+    .order('name', { ascending: true });
+
+  if (category) {
+    query = query.eq('category', category);
   }
 
-  try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
+  const { data: templates, error } = await query;
 
-    let query = db.from("portal_email_templates").select("*");
-    
-    if (category) {
-      query = query.eq("category", category);
-    }
+  if (error) throw new DatabaseError(error.message);
 
-    const { data: templates, error } = await query.order("name", { ascending: true });
+  // Group by category for UI
+  const grouped: Record<string, typeof templates> = {};
+  (templates || []).forEach((t: any) => {
+    const cat = t.category || 'general';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(t);
+  });
 
-    if (error) {
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
+  return {
+    templates: templates || [],
+    grouped,
+    categories: Object.keys(grouped),
+  };
+});
 
-    return NextResponse.json({ templates: templates || [] });
-  } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
+// ─────────────────────────────────────────────────────────────────
+// POST /api/email-templates - Create template
+// ─────────────────────────────────────────────────────────────────
+
+export const POST = createHandler({
+  auth: true,
+  schema: CreateEmailTemplateSchema,
+}, async (data: CreateEmailTemplateInput) => {
+  const { name, subject, body, category, variables } = data;
+
+  // Check for duplicate name in category
+  const { data: existing } = await db
+    .from('email_templates')
+    .select('id')
+    .eq('name', name)
+    .eq('category', category)
+    .single();
+
+  if (existing) {
+    throw new ConflictError('A template with this name already exists in this category');
   }
-}
 
-// POST - Neues Template erstellen
-export async function POST(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // Extract variables from body if not provided
+  const extractedVars = variables.length > 0 
+    ? variables 
+    : extractVariables(body);
 
-  try {
-    const body = await request.json();
-    const { name, subject, body: emailBody, category, variables } = body;
+  const { data: template, error } = await db
+    .from('email_templates')
+    .insert({
+      name,
+      subject,
+      body,
+      category,
+      variables: extractedVars,
+    })
+    .select()
+    .single();
 
-    if (!name || !subject || !emailBody) {
-      return NextResponse.json({ error: "Name, subject, and body required" }, { status: 400 });
-    }
+  if (error) throw new DatabaseError(error.message);
 
-    const { data: template, error } = await db
-      .from("portal_email_templates")
-      .insert({
-        name,
-        subject,
-        body: emailBody,
-        category: category || "general",
-        variables: variables || [],
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+  return { template };
+});
 
-    if (error) {
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
-    }
+// ─────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────
 
-    return NextResponse.json({ success: true, template });
-  } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
-  }
+function extractVariables(text: string): string[] {
+  const matches = text.match(/\{\{([^}]+)\}\}/g) || [];
+  const unique = new Set(matches.map(m => m.replace(/\{\{|\}\}/g, '').trim()));
+  return Array.from(unique);
 }
