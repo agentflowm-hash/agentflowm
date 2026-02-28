@@ -24,21 +24,10 @@ export const GET = createHandler({
   const status = searchParams.get('status');
   const clientId = searchParams.get('clientId');
 
+  // Simple select without FK joins (avoid schema cache issues)
   let query = db
     .from('invoices')
-    .select(`
-      *,
-      portal_clients (
-        id,
-        name,
-        email,
-        company
-      ),
-      portal_projects (
-        id,
-        name
-      )
-    `)
+    .select('*')
     .order('created_at', { ascending: false });
 
   if (status) {
@@ -52,7 +41,44 @@ export const GET = createHandler({
 
   if (error) throw new DatabaseError(error.message);
 
-  return { invoices: invoices || [] };
+  // Manually fetch client/project names if needed
+  const enrichedInvoices = await Promise.all((invoices || []).map(async (inv) => {
+    let clientName = null;
+    let projectName = null;
+    
+    if (inv.client_id) {
+      const { data: client } = await db
+        .from('portal_clients')
+        .select('name, email, company')
+        .eq('id', inv.client_id)
+        .single();
+      if (client) clientName = client.name;
+    }
+    
+    if (inv.project_id) {
+      const { data: project } = await db
+        .from('portal_projects')
+        .select('name')
+        .eq('id', inv.project_id)
+        .single();
+      if (project) projectName = project.name;
+    }
+    
+    return { ...inv, client_name: clientName, project_name: projectName };
+  }));
+
+  // Calculate stats
+  const stats = {
+    total: enrichedInvoices.length,
+    draft: enrichedInvoices.filter(i => i.status === 'draft').length,
+    sent: enrichedInvoices.filter(i => i.status === 'sent').length,
+    paid: enrichedInvoices.filter(i => i.status === 'paid').length,
+    overdue: enrichedInvoices.filter(i => i.status === 'overdue').length,
+    totalAmount: enrichedInvoices.reduce((sum, i) => sum + (i.total || 0), 0),
+    paidAmount: enrichedInvoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.total || 0), 0),
+  };
+
+  return { invoices: enrichedInvoices, stats };
 });
 
 // ─────────────────────────────────────────────────────────────────

@@ -26,8 +26,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50", 10);
     const client_id = searchParams.get("client_id");
 
+    // Simple query without FK joins
     let query = db.from("portal_emails")
-      .select(`*, client:portal_clients(id, name, email)`)
+      .select("*")
       .order("sent_at", { ascending: false })
       .limit(limit);
 
@@ -41,15 +42,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
+    // Enrich with client names
+    const enrichedEmails = await Promise.all((emails || []).map(async (email) => {
+      let clientName = null;
+      if (email.client_id) {
+        const { data: client } = await db
+          .from('portal_clients')
+          .select('name, email')
+          .eq('id', email.client_id)
+          .single();
+        if (client) clientName = client.name;
+      }
+      return { ...email, client_name: clientName };
+    }));
+
     // Stats
     const stats = {
-      total: emails?.length || 0,
-      opened: emails?.filter(e => e.opened_at).length || 0,
-      clicked: emails?.filter(e => e.clicked_at).length || 0,
-      openRate: emails?.length ? Math.round((emails.filter(e => e.opened_at).length / emails.length) * 100) : 0,
+      total: enrichedEmails.length,
+      opened: enrichedEmails.filter(e => e.opened_at).length,
+      clicked: enrichedEmails.filter(e => e.clicked_at).length,
+      openRate: enrichedEmails.length ? Math.round((enrichedEmails.filter(e => e.opened_at).length / enrichedEmails.length) * 100) : 0,
     };
 
-    return NextResponse.json({ emails: emails || [], stats });
+    return NextResponse.json({ emails: enrichedEmails, stats });
   } catch (error) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }

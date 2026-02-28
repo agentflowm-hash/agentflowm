@@ -25,16 +25,10 @@ export const GET = createHandler({
   const status = searchParams.get('status');
   const referrerId = searchParams.get('referrerId');
 
+  // Simple select without FK joins (avoid schema cache issues)
   let query = db
     .from('referrals')
-    .select(`
-      *,
-      referrer:portal_clients!referrer_id (
-        id,
-        name,
-        email
-      )
-    `)
+    .select('*')
     .order('created_at', { ascending: false });
 
   if (status) {
@@ -48,18 +42,32 @@ export const GET = createHandler({
 
   if (error) throw new DatabaseError(error.message);
 
+  // Manually enrich with referrer names if needed
+  const enrichedReferrals = await Promise.all((referrals || []).map(async (ref) => {
+    let referrerName = null;
+    if (ref.referrer_id) {
+      const { data: referrer } = await db
+        .from('portal_clients')
+        .select('name, email')
+        .eq('id', ref.referrer_id)
+        .single();
+      if (referrer) referrerName = referrer.name;
+    }
+    return { ...ref, referrer_name: referrerName };
+  }));
+
   // Calculate stats
   const stats = {
-    total: referrals?.length || 0,
-    pending: referrals?.filter((r: any) => r.status === 'pending').length || 0,
-    converted: referrals?.filter((r: any) => r.status === 'converted').length || 0,
-    pendingRewards: referrals?.filter((r: any) => 
+    total: enrichedReferrals.length,
+    pending: enrichedReferrals.filter((r: any) => r.status === 'pending').length,
+    converted: enrichedReferrals.filter((r: any) => r.status === 'converted').length,
+    pendingRewards: enrichedReferrals.filter((r: any) => 
       r.status === 'converted' && r.reward_status === 'pending'
-    ).length || 0,
+    ).length,
   };
 
   return {
-    referrals: referrals || [],
+    referrals: enrichedReferrals,
     stats,
   };
 });
