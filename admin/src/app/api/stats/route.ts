@@ -48,13 +48,14 @@ export async function GET() {
     const { count: subscribersConfirmed } = await db.from('subscribers').select('*', { count: 'exact', head: true }).eq('status', 'confirmed');
     const { count: subscribersThisWeek } = await db.from('subscribers').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo);
 
-    // Revenue from customers table
+    // Revenue from invoices (paid invoices)
     const thisMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-    const { data: customersAll } = await db.from('customers').select('amount_paid, created_at');
-    const revenueTotal = (customersAll || []).reduce((sum, c) => sum + (c.amount_paid || 0), 0);
-    const revenueThisMonth = (customersAll || [])
-      .filter(c => c.created_at >= thisMonthStart)
-      .reduce((sum, c) => sum + (c.amount_paid || 0), 0);
+    const { data: invoicesAll } = await db.from('invoices').select('total, status, paid_at, created_at');
+    const paidInvoices = (invoicesAll || []).filter(i => i.status === 'paid');
+    const revenueTotal = paidInvoices.reduce((sum, i) => sum + (parseFloat(i.total) || 0), 0);
+    const revenueThisMonth = paidInvoices
+      .filter(i => i.paid_at >= thisMonthStart || i.created_at >= thisMonthStart)
+      .reduce((sum, i) => sum + (parseFloat(i.total) || 0), 0);
 
     // Recent leads (last 5)
     const { data: recentLeadsRaw } = await db
