@@ -92,17 +92,28 @@ export const POST = createHandler({
   auth: true,
   schema: CreateInvoiceSchema,
 }, async (data: CreateInvoiceInput) => {
-  const { client_id, project_id, items, tax_rate, discount_percent = 0, due_date, notes } = data;
+  const { 
+    client_id, client_name, client_email, client_company, client_address,
+    project_id, items, tax_rate, discount_percent = 0, due_date, notes 
+  } = data;
 
-  // Verify client exists
-  const { data: client } = await db
-    .from('portal_clients')
-    .select('id, name, email, company')
-    .eq('id', client_id)
-    .single();
+  // Get client info - either from ID or use provided details
+  let clientName = client_name || '';
+  let clientEmail = client_email || '';
+  let clientCompany = client_company || null;
+  
+  if (client_id) {
+    const { data: client } = await db
+      .from('portal_clients')
+      .select('id, name, email, company')
+      .eq('id', client_id)
+      .single();
 
-  if (!client) {
-    throw new NotFoundError('Client');
+    if (client) {
+      clientName = client.name;
+      clientEmail = client.email;
+      clientCompany = client.company;
+    }
   }
 
   // Calculate totals with discount
@@ -127,12 +138,12 @@ export const POST = createHandler({
   const { data: invoice, error } = await db
     .from('invoices')
     .insert({
-      client_id,
+      client_id: client_id || null,
       project_id: project_id || null,
       invoice_number: invoiceNumber,
-      client_name: client.name,
-      client_email: client.email,
-      client_company: client.company || null,
+      client_name: clientName,
+      client_email: clientEmail,
+      client_company: clientCompany,
       subtotal,
       discount_percent,
       discount_amount,
@@ -141,7 +152,7 @@ export const POST = createHandler({
       total,
       status: 'draft',
       issue_date: new Date().toISOString().split('T')[0],
-      due_date: due_date.split('T')[0],
+      due_date: due_date.includes('T') ? due_date.split('T')[0] : due_date,
       notes: notes || null,
     })
     .select()

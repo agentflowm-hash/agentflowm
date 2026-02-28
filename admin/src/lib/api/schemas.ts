@@ -69,14 +69,22 @@ export const InvoiceItemSchema = z.object({
 });
 
 export const CreateInvoiceSchema = z.object({
-  client_id: IdSchema,
+  // Either client_id OR client details
+  client_id: IdSchema.optional().nullable(),
+  client_name: z.string().min(1).max(100).optional(),
+  client_email: EmailSchema.optional(),
+  client_company: z.string().max(100).optional().nullable(),
+  client_address: z.string().max(500).optional().nullable(),
   project_id: IdSchema.optional().nullable(),
   items: z.array(InvoiceItemSchema).min(1, 'At least one item is required'),
   tax_rate: z.number().min(0).max(100).default(19),
   discount_percent: z.number().min(0).max(100).default(0),
-  due_date: z.string().datetime('Invalid due date'),
+  due_date: z.string(),  // Accept any date string format
   notes: z.string().max(1000).optional(),
-});
+}).refine(
+  data => data.client_id || (data.client_name && data.client_email),
+  { message: 'Either client_id or client_name+email required' }
+);
 
 export const UpdateInvoiceSchema = z.object({
   status: z.enum(['draft', 'sent', 'paid', 'overdue', 'cancelled']).optional(),
