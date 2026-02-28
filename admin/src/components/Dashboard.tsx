@@ -1104,8 +1104,8 @@ function DashboardTab({
         <StatCard
           title="Umsatz"
           value={`€${(stats.revenue.thisMonth / 1000).toFixed(1)}k`}
-          change={stats.revenue.thisMonth > 0 ? Math.round((stats.revenue.thisMonth / stats.revenue.total) * 100) : 0}
-          changeLabel="diesen Monat"
+          change={stats.revenue.deals}
+          changeLabel={`${stats.revenue.deals === 1 ? 'Deal' : 'Deals'} abgeschlossen`}
           icon={CurrencyEuroIcon}
           color="orange"
           trend={stats.revenue.thisMonth > 0 ? "up" : undefined}
@@ -1115,12 +1115,12 @@ function DashboardTab({
         <StatCard
           title="Conversion"
           value={`${stats.leads.conversionRate}%`}
-          change={stats.leads.conversionRate}
-          changeLabel="Rate"
+          change={stats.leads.won}
+          changeLabel={`von ${stats.leads.total} Leads`}
           icon={ArrowTrendingUpIcon}
           color="purple"
           trend={stats.leads.conversionRate > 50 ? "up" : undefined}
-          sparkline={[stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate]}
+          sparkline={[0, 0, 0, 0, 0, stats.leads.total - stats.leads.won, stats.leads.won]}
           onClick={() => onNavigate?.("pipeline")}
         />
       </div>
