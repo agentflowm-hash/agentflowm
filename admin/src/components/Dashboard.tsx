@@ -139,6 +139,11 @@ interface Stats {
     projected: number;
     deals: number;
   };
+  trends?: {
+    leads: number[];
+    checks: number[];
+    revenue: number[];
+  };
   recentLeads?: {
     id: number;
     name: string;
@@ -275,6 +280,7 @@ export function Dashboard() {
             projected: 0,
             deals: data.leads.won || 0,
           },
+          trends: data.trends || { leads: [], checks: [], revenue: [] },
           recentLeads: data.recentLeads || [],
         });
       } else {
@@ -1082,7 +1088,8 @@ function DashboardTab({
           changeLabel="diese Woche"
           icon={UsersIcon}
           color="blue"
-          sparkline={[30, 45, 35, 50, 49, 60, 70]}
+          sparkline={stats.trends?.leads?.length ? stats.trends.leads : [0, 0, 0, 0, 0, 0, stats.leads.total]}
+          onClick={() => onNavigate?.("leads")}
         />
         <StatCard
           title="Website-Checks"
@@ -1091,27 +1098,30 @@ function DashboardTab({
           changeLabel="heute"
           icon={GlobeAltIcon}
           color="green"
-          sparkline={[20, 30, 25, 40, 35, 45, 50]}
+          sparkline={stats.trends?.checks?.length ? stats.trends.checks : [0, 0, 0, 0, 0, 0, stats.checks.total]}
+          onClick={() => onNavigate?.("checks")}
         />
         <StatCard
           title="Umsatz"
           value={`€${(stats.revenue.thisMonth / 1000).toFixed(1)}k`}
-          change={15}
-          changeLabel="vs. letzter Monat"
+          change={stats.revenue.thisMonth > 0 ? Math.round((stats.revenue.thisMonth / stats.revenue.total) * 100) : 0}
+          changeLabel="diesen Monat"
           icon={CurrencyEuroIcon}
           color="orange"
-          trend="up"
-          sparkline={[40, 35, 50, 45, 60, 55, 70]}
+          trend={stats.revenue.thisMonth > 0 ? "up" : undefined}
+          sparkline={stats.trends?.revenue?.length ? stats.trends.revenue : [0, 0, 0, 0, 0, 0, stats.revenue.thisMonth]}
+          onClick={() => onNavigate?.("invoices")}
         />
         <StatCard
           title="Conversion"
           value={`${stats.leads.conversionRate}%`}
-          change={5}
-          changeLabel="vs. letzter Monat"
+          change={stats.leads.conversionRate}
+          changeLabel="Rate"
           icon={ArrowTrendingUpIcon}
           color="purple"
-          trend="up"
-          sparkline={[25, 30, 28, 35, 40, 38, 45]}
+          trend={stats.leads.conversionRate > 50 ? "up" : undefined}
+          sparkline={[stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate, stats.leads.conversionRate]}
+          onClick={() => onNavigate?.("pipeline")}
         />
       </div>
 
@@ -1270,6 +1280,7 @@ function StatCard({
   color,
   trend,
   sparkline,
+  onClick,
 }: any) {
   const colors: Record<string, string> = {
     blue: "from-blue-500/20 to-blue-600/5 border-blue-500/20",
@@ -1286,7 +1297,8 @@ function StatCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${colors[color]} border p-5`}
+      onClick={onClick}
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${colors[color]} border p-5 ${onClick ? 'cursor-pointer hover:scale-[1.02] transition-transform' : ''}`}
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`p-2.5 rounded-xl ${iconColors[color]}`}>

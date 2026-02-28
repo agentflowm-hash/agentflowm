@@ -87,6 +87,21 @@ export async function GET() {
     const wonLeads = leadsWon || 0;
     const conversionRate = totalLeads > 0 ? Math.round((wonLeads / totalLeads) * 100) : 0;
 
+    // Historical trends for sparklines (last 7 days)
+    const trends = { leads: [] as number[], checks: [] as number[], revenue: [] as number[] };
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const dayEnd = new Date(Date.now() - (i - 1) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const { count: leadsDay } = await db.from('leads').select('*', { count: 'exact', head: true })
+        .gte('created_at', dayStart).lt('created_at', dayEnd);
+      const { count: checksDay } = await db.from('website_checks').select('*', { count: 'exact', head: true })
+        .gte('created_at', dayStart).lt('created_at', dayEnd);
+      
+      trends.leads.push(leadsDay || 0);
+      trends.checks.push(checksDay || 0);
+    }
+
     return NextResponse.json({
       leads: {
         total: leadsTotal || 0,
@@ -135,6 +150,7 @@ export async function GET() {
         createdAt: lead.created_at,
       })),
       recentActivity,
+      trends,
     });
   } catch (error) {
     console.error("Stats error:", error);
