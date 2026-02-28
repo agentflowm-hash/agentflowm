@@ -139,7 +139,6 @@ export const POST = createHandler({
     .from('invoices')
     .insert({
       client_id: client_id || null,
-      project_id: project_id || null,
       invoice_number: invoiceNumber,
       client_name: clientName,
       client_email: clientEmail,
@@ -159,6 +158,28 @@ export const POST = createHandler({
     .single();
 
   if (error) throw new DatabaseError(error.message);
+
+  // Insert invoice items
+  if (invoice && items.length > 0) {
+    const invoiceItems = items.map((item, index) => ({
+      invoice_id: invoice.id,
+      description: item.description,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      total: item.quantity * item.unit_price,
+      sort_order: index,
+    }));
+
+    const { error: itemsError } = await db
+      .from('invoice_items')
+      .insert(invoiceItems);
+
+    if (itemsError) {
+      // Rollback: delete the invoice if items failed
+      await db.from('invoices').delete().eq('id', invoice.id);
+      throw new DatabaseError(`Failed to create invoice items: ${itemsError.message}`);
+    }
+  }
 
   return { invoice };
 });
