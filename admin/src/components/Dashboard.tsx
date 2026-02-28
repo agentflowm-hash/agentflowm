@@ -1136,31 +1136,36 @@ function DashboardTab({
                 label="Neu"
                 count={stats.leads.new}
                 color="blue"
-                percentage={30}
+                percentage={stats.leads.total > 0 ? (stats.leads.new / stats.leads.total) * 100 : 0}
+                onClick={() => onNavigate?.("pipeline")}
               />
               <PipelineStage
                 label="Kontaktiert"
                 count={stats.leads.contacted}
                 color="yellow"
-                percentage={25}
+                percentage={stats.leads.total > 0 ? (stats.leads.contacted / stats.leads.total) * 100 : 0}
+                onClick={() => onNavigate?.("pipeline")}
               />
               <PipelineStage
                 label="Qualifiziert"
                 count={stats.leads.qualified}
                 color="purple"
-                percentage={20}
+                percentage={stats.leads.total > 0 ? (stats.leads.qualified / stats.leads.total) * 100 : 0}
+                onClick={() => onNavigate?.("pipeline")}
               />
               <PipelineStage
                 label="Angebot"
                 count={stats.leads.proposal || 0}
                 color="orange"
-                percentage={15}
+                percentage={stats.leads.total > 0 ? ((stats.leads.proposal || 0) / stats.leads.total) * 100 : 0}
+                onClick={() => onNavigate?.("pipeline")}
               />
               <PipelineStage
                 label="Gewonnen"
                 count={stats.leads.won}
                 color="green"
-                percentage={10}
+                percentage={stats.leads.total > 0 ? (stats.leads.won / stats.leads.total) * 100 : 0}
+                onClick={() => onNavigate?.("pipeline")}
               />
             </div>
           </GlassCard>
@@ -1185,6 +1190,7 @@ function DashboardTab({
                     package={lead.packageInterest || "—"}
                     time={formatRelativeTime(lead.createdAt)}
                     priority={lead.priority || "medium"}
+                    onClick={() => onNavigate?.("leads")}
                   />
                 ))
               ) : (
@@ -1231,10 +1237,15 @@ function DashboardTab({
 
           {/* Top Scores */}
           <GlassCard title="Beste Website-Checks" icon={StarIcon}>
-            <div className="space-y-3">
+            <div className="space-y-1">
               {topChecks.length > 0 ? (
                 topChecks.map((check, i) => (
-                  <ScoreRow key={i} url={check.url} score={check.scoreOverall} />
+                  <ScoreRow 
+                    key={i} 
+                    url={check.url} 
+                    score={check.scoreOverall} 
+                    onClick={() => onNavigate?.("checks")}
+                  />
                 ))
               ) : (
                 <p className="text-white/40 text-sm text-center py-4">
@@ -1367,11 +1378,13 @@ function PipelineStage({
   count,
   color,
   percentage,
+  onClick,
 }: {
   label: string;
   count: number;
   color: string;
   percentage: number;
+  onClick?: () => void;
 }) {
   const colors: Record<string, string> = {
     blue: "bg-blue-500",
@@ -1381,7 +1394,7 @@ function PipelineStage({
     green: "bg-green-500",
   };
   return (
-    <div className="text-center">
+    <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={onClick}>
       <div className="text-2xl font-bold text-white mb-1">{count}</div>
       <div className="text-[10px] text-white/40 mb-2">{label}</div>
       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -1394,14 +1407,14 @@ function PipelineStage({
   );
 }
 
-function LeadRow({ name, email, package: pkg, time, priority }: any) {
+function LeadRow({ name, email, package: pkg, time, priority, onClick }: any) {
   const priorityColors: Record<string, string> = {
     high: "text-red-400 bg-red-500/20",
     medium: "text-yellow-400 bg-yellow-500/20",
     low: "text-blue-400 bg-blue-500/20",
   };
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer">
+    <div onClick={onClick} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FC682C]/20 to-[#9D65C9]/20 flex items-center justify-center text-white font-medium">
           {name.charAt(0)}
@@ -1445,18 +1458,22 @@ function QuickActionButton({ icon: Icon, label, color, onClick }: any) {
   );
 }
 
-function ScoreRow({ url, score }: { url: string; score: number }) {
+function ScoreRow({ url, score, onClick }: { url: string; score: number; onClick?: () => void }) {
   const color =
     score >= 80
       ? "text-green-400"
       : score >= 60
         ? "text-yellow-400"
         : "text-red-400";
+  const displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
   return (
-    <div className="flex items-center justify-between">
+    <div 
+      className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+      onClick={onClick}
+    >
       <div className="flex items-center gap-2">
         <GlobeAltIcon className="w-4 h-4 text-white/30" />
-        <span className="text-sm text-white/70">{url}</span>
+        <span className="text-sm text-white/70 truncate max-w-[150px]">{displayUrl}</span>
       </div>
       <span className={`text-lg font-bold ${color}`}>{score}</span>
     </div>
