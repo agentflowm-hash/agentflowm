@@ -1012,6 +1012,25 @@ function DashboardTab({
   stats: Stats | null;
   onNavigate?: (tab: Tab) => void;
 }) {
+  const [topChecks, setTopChecks] = useState<{url: string; scoreOverall: number}[]>([]);
+
+  useEffect(() => {
+    // Fetch top website checks
+    fetch('/api/checks')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data?.checks) {
+          // Sort by score and take top 3
+          const sorted = data.data.checks
+            .filter((c: any) => c.scoreOverall > 0)
+            .sort((a: any, b: any) => b.scoreOverall - a.scoreOverall)
+            .slice(0, 3);
+          setTopChecks(sorted);
+        }
+      })
+      .catch(err => console.error('Failed to fetch checks:', err));
+  }, []);
+
   if (!stats) {
     return <LoadingState />;
   }
@@ -1177,21 +1196,25 @@ function DashboardTab({
                 icon={PlusIcon}
                 label="Lead anlegen"
                 color="blue"
+                onClick={() => onNavigate?.("leads")}
               />
               <QuickActionButton
                 icon={EnvelopeOpenIcon}
                 label="E-Mail senden"
                 color="green"
+                onClick={() => onNavigate?.("emails")}
               />
               <QuickActionButton
                 icon={PhoneIcon}
                 label="Anrufen"
                 color="purple"
+                onClick={() => onNavigate?.("leads")}
               />
               <QuickActionButton
                 icon={CalendarIcon}
                 label="Termin"
                 color="orange"
+                onClick={() => onNavigate?.("calendar")}
               />
             </div>
           </GlassCard>
@@ -1199,9 +1222,15 @@ function DashboardTab({
           {/* Top Scores */}
           <GlassCard title="Beste Website-Checks" icon={StarIcon}>
             <div className="space-y-3">
-              <ScoreRow url="example.com" score={95} />
-              <ScoreRow url="firma.de" score={88} />
-              <ScoreRow url="startup.io" score={82} />
+              {topChecks.length > 0 ? (
+                topChecks.map((check, i) => (
+                  <ScoreRow key={i} url={check.url} score={check.scoreOverall} />
+                ))
+              ) : (
+                <p className="text-white/40 text-sm text-center py-4">
+                  Noch keine Website-Checks vorhanden
+                </p>
+              )}
             </div>
           </GlassCard>
 
@@ -1383,7 +1412,7 @@ function LeadRow({ name, email, package: pkg, time, priority }: any) {
   );
 }
 
-function QuickActionButton({ icon: Icon, label, color }: any) {
+function QuickActionButton({ icon: Icon, label, color, onClick }: any) {
   const colors: Record<string, string> = {
     blue: "hover:bg-blue-500/10 hover:border-blue-500/30 hover:text-blue-400",
     green:
@@ -1395,7 +1424,8 @@ function QuickActionButton({ icon: Icon, label, color }: any) {
   };
   return (
     <button
-      className={`flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] text-white/50 transition-all ${colors[color]}`}
+      onClick={onClick}
+      className={`flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] text-white/50 transition-all cursor-pointer ${colors[color]}`}
     >
       <Icon className="w-5 h-5" />
       <span className="text-xs">{label}</span>
