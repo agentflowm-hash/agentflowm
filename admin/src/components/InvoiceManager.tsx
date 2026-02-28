@@ -260,11 +260,14 @@ export default function InvoiceManager() {
     return { subtotal, discount, taxable, tax, total: taxable + tax };
   };
 
-  const filteredInvoices = invoices.filter((inv) =>
-    inv.client_name.toLowerCase().includes(search.toLowerCase()) ||
-    inv.invoice_number.toLowerCase().includes(search.toLowerCase()) ||
-    inv.client_email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredInvoices = invoices.filter((inv) => {
+    const searchLower = search.toLowerCase();
+    return (
+      (inv.client_name || '').toLowerCase().includes(searchLower) ||
+      (inv.invoice_number || '').toLowerCase().includes(searchLower) ||
+      (inv.client_email || '').toLowerCase().includes(searchLower)
+    );
+  });
 
   const totals = calculateTotal();
 
