@@ -234,3 +234,54 @@ export async function PATCH(
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
+
+// DELETE - Projekt und alle zugehörigen Daten löschen
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+    const projectId = parseInt(id, 10);
+
+    if (isNaN(projectId)) {
+      return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });
+    }
+
+    const { data: project, error: fetchError } = await db
+      .from("portal_projects")
+      .select("*")
+      .eq("id", projectId)
+      .single();
+
+    if (fetchError || !project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // Alle zugehörigen Daten löschen (cascade)
+    await db.from("portal_milestones").delete().eq("project_id", projectId);
+    await db.from("portal_messages").delete().eq("project_id", projectId);
+    await db.from("portal_files").delete().eq("project_id", projectId);
+    await db.from("portal_approvals").delete().eq("project_id", projectId);
+    
+    // Projekt löschen
+    const { error } = await db
+      .from("portal_projects")
+      .delete()
+      .eq("id", projectId);
+
+    if (error) {
+      return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Project DELETE error:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
+  }
+}

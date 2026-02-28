@@ -4445,11 +4445,17 @@ interface PortalClient {
 function ClientsTab() {
   const [clients, setClients] = useState<PortalClient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedClient, setSelectedClient] = useState<PortalClient | null>(
-    null,
-  );
+  const [selectedClient, setSelectedClient] = useState<PortalClient | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // NEW: Power Features State
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [projectFilter, setProjectFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"name" | "created" | "activity">("created");
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [bulkAction, setBulkAction] = useState<string>("");
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -4469,13 +4475,111 @@ function ClientsTab() {
     fetchClients();
   }, [fetchClients]);
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.access_code.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // Enhanced filtering
+  const filteredClients = clients
+    .filter((client) => {
+      const matchesSearch = 
+        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.access_code.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = statusFilter === "all" || client.status === statusFilter;
+      const matchesProject = projectFilter === "all" || 
+        (projectFilter === "with" && client.project_id) ||
+        (projectFilter === "without" && !client.project_id) ||
+        client.project_status === projectFilter;
+      
+      return matchesSearch && matchesStatus && matchesProject;
+    })
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "activity") return new Date(b.last_login || b.created_at).getTime() - new Date(a.last_login || a.created_at).getTime();
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+  // Stats calculation
+  const stats = {
+    total: clients.length,
+    active: clients.filter(c => c.status === "active").length,
+    withProjects: clients.filter(c => c.project_id).length,
+    inProgress: clients.filter(c => c.project_status === "entwicklung").length,
+    completed: clients.filter(c => c.project_status === "abgeschlossen").length,
+  };
+
+  // Bulk actions
+  const handleSelectAll = () => {
+    if (selectedIds.size === filteredClients.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredClients.map(c => c.id)));
+    }
+  };
+
+  const handleSelect = (id: number) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`${selectedIds.size} Kunden wirklich löschen?`)) return;
+    for (const id of selectedIds) {
+      await fetch(`/api/clients/${id}`, { method: "DELETE", credentials: "include" });
+    }
+    setSelectedIds(new Set());
+    fetchClients();
+  };
+
+  const handleBulkStatusChange = async (status: string) => {
+    for (const id of selectedIds) {
+      await fetch(`/api/clients/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status }),
+      });
+    }
+    setSelectedIds(new Set());
+    fetchClients();
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Name", "Email", "Firma", "Telefon", "Status", "Paket", "Fortschritt", "Erstellt"];
+    const rows = filteredClients.map(c => [
+      c.name,
+      c.email,
+      c.company || "",
+      c.phone || "",
+      c.status || "active",
+      c.package || "",
+      c.progress ? `${c.progress}%` : "",
+      new Date(c.created_at).toLocaleDateString("de-DE"),
+    ]);
+    
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `kunden-export-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+  };
+
+  const copyPortalLink = (code: string) => {
+    navigator.clipboard.writeText(`https://portal.agentflowm.de/login?code=${code}`);
+    alert("Portal-Link kopiert!");
+  };
+
+  const handleQuickInvoice = (client: PortalClient) => {
+    // Navigate to invoices tab with pre-filled client data
+    const event = new CustomEvent("createInvoice", { detail: { client } });
+    window.dispatchEvent(event);
+  };
 
   const getStatusColor = (status: string | null) => {
     switch (status) {
@@ -4492,67 +4596,189 @@ function ClientsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FC682C] to-[#9D65C9] flex items-center justify-center">
-            <UserGroupIcon className="w-5 h-5 text-white" />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="p-4 bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 rounded-xl border border-[#FC682C]/20">
+          <div className="text-2xl font-bold text-white">{stats.total}</div>
+          <div className="text-xs text-white/50">Gesamt</div>
+        </div>
+        <div className="p-4 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-xl border border-green-500/20">
+          <div className="text-2xl font-bold text-green-400">{stats.active}</div>
+          <div className="text-xs text-white/50">Aktiv</div>
+        </div>
+        <div className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-xl border border-blue-500/20">
+          <div className="text-2xl font-bold text-blue-400">{stats.withProjects}</div>
+          <div className="text-xs text-white/50">Mit Projekt</div>
+        </div>
+        <div className="p-4 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 rounded-xl border border-yellow-500/20">
+          <div className="text-2xl font-bold text-yellow-400">{stats.inProgress}</div>
+          <div className="text-xs text-white/50">In Arbeit</div>
+        </div>
+        <div className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl border border-purple-500/20">
+          <div className="text-2xl font-bold text-purple-400">{stats.completed}</div>
+          <div className="text-xs text-white/50">Abgeschlossen</div>
+        </div>
+      </div>
+
+      {/* Header with Search & Filters */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FC682C] to-[#9D65C9] flex items-center justify-center">
+              <UserGroupIcon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Portal-Kunden</h2>
+              <p className="text-sm text-white/40">{filteredClients.length} von {clients.length} angezeigt</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-white">Portal-Kunden</h2>
-            <p className="text-sm text-white/40">
-              {clients.length} Kunden gesamt
-            </p>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={handleExportCSV}
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white/70 flex items-center gap-1.5 transition-colors"
+            >
+              <ArrowDownTrayIcon className="w-4 h-4" />
+              Export
+            </button>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-opacity"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Neuer Kunde
+            </button>
           </div>
         </div>
-        <div className="flex gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
+        
+        {/* Filters Row */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="relative flex-1 min-w-[200px] max-w-xs">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
               type="text"
               placeholder="Suchen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none"
+              className="w-full pl-10 pr-4 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
             />
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2.5 bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-xl text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-opacity whitespace-nowrap"
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
           >
-            <PlusIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Neuer Kunde</span>
-          </button>
+            <option value="all">Alle Status</option>
+            <option value="active">Aktiv</option>
+            <option value="inactive">Inaktiv</option>
+            <option value="paused">Pausiert</option>
+          </select>
+          <select
+            value={projectFilter}
+            onChange={(e) => setProjectFilter(e.target.value)}
+            className="px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+          >
+            <option value="all">Alle Projekte</option>
+            <option value="with">Mit Projekt</option>
+            <option value="without">Ohne Projekt</option>
+            <option value="planung">In Planung</option>
+            <option value="entwicklung">In Entwicklung</option>
+            <option value="abgeschlossen">Abgeschlossen</option>
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            className="px-3 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white text-sm focus:border-[#FC682C]/50 outline-none"
+          >
+            <option value="created">Neueste zuerst</option>
+            <option value="name">Name A-Z</option>
+            <option value="activity">Letzte Aktivität</option>
+          </select>
         </div>
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 p-3 bg-[#FC682C]/10 border border-[#FC682C]/30 rounded-xl">
+          <span className="text-sm text-white font-medium">{selectedIds.size} ausgewählt</span>
+          <div className="flex-1" />
+          <button
+            onClick={() => handleBulkStatusChange("active")}
+            className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg text-xs text-green-400 transition-colors"
+          >
+            Aktivieren
+          </button>
+          <button
+            onClick={() => handleBulkStatusChange("inactive")}
+            className="px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-lg text-xs text-yellow-400 transition-colors"
+          >
+            Deaktivieren
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-xs text-red-400 transition-colors"
+          >
+            Löschen
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/70 transition-colors"
+          >
+            Abbrechen
+          </button>
+        </div>
+      )}
+
       {/* Client List */}
       <div className="bg-[#0f0f12]/80 backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden">
+        {/* Table Header */}
+        <div className="hidden md:flex items-center gap-4 px-4 py-3 bg-white/[0.02] border-b border-white/[0.06] text-xs text-white/50 font-medium">
+          <div className="w-8">
+            <input
+              type="checkbox"
+              checked={selectedIds.size === filteredClients.length && filteredClients.length > 0}
+              onChange={handleSelectAll}
+              className="w-4 h-4 rounded bg-white/10 border-white/20 text-[#FC682C] focus:ring-[#FC682C]"
+            />
+          </div>
+          <div className="flex-1">KUNDE</div>
+          <div className="w-32">CODE</div>
+          <div className="w-32">PROJEKT</div>
+          <div className="w-24">STATUS</div>
+          <div className="w-32">AKTIONEN</div>
+        </div>
+        
         {loading ? (
           <div className="p-8 text-center text-white/40">Laden...</div>
         ) : filteredClients.length === 0 ? (
           <div className="p-8 text-center text-white/40">
-            {searchTerm
-              ? "Keine Kunden gefunden"
-              : "Noch keine Portal-Kunden vorhanden"}
+            {searchTerm ? "Keine Kunden gefunden" : "Noch keine Portal-Kunden vorhanden"}
           </div>
         ) : (
           <div className="divide-y divide-white/[0.06]">
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                onClick={() => setSelectedClient(client)}
-                className="p-4 hover:bg-white/[0.02] cursor-pointer transition-colors"
+                className={`p-4 hover:bg-white/[0.02] transition-colors ${selectedIds.has(client.id) ? 'bg-[#FC682C]/5' : ''}`}
               >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 min-w-0">
+                <div className="flex items-center gap-4">
+                  {/* Checkbox */}
+                  <div className="w-8 hidden md:block">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(client.id)}
+                      onChange={(e) => { e.stopPropagation(); handleSelect(client.id); }}
+                      className="w-4 h-4 rounded bg-white/10 border-white/20 text-[#FC682C] focus:ring-[#FC682C]"
+                    />
+                  </div>
+                  
+                  {/* Client Info */}
+                  <div 
+                    className="flex-1 flex items-center gap-3 min-w-0 cursor-pointer"
+                    onClick={() => setSelectedClient(client)}
+                  >
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FC682C]/20 to-[#9D65C9]/20 flex items-center justify-center flex-shrink-0">
                       <span className="text-sm font-medium text-white">
-                        {client.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
+                        {client.name.split(" ").map((n) => n[0]).join("").toUpperCase()
                           .slice(0, 2)}
                       </span>
                     </div>
@@ -4577,23 +4803,68 @@ function ClientsTab() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 flex-shrink-0">
-                    <div className="hidden md:block text-right">
-                      <div className="text-sm font-mono text-[#FC682C]">
-                        {client.access_code}
+                  
+                  {/* Access Code */}
+                  <div className="w-32 hidden md:block">
+                    <div className="text-sm font-mono text-[#FC682C]">{client.access_code}</div>
+                  </div>
+                  
+                  {/* Project Status */}
+                  <div className="w-32 hidden md:block">
+                    {client.project_status ? (
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(client.project_status)}`}>
+                          {client.progress}%
+                        </span>
                       </div>
-                      <div className="text-xs text-white/40">
-                        {client.package || "Kein Projekt"}
-                      </div>
-                    </div>
-                    {client.project_status && (
-                      <span
-                        className={`hidden lg:flex px-2.5 py-1 rounded-lg text-xs font-medium ${getStatusColor(client.project_status)}`}
-                      >
-                        {client.progress}%
-                      </span>
+                    ) : (
+                      <span className="text-xs text-white/30">Kein Projekt</span>
                     )}
-                    <ChevronRightIcon className="w-4 h-4 text-white/20" />
+                  </div>
+                  
+                  {/* Client Status */}
+                  <div className="w-24 hidden md:block">
+                    <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                      client.status === "active" ? "bg-green-500/20 text-green-400" :
+                      client.status === "inactive" ? "bg-red-500/20 text-red-400" :
+                      "bg-yellow-500/20 text-yellow-400"
+                    }`}>
+                      {client.status === "active" ? "Aktiv" : client.status === "inactive" ? "Inaktiv" : "Pausiert"}
+                    </span>
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="w-32 flex items-center justify-end gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); copyPortalLink(client.access_code); }}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors group"
+                      title="Portal-Link kopieren"
+                    >
+                      <LinkIcon className="w-4 h-4 text-white/40 group-hover:text-[#FC682C]" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); window.open(`mailto:${client.email}`); }}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors group"
+                      title="Email senden"
+                    >
+                      <EnvelopeIcon className="w-4 h-4 text-white/40 group-hover:text-blue-400" />
+                    </button>
+                    {client.telegram_username && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); window.open(`https://t.me/${client.telegram_username}`); }}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors group"
+                        title="Telegram öffnen"
+                      >
+                        <ChatBubbleLeftRightIcon className="w-4 h-4 text-white/40 group-hover:text-[#0088cc]" />
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectedClient(client); }}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                      title="Details"
+                    >
+                      <ChevronRightIcon className="w-4 h-4 text-white/40" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -5088,6 +5359,67 @@ function ClientDetailModal({
             <div className="space-y-4">
               {projectData?.project ? (
                 <>
+                  {/* Project Admin Actions */}
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">
+                    <span className="text-sm text-white/70 font-medium">Projekt-Verwaltung</span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          const newProgress = prompt("Neuer Fortschritt (0-100):", String(projectData.project.progress));
+                          if (newProgress !== null) {
+                            const progress = Math.min(100, Math.max(0, parseInt(newProgress) || 0));
+                            await fetch(`/api/projects/${projectData.project.id}`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              credentials: "include",
+                              body: JSON.stringify({ progress }),
+                            });
+                            setProjectData({ ...projectData, project: { ...projectData.project, progress } });
+                            onUpdate();
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white flex items-center gap-1.5 transition-colors"
+                      >
+                        <ChartBarIcon className="w-3.5 h-3.5" />
+                        Fortschritt
+                      </button>
+                      <select
+                        value={projectData.project.status || "planung"}
+                        onChange={async (e) => {
+                          const status = e.target.value;
+                          await fetch(`/api/projects/${projectData.project.id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify({ status }),
+                          });
+                          setProjectData({ ...projectData, project: { ...projectData.project, status } });
+                          onUpdate();
+                        }}
+                        className="px-3 py-1.5 bg-white/10 rounded-lg text-xs text-white focus:outline-none"
+                      >
+                        <option value="planung">Planung</option>
+                        <option value="entwicklung">Entwicklung</option>
+                        <option value="abgeschlossen">Abgeschlossen</option>
+                      </select>
+                      <button
+                        onClick={async () => {
+                          if (!confirm("Projekt wirklich löschen? Alle Meilensteine, Nachrichten und Dateien werden gelöscht!")) return;
+                          await fetch(`/api/projects/${projectData.project.id}`, {
+                            method: "DELETE",
+                            credentials: "include",
+                          });
+                          setProjectData(null);
+                          onUpdate();
+                        }}
+                        className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/40 rounded-lg text-xs text-red-400 flex items-center gap-1.5 transition-colors"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                        Löschen
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="p-4 bg-white/[0.02] rounded-xl">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-medium text-white">
@@ -5210,13 +5542,32 @@ function ClientDetailModal({
                   </div>
 
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-white/70">
-                      Meilensteine
-                    </h4>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium text-white/70">Meilensteine</h4>
+                      <button
+                        onClick={async () => {
+                          const title = prompt("Meilenstein-Titel:");
+                          if (title) {
+                            await fetch(`/api/projects/${projectData.project.id}/milestones`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              credentials: "include",
+                              body: JSON.stringify({ title, status: "pending" }),
+                            });
+                            const data = await fetch(`/api/projects/${client.project_id}`, { credentials: "include" }).then(r => r.json());
+                            setProjectData(data);
+                          }
+                        }}
+                        className="text-xs text-[#FC682C] hover:text-[#FF8F5C] flex items-center gap-1"
+                      >
+                        <PlusIcon className="w-3.5 h-3.5" />
+                        Hinzufügen
+                      </button>
+                    </div>
                     {projectData.milestones?.map((m: any) => (
                       <div
                         key={m.id}
-                        className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-xl"
+                        className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-xl group"
                       >
                         <button
                           onClick={() =>
@@ -5247,13 +5598,28 @@ function ClientDetailModal({
                         <div className="flex-1">
                           <div className="text-sm text-white">{m.title}</div>
                           {m.date && (
-                            <div className="text-xs text-white/40">
-                              {m.date}
-                            </div>
+                            <div className="text-xs text-white/40">{m.date}</div>
                           )}
                         </div>
+                        <button
+                          onClick={async () => {
+                            if (!confirm("Meilenstein löschen?")) return;
+                            await fetch(`/api/projects/${projectData.project.id}/milestones/${m.id}`, {
+                              method: "DELETE",
+                              credentials: "include",
+                            });
+                            const data = await fetch(`/api/projects/${client.project_id}`, { credentials: "include" }).then(r => r.json());
+                            setProjectData(data);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/20 rounded transition-all"
+                        >
+                          <TrashIcon className="w-3.5 h-3.5 text-red-400" />
+                        </button>
                       </div>
                     ))}
+                    {(!projectData.milestones || projectData.milestones.length === 0) && (
+                      <div className="text-center text-white/30 py-4 text-sm">Keine Meilensteine</div>
+                    )}
                   </div>
                 </>
               ) : (
