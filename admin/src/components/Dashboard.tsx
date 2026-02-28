@@ -63,6 +63,7 @@ import {
 // Next-Level Components
 import { Confetti, KeyboardShortcuts, useToast, GoogleAnalyticsWidget, WebsiteAnalyticsWidget, LiveActivityFeed, AnimatedStatsCards, GoalsWidget, AIInsightsWidget } from "@/components";
 import InvoiceManager from "@/components/InvoiceManager";
+import { AgreementManager } from "@/components/AgreementManager";
 import CalendarTab from "@/components/CalendarTab";
 import EmailCenterTab from "@/components/EmailCenterTab";
 import NotificationsTab from "@/components/NotificationsTab";
@@ -89,6 +90,7 @@ type Tab =
   | "leads"
   | "clients"
   | "invoices"
+  | "agreements"
   | "checks"
   | "referrals"
   | "subscribers"
@@ -358,6 +360,13 @@ export function Dashboard() {
       id: "invoices" as Tab,
       label: "Rechnungen",
       icon: CurrencyEuroIcon,
+      badge: null,
+      new: true,
+    },
+    {
+      id: "agreements" as Tab,
+      label: "Vereinbarungen",
+      icon: DocumentTextIcon,
       badge: null,
       new: true,
     },
@@ -677,6 +686,7 @@ export function Dashboard() {
           {activeTab === "leads" && <LeadsTab />}
           {activeTab === "clients" && <ClientsTab />}
           {activeTab === "invoices" && <InvoiceManager />}
+          {activeTab === "agreements" && <AgreementManager />}
           {activeTab === "checks" && <ChecksTab />}
           {activeTab === "referrals" && <ReferralsTab />}
           {activeTab === "subscribers" && <SubscribersTab />}
