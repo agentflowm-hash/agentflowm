@@ -54,6 +54,9 @@ import {
   TagIcon,
   HashtagIcon,
   ArrowUpIcon,
+  EllipsisVerticalIcon,
+  CheckIcon,
+  CheckBadgeIcon,
 } from "@heroicons/react/24/outline";
 import {
   StarIcon as StarSolid,
@@ -1532,6 +1535,7 @@ function PipelineTab() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewLeadModal, setShowNewLeadModal] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   useEffect(() => {
     fetch("/api/leads", { credentials: "include" })
@@ -1640,7 +1644,7 @@ function PipelineTab() {
               </div>
               <div className="space-y-3">
                 {stageLeads.map((lead) => (
-                  <KanbanCard key={lead.id} lead={lead} onMove={updateStatus} />
+                  <KanbanCard key={lead.id} lead={lead} onMove={updateStatus} onClick={() => setSelectedLead(lead)} />
                 ))}
                 {stageLeads.length === 0 && (
                   <div className="py-8 text-center text-white/20 text-sm border-2 border-dashed border-white/10 rounded-xl">
@@ -1664,6 +1668,17 @@ function PipelineTab() {
         }}
       />
     )}
+    {selectedLead && (
+      <LeadModal 
+        lead={selectedLead} 
+        onClose={() => setSelectedLead(null)} 
+        onRefresh={() => {
+          fetch("/api/leads", { credentials: "include" })
+            .then((r) => r.json())
+            .then((data) => setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []));
+        }}
+      />
+    )}
     </>
   );
 }
@@ -1671,66 +1686,100 @@ function PipelineTab() {
 function KanbanCard({
   lead,
   onMove,
+  onClick,
 }: {
   lead: Lead;
   onMove: (id: number, status: string) => void;
+  onClick?: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <div className="relative p-4 bg-[#0f0f12] border border-white/[0.06] rounded-xl hover:border-white/[0.12] transition-colors cursor-pointer group">
+    <div 
+      onClick={(e) => { if (!showMenu) onClick?.(); }}
+      className={`relative p-4 bg-[#0f0f12] border border-white/[0.06] rounded-xl hover:border-white/[0.15] hover:bg-white/[0.02] transition-all cursor-pointer group ${lead.priority === 'high' ? 'ring-2 ring-red-500/20' : ''}`}
+    >
       <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FC682C]/30 to-[#9D65C9]/30 flex items-center justify-center text-white text-xs font-medium">
-            {lead.name.charAt(0)}
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FC682C]/40 to-[#9D65C9]/40 flex items-center justify-center text-white text-sm font-semibold shadow-lg">
+            {lead.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <p className="text-sm font-medium text-white">{lead.name}</p>
-            <p className="text-[11px] text-white/40">
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium text-white">{lead.name}</p>
+              {lead.email && <CheckBadgeIcon className="w-3.5 h-3.5 text-blue-400" />}
+            </div>
+            <p className="text-[11px] text-white/40 truncate max-w-[140px]">
               {lead.company || lead.email}
             </p>
           </div>
         </div>
         <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-lg transition-all"
+          onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+          className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/10 rounded-lg transition-all"
         >
-          <ChevronDownIcon className="w-4 h-4 text-white/40" />
+          <EllipsisVerticalIcon className="w-4 h-4 text-white/50" />
         </button>
       </div>
 
-      {lead.packageInterest && (
-        <div className="mb-3">
-          <span className="px-2 py-1 bg-[#FC682C]/20 text-[#FC682C] rounded-lg text-xs">
+      {/* Package & Budget */}
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        {lead.packageInterest && (
+          <span className="px-2.5 py-1 bg-[#FC682C]/20 text-[#FC682C] rounded-lg text-xs font-medium">
             {lead.packageInterest}
           </span>
-        </div>
-      )}
+        )}
+        {lead.budget && Number(lead.budget) > 0 && (
+          <span className="flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-400 rounded-lg text-xs">
+            <CurrencyEuroIcon className="w-3 h-3" />
+            {Number(lead.budget).toLocaleString('de-DE')}
+          </span>
+        )}
+      </div>
 
       <div className="flex items-center justify-between text-[11px] text-white/30">
         <span>{formatDate(lead.createdAt)}</span>
-        {lead.priority === "high" && (
-          <FireSolid className="w-4 h-4 text-red-400" />
+        <div className="flex items-center gap-2">
+          {lead.priority === "high" && <FireSolid className="w-4 h-4 text-red-400" />}
+          {lead.source && <span className="px-1.5 py-0.5 bg-white/5 rounded text-[10px]">{lead.source}</span>}
+        </div>
+      </div>
+
+      {/* Quick Actions on Hover */}
+      <div className="absolute bottom-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {lead.phone && (
+          <a href={`tel:${lead.phone}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors">
+            <PhoneIcon className="w-3 h-3 text-green-400" />
+          </a>
+        )}
+        {lead.email && (
+          <a href={`mailto:${lead.email}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors">
+            <EnvelopeIcon className="w-3 h-3 text-blue-400" />
+          </a>
         )}
       </div>
 
       {/* Quick Move Menu */}
       {showMenu && (
-        <div className="absolute right-0 top-10 z-20 w-40 py-2 bg-[#1a1a1f] border border-white/10 rounded-xl shadow-xl">
-          {["new", "contacted", "qualified", "proposal", "won"].map(
-            (status) => (
-              <button
-                key={status}
-                onClick={() => {
-                  onMove(lead.id, status);
-                  setShowMenu(false);
-                }}
-                className="w-full px-4 py-2 text-left text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-              >
-                → {status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ),
-          )}
+        <div className="absolute right-0 top-10 z-20 w-44 py-2 bg-[#1a1a1f] border border-white/10 rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="px-3 py-1.5 text-[10px] uppercase text-white/30 font-medium">Status ändern</div>
+          {[
+            { id: "new", label: "Neu", color: "text-blue-400" },
+            { id: "contacted", label: "Kontaktiert", color: "text-yellow-400" },
+            { id: "qualified", label: "Qualifiziert", color: "text-purple-400" },
+            { id: "proposal", label: "Angebot", color: "text-[#FC682C]" },
+            { id: "won", label: "Gewonnen", color: "text-green-400" },
+          ].map((status) => (
+            <button
+              key={status.id}
+              onClick={() => { onMove(lead.id, status.id); setShowMenu(false); }}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-white/5 transition-colors ${lead.status === status.id ? 'bg-white/5 text-white' : 'text-white/70'}`}
+            >
+              <span className={`w-2 h-2 rounded-full ${status.color.replace('text-', 'bg-')}`} />
+              {status.label}
+              {lead.status === status.id && <CheckIcon className="w-3 h-3 ml-auto text-green-400" />}
+            </button>
+          ))}
         </div>
       )}
     </div>
