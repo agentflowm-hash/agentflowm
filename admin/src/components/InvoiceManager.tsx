@@ -421,32 +421,18 @@ export default function InvoiceManager() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-1">
+                        {/* Send button - only for drafts */}
                         {invoice.status === "draft" && (
-                          <>
-                            <button
-                              onClick={() => sendInvoice(invoice.id)}
-                              className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors"
-                              title="Senden"
-                            >
-                              <PaperAirplaneIcon className="w-4 h-4 text-blue-400" />
-                            </button>
-                            <button
-                              onClick={() => openEditModal(invoice)}
-                              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                              title="Bearbeiten"
-                            >
-                              <PencilIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => deleteInvoice(invoice.id)}
-                              className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                              title="Löschen"
-                            >
-                              <TrashIcon className="w-4 h-4 text-red-400" />
-                            </button>
-                          </>
+                          <button
+                            onClick={() => sendInvoice(invoice.id)}
+                            className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors"
+                            title="Senden"
+                          >
+                            <PaperAirplaneIcon className="w-4 h-4 text-blue-400" />
+                          </button>
                         )}
-                        {invoice.status === "sent" && (
+                        {/* Mark as paid - for sent/overdue invoices */}
+                        {(invoice.status === "sent" || isOverdue) && (
                           <button
                             onClick={() => markAsPaid(invoice.id)}
                             className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
@@ -455,6 +441,22 @@ export default function InvoiceManager() {
                             <CheckCircleIcon className="w-4 h-4 text-green-400" />
                           </button>
                         )}
+                        {/* Edit - ALWAYS available */}
+                        <button
+                          onClick={() => openEditModal(invoice)}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Bearbeiten"
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </button>
+                        {/* Delete - ALWAYS available */}
+                        <button
+                          onClick={() => deleteInvoice(invoice.id)}
+                          className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                          title="Löschen"
+                        >
+                          <TrashIcon className="w-4 h-4 text-red-400" />
+                        </button>
                         <button
                           onClick={() => window.open(`/api/invoices/${invoice.id}/pdf`, '_blank')}
                           className="p-2 hover:bg-white/10 rounded-lg transition-colors"
