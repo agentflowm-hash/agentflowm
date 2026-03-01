@@ -57,6 +57,13 @@ import {
   EllipsisVerticalIcon,
   CheckIcon,
   CheckBadgeIcon,
+  CalculatorIcon,
+  LockClosedIcon,
+  BanknotesIcon,
+  ReceiptPercentIcon,
+  ScaleIcon,
+  DocumentDuplicateIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import {
   StarIcon as StarSolid,
@@ -70,6 +77,8 @@ import { AgreementManager } from "@/components/AgreementManager";
 import CalendarTab from "@/components/CalendarTab";
 import EmailCenterTab from "@/components/EmailCenterTab";
 import NotificationsTab from "@/components/NotificationsTab";
+import AccountingTab from "@/components/AccountingTab";
+import PrivacyTab from "@/components/PrivacyTab";
 
 // ═══════════════════════════════════════════════════════════════
 //                    API RESPONSE HELPER
@@ -94,6 +103,8 @@ type Tab =
   | "clients"
   | "invoices"
   | "agreements"
+  | "accounting"
+  | "privacy"
   | "checks"
   | "referrals"
   | "subscribers"
@@ -376,6 +387,20 @@ export function Dashboard() {
       id: "agreements" as Tab,
       label: "Vereinbarungen",
       icon: DocumentTextIcon,
+      badge: null,
+      new: true,
+    },
+    {
+      id: "accounting" as Tab,
+      label: "Buchhaltung",
+      icon: CalculatorIcon,
+      badge: null,
+      new: true,
+    },
+    {
+      id: "privacy" as Tab,
+      label: "Datenschutz",
+      icon: ShieldCheckIcon,
       badge: null,
       new: true,
     },
@@ -696,6 +721,8 @@ export function Dashboard() {
           {activeTab === "clients" && <ClientsTab />}
           {activeTab === "invoices" && <InvoiceManager />}
           {activeTab === "agreements" && <AgreementManager />}
+          {activeTab === "accounting" && <AccountingTab />}
+          {activeTab === "privacy" && <PrivacyTab />}
           {activeTab === "checks" && <ChecksTab />}
           {activeTab === "referrals" && <ReferralsTab />}
           {activeTab === "subscribers" && <SubscribersTab />}
