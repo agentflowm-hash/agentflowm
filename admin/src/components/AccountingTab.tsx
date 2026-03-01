@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   CalculatorIcon,
   BanknotesIcon,
@@ -9,16 +9,19 @@ import {
   PlusIcon,
   DocumentTextIcon,
   ChartBarIcon,
-  CalendarDaysIcon,
   ArrowDownTrayIcon,
   FunnelIcon,
-  CurrencyEuroIcon,
   ReceiptPercentIcon,
   BuildingLibraryIcon,
   ClipboardDocumentListIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   XMarkIcon,
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
+  DocumentArrowDownIcon,
+  PrinterIcon,
 } from "@heroicons/react/24/outline";
 
 interface Transaction {
@@ -33,23 +36,12 @@ interface Transaction {
   net_amount: number;
   account: string;
   reference?: string;
+  notes?: string;
   invoice_id?: number;
   created_at: string;
 }
 
-interface AccountingStats {
-  totalIncome: number;
-  totalExpenses: number;
-  netProfit: number;
-  pendingTax: number;
-  monthlyIncome: number;
-  monthlyExpenses: number;
-  yearToDate: {
-    income: number;
-    expenses: number;
-    profit: number;
-  };
-}
+const STORAGE_KEY = "agentflow_accounting_transactions";
 
 const CATEGORIES = {
   income: [
@@ -75,14 +67,64 @@ const CATEGORIES = {
 
 const TAX_RATES = [0, 7, 19];
 
+const INITIAL_TRANSACTIONS: Transaction[] = [
+  {
+    id: 1,
+    date: "2026-02-28",
+    description: "Website Launch - SonnenscheinPraxis",
+    category: "Website-Projekte",
+    type: "income",
+    amount: 5390,
+    tax_rate: 19,
+    tax_amount: 860.18,
+    net_amount: 4529.82,
+    account: "Geschäftskonto",
+    reference: "INV-2026-001",
+    created_at: "2026-02-28T10:00:00Z",
+  },
+  {
+    id: 2,
+    date: "2026-02-25",
+    description: "Vercel Pro Subscription",
+    category: "Hosting & Server",
+    type: "expense",
+    amount: 20,
+    tax_rate: 0,
+    tax_amount: 0,
+    net_amount: 20,
+    account: "Geschäftskonto",
+    created_at: "2026-02-25T10:00:00Z",
+  },
+  {
+    id: 3,
+    date: "2026-02-20",
+    description: "Figma Subscription",
+    category: "Software & Tools",
+    type: "expense",
+    amount: 15,
+    tax_rate: 0,
+    tax_amount: 0,
+    net_amount: 15,
+    account: "Geschäftskonto",
+    created_at: "2026-02-20T10:00:00Z",
+  },
+];
+
 export default function AccountingTab() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [stats, setStats] = useState<AccountingStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [activeView, setActiveView] = useState<"overview" | "transactions" | "taxes" | "reports">("overview");
-  const [filter, setFilter] = useState({ type: "all", month: new Date().getMonth(), year: new Date().getFullYear() });
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [filter, setFilter] = useState({ 
+    type: "all", 
+    month: new Date().getMonth(), 
+    year: new Date().getFullYear() 
+  });
+  const [editMode, setEditMode] = useState(false);
+  const [exportStatus, setExportStatus] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -90,108 +132,167 @@ export default function AccountingTab() {
     description: "",
     category: "",
     type: "income" as "income" | "expense",
-    amount: 0,
+    amount: "",
     tax_rate: 19,
     account: "Geschäftskonto",
     reference: "",
+    notes: "",
   });
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      // In real implementation, this would fetch from API
-      // For now, using mock data
-      const mockTransactions: Transaction[] = [
-        {
-          id: 1,
-          date: "2026-02-28",
-          description: "Website Launch - SonnenscheinPraxis",
-          category: "Website-Projekte",
-          type: "income",
-          amount: 5390,
-          tax_rate: 19,
-          tax_amount: 860.18,
-          net_amount: 4529.82,
-          account: "Geschäftskonto",
-          reference: "INV-2026-001",
-          created_at: "2026-02-28T10:00:00Z",
-        },
-        {
-          id: 2,
-          date: "2026-02-25",
-          description: "Vercel Pro Subscription",
-          category: "Hosting & Server",
-          type: "expense",
-          amount: 20,
-          tax_rate: 0,
-          tax_amount: 0,
-          net_amount: 20,
-          account: "Geschäftskonto",
-          created_at: "2026-02-25T10:00:00Z",
-        },
-        {
-          id: 3,
-          date: "2026-02-20",
-          description: "Figma Subscription",
-          category: "Software & Tools",
-          type: "expense",
-          amount: 15,
-          tax_rate: 0,
-          tax_amount: 0,
-          net_amount: 15,
-          account: "Geschäftskonto",
-          created_at: "2026-02-20T10:00:00Z",
-        },
-      ];
-
-      setTransactions(mockTransactions);
-
-      // Calculate stats
-      const income = mockTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-      const expenses = mockTransactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
-      const taxAmount = mockTransactions.reduce((sum, t) => sum + t.tax_amount, 0);
-
-      setStats({
-        totalIncome: income,
-        totalExpenses: expenses,
-        netProfit: income - expenses,
-        pendingTax: taxAmount,
-        monthlyIncome: income,
-        monthlyExpenses: expenses,
-        yearToDate: {
-          income: income,
-          expenses: expenses,
-          profit: income - expenses,
-        },
-      });
-    } catch (error) {
-      console.error("Failed to fetch accounting data:", error);
+  // Load transactions from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        setTransactions(JSON.parse(stored));
+      } catch {
+        setTransactions(INITIAL_TRANSACTIONS);
+      }
+    } else {
+      setTransactions(INITIAL_TRANSACTIONS);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_TRANSACTIONS));
     }
     setLoading(false);
   }, []);
 
+  // Save transactions to localStorage whenever they change
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!loading && transactions.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    }
+  }, [transactions, loading]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Calculate stats from transactions
+  const stats = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    
+    const monthlyTransactions = transactions.filter(t => {
+      const d = new Date(t.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    const yearTransactions = transactions.filter(t => {
+      const d = new Date(t.date);
+      return d.getFullYear() === currentYear;
+    });
+
+    const monthlyIncome = monthlyTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+    const monthlyExpenses = monthlyTransactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+    const monthlyTax = monthlyTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.tax_amount, 0);
+
+    const yearIncome = yearTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+    const yearExpenses = yearTransactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+
+    return {
+      totalIncome: monthlyIncome,
+      totalExpenses: monthlyExpenses,
+      netProfit: monthlyIncome - monthlyExpenses,
+      pendingTax: monthlyTax,
+      yearToDate: {
+        income: yearIncome,
+        expenses: yearExpenses,
+        profit: yearIncome - yearExpenses,
+      },
+    };
+  }, [transactions]);
+
+  // Filter transactions
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      const date = new Date(t.date);
+      const matchesType = filter.type === "all" || t.type === filter.type;
+      const matchesMonth = date.getMonth() === filter.month;
+      const matchesYear = date.getFullYear() === filter.year;
+      return matchesType && matchesMonth && matchesYear;
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [transactions, filter]);
+
+  // Tax calculations per quarter
+  const taxByQuarter = useMemo(() => {
+    const year = new Date().getFullYear();
+    const quarters = [
+      { name: "Q1 (Jan-Mär)", months: [0, 1, 2], due: `10.04.${year}` },
+      { name: "Q2 (Apr-Jun)", months: [3, 4, 5], due: `10.07.${year}` },
+      { name: "Q3 (Jul-Sep)", months: [6, 7, 8], due: `10.10.${year}` },
+      { name: "Q4 (Okt-Dez)", months: [9, 10, 11], due: `10.01.${year + 1}` },
+    ];
+
+    return quarters.map(q => {
+      const quarterTransactions = transactions.filter(t => {
+        const d = new Date(t.date);
+        return d.getFullYear() === year && q.months.includes(d.getMonth());
+      });
+
+      const collectedTax = quarterTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.tax_amount, 0);
+      const paidTax = quarterTransactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.tax_amount, 0);
+      
+      const currentQuarter = Math.floor(new Date().getMonth() / 3);
+      const quarterIndex = quarters.indexOf(q);
+      
+      let status: "paid" | "open" | "upcoming" = "upcoming";
+      if (quarterIndex < currentQuarter) status = "paid";
+      else if (quarterIndex === currentQuarter) status = "open";
+
+      return {
+        ...q,
+        collectedTax,
+        paidTax,
+        liability: collectedTax - paidTax,
+        status,
+      };
+    });
+  }, [transactions]);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const taxAmount = (formData.amount * formData.tax_rate) / (100 + formData.tax_rate);
-    const netAmount = formData.amount - taxAmount;
+    const amount = parseFloat(formData.amount) || 0;
+    const taxAmount = (amount * formData.tax_rate) / (100 + formData.tax_rate);
+    const netAmount = amount - taxAmount;
 
-    const newTransaction: Transaction = {
-      id: Date.now(),
-      ...formData,
-      tax_amount: taxAmount,
-      net_amount: netAmount,
-      created_at: new Date().toISOString(),
-    };
+    if (editMode && selectedTransaction) {
+      // Update existing
+      setTransactions(transactions.map(t => 
+        t.id === selectedTransaction.id 
+          ? {
+              ...t,
+              date: formData.date,
+              description: formData.description,
+              category: formData.category,
+              type: formData.type,
+              amount,
+              tax_rate: formData.tax_rate,
+              tax_amount: Math.round(taxAmount * 100) / 100,
+              net_amount: Math.round(netAmount * 100) / 100,
+              account: formData.account,
+              reference: formData.reference,
+              notes: formData.notes,
+            }
+          : t
+      ));
+    } else {
+      // Create new
+      const newTransaction: Transaction = {
+        id: Date.now(),
+        date: formData.date,
+        description: formData.description,
+        category: formData.category,
+        type: formData.type,
+        amount,
+        tax_rate: formData.tax_rate,
+        tax_amount: Math.round(taxAmount * 100) / 100,
+        net_amount: Math.round(netAmount * 100) / 100,
+        account: formData.account,
+        reference: formData.reference,
+        notes: formData.notes,
+        created_at: new Date().toISOString(),
+      };
+      setTransactions([newTransaction, ...transactions]);
+    }
 
-    setTransactions([newTransaction, ...transactions]);
     setShowModal(false);
     resetForm();
-    fetchData(); // Recalculate stats
   };
 
   const resetForm = () => {
@@ -200,12 +301,80 @@ export default function AccountingTab() {
       description: "",
       category: "",
       type: "income",
-      amount: 0,
+      amount: "",
       tax_rate: 19,
       account: "Geschäftskonto",
       reference: "",
+      notes: "",
     });
-    setEditingTransaction(null);
+    setEditMode(false);
+    setSelectedTransaction(null);
+  };
+
+  const openEditModal = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setFormData({
+      date: transaction.date,
+      description: transaction.description,
+      category: transaction.category,
+      type: transaction.type,
+      amount: transaction.amount.toString(),
+      tax_rate: transaction.tax_rate,
+      account: transaction.account,
+      reference: transaction.reference || "",
+      notes: transaction.notes || "",
+    });
+    setEditMode(true);
+    setShowModal(true);
+  };
+
+  const openDetailModal = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setShowDetailModal(true);
+  };
+
+  const confirmDelete = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setShowDeleteConfirm(true);
+  };
+
+  const deleteTransaction = () => {
+    if (selectedTransaction) {
+      setTransactions(transactions.filter(t => t.id !== selectedTransaction.id));
+      setShowDeleteConfirm(false);
+      setShowDetailModal(false);
+      setSelectedTransaction(null);
+    }
+  };
+
+  const exportToCSV = () => {
+    setExportStatus("Exportiere...");
+    
+    const headers = ["Datum", "Beschreibung", "Kategorie", "Typ", "Brutto", "Netto", "USt", "USt-%", "Konto", "Referenz"];
+    const rows = filteredTransactions.map(t => [
+      t.date,
+      `"${t.description}"`,
+      t.category,
+      t.type === "income" ? "Einnahme" : "Ausgabe",
+      t.amount.toFixed(2).replace(".", ","),
+      t.net_amount.toFixed(2).replace(".", ","),
+      t.tax_amount.toFixed(2).replace(".", ","),
+      t.tax_rate + "%",
+      t.account,
+      t.reference || "",
+    ]);
+
+    const csv = [headers.join(";"), ...rows.map(r => r.join(";"))].join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `buchungen_${filter.year}_${String(filter.month + 1).padStart(2, "0")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    setExportStatus("✓ Exportiert!");
+    setTimeout(() => setExportStatus(null), 2000);
   };
 
   const formatCurrency = (amount: number) => {
@@ -215,14 +384,6 @@ export default function AccountingTab() {
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
-
-  const filteredTransactions = transactions.filter(t => {
-    const date = new Date(t.date);
-    const matchesType = filter.type === "all" || t.type === filter.type;
-    const matchesMonth = date.getMonth() === filter.month;
-    const matchesYear = date.getFullYear() === filter.year;
-    return matchesType && matchesMonth && matchesYear;
-  });
 
   if (loading) {
     return (
@@ -243,7 +404,7 @@ export default function AccountingTab() {
             </div>
             <span className="text-sm text-white/50">Einnahmen</span>
           </div>
-          <p className="text-2xl font-bold text-green-400">{formatCurrency(stats?.totalIncome || 0)}</p>
+          <p className="text-2xl font-bold text-green-400">{formatCurrency(stats.totalIncome)}</p>
           <p className="text-xs text-white/30 mt-1">Dieser Monat</p>
         </div>
 
@@ -254,7 +415,7 @@ export default function AccountingTab() {
             </div>
             <span className="text-sm text-white/50">Ausgaben</span>
           </div>
-          <p className="text-2xl font-bold text-red-400">{formatCurrency(stats?.totalExpenses || 0)}</p>
+          <p className="text-2xl font-bold text-red-400">{formatCurrency(stats.totalExpenses)}</p>
           <p className="text-xs text-white/30 mt-1">Dieser Monat</p>
         </div>
 
@@ -265,7 +426,7 @@ export default function AccountingTab() {
             </div>
             <span className="text-sm text-white/50">Gewinn</span>
           </div>
-          <p className="text-2xl font-bold text-[#FC682C]">{formatCurrency(stats?.netProfit || 0)}</p>
+          <p className="text-2xl font-bold text-[#FC682C]">{formatCurrency(stats.netProfit)}</p>
           <p className="text-xs text-white/30 mt-1">Netto nach Ausgaben</p>
         </div>
 
@@ -276,7 +437,7 @@ export default function AccountingTab() {
             </div>
             <span className="text-sm text-white/50">USt-Rückstellung</span>
           </div>
-          <p className="text-2xl font-bold text-purple-400">{formatCurrency(stats?.pendingTax || 0)}</p>
+          <p className="text-2xl font-bold text-purple-400">{formatCurrency(stats.pendingTax)}</p>
           <p className="text-xs text-white/30 mt-1">Noch abzuführen</p>
         </div>
       </div>
@@ -304,12 +465,15 @@ export default function AccountingTab() {
         </div>
 
         <div className="flex gap-2">
-          <button className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2">
+          <button 
+            onClick={exportToCSV}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2 transition-colors"
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
-            Export
+            {exportStatus || "Export CSV"}
           </button>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => { resetForm(); setShowModal(true); }}
             className="px-4 py-2 bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-xl text-sm font-medium flex items-center gap-2"
           >
             <PlusIcon className="w-4 h-4" />
@@ -320,36 +484,39 @@ export default function AccountingTab() {
 
       {/* Filter Bar */}
       {activeView === "transactions" && (
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center flex-wrap">
           <div className="flex items-center gap-2 px-3 py-2 bg-white/[0.04] rounded-xl">
             <FunnelIcon className="w-4 h-4 text-white/40" />
             <select
               value={filter.type}
               onChange={(e) => setFilter({ ...filter, type: e.target.value })}
-              className="bg-transparent text-white text-sm outline-none"
+              className="bg-transparent text-white text-sm outline-none cursor-pointer"
             >
-              <option value="all">Alle Buchungen</option>
-              <option value="income">Nur Einnahmen</option>
-              <option value="expense">Nur Ausgaben</option>
+              <option value="all" className="bg-[#1a1a1f]">Alle Buchungen</option>
+              <option value="income" className="bg-[#1a1a1f]">Nur Einnahmen</option>
+              <option value="expense" className="bg-[#1a1a1f]">Nur Ausgaben</option>
             </select>
           </div>
           <select
             value={filter.month}
             onChange={(e) => setFilter({ ...filter, month: parseInt(e.target.value) })}
-            className="px-3 py-2 bg-white/[0.04] rounded-xl text-white text-sm outline-none"
+            className="px-3 py-2 bg-white/[0.04] rounded-xl text-white text-sm outline-none cursor-pointer"
           >
             {["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"].map((m, i) => (
-              <option key={i} value={i}>{m}</option>
+              <option key={i} value={i} className="bg-[#1a1a1f]">{m}</option>
             ))}
           </select>
           <select
             value={filter.year}
             onChange={(e) => setFilter({ ...filter, year: parseInt(e.target.value) })}
-            className="px-3 py-2 bg-white/[0.04] rounded-xl text-white text-sm outline-none"
+            className="px-3 py-2 bg-white/[0.04] rounded-xl text-white text-sm outline-none cursor-pointer"
           >
-            <option value={2025}>2025</option>
-            <option value={2026}>2026</option>
+            <option value={2025} className="bg-[#1a1a1f]">2025</option>
+            <option value={2026} className="bg-[#1a1a1f]">2026</option>
           </select>
+          <span className="text-sm text-white/40">
+            {filteredTransactions.length} Buchung{filteredTransactions.length !== 1 ? "en" : ""}
+          </span>
         </div>
       )}
 
@@ -364,7 +531,11 @@ export default function AccountingTab() {
             </h3>
             <div className="space-y-3">
               {transactions.slice(0, 5).map((t) => (
-                <div key={t.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl">
+                <div 
+                  key={t.id} 
+                  onClick={() => openDetailModal(t)}
+                  className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl cursor-pointer hover:bg-white/[0.04] transition-colors"
+                >
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${t.type === "income" ? "bg-green-500/20" : "bg-red-500/20"}`}>
                       {t.type === "income" ? (
@@ -383,6 +554,9 @@ export default function AccountingTab() {
                   </p>
                 </div>
               ))}
+              {transactions.length === 0 && (
+                <p className="text-center text-white/40 py-4">Keine Buchungen vorhanden</p>
+              )}
             </div>
           </div>
 
@@ -390,12 +564,12 @@ export default function AccountingTab() {
           <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <ReceiptPercentIcon className="w-5 h-5 text-purple-400" />
-              USt-Übersicht Q1/2026
+              USt-Übersicht Q{Math.floor(new Date().getMonth() / 3) + 1}/{new Date().getFullYear()}
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl">
                 <span className="text-white/60">Eingenommene USt</span>
-                <span className="text-white font-medium">{formatCurrency(stats?.pendingTax || 0)}</span>
+                <span className="text-white font-medium">{formatCurrency(stats.pendingTax)}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl">
                 <span className="text-white/60">Gezahlte Vorsteuer</span>
@@ -403,14 +577,36 @@ export default function AccountingTab() {
               </div>
               <div className="flex justify-between items-center p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
                 <span className="text-purple-400 font-medium">USt-Zahllast</span>
-                <span className="text-purple-400 font-bold">{formatCurrency(stats?.pendingTax || 0)}</span>
+                <span className="text-purple-400 font-bold">{formatCurrency(stats.pendingTax)}</span>
               </div>
               <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-2">
                 <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-yellow-400 font-medium">Nächste USt-Voranmeldung</p>
-                  <p className="text-xs text-white/50">Fällig am 10.04.2026 für Q1</p>
+                  <p className="text-xs text-white/50">Fällig am {taxByQuarter.find(q => q.status === "open")?.due || "N/A"}</p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Year Summary */}
+          <div className="lg:col-span-2 p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <ChartBarIcon className="w-5 h-5 text-blue-400" />
+              Jahresübersicht {new Date().getFullYear()}
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20">
+                <p className="text-sm text-white/50 mb-1">Einnahmen YTD</p>
+                <p className="text-xl font-bold text-green-400">{formatCurrency(stats.yearToDate.income)}</p>
+              </div>
+              <div className="p-4 bg-red-500/10 rounded-xl border border-red-500/20">
+                <p className="text-sm text-white/50 mb-1">Ausgaben YTD</p>
+                <p className="text-xl font-bold text-red-400">{formatCurrency(stats.yearToDate.expenses)}</p>
+              </div>
+              <div className="p-4 bg-[#FC682C]/10 rounded-xl border border-[#FC682C]/20">
+                <p className="text-sm text-white/50 mb-1">Gewinn YTD</p>
+                <p className="text-xl font-bold text-[#FC682C]">{formatCurrency(stats.yearToDate.profit)}</p>
               </div>
             </div>
           </div>
@@ -425,10 +621,10 @@ export default function AccountingTab() {
                 <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Datum</th>
                 <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Beschreibung</th>
                 <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Kategorie</th>
-                <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Konto</th>
                 <th className="px-5 py-4 text-right text-xs font-medium text-white/40 uppercase">Netto</th>
                 <th className="px-5 py-4 text-right text-xs font-medium text-white/40 uppercase">USt</th>
                 <th className="px-5 py-4 text-right text-xs font-medium text-white/40 uppercase">Brutto</th>
+                <th className="px-5 py-4 text-center text-xs font-medium text-white/40 uppercase">Aktionen</th>
               </tr>
             </thead>
             <tbody>
@@ -436,12 +632,12 @@ export default function AccountingTab() {
                 <tr>
                   <td colSpan={7} className="px-5 py-12 text-center">
                     <CalculatorIcon className="w-10 h-10 text-white/10 mx-auto mb-2" />
-                    <p className="text-white/40">Keine Buchungen gefunden</p>
+                    <p className="text-white/40">Keine Buchungen für diesen Zeitraum</p>
                   </td>
                 </tr>
               ) : (
                 filteredTransactions.map((t) => (
-                  <tr key={t.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                  <tr key={t.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
                     <td className="px-5 py-4 text-sm text-white/70">{formatDate(t.date)}</td>
                     <td className="px-5 py-4">
                       <p className="text-sm text-white">{t.description}</p>
@@ -454,13 +650,37 @@ export default function AccountingTab() {
                         {t.category}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-sm text-white/50">{t.account}</td>
                     <td className="px-5 py-4 text-sm text-right text-white/70">{formatCurrency(t.net_amount)}</td>
                     <td className="px-5 py-4 text-sm text-right text-white/50">{formatCurrency(t.tax_amount)}</td>
                     <td className={`px-5 py-4 text-sm text-right font-medium ${
                       t.type === "income" ? "text-green-400" : "text-red-400"
                     }`}>
                       {t.type === "income" ? "+" : "-"}{formatCurrency(t.amount)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex gap-1 justify-center">
+                        <button 
+                          onClick={() => openDetailModal(t)}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors" 
+                          title="Details"
+                        >
+                          <EyeIcon className="w-4 h-4 text-white/50" />
+                        </button>
+                        <button 
+                          onClick={() => openEditModal(t)}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors" 
+                          title="Bearbeiten"
+                        >
+                          <PencilIcon className="w-4 h-4 text-white/50" />
+                        </button>
+                        <button 
+                          onClick={() => confirmDelete(t)}
+                          className="p-2 hover:bg-red-500/20 rounded-lg transition-colors" 
+                          title="Löschen"
+                        >
+                          <TrashIcon className="w-4 h-4 text-red-400/50 hover:text-red-400" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -473,33 +693,53 @@ export default function AccountingTab() {
       {activeView === "taxes" && (
         <div className="space-y-6">
           <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4">USt-Voranmeldungen 2026</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">USt-Voranmeldungen {new Date().getFullYear()}</h3>
             <div className="space-y-3">
-              {[
-                { period: "Q1 (Jan-Mär)", due: "10.04.2026", status: "offen", amount: stats?.pendingTax || 0 },
-                { period: "Q2 (Apr-Jun)", due: "10.07.2026", status: "kommend", amount: 0 },
-                { period: "Q3 (Jul-Sep)", due: "10.10.2026", status: "kommend", amount: 0 },
-                { period: "Q4 (Okt-Dez)", due: "10.01.2027", status: "kommend", amount: 0 },
-              ].map((q, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-white/[0.02] rounded-xl">
+              {taxByQuarter.map((q, i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-white/[0.02] rounded-xl hover:bg-white/[0.03] transition-colors">
                   <div>
-                    <p className="text-white font-medium">{q.period}</p>
+                    <p className="text-white font-medium">{q.name}</p>
                     <p className="text-xs text-white/40">Fällig: {q.due}</p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs ${
-                      q.status === "offen" ? "bg-yellow-500/20 text-yellow-400" :
-                      q.status === "bezahlt" ? "bg-green-500/20 text-green-400" :
+                    <div className="text-right">
+                      <p className="text-xs text-white/40">Eingenommen</p>
+                      <p className="text-sm text-white">{formatCurrency(q.collectedTax)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-white/40">Vorsteuer</p>
+                      <p className="text-sm text-white">{formatCurrency(q.paidTax)}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-lg text-xs min-w-[80px] text-center ${
+                      q.status === "open" ? "bg-yellow-500/20 text-yellow-400" :
+                      q.status === "paid" ? "bg-green-500/20 text-green-400" :
                       "bg-white/10 text-white/40"
                     }`}>
-                      {q.status}
+                      {q.status === "open" ? "Offen" : q.status === "paid" ? "Bezahlt" : "Kommend"}
                     </span>
                     <span className="text-white font-medium min-w-[100px] text-right">
-                      {formatCurrency(q.amount)}
+                      {formatCurrency(q.liability)}
                     </span>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
+            <h3 className="text-lg font-semibold text-white mb-4">USt-Sätze Übersicht</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {TAX_RATES.map(rate => {
+                const rateTransactions = transactions.filter(t => t.tax_rate === rate);
+                const total = rateTransactions.reduce((sum, t) => sum + t.tax_amount, 0);
+                return (
+                  <div key={rate} className="p-4 bg-white/[0.02] rounded-xl">
+                    <p className="text-2xl font-bold text-white mb-1">{rate}%</p>
+                    <p className="text-sm text-white/50">{formatCurrency(total)} USt</p>
+                    <p className="text-xs text-white/30">{rateTransactions.length} Buchungen</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -508,21 +748,23 @@ export default function AccountingTab() {
       {activeView === "reports" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { title: "EÜR 2026", desc: "Einnahmen-Überschuss-Rechnung", icon: DocumentTextIcon },
-            { title: "BWA Februar", desc: "Betriebswirtschaftliche Auswertung", icon: ChartBarIcon },
-            { title: "Kontosalden", desc: "Übersicht aller Konten", icon: BuildingLibraryIcon },
-            { title: "Offene Posten", desc: "Unbezahlte Rechnungen", icon: ClipboardDocumentListIcon },
-            { title: "Abschreibungen", desc: "AfA-Übersicht", icon: CalculatorIcon },
-            { title: "Jahresabschluss", desc: "Vorbereitung Steuerberater", icon: CheckCircleIcon },
+            { title: "EÜR " + new Date().getFullYear(), desc: "Einnahmen-Überschuss-Rechnung", icon: DocumentTextIcon, action: () => alert("EÜR Export wird generiert...") },
+            { title: "BWA " + ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"][new Date().getMonth()], desc: "Betriebswirtschaftliche Auswertung", icon: ChartBarIcon, action: () => alert("BWA Export wird generiert...") },
+            { title: "Kontosalden", desc: "Übersicht aller Konten", icon: BuildingLibraryIcon, action: () => alert("Kontosalden Export wird generiert...") },
+            { title: "Offene Posten", desc: "Unbezahlte Rechnungen", icon: ClipboardDocumentListIcon, action: () => alert("Offene Posten Export wird generiert...") },
+            { title: "Abschreibungen", desc: "AfA-Übersicht", icon: CalculatorIcon, action: () => alert("AfA Export wird generiert...") },
+            { title: "DATEV Export", desc: "Für Steuerberater", icon: DocumentArrowDownIcon, action: () => alert("DATEV Export wird generiert...") },
           ].map((report, i) => (
             <button
               key={i}
+              onClick={report.action}
               className="p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl text-left hover:bg-white/[0.04] hover:border-white/[0.1] transition-colors group"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-[#FC682C]/20 rounded-xl group-hover:bg-[#FC682C]/30 transition-colors">
                   <report.icon className="w-5 h-5 text-[#FC682C]" />
                 </div>
+                <PrinterIcon className="w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors ml-auto" />
               </div>
               <h4 className="text-white font-medium mb-1">{report.title}</h4>
               <p className="text-sm text-white/40">{report.desc}</p>
@@ -531,12 +773,14 @@ export default function AccountingTab() {
         </div>
       )}
 
-      {/* New Transaction Modal */}
+      {/* New/Edit Transaction Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
-              <h3 className="text-lg font-semibold text-white">Neue Buchung</h3>
+              <h3 className="text-lg font-semibold text-white">
+                {editMode ? "Buchung bearbeiten" : "Neue Buchung"}
+              </h3>
               <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2 hover:bg-white/10 rounded-lg">
                 <XMarkIcon className="w-5 h-5 text-white/50" />
               </button>
@@ -567,7 +811,7 @@ export default function AccountingTab() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-white/50 mb-2">Datum</label>
+                  <label className="block text-sm text-white/50 mb-2">Datum *</label>
                   <input
                     type="date"
                     value={formData.date}
@@ -577,12 +821,13 @@ export default function AccountingTab() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-white/50 mb-2">Betrag (Brutto)</label>
+                  <label className="block text-sm text-white/50 mb-2">Betrag (Brutto) *</label>
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.amount || ""}
-                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                    min="0"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                     className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm outline-none focus:border-[#FC682C]/50"
                     placeholder="0,00 €"
                     required
@@ -591,7 +836,7 @@ export default function AccountingTab() {
               </div>
 
               <div>
-                <label className="block text-sm text-white/50 mb-2">Beschreibung</label>
+                <label className="block text-sm text-white/50 mb-2">Beschreibung *</label>
                 <input
                   type="text"
                   value={formData.description}
@@ -604,16 +849,16 @@ export default function AccountingTab() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-white/50 mb-2">Kategorie</label>
+                  <label className="block text-sm text-white/50 mb-2">Kategorie *</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm outline-none focus:border-[#FC682C]/50"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm outline-none focus:border-[#FC682C]/50 cursor-pointer"
                     required
                   >
-                    <option value="">Auswählen...</option>
+                    <option value="" className="bg-[#1a1a1f]">Auswählen...</option>
                     {CATEGORIES[formData.type].map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat} className="bg-[#1a1a1f]">{cat}</option>
                     ))}
                   </select>
                 </div>
@@ -622,25 +867,57 @@ export default function AccountingTab() {
                   <select
                     value={formData.tax_rate}
                     onChange={(e) => setFormData({ ...formData, tax_rate: parseInt(e.target.value) })}
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm outline-none focus:border-[#FC682C]/50"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm outline-none focus:border-[#FC682C]/50 cursor-pointer"
                   >
                     {TAX_RATES.map((rate) => (
-                      <option key={rate} value={rate}>{rate}%</option>
+                      <option key={rate} value={rate} className="bg-[#1a1a1f]">{rate}%</option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm text-white/50 mb-2">Referenz (optional)</label>
+                <label className="block text-sm text-white/50 mb-2">Referenz / Rechnungsnummer</label>
                 <input
                   type="text"
                   value={formData.reference}
                   onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
                   className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm outline-none focus:border-[#FC682C]/50"
-                  placeholder="z.B. Rechnungsnummer"
+                  placeholder="z.B. INV-2026-001"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm text-white/50 mb-2">Notizen</label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm outline-none focus:border-[#FC682C]/50 resize-none"
+                  rows={2}
+                  placeholder="Zusätzliche Informationen..."
+                />
+              </div>
+
+              {/* Preview */}
+              {formData.amount && (
+                <div className="p-4 bg-white/[0.02] rounded-xl border border-white/[0.06]">
+                  <p className="text-xs text-white/40 mb-2">Vorschau</p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">Netto:</span>
+                    <span className="text-white">{formatCurrency((parseFloat(formData.amount) || 0) - ((parseFloat(formData.amount) || 0) * formData.tax_rate) / (100 + formData.tax_rate))}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">USt ({formData.tax_rate}%):</span>
+                    <span className="text-white">{formatCurrency(((parseFloat(formData.amount) || 0) * formData.tax_rate) / (100 + formData.tax_rate))}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium mt-2 pt-2 border-t border-white/[0.06]">
+                    <span className="text-white">Brutto:</span>
+                    <span className={formData.type === "income" ? "text-green-400" : "text-red-400"}>
+                      {formData.type === "income" ? "+" : "-"}{formatCurrency(parseFloat(formData.amount) || 0)}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-4 flex gap-3">
                 <button
@@ -654,10 +931,115 @@ export default function AccountingTab() {
                   type="submit"
                   className="flex-1 py-3 bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] rounded-xl text-white text-sm font-medium"
                 >
-                  Buchung speichern
+                  {editMode ? "Änderungen speichern" : "Buchung speichern"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedTransaction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
+              <h3 className="text-lg font-semibold text-white">Buchungsdetails</h3>
+              <button onClick={() => { setShowDetailModal(false); setSelectedTransaction(null); }} className="p-2 hover:bg-white/10 rounded-lg">
+                <XMarkIcon className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className={`p-4 rounded-xl ${selectedTransaction.type === "income" ? "bg-green-500/10 border border-green-500/20" : "bg-red-500/10 border border-red-500/20"}`}>
+                <p className="text-sm text-white/50">{selectedTransaction.type === "income" ? "Einnahme" : "Ausgabe"}</p>
+                <p className={`text-3xl font-bold ${selectedTransaction.type === "income" ? "text-green-400" : "text-red-400"}`}>
+                  {selectedTransaction.type === "income" ? "+" : "-"}{formatCurrency(selectedTransaction.amount)}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-white/50">Beschreibung</span>
+                  <span className="text-white text-right max-w-[60%]">{selectedTransaction.description}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/50">Kategorie</span>
+                  <span className="text-white">{selectedTransaction.category}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/50">Datum</span>
+                  <span className="text-white">{formatDate(selectedTransaction.date)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/50">Netto</span>
+                  <span className="text-white">{formatCurrency(selectedTransaction.net_amount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/50">USt ({selectedTransaction.tax_rate}%)</span>
+                  <span className="text-white">{formatCurrency(selectedTransaction.tax_amount)}</span>
+                </div>
+                {selectedTransaction.reference && (
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Referenz</span>
+                    <span className="text-white">{selectedTransaction.reference}</span>
+                  </div>
+                )}
+                {selectedTransaction.notes && (
+                  <div>
+                    <span className="text-white/50 block mb-1">Notizen</span>
+                    <p className="text-white text-sm bg-white/[0.02] p-2 rounded-lg">{selectedTransaction.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  onClick={() => { setShowDetailModal(false); openEditModal(selectedTransaction); }}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/70 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                  Bearbeiten
+                </button>
+                <button
+                  onClick={() => confirmDelete(selectedTransaction)}
+                  className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-400 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                  Löschen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && selectedTransaction && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl w-full max-w-sm p-6">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrashIcon className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Buchung löschen?</h3>
+              <p className="text-sm text-white/50 mb-6">
+                &quot;{selectedTransaction.description}&quot; wird unwiderruflich gelöscht.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowDeleteConfirm(false); setSelectedTransaction(null); }}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/70 text-sm font-medium transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={deleteTransaction}
+                  className="flex-1 py-3 bg-red-500 hover:bg-red-600 rounded-xl text-white text-sm font-medium transition-colors"
+                >
+                  Löschen
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
