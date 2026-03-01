@@ -522,10 +522,10 @@ export function Dashboard() {
           </div>
         )}
 
-        {/* Nav */}
+        {/* Nav - Scrollable */}
         <nav
-          className="p-3 space-y-1 overflow-y-auto"
-          style={{ maxHeight: "calc(100vh - 200px)" }}
+          className="flex-1 p-2 space-y-0.5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+          style={{ maxHeight: "calc(100vh - 240px)" }}
         >
           {navItems.map((item) => (
             <button
@@ -534,35 +534,35 @@ export function Dashboard() {
                 setActiveTab(item.id);
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group relative ${
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all group relative ${
                 activeTab === item.id
                   ? "bg-gradient-to-r from-[#FC682C]/20 via-[#FC682C]/10 to-transparent text-white"
                   : "text-white/50 hover:text-white hover:bg-white/[0.04]"
               }`}
             >
               {activeTab === item.id && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full" />
               )}
               <item.icon
-                className={`w-5 h-5 ${activeTab === item.id ? "text-[#FC682C]" : ""}`}
+                className={`w-[18px] h-[18px] flex-shrink-0 ${activeTab === item.id ? "text-[#FC682C]" : ""}`}
               />
               {!sidebarCollapsed && (
                 <>
-                  <span className="flex-1 text-left">{item.label}</span>
+                  <span className="flex-1 text-left truncate">{item.label}</span>
                   {item.hot && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-full">
+                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-full">
                       HOT
                     </span>
                   )}
                   {item.new && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-[#9D65C9] to-[#B794F6] text-white rounded-full">
+                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-gradient-to-r from-[#9D65C9] to-[#B794F6] text-white rounded-full">
                       NEU
                     </span>
                   )}
                   {item.badge !== null &&
                     item.badge !== undefined &&
                     item.badge > 0 && (
-                      <span className="min-w-[20px] h-5 px-1.5 text-xs bg-[#FC682C] text-white rounded-full font-medium flex items-center justify-center">
+                      <span className="min-w-[18px] h-[18px] px-1 text-[10px] bg-[#FC682C] text-white rounded-full font-medium flex items-center justify-center">
                         {item.badge}
                       </span>
                     )}
@@ -572,17 +572,17 @@ export function Dashboard() {
           ))}
         </nav>
 
-        {/* Bottom Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/[0.06] bg-[#0f0f12]">
+        {/* Bottom Section - Compact */}
+        <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-white/[0.06] bg-[#0f0f12]">
           {!sidebarCollapsed && (
-            <div className="mb-3 p-3 rounded-xl bg-gradient-to-br from-[#FC682C]/10 to-[#9D65C9]/10 border border-[#FC682C]/20">
-              <div className="flex items-center gap-2 mb-2">
-                <SparklesIcon className="w-4 h-4 text-[#FC682C]" />
-                <span className="text-xs font-medium text-white">Pro Tipp</span>
+            <div className="mb-2 p-2 rounded-lg bg-gradient-to-br from-[#FC682C]/10 to-[#9D65C9]/10 border border-[#FC682C]/20">
+              <div className="flex items-center gap-2">
+                <SparklesIcon className="w-3.5 h-3.5 text-[#FC682C]" />
+                <span className="text-[11px] font-medium text-white">Pro Tipp</span>
               </div>
-              <p className="text-[11px] text-white/50">
+              <p className="text-[10px] text-white/50 mt-1">
                 Drücke{" "}
-                <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">
+                <kbd className="px-1 py-0.5 bg-white/10 rounded text-[9px]">
                   ⌘K
                 </kbd>{" "}
                 für Schnellzugriff
@@ -591,9 +591,9 @@ export function Dashboard() {
           )}
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors ${sidebarCollapsed ? "justify-center" : ""}`}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors ${sidebarCollapsed ? "justify-center" : ""}`}
           >
-            <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
+            <ArrowRightStartOnRectangleIcon className="w-[18px] h-[18px]" />
             {!sidebarCollapsed && <span>Abmelden</span>}
           </button>
         </div>
