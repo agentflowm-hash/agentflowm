@@ -100,6 +100,7 @@ type Tab =
   | "dashboard"
   | "pipeline"
   | "leads"
+  | "vertrieb"
   | "clients"
   | "invoices"
   | "agreements"
@@ -364,8 +365,7 @@ export function Dashboard() {
       label: "CRM & Vertrieb",
       items: [
         { id: "dashboard" as Tab, label: "Dashboard", icon: HomeIcon, badge: null },
-        { id: "pipeline" as Tab, label: "Pipeline", icon: FunnelIcon, badge: stats?.leads.new, hot: true },
-        { id: "leads" as Tab, label: "Leads", icon: UsersIcon, badge: null },
+        { id: "vertrieb" as Tab, label: "Vertrieb", icon: FunnelIcon, badge: stats?.leads.new, hot: true },
         { id: "clients" as Tab, label: "Kunden", icon: UserGroupIcon, badge: null },
       ],
     },
@@ -671,8 +671,9 @@ export function Dashboard() {
           {activeTab === "dashboard" && (
             <DashboardTab stats={stats} onNavigate={setActiveTab} />
           )}
-          {activeTab === "pipeline" && <PipelineTab />}
-          {activeTab === "leads" && <LeadsTab />}
+          {activeTab === "vertrieb" && <VertriebTab />}
+          {activeTab === "pipeline" && <VertriebTab />}
+          {activeTab === "leads" && <VertriebTab />}
           {activeTab === "clients" && <ClientsTab />}
           {activeTab === "invoices" && <InvoiceManager />}
           {activeTab === "agreements" && <AgreementManager />}
@@ -695,9 +696,9 @@ export function Dashboard() {
             {[
               { id: "dashboard" as Tab, icon: HomeIcon, label: "Home" },
               {
-                id: "leads" as Tab,
-                icon: UsersIcon,
-                label: "Leads",
+                id: "vertrieb" as Tab,
+                icon: FunnelIcon,
+                label: "Vertrieb",
                 badge: stats?.leads.new,
               },
               { id: "clients" as Tab, icon: UserGroupIcon, label: "Kunden" },
@@ -917,7 +918,7 @@ function CommandPalette({
       id: "pipeline",
       label: "Pipeline öffnen",
       icon: FunnelIcon,
-      action: () => onNavigate("pipeline"),
+      action: () => onNavigate("vertrieb"),
     },
     {
       id: "new-lead",
@@ -1053,7 +1054,7 @@ function DashboardTab({
               <EyeIcon className="w-4 h-4" /> Leads ansehen
             </button>
             <button
-              onClick={() => onNavigate?.("pipeline")}
+              onClick={() => onNavigate?.("vertrieb")}
               className="px-4 py-2 bg-white/10 text-white rounded-xl text-sm font-medium hover:bg-white/20 transition-colors"
             >
               Pipeline öffnen
@@ -1106,7 +1107,7 @@ function DashboardTab({
           color="purple"
           trend={stats.leads.conversionRate > 50 ? "up" : undefined}
           sparkline={[0, 0, 0, 0, 0, stats.leads.total - stats.leads.won, stats.leads.won]}
-          onClick={() => onNavigate?.("pipeline")}
+          onClick={() => onNavigate?.("vertrieb")}
         />
       </div>
 
@@ -1122,35 +1123,35 @@ function DashboardTab({
                 count={stats.leads.new}
                 color="blue"
                 percentage={stats.leads.total > 0 ? (stats.leads.new / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("pipeline")}
+                onClick={() => onNavigate?.("vertrieb")}
               />
               <PipelineStage
                 label="Kontaktiert"
                 count={stats.leads.contacted}
                 color="yellow"
                 percentage={stats.leads.total > 0 ? (stats.leads.contacted / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("pipeline")}
+                onClick={() => onNavigate?.("vertrieb")}
               />
               <PipelineStage
                 label="Qualifiziert"
                 count={stats.leads.qualified}
                 color="purple"
                 percentage={stats.leads.total > 0 ? (stats.leads.qualified / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("pipeline")}
+                onClick={() => onNavigate?.("vertrieb")}
               />
               <PipelineStage
                 label="Angebot"
                 count={stats.leads.proposal || 0}
                 color="orange"
                 percentage={stats.leads.total > 0 ? ((stats.leads.proposal || 0) / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("pipeline")}
+                onClick={() => onNavigate?.("vertrieb")}
               />
               <PipelineStage
                 label="Gewonnen"
                 count={stats.leads.won}
                 color="green"
                 percentage={stats.leads.total > 0 ? (stats.leads.won / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("pipeline")}
+                onClick={() => onNavigate?.("vertrieb")}
               />
             </div>
           </GlassCard>
@@ -1504,6 +1505,45 @@ function LoadingState() {
         <div className="w-12 h-12 border-2 border-[#FC682C] border-t-transparent rounded-full animate-spin" />
         <p className="text-white/40 text-sm">Lade Daten...</p>
       </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//                    VERTRIEB TAB (PIPELINE + LEADS MERGED)
+// ═══════════════════════════════════════════════════════════════
+
+function VertriebTab() {
+  const [vertriebView, setVertriebView] = useState<"kanban" | "tabelle">("kanban");
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-white">Vertrieb</h2>
+        <div className="flex items-center gap-1 bg-white/[0.06] rounded-lg p-1">
+          <button
+            onClick={() => setVertriebView("kanban")}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              vertriebView === "kanban"
+                ? "bg-[#FC682C] text-white shadow-lg"
+                : "text-white/50 hover:text-white"
+            }`}
+          >
+            Kanban
+          </button>
+          <button
+            onClick={() => setVertriebView("tabelle")}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              vertriebView === "tabelle"
+                ? "bg-[#FC682C] text-white shadow-lg"
+                : "text-white/50 hover:text-white"
+            }`}
+          >
+            Tabelle
+          </button>
+        </div>
+      </div>
+      {vertriebView === "kanban" ? <PipelineTab /> : <LeadsTab />}
     </div>
   );
 }
