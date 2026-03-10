@@ -71,7 +71,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 // Next-Level Components
-import { Confetti, KeyboardShortcuts, useToast, GoogleAnalyticsWidget, WebsiteAnalyticsWidget, LiveActivityFeed, AnimatedStatsCards, GoalsWidget, AIInsightsWidget } from "@/components";
+import { Confetti, KeyboardShortcuts, useToast } from "@/components";
 import InvoiceManager from "@/components/InvoiceManager";
 import { AgreementManager } from "@/components/AgreementManager";
 import CalendarTab from "@/components/CalendarTab";
@@ -480,12 +480,12 @@ export function Dashboard() {
               <MiniStatCard
                 value={stats?.leads.total || 0}
                 label="Leads"
-                trend={12}
+                trend={stats?.leads.new || 0}
               />
               <MiniStatCard
                 value={`€${((stats?.revenue.thisMonth || 0) / 1000).toFixed(1)}k`}
                 label="Umsatz"
-                trend={8}
+                trend={0}
               />
             </div>
           </div>
@@ -4245,19 +4245,6 @@ function AnalyticsTab({ stats }: { stats: Stats | null }) {
 
   return (
     <div className="space-y-6">
-      {/* NEW: Premium Analytics Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GoogleAnalyticsWidget />
-        <WebsiteAnalyticsWidget />
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LiveActivityFeed />
-        <AIInsightsWidget />
-      </div>
-      
-      <GoalsWidget />
-
       {/* Time Range Selector */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Übersicht & Trends</h2>
