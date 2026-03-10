@@ -189,6 +189,16 @@ export default function PrivacyTab() {
 
   return (
     <div className="space-y-6">
+      {/* In Entwicklung Banner */}
+      <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+        <ExclamationTriangleIcon className="w-6 h-6 text-amber-400 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-amber-400">In Entwicklung</p>
+          <p className="text-xs text-white/50 mt-0.5">
+            Dieses Modul befindet sich noch in der Entwicklung. Die angezeigten Daten sind Platzhalter und werden bald durch echte Funktionen ersetzt.
+          </p>
+        </div>
+      </div>
       {/* Header Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-5 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 rounded-2xl border border-yellow-500/20">
