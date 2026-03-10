@@ -244,6 +244,7 @@ export function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
 
@@ -398,7 +399,6 @@ export function Dashboard() {
       label: "Verwaltung",
       items: [
         { id: "privacy" as Tab, label: "Datenschutz", icon: ShieldCheckIcon, badge: null },
-        { id: "settings" as Tab, label: "Einstellungen", icon: Cog6ToothIcon, badge: null },
       ],
     },
   ];
@@ -658,9 +658,36 @@ export function Dashboard() {
               )}
             </div>
 
-            {/* Profile */}
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FC682C] to-[#9D65C9] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:opacity-90 transition-opacity">
-              A
+            {/* Profile Dropdown */}
+            <div className="relative">
+              <div
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FC682C] to-[#9D65C9] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:opacity-90 transition-opacity"
+              >
+                A
+              </div>
+              {showProfileMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
+                  <div className="absolute right-0 top-12 w-52 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
+                    <button
+                      onClick={() => { setActiveTab("settings" as Tab); setShowProfileMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <Cog6ToothIcon className="w-4 h-4" />
+                      Einstellungen
+                    </button>
+                    <div className="border-t border-white/10" />
+                    <button
+                      onClick={() => { handleLogout(); setShowProfileMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                      <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
+                      Abmelden
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
