@@ -104,6 +104,7 @@ type Tab =
   | "clients"
   | "invoices"
   | "agreements"
+  | "dokumente"
   | "accounting"
   | "privacy"
   | "checks"
@@ -113,6 +114,7 @@ type Tab =
   | "automations"
   | "calendar"
   | "emails"
+  | "kommunikation"
   | "notifications"
   | "settings";
 type PipelineView = "kanban" | "list";
@@ -372,18 +374,16 @@ export function Dashboard() {
     {
       label: "Finanzen",
       items: [
-        { id: "invoices" as Tab, label: "Rechnungen", icon: CurrencyEuroIcon, badge: null },
-        { id: "agreements" as Tab, label: "Vereinbarungen", icon: DocumentTextIcon, badge: null },
+        { id: "dokumente" as Tab, label: "Dokumente", icon: DocumentTextIcon, badge: null },
         { id: "accounting" as Tab, label: "Buchhaltung", icon: CalculatorIcon, badge: null },
       ],
     },
     {
       label: "Marketing",
       items: [
-        { id: "emails" as Tab, label: "Email Center", icon: EnvelopeOpenIcon, badge: null },
+        { id: "kommunikation" as Tab, label: "Kommunikation", icon: EnvelopeOpenIcon, badge: null },
         { id: "checks" as Tab, label: "Website-Checks", icon: GlobeAltIcon, badge: stats?.checks.today },
         { id: "referrals" as Tab, label: "Empfehlungen", icon: StarIcon, badge: stats?.referrals.pending },
-        { id: "subscribers" as Tab, label: "Newsletter", icon: EnvelopeIcon, badge: null },
       ],
     },
     {
@@ -675,17 +675,19 @@ export function Dashboard() {
           {activeTab === "pipeline" && <VertriebTab />}
           {activeTab === "leads" && <VertriebTab />}
           {activeTab === "clients" && <ClientsTab />}
-          {activeTab === "invoices" && <InvoiceManager />}
-          {activeTab === "agreements" && <AgreementManager />}
+          {activeTab === "dokumente" && <DokumenteTab />}
+          {activeTab === "invoices" && <DokumenteTab />}
+          {activeTab === "agreements" && <DokumenteTab />}
           {activeTab === "accounting" && <AccountingTab />}
           {activeTab === "privacy" && <PrivacyTab />}
           {activeTab === "checks" && <ChecksTab />}
           {activeTab === "referrals" && <ReferralsTab />}
-          {activeTab === "subscribers" && <SubscribersTab />}
+          {activeTab === "kommunikation" && <KommunikationTab />}
+          {activeTab === "subscribers" && <KommunikationTab />}
           {activeTab === "analytics" && <AnalyticsTab stats={stats} />}
           {activeTab === "automations" && <AutomationsTab />}
           {activeTab === "calendar" && <CalendarTab />}
-          {activeTab === "emails" && <EmailCenterTab />}
+          {activeTab === "emails" && <KommunikationTab />}
           {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "settings" && <SettingsTab />}
         </div>
@@ -1510,6 +1512,78 @@ function LoadingState() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//                    KOMMUNIKATION TAB (EMAIL + NEWSLETTER)
+// ═══════════════════════════════════════════════════════════════
+
+function KommunikationTab() {
+  const [komView, setKomView] = useState<"emails" | "empfaenger">("emails");
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-white">Kommunikation</h2>
+        <div className="flex items-center gap-1 bg-white/[0.06] rounded-lg p-1">
+          <button
+            onClick={() => setKomView("emails")}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              komView === "emails" ? "bg-[#FC682C] text-white shadow-lg" : "text-white/50 hover:text-white"
+            }`}
+          >
+            E-Mails
+          </button>
+          <button
+            onClick={() => setKomView("empfaenger")}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              komView === "empfaenger" ? "bg-[#FC682C] text-white shadow-lg" : "text-white/50 hover:text-white"
+            }`}
+          >
+            Empfänger
+          </button>
+        </div>
+      </div>
+      {komView === "emails" ? <EmailCenterTab /> : <SubscribersTab />}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//                    DOKUMENTE TAB (RECHNUNGEN + VEREINBARUNGEN)
+// ═══════════════════════════════════════════════════════════════
+
+function DokumenteTab() {
+  const [docView, setDocView] = useState<"rechnungen" | "vereinbarungen">("rechnungen");
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-white">Dokumente</h2>
+        <div className="flex items-center gap-1 bg-white/[0.06] rounded-lg p-1">
+          <button
+            onClick={() => setDocView("rechnungen")}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              docView === "rechnungen"
+                ? "bg-[#FC682C] text-white shadow-lg"
+                : "text-white/50 hover:text-white"
+            }`}
+          >
+            Rechnungen
+          </button>
+          <button
+            onClick={() => setDocView("vereinbarungen")}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              docView === "vereinbarungen"
+                ? "bg-[#FC682C] text-white shadow-lg"
+                : "text-white/50 hover:text-white"
+            }`}
+          >
+            Vereinbarungen
+          </button>
+        </div>
+      </div>
+      {docView === "rechnungen" ? <InvoiceManager /> : <AgreementManager />}
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════
 //                    VERTRIEB TAB (PIPELINE + LEADS MERGED)
 // ═══════════════════════════════════════════════════════════════
