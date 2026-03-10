@@ -359,109 +359,53 @@ export function Dashboard() {
     router.push("/login");
   };
 
-  const navItems = [
-    { id: "dashboard" as Tab, label: "Dashboard", icon: HomeIcon, badge: null },
+  const navSections = [
     {
-      id: "pipeline" as Tab,
-      label: "Pipeline",
-      icon: FunnelIcon,
-      badge: stats?.leads.new,
-      hot: true,
-    },
-    { id: "leads" as Tab, label: "Leads", icon: UsersIcon, badge: null },
-    {
-      id: "clients" as Tab,
-      label: "Portal-Kunden",
-      icon: UserGroupIcon,
-      badge: null,
-      new: true,
+      label: "CRM & Vertrieb",
+      items: [
+        { id: "dashboard" as Tab, label: "Dashboard", icon: HomeIcon, badge: null },
+        { id: "pipeline" as Tab, label: "Pipeline", icon: FunnelIcon, badge: stats?.leads.new, hot: true },
+        { id: "leads" as Tab, label: "Leads", icon: UsersIcon, badge: null },
+        { id: "clients" as Tab, label: "Kunden", icon: UserGroupIcon, badge: null },
+      ],
     },
     {
-      id: "invoices" as Tab,
-      label: "Rechnungen",
-      icon: CurrencyEuroIcon,
-      badge: null,
-      new: true,
+      label: "Finanzen",
+      items: [
+        { id: "invoices" as Tab, label: "Rechnungen", icon: CurrencyEuroIcon, badge: null },
+        { id: "agreements" as Tab, label: "Vereinbarungen", icon: DocumentTextIcon, badge: null },
+        { id: "accounting" as Tab, label: "Buchhaltung", icon: CalculatorIcon, badge: null },
+      ],
     },
     {
-      id: "agreements" as Tab,
-      label: "Vereinbarungen",
-      icon: DocumentTextIcon,
-      badge: null,
-      new: true,
+      label: "Marketing",
+      items: [
+        { id: "emails" as Tab, label: "Email Center", icon: EnvelopeOpenIcon, badge: null },
+        { id: "checks" as Tab, label: "Website-Checks", icon: GlobeAltIcon, badge: stats?.checks.today },
+        { id: "referrals" as Tab, label: "Empfehlungen", icon: StarIcon, badge: stats?.referrals.pending },
+        { id: "subscribers" as Tab, label: "Newsletter", icon: EnvelopeIcon, badge: null },
+      ],
     },
     {
-      id: "accounting" as Tab,
-      label: "Buchhaltung",
-      icon: CalculatorIcon,
-      badge: null,
-      new: true,
+      label: "Analyse & System",
+      items: [
+        { id: "analytics" as Tab, label: "Analytics", icon: ChartBarIcon, badge: null },
+        { id: "notifications" as Tab, label: "Benachrichtigungen", icon: BellIcon, badge: unreadCount > 0 ? unreadCount : null },
+        { id: "automations" as Tab, label: "Automationen", icon: BoltIcon, badge: null },
+        { id: "calendar" as Tab, label: "Kalender", icon: CalendarDaysIcon, badge: null },
+      ],
     },
     {
-      id: "privacy" as Tab,
-      label: "Datenschutz",
-      icon: ShieldCheckIcon,
-      badge: null,
-      new: true,
-    },
-    {
-      id: "checks" as Tab,
-      label: "Website-Checks",
-      icon: GlobeAltIcon,
-      badge: stats?.checks.today,
-    },
-    {
-      id: "referrals" as Tab,
-      label: "Empfehlungen",
-      icon: StarIcon,
-      badge: stats?.referrals.pending,
-    },
-    {
-      id: "subscribers" as Tab,
-      label: "Newsletter",
-      icon: EnvelopeIcon,
-      badge: null,
-    },
-    {
-      id: "analytics" as Tab,
-      label: "Analytics",
-      icon: ChartBarIcon,
-      badge: null,
-    },
-    {
-      id: "automations" as Tab,
-      label: "Automationen",
-      icon: BoltIcon,
-      badge: null,
-    },
-    {
-      id: "calendar" as Tab,
-      label: "Kalender",
-      icon: CalendarDaysIcon,
-      badge: null,
-      new: true,
-    },
-    {
-      id: "emails" as Tab,
-      label: "Email Center",
-      icon: EnvelopeOpenIcon,
-      badge: null,
-      new: true,
-    },
-    {
-      id: "notifications" as Tab,
-      label: "Notifications",
-      icon: BellIcon,
-      badge: null,
-      new: true,
-    },
-    {
-      id: "settings" as Tab,
-      label: "Einstellungen",
-      icon: Cog6ToothIcon,
-      badge: null,
+      label: "Verwaltung",
+      items: [
+        { id: "privacy" as Tab, label: "Datenschutz", icon: ShieldCheckIcon, badge: null },
+        { id: "settings" as Tab, label: "Einstellungen", icon: Cog6ToothIcon, badge: null },
+      ],
     },
   ];
+
+  // Flat list for compatibility (mobile nav, command palette, etc.)
+  const navItems = navSections.flatMap((s) => s.items);
 
   return (
     <div className="min-h-screen bg-[#09090b] flex">
@@ -549,51 +493,62 @@ export function Dashboard() {
 
         {/* Nav - Scrollable */}
         <nav
-          className="flex-1 p-2 space-y-0.5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+          className="flex-1 p-2 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
           style={{ maxHeight: "calc(100vh - 240px)" }}
         >
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setActiveTab(item.id);
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all group relative ${
-                activeTab === item.id
-                  ? "bg-gradient-to-r from-[#FC682C]/20 via-[#FC682C]/10 to-transparent text-white"
-                  : "text-white/50 hover:text-white hover:bg-white/[0.04]"
-              }`}
-            >
-              {activeTab === item.id && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full" />
-              )}
-              <item.icon
-                className={`w-[18px] h-[18px] flex-shrink-0 ${activeTab === item.id ? "text-[#FC682C]" : ""}`}
-              />
+          {navSections.map((section, sIdx) => (
+            <div key={section.label} className={sIdx > 0 ? "mt-4" : ""}>
               {!sidebarCollapsed && (
-                <>
-                  <span className="flex-1 text-left truncate">{item.label}</span>
-                  {item.hot && (
-                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-full">
-                      HOT
-                    </span>
-                  )}
-                  {item.new && (
-                    <span className="px-1.5 py-0.5 text-[8px] font-bold bg-gradient-to-r from-[#9D65C9] to-[#B794F6] text-white rounded-full">
-                      NEU
-                    </span>
-                  )}
-                  {item.badge !== null &&
-                    item.badge !== undefined &&
-                    item.badge > 0 && (
-                      <span className="min-w-[18px] h-[18px] px-1 text-[10px] bg-[#FC682C] text-white rounded-full font-medium flex items-center justify-center">
-                        {item.badge}
-                      </span>
-                    )}
-                </>
+                <div className="px-3 mb-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/25">
+                    {section.label}
+                  </span>
+                </div>
               )}
-            </button>
+              {sidebarCollapsed && sIdx > 0 && (
+                <div className="mx-3 mb-2 border-t border-white/[0.06]" />
+              )}
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all group relative ${
+                      activeTab === item.id
+                        ? "bg-gradient-to-r from-[#FC682C]/20 via-[#FC682C]/10 to-transparent text-white"
+                        : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    {activeTab === item.id && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full" />
+                    )}
+                    <item.icon
+                      className={`w-[18px] h-[18px] flex-shrink-0 ${activeTab === item.id ? "text-[#FC682C]" : ""}`}
+                    />
+                    {!sidebarCollapsed && (
+                      <>
+                        <span className="flex-1 text-left truncate">{item.label}</span>
+                        {"hot" in item && item.hot && (
+                          <span className="px-1.5 py-0.5 text-[8px] font-bold bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-full">
+                            HOT
+                          </span>
+                        )}
+                        {item.badge !== null &&
+                          item.badge !== undefined &&
+                          item.badge > 0 && (
+                            <span className="min-w-[18px] h-[18px] px-1 text-[10px] bg-[#FC682C] text-white rounded-full font-medium flex items-center justify-center">
+                              {item.badge}
+                            </span>
+                          )}
+                      </>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
