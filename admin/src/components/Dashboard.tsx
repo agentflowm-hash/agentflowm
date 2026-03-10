@@ -3258,6 +3258,34 @@ function CheckDetailModal({
   check: WebsiteCheck;
   onClose: () => void;
 }) {
+  const [leadCreated, setLeadCreated] = useState(false);
+  const [creatingLead, setCreatingLead] = useState(false);
+
+  const handleCreateLead = async () => {
+    setCreatingLead(true);
+    try {
+      await fetch("/api/leads", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: check.url.replace(/^https?:\/\//, ""),
+          email: check.email || "",
+          source: "Website-Check",
+          message: `Website-Check Score: ${check.scoreOverall}/100 | URL: ${check.url}`,
+          packageInterest: "Website-Check",
+          status: "new",
+          priority: "medium",
+        }),
+      });
+      setLeadCreated(true);
+    } catch (error) {
+      console.error("Failed to create lead:", error);
+    } finally {
+      setCreatingLead(false);
+    }
+  };
+
   const categories = [
     { label: "Gesamt", value: check.scoreOverall, icon: ChartBarIcon },
     { label: "SEO", value: check.scoreSeo, icon: MagnifyingGlassCircleIcon },
@@ -3422,13 +3450,47 @@ function CheckDetailModal({
                   <p className="text-xs text-white/40 mb-1">Kontakt E-Mail</p>
                   <p className="text-sm text-white">{check.email}</p>
                 </div>
-                <a
-                  href={`mailto:${check.email}?subject=Website-Analyse für ${check.url}`}
-                  className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90"
-                >
-                  E-Mail senden
-                </a>
+                <div className="flex items-center gap-2">
+                  {!leadCreated ? (
+                    <button
+                      onClick={handleCreateLead}
+                      disabled={creatingLead}
+                      className="px-4 py-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl text-sm font-medium hover:bg-green-500/30 transition-colors disabled:opacity-50"
+                    >
+                      {creatingLead ? "Wird erstellt..." : "Als Lead anlegen"}
+                    </button>
+                  ) : (
+                    <span className="px-4 py-2 text-green-400 text-sm font-medium">
+                      ✓ Lead erstellt
+                    </span>
+                  )}
+                  <a
+                    href={`mailto:${check.email}?subject=Website-Analyse für ${check.url}`}
+                    className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90"
+                  >
+                    E-Mail senden
+                  </a>
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* Als Lead anlegen - wenn keine Email */}
+          {!check.email && (
+            <div className="flex justify-end">
+              {!leadCreated ? (
+                <button
+                  onClick={handleCreateLead}
+                  disabled={creatingLead}
+                  className="px-4 py-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl text-sm font-medium hover:bg-green-500/30 transition-colors disabled:opacity-50"
+                >
+                  {creatingLead ? "Wird erstellt..." : "Als Lead anlegen"}
+                </button>
+              ) : (
+                <span className="px-4 py-2 text-green-400 text-sm font-medium">
+                  ✓ Lead erstellt
+                </span>
+              )}
             </div>
           )}
         </div>
