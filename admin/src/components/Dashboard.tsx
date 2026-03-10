@@ -5188,7 +5188,7 @@ function ClientDetailModal({
   onUpdate: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<
-    "details" | "project" | "messages" | "approvals"
+    "details" | "project" | "messages" | "approvals" | "dokumente"
   >("details");
   const [projectData, setProjectData] = useState<any>(null);
   const [newMessage, setNewMessage] = useState("");
@@ -5199,6 +5199,32 @@ function ClientDetailModal({
     title: "",
     description: "",
     type: "design",
+  });
+
+  // Dokumente State
+  const [clientInvoices, setClientInvoices] = useState<any[]>([]);
+  const [clientAgreements, setClientAgreements] = useState<any[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [showCreateInvoice, setShowCreateInvoice] = useState(false);
+  const [showCreateAgreement, setShowCreateAgreement] = useState(false);
+  const [creatingDoc, setCreatingDoc] = useState(false);
+  const [invoiceForm, setInvoiceForm] = useState({
+    due_date: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+    tax_rate: 19,
+    discount_percent: 0,
+    notes: "",
+    items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
+  });
+  const [agreementForm, setAgreementForm] = useState({
+    project_title: "",
+    project_description: "",
+    services: [] as string[],
+    amount: 0,
+    tax_rate: 19,
+    payment_terms: "100% bei Vertragsstart",
+    project_duration: "2 Wochen",
+    notes: "",
+    newService: "",
   });
   
   // Admin Edit States
@@ -5317,6 +5343,122 @@ function ClientDetailModal({
     }
   }, [client.project_id, fetchApprovals]);
 
+  // Fetch client documents
+  const fetchClientDocs = useCallback(async () => {
+    setLoadingDocs(true);
+    try {
+      const [invRes, agrRes] = await Promise.all([
+        fetch("/api/invoices", { credentials: "include" }),
+        fetch("/api/agreements", { credentials: "include" }),
+      ]);
+      if (invRes.ok) {
+        const invData = await invRes.json();
+        const invUnwrapped = invData.data || invData;
+        const allInvoices = invUnwrapped.invoices || [];
+        setClientInvoices(allInvoices.filter((inv: any) =>
+          inv.client_name?.toLowerCase() === client.name.toLowerCase() ||
+          inv.client_email?.toLowerCase() === client.email.toLowerCase()
+        ));
+      }
+      if (agrRes.ok) {
+        const agrData = await agrRes.json();
+        const allAgreements = agrData.data?.agreements || agrData.agreements || [];
+        setClientAgreements(allAgreements.filter((agr: any) =>
+          agr.client_name?.toLowerCase() === client.name.toLowerCase() ||
+          agr.client_email?.toLowerCase() === client.email.toLowerCase()
+        ));
+      }
+    } catch (error) {
+      console.error("Failed to fetch client docs:", error);
+    }
+    setLoadingDocs(false);
+  }, [client.name, client.email]);
+
+  useEffect(() => {
+    if (activeTab === "dokumente") {
+      fetchClientDocs();
+    }
+  }, [activeTab, fetchClientDocs]);
+
+  // Create invoice for this client
+  const handleCreateInvoice = async () => {
+    setCreatingDoc(true);
+    try {
+      const items = invoiceForm.items.map(item => ({
+        ...item,
+        total: item.quantity * item.unit_price,
+      }));
+      const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+      const res = await fetch("/api/invoices", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_name: client.name,
+          client_email: client.email,
+          client_company: client.company || "",
+          client_address: "",
+          due_date: invoiceForm.due_date,
+          tax_rate: invoiceForm.tax_rate,
+          discount_percent: invoiceForm.discount_percent,
+          notes: invoiceForm.notes,
+          items,
+          subtotal,
+        }),
+      });
+      if (res.ok) {
+        setShowCreateInvoice(false);
+        setInvoiceForm({
+          due_date: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+          tax_rate: 19, discount_percent: 0, notes: "",
+          items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
+        });
+        fetchClientDocs();
+      }
+    } catch (error) {
+      console.error("Failed to create invoice:", error);
+    }
+    setCreatingDoc(false);
+  };
+
+  // Create agreement for this client
+  const handleCreateAgreement = async () => {
+    setCreatingDoc(true);
+    try {
+      const res = await fetch("/api/agreements", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_name: client.name,
+          client_email: client.email,
+          client_company: client.company || "",
+          client_address: "",
+          project_title: agreementForm.project_title,
+          project_description: agreementForm.project_description,
+          services: agreementForm.services,
+          amount: agreementForm.amount,
+          tax_rate: agreementForm.tax_rate,
+          payment_terms: agreementForm.payment_terms,
+          project_duration: agreementForm.project_duration,
+          notes: agreementForm.notes,
+        }),
+      });
+      if (res.ok) {
+        setShowCreateAgreement(false);
+        setAgreementForm({
+          project_title: "", project_description: "", services: [],
+          amount: 0, tax_rate: 19, payment_terms: "100% bei Vertragsstart",
+          project_duration: "2 Wochen", notes: "", newService: "",
+        });
+        fetchClientDocs();
+      }
+    } catch (error) {
+      console.error("Failed to create agreement:", error);
+    }
+    setCreatingDoc(false);
+  };
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !client.project_id) return;
     setSendingMessage(true);
@@ -5397,20 +5539,22 @@ function ClientDetailModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/[0.06]">
-          {["details", "project", "messages", "approvals"].map((tab) => (
+        <div className="flex border-b border-white/[0.06] overflow-x-auto">
+          {["details", "dokumente", "project", "messages", "approvals"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as typeof activeTab)}
-              className={`flex-1 py-3 text-sm font-medium transition-colors relative ${activeTab === tab ? "text-[#FC682C] border-b-2 border-[#FC682C]" : "text-white/50 hover:text-white"}`}
+              className={`flex-1 py-3 text-sm font-medium transition-colors relative whitespace-nowrap px-2 ${activeTab === tab ? "text-[#FC682C] border-b-2 border-[#FC682C]" : "text-white/50 hover:text-white"}`}
             >
               {tab === "details"
                 ? "Details"
-                : tab === "project"
-                  ? "Projekt"
-                  : tab === "messages"
-                    ? "Nachrichten"
-                    : "Freigaben"}
+                : tab === "dokumente"
+                  ? "Dokumente"
+                  : tab === "project"
+                    ? "Projekt"
+                    : tab === "messages"
+                      ? "Nachrichten"
+                      : "Freigaben"}
               {tab === "approvals" &&
                 approvals.filter((a) => a.status === "pending").length > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 text-white text-[10px] rounded-full flex items-center justify-center">
@@ -5636,6 +5780,357 @@ function ClientDetailModal({
                   <div className="text-sm text-white">
                     {new Date(client.last_login).toLocaleString("de-DE")}
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "dokumente" && (
+            <div className="space-y-4">
+              {/* Quick Actions */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); }}
+                  className="p-3 bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20 rounded-xl hover:border-[#FC682C]/40 transition-colors text-center"
+                >
+                  <CurrencyEuroIcon className="w-5 h-5 text-[#FC682C] mx-auto mb-1" />
+                  <span className="text-xs font-medium text-white">Rechnung</span>
+                </button>
+                <button
+                  onClick={() => { setShowCreateAgreement(true); setShowCreateInvoice(false); }}
+                  className="p-3 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-xl hover:border-purple-500/40 transition-colors text-center"
+                >
+                  <DocumentTextIcon className="w-5 h-5 text-purple-400 mx-auto mb-1" />
+                  <span className="text-xs font-medium text-white">Vereinbarung</span>
+                </button>
+                <button
+                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); }}
+                  className="p-3 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-xl hover:border-blue-500/40 transition-colors text-center"
+                >
+                  <DocumentTextIcon className="w-5 h-5 text-blue-400 mx-auto mb-1" />
+                  <span className="text-xs font-medium text-white">Angebot</span>
+                </button>
+              </div>
+
+              {/* Create Invoice Form */}
+              {showCreateInvoice && (
+                <div className="p-4 bg-white/[0.03] border border-[#FC682C]/20 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">Neue Rechnung für {client.name}</h4>
+                    <button onClick={() => setShowCreateInvoice(false)} className="p-1 hover:bg-white/10 rounded-lg">
+                      <XMarkIcon className="w-4 h-4 text-white/40" />
+                    </button>
+                  </div>
+                  {/* Items */}
+                  {invoiceForm.items.map((item, idx) => (
+                    <div key={idx} className="grid grid-cols-12 gap-2 items-end">
+                      <div className="col-span-6">
+                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Beschreibung</label>}
+                        <input
+                          type="text"
+                          value={item.description}
+                          onChange={(e) => {
+                            const items = [...invoiceForm.items];
+                            items[idx] = { ...items[idx], description: e.target.value };
+                            setInvoiceForm({ ...invoiceForm, items });
+                          }}
+                          placeholder="Leistung..."
+                          className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-[#FC682C]/50"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Menge</label>}
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => {
+                            const items = [...invoiceForm.items];
+                            items[idx] = { ...items[idx], quantity: Number(e.target.value) };
+                            setInvoiceForm({ ...invoiceForm, items });
+                          }}
+                          className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-[#FC682C]/50"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Preis (€)</label>}
+                        <input
+                          type="number"
+                          value={item.unit_price}
+                          onChange={(e) => {
+                            const items = [...invoiceForm.items];
+                            items[idx] = { ...items[idx], unit_price: Number(e.target.value) };
+                            setInvoiceForm({ ...invoiceForm, items });
+                          }}
+                          className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-[#FC682C]/50"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        {invoiceForm.items.length > 1 && (
+                          <button
+                            onClick={() => {
+                              const items = invoiceForm.items.filter((_, i) => i !== idx);
+                              setInvoiceForm({ ...invoiceForm, items });
+                            }}
+                            className="p-1.5 hover:bg-red-500/20 rounded-lg"
+                          >
+                            <XMarkIcon className="w-3.5 h-3.5 text-red-400" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setInvoiceForm({
+                      ...invoiceForm,
+                      items: [...invoiceForm.items, { description: "", quantity: 1, unit_price: 0, total: 0 }],
+                    })}
+                    className="text-xs text-[#FC682C] hover:text-[#FC682C]/80 flex items-center gap-1"
+                  >
+                    <PlusIcon className="w-3 h-3" /> Position hinzufügen
+                  </button>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Fällig am</label>
+                      <input
+                        type="date"
+                        value={invoiceForm.due_date}
+                        onChange={(e) => setInvoiceForm({ ...invoiceForm, due_date: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-[#FC682C]/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">MwSt %</label>
+                      <input
+                        type="number"
+                        value={invoiceForm.tax_rate}
+                        onChange={(e) => setInvoiceForm({ ...invoiceForm, tax_rate: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-[#FC682C]/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Rabatt %</label>
+                      <input
+                        type="number"
+                        value={invoiceForm.discount_percent}
+                        onChange={(e) => setInvoiceForm({ ...invoiceForm, discount_percent: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-[#FC682C]/50"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Notizen</label>
+                    <textarea
+                      value={invoiceForm.notes}
+                      onChange={(e) => setInvoiceForm({ ...invoiceForm, notes: e.target.value })}
+                      rows={2}
+                      className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-[#FC682C]/50 resize-none"
+                    />
+                  </div>
+                  {/* Summary */}
+                  <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                    <div className="text-xs text-white/50">
+                      Summe: €{invoiceForm.items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0).toFixed(2)}
+                      {invoiceForm.tax_rate > 0 && ` + ${invoiceForm.tax_rate}% MwSt`}
+                    </div>
+                    <button
+                      onClick={handleCreateInvoice}
+                      disabled={creatingDoc || !invoiceForm.items[0]?.description}
+                      className="px-4 py-2 bg-[#FC682C] text-white rounded-lg text-xs font-medium hover:bg-[#FC682C]/90 disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                      {creatingDoc ? "Wird erstellt..." : "Rechnung erstellen"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Create Agreement Form */}
+              {showCreateAgreement && (
+                <div className="p-4 bg-white/[0.03] border border-purple-500/20 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">Neue Vereinbarung für {client.name}</h4>
+                    <button onClick={() => setShowCreateAgreement(false)} className="p-1 hover:bg-white/10 rounded-lg">
+                      <XMarkIcon className="w-4 h-4 text-white/40" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Projekttitel *</label>
+                      <input
+                        type="text"
+                        value={agreementForm.project_title}
+                        onChange={(e) => setAgreementForm({ ...agreementForm, project_title: e.target.value })}
+                        placeholder="z.B. Growth Website"
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Betrag (€ netto)</label>
+                      <input
+                        type="number"
+                        value={agreementForm.amount}
+                        onChange={(e) => setAgreementForm({ ...agreementForm, amount: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Projektbeschreibung</label>
+                    <textarea
+                      value={agreementForm.project_description}
+                      onChange={(e) => setAgreementForm({ ...agreementForm, project_description: e.target.value })}
+                      rows={2}
+                      className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50 resize-none"
+                    />
+                  </div>
+                  {/* Services */}
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Leistungen</label>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {agreementForm.services.map((s, i) => (
+                        <span key={i} className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded-lg text-xs flex items-center gap-1">
+                          {s}
+                          <button onClick={() => setAgreementForm({
+                            ...agreementForm,
+                            services: agreementForm.services.filter((_, idx) => idx !== i),
+                          })}>
+                            <XMarkIcon className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-1">
+                      <input
+                        type="text"
+                        value={agreementForm.newService}
+                        onChange={(e) => setAgreementForm({ ...agreementForm, newService: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && agreementForm.newService.trim()) {
+                            setAgreementForm({
+                              ...agreementForm,
+                              services: [...agreementForm.services, agreementForm.newService.trim()],
+                              newService: "",
+                            });
+                          }
+                        }}
+                        placeholder="Leistung eingeben + Enter"
+                        className="flex-1 px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Laufzeit</label>
+                      <input
+                        type="text"
+                        value={agreementForm.project_duration}
+                        onChange={(e) => setAgreementForm({ ...agreementForm, project_duration: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Zahlung</label>
+                      <input
+                        type="text"
+                        value={agreementForm.payment_terms}
+                        onChange={(e) => setAgreementForm({ ...agreementForm, payment_terms: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">MwSt %</label>
+                      <input
+                        type="number"
+                        value={agreementForm.tax_rate}
+                        onChange={(e) => setAgreementForm({ ...agreementForm, tax_rate: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end pt-2 border-t border-white/10">
+                    <button
+                      onClick={handleCreateAgreement}
+                      disabled={creatingDoc || !agreementForm.project_title}
+                      className="px-4 py-2 bg-purple-500 text-white rounded-lg text-xs font-medium hover:bg-purple-500/90 disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                      {creatingDoc ? "Wird erstellt..." : "Vereinbarung erstellen"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Existing Documents List */}
+              {loadingDocs ? (
+                <div className="text-center py-4 text-white/40 text-sm">Dokumente werden geladen...</div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Invoices */}
+                  {clientInvoices.length > 0 && (
+                    <div>
+                      <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2">Rechnungen ({clientInvoices.length})</h4>
+                      <div className="space-y-1.5">
+                        {clientInvoices.map((inv: any) => (
+                          <div key={inv.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/[0.04] hover:border-white/10 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <CurrencyEuroIcon className="w-4 h-4 text-[#FC682C]" />
+                              <div>
+                                <div className="text-sm text-white font-medium">{inv.invoice_number}</div>
+                                <div className="text-[11px] text-white/40">{new Date(inv.created_at).toLocaleDateString("de-DE")}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-medium text-white">€{inv.total?.toFixed(2)}</span>
+                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-medium ${
+                                inv.status === "paid" ? "bg-green-500/20 text-green-400" :
+                                inv.status === "sent" ? "bg-blue-500/20 text-blue-400" :
+                                inv.status === "overdue" ? "bg-red-500/20 text-red-400" :
+                                "bg-white/10 text-white/50"
+                              }`}>
+                                {inv.status === "paid" ? "Bezahlt" : inv.status === "sent" ? "Gesendet" : inv.status === "overdue" ? "Überfällig" : "Entwurf"}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Agreements */}
+                  {clientAgreements.length > 0 && (
+                    <div>
+                      <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2">Vereinbarungen ({clientAgreements.length})</h4>
+                      <div className="space-y-1.5">
+                        {clientAgreements.map((agr: any) => (
+                          <div key={agr.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/[0.04] hover:border-white/10 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <DocumentTextIcon className="w-4 h-4 text-purple-400" />
+                              <div>
+                                <div className="text-sm text-white font-medium">{agr.project_title || agr.agreement_number}</div>
+                                <div className="text-[11px] text-white/40">{new Date(agr.created_at).toLocaleDateString("de-DE")}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-medium text-white">€{agr.total_amount?.toFixed(2)}</span>
+                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-medium ${
+                                agr.status === "signed" ? "bg-green-500/20 text-green-400" :
+                                agr.status === "sent" ? "bg-blue-500/20 text-blue-400" :
+                                "bg-white/10 text-white/50"
+                              }`}>
+                                {agr.status === "signed" ? "Unterschrieben" : agr.status === "sent" ? "Gesendet" : "Entwurf"}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {clientInvoices.length === 0 && clientAgreements.length === 0 && !showCreateInvoice && !showCreateAgreement && (
+                    <div className="text-center py-6 text-white/40">
+                      <DocumentTextIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Noch keine Dokumente für diesen Kunden</p>
+                      <p className="text-xs mt-1">Erstelle eine Rechnung, Vereinbarung oder ein Angebot</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
