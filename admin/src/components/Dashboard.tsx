@@ -711,6 +711,7 @@ export function Dashboard() {
           {activeTab === "kommunikation" && <KommunikationTab />}
           {activeTab === "subscribers" && <KommunikationTab />}
           {activeTab === "analytics" && <AnalyticsTab stats={stats} />}
+          {/* automations removed from sidebar - kept for direct URL access */}
           {activeTab === "automations" && <AutomationsTab />}
           {activeTab === "calendar" && <CalendarTab />}
           {activeTab === "emails" && <KommunikationTab />}
@@ -736,7 +737,7 @@ export function Dashboard() {
                 label: "Empf.",
                 badge: stats?.referrals.pending,
               },
-              { id: "settings" as Tab, icon: Cog6ToothIcon, label: "Mehr" },
+              { id: "kommunikation" as Tab, icon: EnvelopeOpenIcon, label: "Komm." },
             ].map((item) => (
               <button
                 key={item.id}
