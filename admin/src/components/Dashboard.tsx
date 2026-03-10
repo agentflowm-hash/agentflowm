@@ -391,7 +391,6 @@ export function Dashboard() {
       items: [
         { id: "analytics" as Tab, label: "Analytics", icon: ChartBarIcon, badge: null },
         { id: "notifications" as Tab, label: "Benachrichtigungen", icon: BellIcon, badge: unreadCount > 0 ? unreadCount : null },
-        { id: "automations" as Tab, label: "Automationen", icon: BoltIcon, badge: null },
         { id: "calendar" as Tab, label: "Kalender", icon: CalendarDaysIcon, badge: null },
       ],
     },
