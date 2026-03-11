@@ -4740,6 +4740,7 @@ function ClientsTab() {
   const [sortBy, setSortBy] = useState<"name" | "created" | "activity">("created");
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [bulkAction, setBulkAction] = useState<string>("");
+  const [quickDocTab, setQuickDocTab] = useState<string | null>(null);
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -5119,7 +5120,14 @@ function ClientsTab() {
                   </div>
                   
                   {/* Quick Actions */}
-                  <div className="w-32 flex items-center justify-end gap-1">
+                  <div className="w-44 flex items-center justify-end gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectedClient(client); setQuickDocTab("dokumente"); }}
+                      className="p-2 hover:bg-[#FC682C]/10 rounded-lg transition-colors group"
+                      title="Dokument erstellen"
+                    >
+                      <DocumentTextIcon className="w-4 h-4 text-white/40 group-hover:text-[#FC682C]" />
+                    </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); copyPortalLink(client.access_code); }}
                       className="p-2 hover:bg-white/10 rounded-lg transition-colors group"
@@ -5162,8 +5170,9 @@ function ClientsTab() {
       {selectedClient && (
         <ClientDetailModal
           client={selectedClient}
-          onClose={() => setSelectedClient(null)}
+          onClose={() => { setSelectedClient(null); setQuickDocTab(null); }}
           onUpdate={fetchClients}
+          initialTab={quickDocTab as any}
         />
       )}
 
@@ -5182,14 +5191,16 @@ function ClientDetailModal({
   client,
   onClose,
   onUpdate,
+  initialTab,
 }: {
   client: PortalClient;
   onClose: () => void;
   onUpdate: () => void;
+  initialTab?: "details" | "project" | "messages" | "approvals" | "dokumente";
 }) {
   const [activeTab, setActiveTab] = useState<
     "details" | "project" | "messages" | "approvals" | "dokumente"
-  >("details");
+  >(initialTab || "details");
   const [projectData, setProjectData] = useState<any>(null);
   const [newMessage, setNewMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
