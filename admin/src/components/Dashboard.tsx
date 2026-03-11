@@ -5832,6 +5832,37 @@ function ClientDetailModal({
                       <XMarkIcon className="w-4 h-4 text-white/40" />
                     </button>
                   </div>
+                  {/* Leistungs-Vorlagen */}
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Schnell-Vorlage</label>
+                    <div className="flex flex-wrap gap-1">
+                      {[
+                        { label: "Growth Website", price: 2000 },
+                        { label: "Business Website", price: 3500 },
+                        { label: "One-Page Website", price: 500 },
+                        { label: "Website-Check", price: 0 },
+                        { label: "SEO-Optimierung", price: 800 },
+                        { label: "Logo & Branding", price: 600 },
+                        { label: "Wartung/Monat", price: 150 },
+                        { label: "Hosting/Jahr", price: 200 },
+                      ].map((tpl) => (
+                        <button
+                          key={tpl.label}
+                          onClick={() => {
+                            const exists = invoiceForm.items.some(i => i.description === tpl.label);
+                            if (!exists) {
+                              const newItem = { description: tpl.label, quantity: 1, unit_price: tpl.price, total: tpl.price };
+                              const items = invoiceForm.items[0]?.description === "" ? [newItem] : [...invoiceForm.items, newItem];
+                              setInvoiceForm({ ...invoiceForm, items });
+                            }
+                          }}
+                          className="px-2 py-1 bg-white/[0.06] hover:bg-[#FC682C]/20 border border-white/10 hover:border-[#FC682C]/30 rounded-lg text-[10px] text-white/60 hover:text-white transition-colors"
+                        >
+                          {tpl.label} {tpl.price > 0 && `€${tpl.price}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   {/* Items */}
                   {invoiceForm.items.map((item, idx) => (
                     <div key={idx} className="grid grid-cols-12 gap-2 items-end">
@@ -6078,26 +6109,68 @@ function ClientDetailModal({
                   {clientInvoices.length > 0 && (
                     <div>
                       <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2">Rechnungen ({clientInvoices.length})</h4>
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         {clientInvoices.map((inv: any) => (
-                          <div key={inv.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/[0.04] hover:border-white/10 transition-colors">
-                            <div className="flex items-center gap-3">
-                              <CurrencyEuroIcon className="w-4 h-4 text-[#FC682C]" />
-                              <div>
-                                <div className="text-sm text-white font-medium">{inv.invoice_number}</div>
-                                <div className="text-[11px] text-white/40">{new Date(inv.created_at).toLocaleDateString("de-DE")}</div>
+                          <div key={inv.id} className="p-3 bg-white/[0.02] rounded-xl border border-white/[0.04] hover:border-white/10 transition-colors">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-3">
+                                <CurrencyEuroIcon className="w-4 h-4 text-[#FC682C]" />
+                                <div>
+                                  <div className="text-sm text-white font-medium">{inv.invoice_number}</div>
+                                  <div className="text-[11px] text-white/40">{new Date(inv.created_at).toLocaleDateString("de-DE")}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-white">€{inv.total?.toFixed(2)}</span>
+                                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-medium ${
+                                  inv.status === "paid" ? "bg-green-500/20 text-green-400" :
+                                  inv.status === "sent" ? "bg-blue-500/20 text-blue-400" :
+                                  inv.status === "overdue" ? "bg-red-500/20 text-red-400" :
+                                  "bg-white/10 text-white/50"
+                                }`}>
+                                  {inv.status === "paid" ? "Bezahlt" : inv.status === "sent" ? "Gesendet" : inv.status === "overdue" ? "Überfällig" : "Entwurf"}
+                                </span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm font-medium text-white">€{inv.total?.toFixed(2)}</span>
-                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-medium ${
-                                inv.status === "paid" ? "bg-green-500/20 text-green-400" :
-                                inv.status === "sent" ? "bg-blue-500/20 text-blue-400" :
-                                inv.status === "overdue" ? "bg-red-500/20 text-red-400" :
-                                "bg-white/10 text-white/50"
-                              }`}>
-                                {inv.status === "paid" ? "Bezahlt" : inv.status === "sent" ? "Gesendet" : inv.status === "overdue" ? "Überfällig" : "Entwurf"}
-                              </span>
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-1.5 pt-2 border-t border-white/[0.04]">
+                              <button
+                                onClick={() => window.open(`/api/invoices/${inv.id}/pdf`, "_blank")}
+                                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg text-[11px] text-white/60 hover:text-white transition-colors"
+                              >
+                                <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                                PDF
+                              </button>
+                              {inv.status === "draft" && (
+                                <button
+                                  onClick={async () => {
+                                    await fetch(`/api/invoices/${inv.id}/send`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+                                    fetchClientDocs();
+                                  }}
+                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg text-[11px] text-blue-400 transition-colors"
+                                >
+                                  <PaperAirplaneIcon className="w-3.5 h-3.5" />
+                                  An {client.name.split(" ")[0]} senden
+                                </button>
+                              )}
+                              {(inv.status === "sent" || inv.status === "overdue") && (
+                                <button
+                                  onClick={async () => {
+                                    await fetch(`/api/invoices/${inv.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "paid" }) });
+                                    fetchClientDocs();
+                                  }}
+                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-green-500/10 hover:bg-green-500/20 rounded-lg text-[11px] text-green-400 transition-colors"
+                                >
+                                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                                  Als bezahlt
+                                </button>
+                              )}
+                              {inv.status === "paid" && (
+                                <span className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-green-400/50">
+                                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                                  Abgeschlossen
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -6109,25 +6182,67 @@ function ClientDetailModal({
                   {clientAgreements.length > 0 && (
                     <div>
                       <h4 className="text-xs text-white/40 uppercase tracking-wider mb-2">Vereinbarungen ({clientAgreements.length})</h4>
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         {clientAgreements.map((agr: any) => (
-                          <div key={agr.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/[0.04] hover:border-white/10 transition-colors">
-                            <div className="flex items-center gap-3">
-                              <DocumentTextIcon className="w-4 h-4 text-purple-400" />
-                              <div>
-                                <div className="text-sm text-white font-medium">{agr.project_title || agr.agreement_number}</div>
-                                <div className="text-[11px] text-white/40">{new Date(agr.created_at).toLocaleDateString("de-DE")}</div>
+                          <div key={agr.id} className="p-3 bg-white/[0.02] rounded-xl border border-white/[0.04] hover:border-white/10 transition-colors">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-3">
+                                <DocumentTextIcon className="w-4 h-4 text-purple-400" />
+                                <div>
+                                  <div className="text-sm text-white font-medium">{agr.project_title || agr.agreement_number}</div>
+                                  <div className="text-[11px] text-white/40">{new Date(agr.created_at).toLocaleDateString("de-DE")}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-white">€{agr.total_amount?.toFixed(2)}</span>
+                                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-medium ${
+                                  agr.status === "signed" ? "bg-green-500/20 text-green-400" :
+                                  agr.status === "sent" ? "bg-blue-500/20 text-blue-400" :
+                                  "bg-white/10 text-white/50"
+                                }`}>
+                                  {agr.status === "signed" ? "Unterschrieben" : agr.status === "sent" ? "Gesendet" : "Entwurf"}
+                                </span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm font-medium text-white">€{agr.total_amount?.toFixed(2)}</span>
-                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-medium ${
-                                agr.status === "signed" ? "bg-green-500/20 text-green-400" :
-                                agr.status === "sent" ? "bg-blue-500/20 text-blue-400" :
-                                "bg-white/10 text-white/50"
-                              }`}>
-                                {agr.status === "signed" ? "Unterschrieben" : agr.status === "sent" ? "Gesendet" : "Entwurf"}
-                              </span>
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-1.5 pt-2 border-t border-white/[0.04]">
+                              <button
+                                onClick={() => window.open(`/api/agreements/${agr.id}/pdf`, "_blank")}
+                                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg text-[11px] text-white/60 hover:text-white transition-colors"
+                              >
+                                <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                                PDF
+                              </button>
+                              {agr.status === "draft" && client.email && (
+                                <button
+                                  onClick={async () => {
+                                    await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sent" }) });
+                                    fetchClientDocs();
+                                  }}
+                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 rounded-lg text-[11px] text-purple-400 transition-colors"
+                                >
+                                  <PaperAirplaneIcon className="w-3.5 h-3.5" />
+                                  An {client.name.split(" ")[0]} senden
+                                </button>
+                              )}
+                              {agr.status === "sent" && (
+                                <button
+                                  onClick={async () => {
+                                    await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "signed" }) });
+                                    fetchClientDocs();
+                                  }}
+                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-green-500/10 hover:bg-green-500/20 rounded-lg text-[11px] text-green-400 transition-colors"
+                                >
+                                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                                  Als unterschrieben
+                                </button>
+                              )}
+                              {agr.status === "signed" && (
+                                <span className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-green-400/50">
+                                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                                  Abgeschlossen
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}
