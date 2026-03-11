@@ -5187,6 +5187,106 @@ function ClientsTab() {
   );
 }
 
+function generatePosterHTML(client: any, form: any): string {
+  const resultsHTML = form.results.map((r: string) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15);border-radius:12px">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l4 4 8-8"/></svg>
+      </div>
+      <span style="font-size:13px;color:rgba(245,247,250,.8)">${r}</span>
+    </div>`).join("");
+  const agentsHTML = form.agents.map((a: string) => `<span style="padding:6px 14px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-size:12px;color:#818CF8;font-weight:600">${a}</span>`).join("");
+  const screenshotSection = form.screenshotUrl ? `<div style="border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,.1);margin-top:20px"><img src="${form.screenshotUrl}" style="width:100%;display:block" alt="Website Screenshot"/></div>` : "";
+  const scoreColor = form.scoreOverall >= 80 ? "#10B981" : form.scoreOverall >= 60 ? "#F59E0B" : "#EF4444";
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Projektabschluss — ${client.company || client.name} | AgentFlowMarketing</title>
+<style>@page{size:A1;margin:0}*{margin:0;padding:0;box-sizing:border-box}html,body{background:#04060A;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',system-ui,sans-serif;color:#F5F7FA;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{display:flex;justify-content:center;padding:40px 20px;min-height:100vh}
+.poster{width:95vw;max-width:1000px;border-radius:20px;overflow:hidden;position:relative;background:radial-gradient(ellipse 140% 70% at 50% -20%,rgba(99,102,241,.2) 0%,transparent 50%),radial-gradient(ellipse 100% 60% at 120% 50%,rgba(255,106,0,.15) 0%,transparent 50%),radial-gradient(ellipse 80% 70% at -20% 100%,rgba(16,185,129,.12) 0%,transparent 50%),linear-gradient(180deg,#0C0F16 0%,#040608 100%);box-shadow:0 0 0 1px rgba(255,255,255,.05),0 60px 180px rgba(0,0,0,.95)}
+.poster::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black 20%,transparent 70%);pointer-events:none}
+.content{position:relative;z-index:1;padding:5vw;display:flex;flex-direction:column}
+.header{display:flex;justify-content:space-between;align-items:center;padding-bottom:24px;margin-bottom:32px;border-bottom:1px solid rgba(255,255,255,.06)}
+.brand{display:flex;align-items:center;gap:16px}
+.brand-icon{width:56px;height:56px;background:#000;border-radius:25%;border:2px solid rgba(255,255,255,.12);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(0,0,0,.6),0 0 40px rgba(255,106,0,.5)}
+.brand-name{font-size:22px;font-weight:800;letter-spacing:-0.03em}
+.brand-name span{color:#FF6A00;text-shadow:0 0 30px rgba(255,106,0,.5)}
+.badge{background:linear-gradient(135deg,#FF6A00,#E55500);color:#000;font-weight:800;padding:8px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 20px rgba(255,106,0,.5)}
+.hero{text-align:center;margin-bottom:40px}
+.hero-label{display:inline-flex;font-weight:700;color:#6366F1;letter-spacing:0.2em;text-transform:uppercase;font-size:13px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:8px 20px;margin-bottom:20px}
+.hero h1{font-size:clamp(36px,7.5vw,72px);font-weight:900;letter-spacing:-0.05em;line-height:0.9;background:linear-gradient(180deg,#FFF 10%,#6B7280 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.hero .client-name{font-size:clamp(20px,3vw,32px);font-weight:700;color:#FF6A00;margin-bottom:10px}
+.hero .tagline{font-size:16px;color:rgba(245,247,250,.5)}
+.card{background:linear-gradient(170deg,#161C2A 0%,#0A0D14 100%);border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,.7);margin-bottom:24px;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+.card-title{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.orange{background:#FF6A00;box-shadow:0 0 15px rgba(255,106,0,.5)}
+.dot.purple{background:#6366F1;box-shadow:0 0 15px rgba(99,102,241,.6)}
+.dot.teal{background:#10B981;box-shadow:0 0 15px rgba(16,185,129,.6)}
+.card-badge{color:rgba(245,247,250,.5);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600}
+.stats-content{padding:28px;display:flex;gap:24px;align-items:center}
+.score-circle{width:120px;height:120px;border-radius:50%;background:conic-gradient(${scoreColor} ${form.scoreOverall * 3.6}deg,rgba(255,255,255,.08) 0deg);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 40px ${scoreColor}33}
+.score-inner{width:90px;height:90px;border-radius:50%;background:#0A0D14;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-value{font-size:32px;font-weight:900;color:${scoreColor}}
+.score-label{font-size:10px;color:rgba(245,247,250,.5);text-transform:uppercase;letter-spacing:0.1em}
+.stats-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-mini{padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);border-radius:10px}
+.stat-mini-value{font-size:18px;font-weight:800;color:#FFF}
+.stat-mini-label{font-size:10px;color:rgba(245,247,250,.4);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px}
+.stat-mini-bar{height:4px;border-radius:2px;margin-top:6px;background:rgba(255,255,255,.06)}
+.stat-mini-bar-fill{height:100%;border-radius:2px}
+.results-content{padding:20px;display:flex;flex-direction:column;gap:8px}
+.agents{display:flex;flex-wrap:wrap;gap:8px;padding:20px}
+.footer{margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
+.footer-left{display:flex;align-items:center;gap:12px}
+.footer-logo{width:44px;height:44px;background:linear-gradient(135deg,#FF6A00,#6366F1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#FFF}
+.footer-info{font-size:13px;color:rgba(245,247,250,.5)}
+.footer-thanks{font-size:18px;font-weight:700;background:linear-gradient(135deg,#FF6A00,#6366F1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+</style></head><body>
+<div class="poster"><div class="content">
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon"><span style="font-size:24px;font-weight:900;color:#FF6A00">AF</span></div>
+    <div class="brand-name">Agent<span>Flow</span>Marketing</div>
+  </div>
+  <div class="badge">CASE STUDY</div>
+</div>
+<div class="hero">
+  <div class="hero-label">✦ PROJEKTABSCHLUSS ${new Date().getFullYear()}</div>
+  <h1>${form.projectType}</h1>
+  <div class="client-name">${client.company || client.name}</div>
+  <div class="tagline">${form.tagline}</div>
+</div>
+${screenshotSection}
+<div class="card" style="margin-top:24px">
+  <div class="card-header"><div class="card-title"><div class="dot purple"></div>AI-Agenten</div><div class="card-badge">${form.agents.length} Agenten</div></div>
+  <div class="agents">${agentsHTML}</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header"><div class="card-title"><div class="dot teal"></div>Performance</div><div class="card-badge">Score</div></div>
+    <div class="stats-content">
+      <div class="score-circle"><div class="score-inner"><div class="score-value">${form.scoreOverall}</div><div class="score-label">Gesamt</div></div></div>
+      <div class="stats-grid">
+        <div class="stat-mini"><div class="stat-mini-value">${form.scoreSeo}</div><div class="stat-mini-label">SEO Score</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSeo}%;background:#6366F1;box-shadow:0 0 8px rgba(99,102,241,.5)"></div></div></div>
+        <div class="stat-mini"><div class="stat-mini-value">${form.scorePerformance}</div><div class="stat-mini-label">Performance</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scorePerformance}%;background:#3B82F6;box-shadow:0 0 8px rgba(59,130,246,.5)"></div></div></div>
+        <div class="stat-mini"><div class="stat-mini-value">${form.scoreSecurity}</div><div class="stat-mini-label">Sicherheit</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSecurity}%;background:#10B981;box-shadow:0 0 8px rgba(16,185,129,.5)"></div></div></div>
+        <div class="stat-mini"><div class="stat-mini-value">${form.loadTime}</div><div class="stat-mini-label">Ladezeit</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:85%;background:#FF6A00;box-shadow:0 0 8px rgba(255,106,0,.5)"></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header"><div class="card-title"><div class="dot orange"></div>Ergebnisse</div><div class="card-badge">${form.results.length} Punkte</div></div>
+    <div class="results-content">${resultsHTML}</div>
+  </div>
+</div>
+<div class="footer">
+  <div class="footer-left"><div class="footer-logo">AF</div><div class="footer-info">AgentFlowMarketing<br>agentflowm.de</div></div>
+  <div class="footer-thanks">Danke für die Zusammenarbeit! ✦</div>
+</div>
+</div></div></body></html>`;
+}
+
 function ClientDetailModal({
   client,
   onClose,
@@ -5236,6 +5336,25 @@ function ClientDetailModal({
     project_duration: "2 Wochen",
     notes: "",
     newService: "",
+  });
+  const [showPosterGen, setShowPosterGen] = useState(false);
+  const [posterForm, setPosterForm] = useState({
+    projectType: "Growth Website",
+    tagline: "Professionelle Webpräsenz mit KI-gestützter Entwicklung",
+    screenshotUrl: "",
+    agents: ["AI Web Builder", "AI SEO Optimizer", "AI Content Writer"],
+    scoreOverall: 92,
+    scoreSeo: 95,
+    scorePerformance: 88,
+    scoreSecurity: 100,
+    loadTime: "1.2s",
+    results: [
+      "Responsive Design für alle Geräte",
+      "SEO-optimierte Seitenstruktur",
+      "DSGVO-konforme Datenschutzlösung",
+      "SSL-Verschlüsselung & Sicherheit",
+    ],
+    customResult: "",
   });
   
   // Admin Edit States
@@ -5799,27 +5918,34 @@ function ClientDetailModal({
           {activeTab === "dokumente" && (
             <div className="space-y-4">
               {/* Quick Actions */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <button
-                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); }}
+                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); setShowPosterGen(false); }}
                   className="p-3 bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20 rounded-xl hover:border-[#FC682C]/40 transition-colors text-center"
                 >
                   <CurrencyEuroIcon className="w-5 h-5 text-[#FC682C] mx-auto mb-1" />
                   <span className="text-xs font-medium text-white">Rechnung</span>
                 </button>
                 <button
-                  onClick={() => { setShowCreateAgreement(true); setShowCreateInvoice(false); }}
+                  onClick={() => { setShowCreateAgreement(true); setShowCreateInvoice(false); setShowPosterGen(false); }}
                   className="p-3 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-xl hover:border-purple-500/40 transition-colors text-center"
                 >
                   <DocumentTextIcon className="w-5 h-5 text-purple-400 mx-auto mb-1" />
                   <span className="text-xs font-medium text-white">Vereinbarung</span>
                 </button>
                 <button
-                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); }}
+                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); setShowPosterGen(false); }}
                   className="p-3 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-xl hover:border-blue-500/40 transition-colors text-center"
                 >
                   <DocumentTextIcon className="w-5 h-5 text-blue-400 mx-auto mb-1" />
                   <span className="text-xs font-medium text-white">Angebot</span>
+                </button>
+                <button
+                  onClick={() => { setShowPosterGen(true); setShowCreateInvoice(false); setShowCreateAgreement(false); }}
+                  className="p-3 bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-xl hover:border-green-500/40 transition-colors text-center"
+                >
+                  <SparklesIcon className="w-5 h-5 text-green-400 mx-auto mb-1" />
+                  <span className="text-xs font-medium text-white">Poster</span>
                 </button>
               </div>
 
@@ -6095,6 +6221,125 @@ function ClientDetailModal({
                       className="px-4 py-2 bg-purple-500 text-white rounded-lg text-xs font-medium hover:bg-purple-500/90 disabled:opacity-50 flex items-center gap-1.5"
                     >
                       {creatingDoc ? "Wird erstellt..." : "Vereinbarung erstellen"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Poster Generator */}
+              {showPosterGen && (
+                <div className="p-4 bg-white/[0.03] border border-green-500/20 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">Abschluss-Poster für {client.name}</h4>
+                    <button onClick={() => setShowPosterGen(false)} className="p-1 hover:bg-white/10 rounded-lg">
+                      <XMarkIcon className="w-4 h-4 text-white/40" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Projekt-Typ</label>
+                      <select value={posterForm.projectType} onChange={(e) => setPosterForm({ ...posterForm, projectType: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50">
+                        <option value="Growth Website">Growth Website</option>
+                        <option value="Business Website">Business Website</option>
+                        <option value="One-Page Website">One-Page Website</option>
+                        <option value="E-Commerce Shop">E-Commerce Shop</option>
+                        <option value="Landing Page">Landing Page</option>
+                        <option value="Web-Anwendung">Web-Anwendung</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Screenshot URL</label>
+                      <input type="text" value={posterForm.screenshotUrl} onChange={(e) => setPosterForm({ ...posterForm, screenshotUrl: e.target.value })}
+                        placeholder="https://... oder leer lassen"
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Tagline</label>
+                    <input type="text" value={posterForm.tagline} onChange={(e) => setPosterForm({ ...posterForm, tagline: e.target.value })}
+                      className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Score</label>
+                      <input type="number" value={posterForm.scoreOverall} onChange={(e) => setPosterForm({ ...posterForm, scoreOverall: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">SEO</label>
+                      <input type="number" value={posterForm.scoreSeo} onChange={(e) => setPosterForm({ ...posterForm, scoreSeo: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Performance</label>
+                      <input type="number" value={posterForm.scorePerformance} onChange={(e) => setPosterForm({ ...posterForm, scorePerformance: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Ladezeit</label>
+                      <input type="text" value={posterForm.loadTime} onChange={(e) => setPosterForm({ ...posterForm, loadTime: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
+                    </div>
+                  </div>
+                  {/* Agents */}
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">AI-Agenten</label>
+                    <div className="flex flex-wrap gap-1 mb-1">
+                      {["AI Web Builder", "AI SEO Optimizer", "AI Content Writer", "AI Lead Generator", "AI Designer", "AI Analytics"].map((agent) => (
+                        <button key={agent} onClick={() => {
+                          const agents = posterForm.agents.includes(agent) ? posterForm.agents.filter(a => a !== agent) : [...posterForm.agents, agent];
+                          setPosterForm({ ...posterForm, agents });
+                        }}
+                          className={`px-2 py-1 rounded-lg text-[10px] transition-colors ${posterForm.agents.includes(agent) ? "bg-purple-500/30 text-purple-300 border border-purple-500/40" : "bg-white/[0.04] text-white/40 border border-white/10 hover:text-white/70"}`}>
+                          {agent}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Results */}
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Ergebnisse</label>
+                    <div className="flex flex-wrap gap-1 mb-1">
+                      {posterForm.results.map((r, i) => (
+                        <span key={i} className="px-2 py-1 bg-green-500/20 text-green-300 rounded-lg text-[10px] flex items-center gap-1">
+                          {r}
+                          <button onClick={() => setPosterForm({ ...posterForm, results: posterForm.results.filter((_, idx) => idx !== i) })}>
+                            <XMarkIcon className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-1 mb-1">
+                      {["Responsive Design", "SEO-optimiert", "DSGVO-konform", "SSL-Verschlüsselung", "CMS-Integration", "Analytics Setup", "E-Mail Automation", "Social Media Integration", "Performance-Optimierung", "Barrierefreiheit"].filter(r => !posterForm.results.includes(r)).map((r) => (
+                        <button key={r} onClick={() => setPosterForm({ ...posterForm, results: [...posterForm.results, r] })}
+                          className="px-2 py-1 bg-white/[0.04] hover:bg-green-500/10 border border-white/10 rounded-lg text-[10px] text-white/40 hover:text-green-300 transition-colors">
+                          + {r}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex gap-1">
+                      <input type="text" value={posterForm.customResult} onChange={(e) => setPosterForm({ ...posterForm, customResult: e.target.value })}
+                        onKeyDown={(e) => { if (e.key === "Enter" && posterForm.customResult.trim()) { setPosterForm({ ...posterForm, results: [...posterForm.results, posterForm.customResult.trim()], customResult: "" }); } }}
+                        placeholder="Eigenes Ergebnis + Enter"
+                        className="flex-1 px-2 py-1 bg-white/[0.06] border border-white/10 rounded-lg text-white text-[10px] outline-none" />
+                    </div>
+                  </div>
+                  {/* Download */}
+                  <div className="flex justify-end pt-2 border-t border-white/10">
+                    <button onClick={() => {
+                      const html = generatePosterHTML(client, posterForm);
+                      const blob = new Blob([html], { type: "text/html" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `poster-${client.name.toLowerCase().replace(/\s+/g, "-")}.html`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                      className="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg text-xs font-medium hover:opacity-90 flex items-center gap-1.5">
+                      <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                      HTML-Poster herunterladen
                     </button>
                   </div>
                 </div>
