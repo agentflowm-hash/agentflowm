@@ -5585,20 +5585,6 @@ ${screenshotSection}
     <span class="card-badge">Automatisiert</span>
   </div>
   <div class="workflow-content" style="padding:2vw">
-    <!-- Agent Chain -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:max(1vw,8px);justify-content:center;margin-bottom:max(2vw,16px)">
-    ${workflowAgentNames.map((name: string, i: number) => {
-      const c = agentNodeColorMap[name] || defaultNodeColor;
-      const robotSvg = agentRobotSvg(name, 36);
-      const isLast = i === workflowAgentNames.length - 1;
-      return `${i > 0 ? `<svg width="max(2vw,16px)" height="16" viewBox="0 0 20 16" style="flex-shrink:0"><path d="M2 8h12M12 4l4 4-4 4" stroke="${c.stroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>` : ''}
-      <div style="display:flex;align-items:center;gap:max(0.8vw,6px);padding:max(0.8vw,8px) max(1.2vw,12px);background:${c.stroke}15;border:1px solid ${c.stroke}40;border-radius:12px">
-        <div style="width:max(2.5vw,22px);height:max(2.5vw,22px);flex-shrink:0">${robotSvg}</div>
-        <span style="font-size:max(1.1vw,11px);font-weight:700;color:${c.label};white-space:nowrap">${name.replace(' Agent','').replace('Enterprise Pro','Enterprise')} Workflow</span>
-        ${isLast ? '<svg width="14" height="14" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10" fill="#10B981"/><path d="M8 12l3 3 5-5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>' : ''}
-      </div>`;
-    }).join("")}
-    </div>
     <!-- Per-Agent Workflow Steps -->
     ${workflowAgentNames.map((name: string, ai: number) => {
       const c = agentNodeColorMap[name] || defaultNodeColor;
