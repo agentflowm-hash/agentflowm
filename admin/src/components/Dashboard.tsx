@@ -5486,7 +5486,7 @@ html, body {
 .hero .client { font-weight: 700; color: var(--accent); }
 .hero .tagline { color: var(--text-muted); }
 
-.card { background: linear-gradient(170deg, var(--bg-card3) 0%, var(--bg-card) 100%); border: 1px solid var(--border); overflow: visible; box-shadow: 0 25px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); position: relative; }
+.card { background: linear-gradient(170deg, var(--bg-card3) 0%, var(--bg-card) 100%); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); position: relative; }
 .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent); }
 .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 100%); }
 .card-title { display: flex; align-items: center; font-weight: 700; }
@@ -5496,7 +5496,7 @@ html, body {
 .card-dot.teal { background: var(--teal); color: var(--teal-glow); }
 .card-badge { color: var(--text-muted); background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; }
 
-.website-section { position: relative; overflow: visible; }
+.website-section { position: relative; overflow: visible !important; }
 .website-container { background: linear-gradient(180deg, var(--bg-card2) 0%, var(--bg-card) 100%); }
 .website-frame { position: relative; overflow: hidden; border: 2px solid var(--border-light); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
 .website-frame img { width: 100%; height: auto; display: block; }
