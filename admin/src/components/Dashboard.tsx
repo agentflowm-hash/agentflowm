@@ -6617,43 +6617,62 @@ function ClientDetailModal({
                 </div>
               )}
 
-              {/* Poster Generator */}
+              {/* Poster Generator — Premium */}
               {showPosterGen && (
-                <div className="p-4 bg-white/[0.03] border border-green-500/20 rounded-xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-white">Abschluss-Poster für {client.name}</h4>
-                    <button onClick={() => setShowPosterGen(false)} className="p-1 hover:bg-white/10 rounded-lg">
-                      <XMarkIcon className="w-4 h-4 text-white/40" />
+                <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02]">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <SparklesIcon className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-[13px] font-semibold text-white tracking-tight">Poster erstellen</h4>
+                        <p className="text-[10px] text-white/30">{client.company || client.name}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setShowPosterGen(false)} className="p-1.5 hover:bg-white/[0.06] rounded-lg transition-colors">
+                      <XMarkIcon className="w-4 h-4 text-white/30 hover:text-white/60" />
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10px] text-white/40 block mb-1">Projekt-Typ</label>
-                      <select value={posterForm.projectType} onChange={(e) => setPosterForm({ ...posterForm, projectType: e.target.value })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50">
-                        <option value="Growth Website">Growth Website</option>
-                        <option value="Business Website">Business Website</option>
-                        <option value="One-Page Website">One-Page Website</option>
-                        <option value="E-Commerce Shop">E-Commerce Shop</option>
-                        <option value="Landing Page">Landing Page</option>
-                        <option value="Web-Anwendung">Web-Anwendung</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-white/40 block mb-1">Website Screenshot</label>
-                      {posterForm.screenshotUrl ? (
-                        <div className="relative group">
-                          <img src={posterForm.screenshotUrl} alt="Screenshot" className="w-full rounded-lg border border-white/10 max-h-32 object-cover object-top" />
-                          <button onClick={() => setPosterForm({ ...posterForm, screenshotUrl: "" })}
-                            className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                            <XMarkIcon className="w-3 h-3 text-white" />
-                          </button>
+
+                  <div className="p-5 space-y-4">
+                    {/* Row 1: Typ + Screenshot */}
+                    <div className="grid grid-cols-[1fr,1.2fr] gap-4">
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-[10px] font-medium text-white/50 uppercase tracking-wider block mb-1.5">Projekt</label>
+                          <select value={posterForm.projectType} onChange={(e) => setPosterForm({ ...posterForm, projectType: e.target.value })}
+                            className="w-full px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-xs outline-none focus:border-emerald-500/40 focus:bg-white/[0.07] transition-all">
+                            <option value="Growth Website">Growth Website</option>
+                            <option value="Business Website">Business Website</option>
+                            <option value="One-Page Website">One-Page Website</option>
+                            <option value="E-Commerce Shop">E-Commerce Shop</option>
+                            <option value="Landing Page">Landing Page</option>
+                            <option value="Web-Anwendung">Web-Anwendung</option>
+                          </select>
                         </div>
-                      ) : (
-                        <div className="flex flex-col gap-1">
-                          <label className="flex items-center justify-center gap-1.5 px-3 py-3 bg-white/[0.04] border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-green-500/40 hover:bg-green-500/5 transition-colors">
-                            <ArrowUpTrayIcon className="w-4 h-4 text-white/40" />
-                            <span className="text-[10px] text-white/40">Bild hochladen oder hierher ziehen</span>
+                        <div>
+                          <label className="text-[10px] font-medium text-white/50 uppercase tracking-wider block mb-1.5">Tagline</label>
+                          <input type="text" value={posterForm.tagline} onChange={(e) => setPosterForm({ ...posterForm, tagline: e.target.value })}
+                            className="w-full px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-xs outline-none focus:border-emerald-500/40 focus:bg-white/[0.07] transition-all" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-medium text-white/50 uppercase tracking-wider block mb-1.5">Screenshot</label>
+                        {posterForm.screenshotUrl ? (
+                          <div className="relative group rounded-xl overflow-hidden border border-white/[0.08]">
+                            <img src={posterForm.screenshotUrl} alt="Screenshot" className="w-full max-h-[104px] object-cover object-top" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <button onClick={() => setPosterForm({ ...posterForm, screenshotUrl: "" })}
+                              className="absolute top-2 right-2 p-1 bg-black/60 backdrop-blur-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/80">
+                              <XMarkIcon className="w-3 h-3 text-white" />
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="flex flex-col items-center justify-center gap-1.5 h-[104px] bg-white/[0.03] border border-dashed border-white/[0.12] rounded-xl cursor-pointer hover:border-emerald-500/30 hover:bg-emerald-500/[0.03] transition-all group">
+                            <ArrowUpTrayIcon className="w-5 h-5 text-white/20 group-hover:text-emerald-400/60 transition-colors" />
+                            <span className="text-[10px] text-white/30 group-hover:text-white/50 transition-colors">Bild hochladen</span>
                             <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
@@ -6665,122 +6684,114 @@ function ClientDetailModal({
                               }
                             }} />
                           </label>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[8px] text-white/30">oder URL:</span>
-                            <input type="text" placeholder="https://..."
-                              onKeyDown={(e) => { if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) setPosterForm({ ...posterForm, screenshotUrl: (e.target as HTMLInputElement).value.trim() }); }}
-                              className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/10 rounded text-white text-[9px] outline-none focus:border-green-500/50" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Row 2: Scores — compact inline */}
+                    <div>
+                      <label className="text-[10px] font-medium text-white/50 uppercase tracking-wider block mb-1.5">Bewertung</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {([
+                          { key: "scoreOverall", label: "Score", icon: "star", color: "from-emerald-500 to-teal-500", type: "number" },
+                          { key: "scoreSeo", label: "SEO", icon: "search", color: "from-blue-500 to-indigo-500", type: "number" },
+                          { key: "scorePerformance", label: "Speed", icon: "bolt", color: "from-amber-500 to-orange-500", type: "number" },
+                          { key: "loadTime", label: "Ladezeit", icon: "clock", color: "from-purple-500 to-pink-500", type: "text" },
+                        ] as const).map((field) => (
+                          <div key={field.key} className="relative">
+                            <div className={`absolute top-0 left-0 right-0 h-[2px] rounded-t-xl bg-gradient-to-r ${field.color} opacity-40`} />
+                            <div className="pt-2.5 pb-2 px-2.5 bg-white/[0.04] rounded-xl border border-white/[0.06]">
+                              <span className="text-[9px] text-white/35 block mb-1">{field.label}</span>
+                              <input
+                                type={field.type}
+                                value={posterForm[field.key]}
+                                onChange={(e) => setPosterForm({ ...posterForm, [field.key]: field.type === "number" ? Number(e.target.value) : e.target.value })}
+                                className="w-full bg-transparent text-white text-sm font-semibold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                            </div>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Row 3: Agents — simplified toggle chips */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[10px] font-medium text-white/50 uppercase tracking-wider">KI-Agenten</label>
+                        <div className="flex gap-1">
+                          <button onClick={() => setPosterForm({ ...posterForm, agents: ["E-Mail Agent","Chat Agent","Vertriebs Agent","Termin Agent","Analyse Agent","Compliance Agent","Automatisierung","Enterprise Pro"] })}
+                            className="px-1.5 py-0.5 rounded text-[8px] text-white/30 hover:text-white/60 transition-colors">Alle</button>
+                          <span className="text-white/10 text-[8px] leading-4">|</span>
+                          <button onClick={() => setPosterForm({ ...posterForm, agents: [] })}
+                            className="px-1.5 py-0.5 rounded text-[8px] text-white/30 hover:text-white/60 transition-colors">Keine</button>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {([
+                          { name: "E-Mail Agent", emoji: "\u2709\uFE0F" },
+                          { name: "Chat Agent", emoji: "\uD83D\uDCAC" },
+                          { name: "Vertriebs Agent", emoji: "\uD83D\uDCC8" },
+                          { name: "Termin Agent", emoji: "\uD83D\uDCC5" },
+                          { name: "Analyse Agent", emoji: "\uD83D\uDD0D" },
+                          { name: "Compliance Agent", emoji: "\uD83D\uDEE1\uFE0F" },
+                          { name: "Automatisierung", emoji: "\u26A1" },
+                          { name: "Enterprise Pro", emoji: "\uD83D\uDC8E" },
+                        ] as const).map((agent) => {
+                          const isActive = posterForm.agents.includes(agent.name);
+                          return (
+                            <button key={agent.name} onClick={() => {
+                              const agents = isActive ? posterForm.agents.filter(a => a !== agent.name) : [...posterForm.agents, agent.name];
+                              setPosterForm({ ...posterForm, agents });
+                            }}
+                              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-all ${isActive
+                                ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 shadow-sm shadow-emerald-500/10"
+                                : "bg-white/[0.03] text-white/30 border border-white/[0.06] hover:text-white/50 hover:border-white/[0.12]"}`}>
+                              <span className="mr-1">{agent.emoji}</span>{agent.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Row 4: Ergebnisse — cleaner chip design */}
+                    <div>
+                      <label className="text-[10px] font-medium text-white/50 uppercase tracking-wider block mb-1.5">Ergebnisse</label>
+                      {posterForm.results.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {posterForm.results.map((r, i) => (
+                            <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-lg text-[10px] font-medium">
+                              {r}
+                              <button onClick={() => setPosterForm({ ...posterForm, results: posterForm.results.filter((_, idx) => idx !== i) })}
+                                className="ml-0.5 hover:text-red-300 transition-colors">
+                                <XMarkIcon className="w-2.5 h-2.5" />
+                              </button>
+                            </span>
+                          ))}
                         </div>
                       )}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-white/40 block mb-1">Tagline</label>
-                    <input type="text" value={posterForm.tagline} onChange={(e) => setPosterForm({ ...posterForm, tagline: e.target.value })}
-                      className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    <div>
-                      <label className="text-[10px] text-white/40 block mb-1">Score</label>
-                      <input type="number" value={posterForm.scoreOverall} onChange={(e) => setPosterForm({ ...posterForm, scoreOverall: Number(e.target.value) })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-white/40 block mb-1">SEO</label>
-                      <input type="number" value={posterForm.scoreSeo} onChange={(e) => setPosterForm({ ...posterForm, scoreSeo: Number(e.target.value) })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-white/40 block mb-1">Performance</label>
-                      <input type="number" value={posterForm.scorePerformance} onChange={(e) => setPosterForm({ ...posterForm, scorePerformance: Number(e.target.value) })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-white/40 block mb-1">Ladezeit</label>
-                      <input type="text" value={posterForm.loadTime} onChange={(e) => setPosterForm({ ...posterForm, loadTime: e.target.value })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
-                    </div>
-                  </div>
-                  {/* Agents */}
-                  <div>
-                    <label className="text-[10px] text-white/40 block mb-1">AI-Agenten (8 AgentFlow Agents)</label>
-                    <div className="grid grid-cols-4 gap-1 mb-1">
-                      {([
-                        { name: "E-Mail Agent", color: "blue", dot: "bg-blue-400" },
-                        { name: "Chat Agent", color: "green", dot: "bg-green-400" },
-                        { name: "Vertriebs Agent", color: "purple", dot: "bg-purple-400" },
-                        { name: "Termin Agent", color: "cyan", dot: "bg-cyan-400" },
-                        { name: "Analyse Agent", color: "orange", dot: "bg-orange-400" },
-                        { name: "Compliance Agent", color: "green", dot: "bg-green-400" },
-                        { name: "Automatisierung", color: "purple", dot: "bg-purple-400" },
-                        { name: "Enterprise Pro", color: "yellow", dot: "bg-yellow-400" },
-                      ] as const).map((agent) => {
-                        const isActive = posterForm.agents.includes(agent.name);
-                        const colorMap: Record<string, { active: string; border: string; text: string }> = {
-                          blue: { active: "bg-blue-500/25", border: "border-blue-500/40", text: "text-blue-300" },
-                          green: { active: "bg-green-500/25", border: "border-green-500/40", text: "text-green-300" },
-                          purple: { active: "bg-purple-500/25", border: "border-purple-500/40", text: "text-purple-300" },
-                          orange: { active: "bg-orange-500/25", border: "border-orange-500/40", text: "text-orange-300" },
-                          yellow: { active: "bg-yellow-500/20", border: "border-yellow-500/40", text: "text-yellow-300" },
-                          cyan: { active: "bg-cyan-500/25", border: "border-cyan-500/40", text: "text-cyan-300" },
-                        };
-                        const c = colorMap[agent.color];
-                        return (
-                          <button key={agent.name} onClick={() => {
-                            const agents = isActive ? posterForm.agents.filter(a => a !== agent.name) : [...posterForm.agents, agent.name];
-                            setPosterForm({ ...posterForm, agents });
-                          }}
-                            className={`px-1.5 py-1.5 rounded-lg text-[9px] transition-colors flex items-center gap-1 ${isActive ? `${c.active} ${c.text} border ${c.border}` : "bg-white/[0.04] text-white/40 border border-white/10 hover:text-white/70"}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? agent.dot : "bg-white/20"}`} />
-                            {agent.name}
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {["Responsive Design", "SEO-optimiert", "DSGVO-konform", "SSL-Verschlüsselung", "CMS-Integration", "Analytics Setup", "E-Mail Automation", "Social Media Integration", "Performance-Optimierung", "Barrierefreiheit"].filter(r => !posterForm.results.includes(r)).map((r) => (
+                          <button key={r} onClick={() => setPosterForm({ ...posterForm, results: [...posterForm.results, r] })}
+                            className="px-2 py-1 bg-white/[0.03] border border-white/[0.06] rounded-lg text-[10px] text-white/30 hover:text-emerald-300 hover:border-emerald-500/20 hover:bg-emerald-500/5 transition-all">
+                            {r}
                           </button>
-                        );
-                      })}
-                    </div>
-                    <div className="flex gap-1 mt-1">
-                      <button onClick={() => setPosterForm({ ...posterForm, agents: ["E-Mail Agent","Chat Agent","Vertriebs Agent","Termin Agent","Analyse Agent","Compliance Agent","Automatisierung","Enterprise Pro"] })}
-                        className="px-2 py-0.5 rounded text-[8px] bg-white/[0.06] text-white/50 hover:text-white/80 border border-white/10">Alle</button>
-                      <button onClick={() => setPosterForm({ ...posterForm, agents: [] })}
-                        className="px-2 py-0.5 rounded text-[8px] bg-white/[0.06] text-white/50 hover:text-white/80 border border-white/10">Keine</button>
-                    </div>
-                  </div>
-                  {/* Results */}
-                  <div>
-                    <label className="text-[10px] text-white/40 block mb-1">Ergebnisse</label>
-                    <div className="flex flex-wrap gap-1 mb-1">
-                      {posterForm.results.map((r, i) => (
-                        <span key={i} className="px-2 py-1 bg-green-500/20 text-green-300 rounded-lg text-[10px] flex items-center gap-1">
-                          {r}
-                          <button onClick={() => setPosterForm({ ...posterForm, results: posterForm.results.filter((_, idx) => idx !== i) })}>
-                            <XMarkIcon className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-1">
-                      {["Responsive Design", "SEO-optimiert", "DSGVO-konform", "SSL-Verschlüsselung", "CMS-Integration", "Analytics Setup", "E-Mail Automation", "Social Media Integration", "Performance-Optimierung", "Barrierefreiheit"].filter(r => !posterForm.results.includes(r)).map((r) => (
-                        <button key={r} onClick={() => setPosterForm({ ...posterForm, results: [...posterForm.results, r] })}
-                          className="px-2 py-1 bg-white/[0.04] hover:bg-green-500/10 border border-white/10 rounded-lg text-[10px] text-white/40 hover:text-green-300 transition-colors">
-                          + {r}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex gap-1">
+                        ))}
+                      </div>
                       <input type="text" value={posterForm.customResult} onChange={(e) => setPosterForm({ ...posterForm, customResult: e.target.value })}
                         onKeyDown={(e) => { if (e.key === "Enter" && posterForm.customResult.trim()) { setPosterForm({ ...posterForm, results: [...posterForm.results, posterForm.customResult.trim()], customResult: "" }); } }}
-                        placeholder="Eigenes Ergebnis + Enter"
-                        className="flex-1 px-2 py-1 bg-white/[0.06] border border-white/10 rounded-lg text-white text-[10px] outline-none" />
+                        placeholder="Eigenes Ergebnis hinzufügen..."
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-emerald-500/30 placeholder:text-white/20 transition-all" />
                     </div>
                   </div>
-                  {/* Actions */}
-                  <div className="flex justify-between items-center pt-2 border-t border-white/10">
+
+                  {/* Footer Actions */}
+                  <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06] bg-white/[0.02]">
                     <button onClick={() => {
                       const html = generatePosterHTML(client, posterForm);
                       const w = window.open("", "_blank", "width=1100,height=900");
                       if (w) { w.document.write(html); w.document.close(); }
                     }}
-                      className="px-3 py-2 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg text-xs font-medium hover:bg-purple-500/30 flex items-center gap-1.5">
+                      className="px-4 py-2 bg-white/[0.05] border border-white/[0.08] text-white/60 rounded-xl text-xs font-medium hover:bg-white/[0.08] hover:text-white transition-all flex items-center gap-1.5">
                       <EyeIcon className="w-3.5 h-3.5" />
                       Vorschau
                     </button>
@@ -6794,9 +6805,9 @@ function ClientDetailModal({
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
-                      className="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg text-xs font-medium hover:opacity-90 flex items-center gap-1.5">
+                      className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-[1px] transition-all flex items-center gap-1.5">
                       <ArrowDownTrayIcon className="w-3.5 h-3.5" />
-                      HTML-Poster herunterladen
+                      Poster herunterladen
                     </button>
                   </div>
                 </div>
