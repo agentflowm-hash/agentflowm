@@ -5212,21 +5212,75 @@ function generatePosterHTML(client: any, form: any): string {
     </div>`;
   }).join("");
 
-  // Agent color mapping matching the 8 AgentFlow agents
-  const agentColorMap: Record<string, { bg: string; border: string; text: string; dot: string }> = {
-    "E-Mail Agent": { bg: "rgba(59,130,246,.15)", border: "rgba(59,130,246,.3)", text: "#60A5FA", dot: "#3B82F6" },
-    "Chat Agent": { bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399", dot: "#10B981" },
-    "Vertriebs Agent": { bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8", dot: "#6366F1" },
-    "Termin Agent": { bg: "rgba(139,92,246,.15)", border: "rgba(139,92,246,.3)", text: "#A78BFA", dot: "#8B5CF6" },
-    "Analyse Agent": { bg: "rgba(249,115,22,.15)", border: "rgba(249,115,22,.3)", text: "#FB923C", dot: "#F97316" },
-    "Compliance Agent": { bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399", dot: "#10B981" },
-    "Automatisierung": { bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8", dot: "#6366F1" },
-    "Enterprise Pro": { bg: "rgba(234,179,8,.12)", border: "rgba(234,179,8,.3)", text: "#FCD34D", dot: "#EAB308" },
+  // Agent SVG robot avatars matching the AgentFlow design (arch helmet, colored eyes, badge icon)
+  const agentSvgMap: Record<string, { eyeColor: string; dotColor: string; bg: string; border: string; text: string; badge: string }> = {
+    "E-Mail Agent": {
+      eyeColor: "#3B82F6", dotColor: "#3B82F6", bg: "rgba(59,130,246,.15)", border: "rgba(59,130,246,.3)", text: "#60A5FA",
+      badge: `<rect x="28" y="5" width="11" height="8" rx="2" fill="#3B82F6"/><path d="M29 6.5L33.5 9.5 38 6.5" stroke="#fff" stroke-width="1" fill="none"/>` // envelope
+    },
+    "Chat Agent": {
+      eyeColor: "#10B981", dotColor: "#F97316", bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399",
+      badge: `<rect x="28" y="5" width="12" height="9" rx="3" fill="#10B981"/><circle cx="31.5" cy="9" r="1" fill="#fff"/><circle cx="34" cy="9" r="1" fill="#fff"/><circle cx="36.5" cy="9" r="1" fill="#fff"/>` // chat dots
+    },
+    "Vertriebs Agent": {
+      eyeColor: "#8B5CF6", dotColor: "#8B5CF6", bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8",
+      badge: `<circle cx="33" cy="9" r="6" fill="#6366F1"/><path d="M33 6L33 12M30 9L36 9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>` // crosshair/target
+    },
+    "Termin Agent": {
+      eyeColor: "#8B5CF6", dotColor: "#8B5CF6", bg: "rgba(139,92,246,.15)", border: "rgba(139,92,246,.3)", text: "#A78BFA",
+      badge: `<circle cx="33" cy="9" r="6" fill="#8B5CF6"/><path d="M33 6V9.5L35.5 11" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none"/>` // clock
+    },
+    "Analyse Agent": {
+      eyeColor: "#F97316", dotColor: "#F97316", bg: "rgba(249,115,22,.15)", border: "rgba(249,115,22,.3)", text: "#FB923C",
+      badge: `<rect x="27" y="4" width="12" height="10" rx="2" fill="#F97316"/><path d="M29 11V9M31 11V7M33 11V8M35 11V6M37 11V9" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>` // bar chart
+    },
+    "Compliance Agent": {
+      eyeColor: "#10B981", dotColor: "#10B981", bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399",
+      badge: `<circle cx="33" cy="9" r="6" fill="#10B981"/><path d="M30 9L32.5 11.5L36.5 7" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` // checkmark
+    },
+    "Automatisierung": {
+      eyeColor: "#6366F1", dotColor: "#6366F1", bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8",
+      badge: `<circle cx="33" cy="9" r="6" fill="#6366F1"/><circle cx="33" cy="9" r="2.5" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M33 5V6M33 12V13M37 9H38M28 9H29" stroke="#fff" stroke-width="1" stroke-linecap="round"/>` // gear
+    },
+    "Enterprise Pro": {
+      eyeColor: "#3B82F6", dotColor: "#EAB308", bg: "rgba(234,179,8,.12)", border: "rgba(234,179,8,.3)", text: "#FCD34D",
+      badge: `<path d="M33 3L34.8 7.5L39.5 7.8L35.8 11L37 15.5L33 13L29 15.5L30.2 11L26.5 7.8L31.2 7.5Z" fill="#EAB308"/>` // star
+    },
   };
-  const defaultAgentColor = { bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.25)", text: "#818CF8", dot: "#6366F1" };
+  const defaultAgentSvg = { eyeColor: "#6366F1", dotColor: "#6366F1", bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.25)", text: "#818CF8", badge: "" };
+
+  // Generate robot SVG for an agent
+  function agentRobotSvg(name: string, size: number): string {
+    const a = agentSvgMap[name] || defaultAgentSvg;
+    return `<svg viewBox="0 0 44 40" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <!-- Antenna -->
+      <line x1="22" y1="8" x2="22" y2="3" stroke="#888" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="22" cy="2" r="1.5" fill="${a.dotColor}"/>
+      <!-- Helmet arch -->
+      <path d="M8 28 Q8 10 22 10 Q36 10 36 28" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Side connectors -->
+      <circle cx="8" cy="28" r="2" fill="#888"/>
+      <circle cx="36" cy="28" r="2" fill="#888"/>
+      <!-- Left eye -->
+      <circle cx="16" cy="24" r="4.5" fill="#1a1a2e"/>
+      <circle cx="16" cy="24" r="3" fill="${a.eyeColor}" opacity="0.9"/>
+      <circle cx="17" cy="23" r="1" fill="#fff" opacity="0.7"/>
+      <!-- Right eye -->
+      <circle cx="28" cy="24" r="4.5" fill="#1a1a2e"/>
+      <circle cx="28" cy="24" r="3" fill="${a.eyeColor}" opacity="0.9"/>
+      <circle cx="29" cy="23" r="1" fill="#fff" opacity="0.7"/>
+      <!-- Badge icon -->
+      ${a.badge}
+    </svg>`;
+  }
+
   const agentsHTML = form.agents.map((a: string) => {
-    const c = agentColorMap[a] || defaultAgentColor;
-    return `<span style="padding:6px 14px;background:${c.bg};border:1px solid ${c.border};border-radius:8px;font-size:12px;color:${c.text};font-weight:600;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:${c.dot};box-shadow:0 0 8px ${c.dot}"></span>${a}</span>`;
+    const c = agentSvgMap[a] || defaultAgentSvg;
+    const robotSvg = agentRobotSvg(a, 32);
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;background:${c.bg};border:1px solid ${c.border};border-radius:12px;min-width:90px">
+      ${robotSvg}
+      <span style="font-size:10px;color:${c.text};font-weight:700;text-align:center;line-height:1.2">${a}</span>
+    </div>`;
   }).join("");
 
   // Website screenshot card with siegel overlay
@@ -5533,22 +5587,25 @@ html, body {
 <!-- WEBSITE -->
 ${screenshotSection}
 
+<!-- AGENTS -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><span class="card-dot purple"></span>AI-Agenten</div>
+    <span class="card-badge">${form.agents.length} Agenten aktiv</span>
+  </div>
+  <div style="padding:2vw;display:flex;flex-wrap:wrap;gap:1.2vw;justify-content:center">${agentsHTML}</div>
+</div>
+
 <!-- WORKFLOW -->
 <div class="card">
   <div class="card-header">
     <div class="card-title"><span class="card-dot purple"></span>AI Workflow</div>
-    <span class="card-badge">${form.agents.length} Agenten</span>
+    <span class="card-badge">Automatisiert</span>
   </div>
   <div class="workflow-content">
     <div class="workflow-header">
-      <div class="agent-badge">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="35" fill="#252A3A"/>
-          <circle cx="50" cy="50" r="25" fill="url(#agentGlow)"/>
-          <path d="M38 45 C38 35 62 35 62 45 L62 55 C62 65 38 65 38 55Z" fill="#818CF8" opacity="0.8"/>
-          <circle cx="50" cy="38" r="10" fill="#A5B4FC"/>
-          <defs><radialGradient id="agentGlow"><stop offset="0%" stop-color="#6366F1" stop-opacity="0.6"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
-        </svg>
+      <div class="agent-badge" style="background:#0A0D14;padding:8px">
+        ${agentRobotSvg(workflowAgentNames[0] || "E-Mail Agent", 64)}
       </div>
       <div class="workflow-info">
         <span class="workflow-title">AI ${form.projectType} Flow</span>
@@ -6704,8 +6761,17 @@ function ClientDetailModal({
                         className="flex-1 px-2 py-1 bg-white/[0.06] border border-white/10 rounded-lg text-white text-[10px] outline-none" />
                     </div>
                   </div>
-                  {/* Download */}
-                  <div className="flex justify-end pt-2 border-t border-white/10">
+                  {/* Actions */}
+                  <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                    <button onClick={() => {
+                      const html = generatePosterHTML(client, posterForm);
+                      const w = window.open("", "_blank", "width=1100,height=900");
+                      if (w) { w.document.write(html); w.document.close(); }
+                    }}
+                      className="px-3 py-2 bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg text-xs font-medium hover:bg-purple-500/30 flex items-center gap-1.5">
+                      <EyeIcon className="w-3.5 h-3.5" />
+                      Vorschau
+                    </button>
                     <button onClick={() => {
                       const html = generatePosterHTML(client, posterForm);
                       const blob = new Blob([html], { type: "text/html" });
