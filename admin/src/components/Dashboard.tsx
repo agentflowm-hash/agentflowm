@@ -5585,7 +5585,8 @@ ${screenshotSection}
     <span class="card-badge">Automatisiert</span>
   </div>
   <div class="workflow-content" style="padding:2vw">
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:max(1vw,8px);justify-content:center">
+    <!-- Agent Chain -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:max(1vw,8px);justify-content:center;margin-bottom:max(2vw,16px)">
     ${workflowAgentNames.map((name: string, i: number) => {
       const c = agentNodeColorMap[name] || defaultNodeColor;
       const robotSvg = agentRobotSvg(name, 36);
@@ -5597,6 +5598,26 @@ ${screenshotSection}
         ${isLast ? '<svg width="14" height="14" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10" fill="#10B981"/><path d="M8 12l3 3 5-5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>' : ''}
       </div>`;
     }).join("")}
+    </div>
+    <!-- Workflow Steps -->
+    <div style="display:flex;align-items:stretch;gap:max(0.8vw,6px);border-top:1px solid rgba(255,255,255,.06);padding-top:max(1.5vw,12px)">
+      ${(() => {
+        const steps = [
+          { icon: '\u26A1', label: 'Trigger', desc: 'Anfrage eingehend' },
+          { icon: '\uD83D\uDD0D', label: 'Analyse', desc: 'Daten auswerten' },
+          { icon: '\u2699\uFE0F', label: 'Verarbeitung', desc: 'KI-Optimierung' },
+          { icon: '\uD83D\uDCE4', label: 'Ausf\u00FChrung', desc: 'Aktion starten' },
+          { icon: '\u2705', label: 'Ergebnis', desc: 'Report erstellen' },
+        ];
+        return steps.map((s, i) => `
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:max(0.5vw,4px);position:relative">
+            ${i < steps.length - 1 ? `<div style="position:absolute;top:max(1.2vw,12px);left:55%;right:-45%;height:2px;background:linear-gradient(90deg,rgba(99,102,241,.4),rgba(99,102,241,.1));z-index:0"></div>` : ''}
+            <div style="width:max(2.5vw,24px);height:max(2.5vw,24px);border-radius:50%;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);display:flex;align-items:center;justify-content:center;font-size:max(1.2vw,12px);position:relative;z-index:1">${s.icon}</div>
+            <span style="font-size:max(0.9vw,9px);font-weight:700;color:rgba(245,247,250,.7);white-space:nowrap">${s.label}</span>
+            <span style="font-size:max(0.7vw,7px);color:rgba(245,247,250,.35);white-space:nowrap">${s.desc}</span>
+          </div>
+        `).join('');
+      })()}
     </div>
   </div>
 </div>
