@@ -5265,12 +5265,31 @@ function generatePosterHTML(client: any, form: any): string {
     return a.svg.replace(/viewBox="0 0 80 80"/, `viewBox="0 0 80 80" width="${size}" height="${size}"`);
   }
 
-  const agentsHTML = form.agents.map((a: string) => {
+  const agentDescriptions: Record<string, string> = {
+    "E-Mail Agent": "Automatisierte E-Mail-Kampagnen, Follow-ups & personalisierte Kommunikation",
+    "Chat Agent": "24/7 Website-Chat mit KI-gestützter Besucherberatung & Lead-Qualifizierung",
+    "Vertriebs Agent": "Pipeline-Management, Lead-Scoring & automatisierte Verkaufsprozesse",
+    "Termin Agent": "Intelligente Terminplanung, Erinnerungen & Kalender-Synchronisation",
+    "Analyse Agent": "Echtzeit-Datenanalyse, Reporting & Performance-Monitoring",
+    "Compliance Agent": "DSGVO-Überwachung, Datenschutz-Audits & rechtliche Absicherung",
+    "Automatisierung": "Workflow-Orchestrierung, Prozessoptimierung & System-Integration",
+    "Enterprise Pro": "Premium KI-Funktionen, Priority Support & erweiterte Skalierung",
+  };
+
+  const agentsHTML = form.agents.map((a: string, idx: number) => {
     const c = agentOriginalSvg[a] || defaultAgentData;
-    const robotSvg = agentRobotSvg(a, 56);
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 12px;background:${c.bg};border:1px solid ${c.border};border-radius:14px;min-width:100px">
-      ${robotSvg}
-      <span style="font-size:11px;color:${c.text};font-weight:700;text-align:center;line-height:1.2">${a}</span>
+    const robotSvg = agentRobotSvg(a, 48);
+    const desc = agentDescriptions[a] || "KI-gestützter Agent für optimierte Geschäftsprozesse";
+    return `<div style="display:flex;align-items:flex-start;gap:16px;padding:18px 20px;background:linear-gradient(135deg,${c.bg},transparent);border:1px solid ${c.border};border-radius:16px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,${c.border},transparent)"></div>
+      <div style="flex-shrink:0;width:48px;height:48px">${robotSvg}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:13px;color:${c.text};font-weight:800;letter-spacing:-0.01em">${a}</span>
+          <span style="font-size:8px;color:${c.dot};background:${c.bg};border:1px solid ${c.border};padding:2px 6px;border-radius:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Aktiv</span>
+        </div>
+        <p style="font-size:10px;color:rgba(245,247,250,.45);line-height:1.5;margin:0">${desc}</p>
+      </div>
     </div>`;
   }).join("");
 
@@ -5574,48 +5593,73 @@ ${screenshotSection}
 <!-- AGENTS -->
 <div class="card">
   <div class="card-header">
-    <div class="card-title"><span class="card-dot purple"></span>AI-Agenten</div>
+    <div class="card-title"><span class="card-dot purple"></span>KI-Agenten im Einsatz</div>
     <span class="card-badge">${form.agents.length} Agenten aktiv</span>
   </div>
-  <div style="padding:2vw;display:flex;flex-wrap:wrap;gap:1.2vw;justify-content:center">${agentsHTML}</div>
+  <div style="padding:2.5vw">
+    <p style="font-size:max(1.1vw,11px);color:rgba(245,247,250,.4);line-height:1.6;margin-bottom:2vw;max-width:700px">
+      F\u00FCr dieses Projekt wurden <strong style="color:rgba(245,247,250,.7)">${form.agents.length} spezialisierte KI-Agenten</strong> konfiguriert,
+      die rund um die Uhr zusammenarbeiten \u2014 von der Lead-Erfassung bis zur automatisierten Kundenkommunikation.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${agentsHTML}</div>
+  </div>
 </div>
 
 <!-- WORKFLOW -->
 <div class="card">
   <div class="card-header">
-    <div class="card-title"><span class="card-dot purple"></span>AI Workflow</div>
-    <span class="card-badge">Automatisiert</span>
+    <div class="card-title"><span class="card-dot purple"></span>Automatisierter Workflow</div>
+    <span class="card-badge">${workflowAgentNames.length} Schritte</span>
   </div>
   <div class="workflow-content">
-    <div class="workflow-header">
-      <div class="agent-badge" style="background:#0A0D14;padding:8px">
-        ${agentRobotSvg(workflowAgentNames[0] || "E-Mail Agent", 64)}
-      </div>
-      <div class="workflow-info">
-        <span class="workflow-title">AI ${form.projectType} Flow</span>
-        <span class="workflow-subtitle">${form.agents.join(" \u2192 ")}</span>
-      </div>
+    <div style="margin-bottom:2vw">
+      <p style="font-size:max(1.1vw,11px);color:rgba(245,247,250,.4);line-height:1.6;max-width:700px">
+        Der vollautomatische <strong style="color:rgba(245,247,250,.7)">${form.projectType} Workflow</strong> verbindet alle Agenten zu einem
+        nahtlosen Prozess \u2014 jeder Schritt wird automatisch ausgel\u00F6st und \u00FCberwacht.
+      </p>
     </div>
-    <div class="workflow-canvas">
-      <svg class="workflow-svg" viewBox="0 0 ${svgWidth} 130" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="node3d" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.6"/></filter>
-          <filter id="glow3d" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          <filter id="lineGlow" x="-20%" y="-100%" width="140%" height="300%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          <linearGradient id="node3dGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2E3448"/><stop offset="50%" stop-color="#1E2330"/><stop offset="100%" stop-color="#141820"/></linearGradient>
-          <linearGradient id="lineGrad" x1="0%" x2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#10B981"/></linearGradient>
-          <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#818CF8"/><stop offset="100%" stop-color="#6366F1"/></linearGradient>
-          <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FB923C"/><stop offset="100%" stop-color="#F97316"/></linearGradient>
-          <linearGradient id="tealGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#34D399"/><stop offset="100%" stop-color="#10B981"/></linearGradient>
-          <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#60A5FA"/><stop offset="100%" stop-color="#3B82F6"/></linearGradient>
-          <linearGradient id="statsGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/></linearGradient>
-        </defs>
-        <g filter="url(#lineGlow)">${connectionsHTML}</g>
-        ${workflowNodesHTML}
-      </svg>
-    </div>
+    ${workflowAgentNames.map((name: string, i: number) => {
+      const c = agentNodeColorMap[name] || defaultNodeColor;
+      const aData = agentOriginalSvg[name];
+      const robotSvg = agentRobotSvg(name, 40);
+      const stepDescriptions: Record<string, string> = {
+        "E-Mail Agent": "Automatische E-Mail-Sequenzen werden an qualifizierte Leads versendet",
+        "Chat Agent": "Website-Besucher werden in Echtzeit beraten und vorqualifiziert",
+        "Vertriebs Agent": "Leads werden bewertet, priorisiert und in die Pipeline \u00FCberf\u00FChrt",
+        "Termin Agent": "Qualifizierte Leads erhalten automatische Terminvorschl\u00E4ge",
+        "Analyse Agent": "Alle Daten werden analysiert und optimiert in Echtzeit",
+        "Compliance Agent": "DSGVO-Konformit\u00E4t und Datenschutz werden kontinuierlich gepr\u00FCft",
+        "Automatisierung": "Alle Systeme werden orchestriert und Prozesse optimiert",
+        "Enterprise Pro": "Premium-Funktionen und erweiterte KI-Modelle werden aktiviert",
+      };
+      const desc = stepDescriptions[name] || "Agent verarbeitet und optimiert den Workflow-Schritt";
+      const isLast = i === workflowAgentNames.length - 1;
+      return `
+      <div style="display:flex;align-items:flex-start;gap:max(1.5vw,12px);position:relative${i > 0 ? ';margin-top:max(0.5vw,4px)' : ''}">
+        <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:max(4vw,36px)">
+          <div style="width:max(3.5vw,32px);height:max(3.5vw,32px);border-radius:50%;background:linear-gradient(135deg,${c.stroke}22,${c.stroke}08);border:2px solid ${c.stroke}60;display:flex;align-items:center;justify-content:center;position:relative;z-index:1">
+            <span style="font-size:max(1.2vw,11px);font-weight:900;color:${c.label}">${i + 1}</span>
+          </div>
+          ${!isLast ? `<div style="width:2px;height:max(3vw,24px);background:linear-gradient(to bottom,${c.stroke}40,transparent);margin-top:4px"></div>` : ''}
+        </div>
+        <div style="flex:1;padding-bottom:${isLast ? '0' : 'max(1.5vw,12px)'}">
+          <div style="display:flex;align-items:center;gap:max(0.8vw,8px);margin-bottom:max(0.4vw,3px)">
+            <div style="width:max(2.5vw,22px);height:max(2.5vw,22px);flex-shrink:0">${robotSvg}</div>
+            <span style="font-size:max(1.3vw,12px);font-weight:800;color:${c.label}">${name}</span>
+            ${isLast ? '<span style="font-size:max(0.8vw,8px);padding:2px 8px;border-radius:6px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-weight:700;letter-spacing:0.03em">ABSCHLUSS</span>' : ''}
+          </div>
+          <p style="font-size:max(1vw,10px);color:rgba(245,247,250,.4);line-height:1.5;margin:0">${desc}</p>
+        </div>
+      </div>`;
+    }).join("")}
   </div>
 </div>
+
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <linearGradient id="statsGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/></linearGradient>
+  </defs>
+</svg>
 
 <!-- BOTTOM -->
 <div class="bottom-section">
