@@ -17,6 +17,7 @@ import {
   TrashIcon,
   EyeIcon,
   ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
   CheckCircleIcon,
@@ -6645,10 +6646,39 @@ function ClientDetailModal({
                       </select>
                     </div>
                     <div>
-                      <label className="text-[10px] text-white/40 block mb-1">Screenshot URL</label>
-                      <input type="text" value={posterForm.screenshotUrl} onChange={(e) => setPosterForm({ ...posterForm, screenshotUrl: e.target.value })}
-                        placeholder="https://... oder leer lassen"
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-green-500/50" />
+                      <label className="text-[10px] text-white/40 block mb-1">Website Screenshot</label>
+                      {posterForm.screenshotUrl ? (
+                        <div className="relative group">
+                          <img src={posterForm.screenshotUrl} alt="Screenshot" className="w-full rounded-lg border border-white/10 max-h-32 object-cover object-top" />
+                          <button onClick={() => setPosterForm({ ...posterForm, screenshotUrl: "" })}
+                            className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            <XMarkIcon className="w-3 h-3 text-white" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <label className="flex items-center justify-center gap-1.5 px-3 py-3 bg-white/[0.04] border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-green-500/40 hover:bg-green-500/5 transition-colors">
+                            <ArrowUpTrayIcon className="w-4 h-4 text-white/40" />
+                            <span className="text-[10px] text-white/40">Bild hochladen oder hierher ziehen</span>
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (ev) => {
+                                  if (ev.target?.result) setPosterForm({ ...posterForm, screenshotUrl: ev.target.result as string });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }} />
+                          </label>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[8px] text-white/30">oder URL:</span>
+                            <input type="text" placeholder="https://..."
+                              onKeyDown={(e) => { if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) setPosterForm({ ...posterForm, screenshotUrl: (e.target as HTMLInputElement).value.trim() }); }}
+                              className="flex-1 px-2 py-1 bg-white/[0.04] border border-white/10 rounded text-white text-[9px] outline-none focus:border-green-500/50" />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div>
