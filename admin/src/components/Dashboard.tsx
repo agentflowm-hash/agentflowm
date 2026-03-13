@@ -5213,7 +5213,8 @@ function generatePosterHTML(client: any, form: any): string {
 
   const resultsHTML = form.results.map((r: string, i: number) => {
     const icon = resultIcons[i % resultIcons.length];
-    return `<div class="result-item">
+    return `<div class="result-item" style="border-left:none">
+      <div style="position:absolute;left:0;top:15%;bottom:15%;width:2px;border-radius:2px;background:${icon.bg}"></div>
       <div class="result-icon" style="background:${icon.bg}">${icon.svg}</div>
       <span class="result-text">${r}</span>
     </div>`;
@@ -5380,20 +5381,20 @@ function generatePosterHTML(client: any, form: any): string {
   .workflow-canvas { height: 20vw; min-height: 140px; }
   .bottom-section { gap: 2vw; }
   .bottom-section .card { margin-bottom: 0; }
-  .stats-content { padding: 2.5vw; gap: 2vw; }
-  .stats-main { gap: 1vw; }
-  .stats-main-circle { width: 11vw; height: 11vw; min-width: 80px; min-height: 80px; }
-  .stats-main-value { font-size: max(3vw, 22px); }
-  .stats-main-label { font-size: max(1vw, 9px); }
-  .stats-grid { gap: 1vw; }
-  .stat-mini { padding: 1vw; border-radius: 0.8vw; }
-  .stat-mini-value { font-size: max(1.6vw, 14px); }
-  .stat-mini-label { font-size: max(0.8vw, 8px); }
-  .stat-mini-bar { height: max(0.4vw, 3px); border-radius: 0.2vw; margin-top: 0.5vw; }
-  .results-content { padding: 1.8vw; gap: 1vw; }
-  .result-item { padding: 0.8vw 1vw; border-radius: 0.8vw; gap: 0.7vw; }
-  .result-icon { width: max(2.4vw, 20px); height: max(2.4vw, 20px); flex-shrink: 0; }
-  .result-text { font-size: max(0.95vw, 8px); }
+  .stats-content { padding: 2.5vw; gap: 1.5vw; }
+  .stats-main { gap: 0.5vw; }
+  .stats-main-circle { width: 13vw; height: 13vw; min-width: 90px; min-height: 90px; }
+  .stats-main-value { font-size: max(3.5vw, 26px); }
+  .stats-main-label { font-size: max(0.9vw, 8px); }
+  .stats-grid { gap: 1.2vw; padding: 0 1vw; }
+  .stat-mini-inner { padding: 1.2vw 1.4vw; }
+  .stat-mini-value { font-size: max(2vw, 16px); }
+  .stat-mini-label { font-size: max(0.7vw, 7px); margin-bottom: 0.4vw; }
+  .stat-mini-bar { height: max(0.5vw, 4px); margin-top: 0.6vw; }
+  .results-content { padding: 2vw; gap: 0.8vw; }
+  .result-item { padding: 1vw 1.4vw; border-radius: 1vw; gap: 1vw; }
+  .result-icon { width: max(2.8vw, 24px); height: max(2.8vw, 24px); border-radius: max(0.8vw, 8px); }
+  .result-text { font-size: max(1.05vw, 9px); }
   .footer { margin-top: 3.5vw; padding-top: 2.5vw; gap: 2vw; }
   .footer-logo { width: 5.5vw; height: 5.5vw; min-width: 44px; min-height: 44px; }
   .footer-info { font-size: max(1.2vw, 11px); }
@@ -5428,19 +5429,19 @@ function generatePosterHTML(client: any, form: any): string {
   .workflow-subtitle { font-size: 4.5mm; }
   .workflow-canvas { height: 80mm; }
   .bottom-section { gap: 10mm; }
-  .stats-content { padding: 10mm; gap: 10mm; }
-  .stats-main-circle { width: 45mm; height: 45mm; }
-  .stats-main-value { font-size: 12mm; }
-  .stats-main-label { font-size: 4mm; }
-  .stats-grid { gap: 5mm; }
-  .stat-mini { padding: 5mm; border-radius: 3mm; }
-  .stat-mini-value { font-size: 7mm; }
-  .stat-mini-label { font-size: 3mm; }
-  .stat-mini-bar { height: 2mm; border-radius: 1mm; margin-top: 2mm; }
-  .results-content { padding: 8mm; gap: 5mm; }
-  .result-item { padding: 4mm 5mm; border-radius: 3mm; gap: 4mm; }
-  .result-icon { width: 12mm; height: 12mm; }
-  .result-text { font-size: 4mm; }
+  .stats-content { padding: 10mm; gap: 8mm; }
+  .stats-main-circle { width: 50mm; height: 50mm; }
+  .stats-main-value { font-size: 14mm; }
+  .stats-main-label { font-size: 3.5mm; }
+  .stats-grid { gap: 5mm; padding: 0 4mm; }
+  .stat-mini-inner { padding: 5mm 6mm; }
+  .stat-mini-value { font-size: 8mm; }
+  .stat-mini-label { font-size: 3mm; margin-bottom: 2mm; }
+  .stat-mini-bar { height: 2.5mm; margin-top: 2mm; }
+  .results-content { padding: 8mm; gap: 4mm; }
+  .result-item { padding: 5mm 6mm; border-radius: 4mm; gap: 5mm; }
+  .result-icon { width: 14mm; height: 14mm; border-radius: 4mm; }
+  .result-text { font-size: 4.5mm; }
   .footer { margin-top: 12mm; padding-top: 10mm; }
   .footer-logo { width: 18mm; height: 18mm; }
   .footer-info { font-size: 5mm; }
@@ -5514,30 +5515,31 @@ html, body {
 .bottom-section { display: grid; grid-template-columns: 1fr 1fr; min-height: 32vw; }
 .bottom-section .card { display: flex; flex-direction: column; }
 
-.stats-content { display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse 80% 60% at 30% 50%, rgba(16,185,129,.08) 0%, transparent 60%), linear-gradient(180deg, var(--bg-card2), var(--bg-card)); flex: 1; }
+.stats-content { display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse 80% 60% at 30% 50%, rgba(16,185,129,.08) 0%, transparent 60%), linear-gradient(180deg, var(--bg-card2), var(--bg-card)); flex: 1; }
 .stats-main { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
 .stats-main-circle { position: relative; display: flex; align-items: center; justify-content: center; }
-.stats-main-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); filter: drop-shadow(0 0 20px var(--teal-glow)); }
-.stats-main-circle .track { fill: none; stroke: #1A1F2A; stroke-width: 8; }
-.stats-main-circle .progress { fill: none; stroke: url(#statsGradient); stroke-width: 8; stroke-linecap: round; }
-.stats-main-value { position: absolute; font-weight: 900; color: var(--teal); text-shadow: 0 0 30px var(--teal-glow); }
-.stats-main-label { color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.8vw; white-space: nowrap; }
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; flex: 1; align-content: center; }
-.stat-mini { display: flex; flex-direction: column; justify-content: center; background: linear-gradient(150deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%); border: 1px solid var(--border); position: relative; }
-.stat-mini::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(16,185,129,.3), transparent); }
-.stat-mini-header { display: flex; justify-content: space-between; align-items: center; }
-.stat-mini-value { font-weight: 800; color: var(--teal); text-shadow: 0 0 15px var(--teal-glow); }
-.stat-mini-label { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-.stat-mini-bar { width: 100%; background: rgba(16,185,129,.15); overflow: hidden; }
-.stat-mini-bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), #34D399); border-radius: inherit; box-shadow: 0 0 8px var(--teal-glow); }
+.stats-main-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); filter: drop-shadow(0 0 25px var(--teal-glow)); }
+.stats-main-circle .track { fill: none; stroke: rgba(255,255,255,.04); stroke-width: 6; }
+.stats-main-circle .progress { fill: none; stroke: url(#statsGradient); stroke-width: 7; stroke-linecap: round; }
+.stats-main-value { position: absolute; font-weight: 900; color: #fff; }
+.stats-main-unit { font-size: 40%; font-weight: 600; color: var(--teal); vertical-align: super; }
+.stats-main-label { color: var(--teal); font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.8vw; white-space: nowrap; font-size: 80%; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+.stat-mini { display: flex; flex-direction: column; justify-content: center; position: relative; }
+.stat-mini-inner { background: linear-gradient(150deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%); border: 1px solid rgba(255,255,255,.05); border-radius: 16px; position: relative; overflow: hidden; }
+.stat-mini-inner::before { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px; background: linear-gradient(90deg, transparent, rgba(16,185,129,.4), transparent); }
+.stat-mini-value { font-weight: 900; color: #fff; line-height: 1; }
+.stat-mini-label { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.stat-mini-bar { width: 100%; background: rgba(255,255,255,.06); overflow: hidden; border-radius: 99px; }
+.stat-mini-bar-fill { height: 100%; border-radius: 99px; position: relative; }
+.stat-mini-bar-fill::after { content: ''; position: absolute; top: 0; right: 0; width: 12px; height: 100%; background: rgba(255,255,255,.4); border-radius: 99px; filter: blur(2px); }
 
-.results-content { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(255,106,0,.06) 0%, transparent 60%), linear-gradient(180deg, var(--bg-card2), var(--bg-card)); flex: 1; align-content: stretch; }
-.result-item { display: flex; align-items: center; background: linear-gradient(150deg, rgba(255,255,255,.03) 0%, transparent 100%); border: 1px solid var(--border); position: relative; overflow: hidden; }
-.result-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent); }
-.result-icon { display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; position: relative; }
-.result-icon::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; background: inherit; opacity: 0.3; filter: blur(8px); }
+.results-content { display: flex; flex-direction: column; background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(255,106,0,.04) 0%, transparent 60%), linear-gradient(180deg, var(--bg-card2), var(--bg-card)); flex: 1; }
+.result-item { display: flex; align-items: center; position: relative; transition: transform .2s; }
+.result-item::before { content: ''; position: absolute; left: 0; top: 15%; bottom: 15%; width: 2px; border-radius: 2px; }
+.result-icon { display: flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink: 0; position: relative; }
 .result-icon svg { width: 50%; height: 50%; stroke: #fff; stroke-width: 2.5; fill: none; position: relative; z-index: 1; }
-.result-text { font-weight: 700; color: var(--text); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.result-text { font-weight: 600; color: var(--text); line-height: 1.3; }
 
 .footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); flex-wrap: wrap; }
 .footer-brand { display: flex; align-items: center; gap: 1.5vw; }
@@ -5630,27 +5632,31 @@ ${screenshotSection}
             <circle class="track" cx="50" cy="50" r="42"/>
             <circle class="progress" cx="50" cy="50" r="42" stroke-dasharray="${scoreDash}, 264"/>
           </svg>
-          <span class="stats-main-value">${form.scoreOverall}</span>
+          <span class="stats-main-value">${form.scoreOverall}<span class="stats-main-unit">/100</span></span>
         </div>
         <span class="stats-main-label">Gesamt-Score</span>
       </div>
       <div class="stats-grid">
-        <div class="stat-mini">
-          <div class="stat-mini-header"><span class="stat-mini-value">${form.scoreSeo}</span><span class="stat-mini-label">SEO</span></div>
-          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSeo}%"></div></div>
-        </div>
-        <div class="stat-mini">
-          <div class="stat-mini-header"><span class="stat-mini-value">${form.scorePerformance}</span><span class="stat-mini-label">Performance</span></div>
-          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scorePerformance}%"></div></div>
-        </div>
-        <div class="stat-mini">
-          <div class="stat-mini-header"><span class="stat-mini-value">${form.scoreSecurity}</span><span class="stat-mini-label">Sicherheit</span></div>
-          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSecurity}%"></div></div>
-        </div>
-        <div class="stat-mini">
-          <div class="stat-mini-header"><span class="stat-mini-value">${form.loadTime}</span><span class="stat-mini-label">Ladezeit</span></div>
-          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:85%"></div></div>
-        </div>
+        <div class="stat-mini"><div class="stat-mini-inner">
+          <span class="stat-mini-label">SEO</span>
+          <span class="stat-mini-value">${form.scoreSeo}</span>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSeo}%;background:linear-gradient(90deg,#3B82F6,#60A5FA)"></div></div>
+        </div></div>
+        <div class="stat-mini"><div class="stat-mini-inner">
+          <span class="stat-mini-label">Performance</span>
+          <span class="stat-mini-value">${form.scorePerformance}</span>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scorePerformance}%;background:linear-gradient(90deg,#F59E0B,#FBBF24)"></div></div>
+        </div></div>
+        <div class="stat-mini"><div class="stat-mini-inner">
+          <span class="stat-mini-label">Sicherheit</span>
+          <span class="stat-mini-value">${form.scoreSecurity}</span>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSecurity}%;background:linear-gradient(90deg,#10B981,#34D399)"></div></div>
+        </div></div>
+        <div class="stat-mini"><div class="stat-mini-inner">
+          <span class="stat-mini-label">Ladezeit</span>
+          <span class="stat-mini-value">${form.loadTime}</span>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:85%;background:linear-gradient(90deg,#8B5CF6,#A78BFA)"></div></div>
+        </div></div>
       </div>
     </div>
   </div>
@@ -5659,6 +5665,7 @@ ${screenshotSection}
   <div class="card">
     <div class="card-header">
       <div class="card-title"><span class="card-dot orange"></span>Ergebnisse</div>
+      <span class="card-badge">${form.results.length} Features</span>
     </div>
     <div class="results-content">${resultsHTML}</div>
   </div>
