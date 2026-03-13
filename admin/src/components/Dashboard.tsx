@@ -6869,13 +6869,18 @@ function ClientDetailModal({
                     </button>
                     <button onClick={() => {
                       const html = generatePosterHTML(client, posterForm);
-                      const blob = new Blob([html], { type: "text/html" });
+                      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement("a");
                       a.href = url;
                       a.download = `poster-${client.name.toLowerCase().replace(/\s+/g, "-")}.html`;
+                      a.style.display = "none";
+                      document.body.appendChild(a);
                       a.click();
-                      URL.revokeObjectURL(url);
+                      setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                      }, 1000);
                     }}
                       className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-[1px] transition-all flex items-center gap-1.5">
                       <ArrowDownTrayIcon className="w-3.5 h-3.5" />
