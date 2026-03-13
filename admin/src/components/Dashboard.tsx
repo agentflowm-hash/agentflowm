@@ -5212,7 +5212,22 @@ function generatePosterHTML(client: any, form: any): string {
     </div>`;
   }).join("");
 
-  const agentsHTML = form.agents.map((a: string) => `<span style="padding:6px 14px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-size:12px;color:#818CF8;font-weight:600">${a}</span>`).join("");
+  // Agent color mapping matching the 8 AgentFlow agents
+  const agentColorMap: Record<string, { bg: string; border: string; text: string; dot: string }> = {
+    "E-Mail Agent": { bg: "rgba(59,130,246,.15)", border: "rgba(59,130,246,.3)", text: "#60A5FA", dot: "#3B82F6" },
+    "Chat Agent": { bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399", dot: "#10B981" },
+    "Vertriebs Agent": { bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8", dot: "#6366F1" },
+    "Termin Agent": { bg: "rgba(139,92,246,.15)", border: "rgba(139,92,246,.3)", text: "#A78BFA", dot: "#8B5CF6" },
+    "Analyse Agent": { bg: "rgba(249,115,22,.15)", border: "rgba(249,115,22,.3)", text: "#FB923C", dot: "#F97316" },
+    "Compliance Agent": { bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399", dot: "#10B981" },
+    "Automatisierung": { bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8", dot: "#6366F1" },
+    "Enterprise Pro": { bg: "rgba(234,179,8,.12)", border: "rgba(234,179,8,.3)", text: "#FCD34D", dot: "#EAB308" },
+  };
+  const defaultAgentColor = { bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.25)", text: "#818CF8", dot: "#6366F1" };
+  const agentsHTML = form.agents.map((a: string) => {
+    const c = agentColorMap[a] || defaultAgentColor;
+    return `<span style="padding:6px 14px;background:${c.bg};border:1px solid ${c.border};border-radius:8px;font-size:12px;color:${c.text};font-weight:600;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:${c.dot};box-shadow:0 0 8px ${c.dot}"></span>${a}</span>`;
+  }).join("");
 
   // Website screenshot card with siegel overlay
   const screenshotSection = form.screenshotUrl ? `
@@ -5239,26 +5254,31 @@ function generatePosterHTML(client: any, form: any): string {
       </div>
     </div>` : "";
 
-  // Workflow nodes from form agents
-  const workflowAgentNames = form.agents.length > 0 ? form.agents : ["Research", "Personalize", "Execute", "Follow-Up", "Complete"];
-  const nodeCount = Math.min(workflowAgentNames.length, 5);
-  const nodeWidth = 130;
+  // Workflow nodes from form agents — color matched to AgentFlow agents
+  const workflowAgentNames = form.agents.length > 0 ? form.agents : ["E-Mail Agent", "Chat Agent", "Vertriebs Agent", "Analyse Agent", "Enterprise Pro"];
+  const nodeCount = Math.min(workflowAgentNames.length, 8);
+  const nodeWidth = nodeCount <= 5 ? 130 : nodeCount <= 6 ? 110 : 95;
   const svgWidth = 900;
   const spacing = (svgWidth - nodeCount * nodeWidth) / (nodeCount + 1);
-  const nodeColors = [
-    { grad: "purpleGrad", stroke: "#3A4055", label: "#6366F1" },
-    { grad: "purpleGrad", stroke: "#3A4055", label: "#818CF8" },
-    { grad: "orangeGrad", stroke: "#F97316", label: "#F97316" },
-    { grad: "blueGrad", stroke: "#3A4055", label: "#3B82F6" },
-    { grad: "tealGrad", stroke: "#10B981", label: "#10B981" },
-  ];
+  const agentNodeColorMap: Record<string, { grad: string; stroke: string; label: string }> = {
+    "E-Mail Agent": { grad: "blueGrad", stroke: "#3B82F6", label: "#60A5FA" },
+    "Chat Agent": { grad: "tealGrad", stroke: "#10B981", label: "#34D399" },
+    "Vertriebs Agent": { grad: "purpleGrad", stroke: "#6366F1", label: "#818CF8" },
+    "Termin Agent": { grad: "purpleGrad", stroke: "#8B5CF6", label: "#A78BFA" },
+    "Analyse Agent": { grad: "orangeGrad", stroke: "#F97316", label: "#FB923C" },
+    "Compliance Agent": { grad: "tealGrad", stroke: "#10B981", label: "#34D399" },
+    "Automatisierung": { grad: "purpleGrad", stroke: "#6366F1", label: "#818CF8" },
+    "Enterprise Pro": { grad: "orangeGrad", stroke: "#EAB308", label: "#FCD34D" },
+  };
+  const defaultNodeColor = { grad: "purpleGrad", stroke: "#3A4055", label: "#6366F1" };
+  const nodeColors = workflowAgentNames.map((name: string) => agentNodeColorMap[name] || defaultNodeColor);
   let workflowNodesHTML = "";
   const nodePositions: { x: number; cx: number }[] = [];
   for (let i = 0; i < nodeCount; i++) {
     const x = spacing + i * (nodeWidth + spacing);
     const cx = x + nodeWidth / 2;
     nodePositions.push({ x, cx });
-    const c = nodeColors[i % nodeColors.length];
+    const c = nodeColors[i];
     const name = workflowAgentNames[i].toUpperCase().substring(0, 16);
     const isLast = i === nodeCount - 1;
     workflowNodesHTML += `<g filter="url(#node3d)">
@@ -5674,7 +5694,7 @@ function ClientDetailModal({
     projectType: "Growth Website",
     tagline: "Professionelle Webpräsenz mit KI-gestützter Entwicklung",
     screenshotUrl: "",
-    agents: ["AI Web Builder", "AI SEO Optimizer", "AI Content Writer"],
+    agents: ["E-Mail Agent", "Chat Agent", "Vertriebs Agent"],
     scoreOverall: 92,
     scoreSeo: 95,
     scorePerformance: 88,
@@ -6616,17 +6636,44 @@ function ClientDetailModal({
                   </div>
                   {/* Agents */}
                   <div>
-                    <label className="text-[10px] text-white/40 block mb-1">AI-Agenten</label>
-                    <div className="flex flex-wrap gap-1 mb-1">
-                      {["AI Web Builder", "AI SEO Optimizer", "AI Content Writer", "AI Lead Generator", "AI Designer", "AI Analytics"].map((agent) => (
-                        <button key={agent} onClick={() => {
-                          const agents = posterForm.agents.includes(agent) ? posterForm.agents.filter(a => a !== agent) : [...posterForm.agents, agent];
-                          setPosterForm({ ...posterForm, agents });
-                        }}
-                          className={`px-2 py-1 rounded-lg text-[10px] transition-colors ${posterForm.agents.includes(agent) ? "bg-purple-500/30 text-purple-300 border border-purple-500/40" : "bg-white/[0.04] text-white/40 border border-white/10 hover:text-white/70"}`}>
-                          {agent}
-                        </button>
-                      ))}
+                    <label className="text-[10px] text-white/40 block mb-1">AI-Agenten (8 AgentFlow Agents)</label>
+                    <div className="grid grid-cols-4 gap-1 mb-1">
+                      {([
+                        { name: "E-Mail Agent", color: "blue", dot: "bg-blue-400" },
+                        { name: "Chat Agent", color: "green", dot: "bg-green-400" },
+                        { name: "Vertriebs Agent", color: "purple", dot: "bg-purple-400" },
+                        { name: "Termin Agent", color: "purple", dot: "bg-purple-400" },
+                        { name: "Analyse Agent", color: "orange", dot: "bg-orange-400" },
+                        { name: "Compliance Agent", color: "green", dot: "bg-green-400" },
+                        { name: "Automatisierung", color: "purple", dot: "bg-purple-400" },
+                        { name: "Enterprise Pro", color: "yellow", dot: "bg-yellow-400" },
+                      ] as const).map((agent) => {
+                        const isActive = posterForm.agents.includes(agent.name);
+                        const colorMap: Record<string, { active: string; border: string; text: string }> = {
+                          blue: { active: "bg-blue-500/25", border: "border-blue-500/40", text: "text-blue-300" },
+                          green: { active: "bg-green-500/25", border: "border-green-500/40", text: "text-green-300" },
+                          purple: { active: "bg-purple-500/25", border: "border-purple-500/40", text: "text-purple-300" },
+                          orange: { active: "bg-orange-500/25", border: "border-orange-500/40", text: "text-orange-300" },
+                          yellow: { active: "bg-yellow-500/20", border: "border-yellow-500/40", text: "text-yellow-300" },
+                        };
+                        const c = colorMap[agent.color];
+                        return (
+                          <button key={agent.name} onClick={() => {
+                            const agents = isActive ? posterForm.agents.filter(a => a !== agent.name) : [...posterForm.agents, agent.name];
+                            setPosterForm({ ...posterForm, agents });
+                          }}
+                            className={`px-1.5 py-1.5 rounded-lg text-[9px] transition-colors flex items-center gap-1 ${isActive ? `${c.active} ${c.text} border ${c.border}` : "bg-white/[0.04] text-white/40 border border-white/10 hover:text-white/70"}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? agent.dot : "bg-white/20"}`} />
+                            {agent.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex gap-1 mt-1">
+                      <button onClick={() => setPosterForm({ ...posterForm, agents: ["E-Mail Agent","Chat Agent","Vertriebs Agent","Termin Agent","Analyse Agent","Compliance Agent","Automatisierung","Enterprise Pro"] })}
+                        className="px-2 py-0.5 rounded text-[8px] bg-white/[0.06] text-white/50 hover:text-white/80 border border-white/10">Alle</button>
+                      <button onClick={() => setPosterForm({ ...posterForm, agents: [] })}
+                        className="px-2 py-0.5 rounded text-[8px] bg-white/[0.06] text-white/50 hover:text-white/80 border border-white/10">Keine</button>
                     </div>
                   </div>
                   {/* Results */}
