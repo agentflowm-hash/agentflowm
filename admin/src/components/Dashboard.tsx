@@ -5553,7 +5553,7 @@ html, body {
 <header class="header">
   <div class="brand">
     <div class="brand-icon"><img src="${logoSrc}" alt="AgentFlow" style="width:100%;height:100%;object-fit:cover"/></div>
-    <div class="brand-name">AgentFlow<span>Marketing</span></div>
+    <div class="brand-name">Agent<span>Flow</span>Marketing</div>
   </div>
   <span class="case-badge">CASE STUDY \u00B7 ${dateStr}</span>
 </header>
