@@ -5276,14 +5276,16 @@ function generatePosterHTML(client: any, form: any): string {
 
   // Website screenshot card with siegel overlay
   const screenshotSection = form.screenshotUrl ? `
-    <div class="card website-section">
-      <div class="card-header">
-        <div class="card-title"><span class="card-dot orange"></span>Website</div>
-        <span class="card-badge">${client.company || client.name}</span>
-      </div>
-      <div class="website-container">
-        <div class="website-frame">
-          <img src="${form.screenshotUrl}" alt="Website Screenshot"/>
+    <div class="website-section-wrapper">
+      <div class="card website-section">
+        <div class="card-header">
+          <div class="card-title"><span class="card-dot orange"></span>Website</div>
+          <span class="card-badge">${client.company || client.name}</span>
+        </div>
+        <div class="website-container">
+          <div class="website-frame">
+            <img src="${form.screenshotUrl}" alt="Website Screenshot"/>
+          </div>
         </div>
       </div>
       <div class="siegel-overlay">
@@ -5414,6 +5416,8 @@ function generatePosterHTML(client: any, form: any): string {
   .hero h1 { font-size: 34mm; margin-bottom: 5mm; }
   .hero .client { font-size: 13mm; margin-bottom: 4mm; }
   .hero .tagline { font-size: 6mm; }
+  .website-section-wrapper { position: relative; margin-bottom: 10mm; }
+  .website-section { overflow: hidden; margin-bottom: 0; }
   .card { border-radius: 8mm; margin-bottom: 10mm; }
   .card-header { padding: 5mm 7mm; }
   .card-title { font-size: 5.5mm; gap: 3mm; }
@@ -5496,7 +5500,8 @@ html, body {
 .card-dot.teal { background: var(--teal); color: var(--teal-glow); }
 .card-badge { color: var(--text-muted); background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; }
 
-.website-section { position: relative; overflow: visible !important; }
+.website-section-wrapper { position: relative; margin-bottom: 3vw; }
+.website-section { overflow: hidden; margin-bottom: 0; }
 .website-container { background: linear-gradient(180deg, var(--bg-card2) 0%, var(--bg-card) 100%); }
 .website-frame { position: relative; overflow: hidden; border: 2px solid var(--border-light); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
 .website-frame img { width: 100%; height: auto; display: block; }
