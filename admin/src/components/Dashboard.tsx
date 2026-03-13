@@ -5188,102 +5188,434 @@ function ClientsTab() {
 }
 
 function generatePosterHTML(client: any, form: any): string {
-  const resultsHTML = form.results.map((r: string) => `
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15);border-radius:12px">
-      <div style="width:28px;height:28px;border-radius:50%;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="14" height="14" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l4 4 8-8"/></svg>
-      </div>
-      <span style="font-size:13px;color:rgba(245,247,250,.8)">${r}</span>
-    </div>`).join("");
-  const agentsHTML = form.agents.map((a: string) => `<span style="padding:6px 14px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-size:12px;color:#818CF8;font-weight:600">${a}</span>`).join("");
-  const screenshotSection = form.screenshotUrl ? `<div style="border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,.1);margin-top:20px"><img src="${form.screenshotUrl}" style="width:100%;display:block" alt="Website Screenshot"/></div>` : "";
   const scoreColor = form.scoreOverall >= 80 ? "#10B981" : form.scoreOverall >= 60 ? "#F59E0B" : "#EF4444";
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Projektabschluss — ${client.company || client.name} | AgentFlowMarketing</title>
-<style>@page{size:A1;margin:0}*{margin:0;padding:0;box-sizing:border-box}html,body{background:#04060A;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',system-ui,sans-serif;color:#F5F7FA;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{display:flex;justify-content:center;padding:40px 20px;min-height:100vh}
-.poster{width:95vw;max-width:1000px;border-radius:20px;overflow:hidden;position:relative;background:radial-gradient(ellipse 140% 70% at 50% -20%,rgba(99,102,241,.2) 0%,transparent 50%),radial-gradient(ellipse 100% 60% at 120% 50%,rgba(255,106,0,.15) 0%,transparent 50%),radial-gradient(ellipse 80% 70% at -20% 100%,rgba(16,185,129,.12) 0%,transparent 50%),linear-gradient(180deg,#0C0F16 0%,#040608 100%);box-shadow:0 0 0 1px rgba(255,255,255,.05),0 60px 180px rgba(0,0,0,.95)}
-.poster::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black 20%,transparent 70%);pointer-events:none}
-.content{position:relative;z-index:1;padding:5vw;display:flex;flex-direction:column}
-.header{display:flex;justify-content:space-between;align-items:center;padding-bottom:24px;margin-bottom:32px;border-bottom:1px solid rgba(255,255,255,.06)}
-.brand{display:flex;align-items:center;gap:16px}
-.brand-icon{width:56px;height:56px;background:#000;border-radius:25%;border:2px solid rgba(255,255,255,.12);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(0,0,0,.6),0 0 40px rgba(255,106,0,.5)}
-.brand-name{font-size:22px;font-weight:800;letter-spacing:-0.03em}
-.brand-name span{color:#FF6A00;text-shadow:0 0 30px rgba(255,106,0,.5)}
-.badge{background:linear-gradient(135deg,#FF6A00,#E55500);color:#000;font-weight:800;padding:8px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 20px rgba(255,106,0,.5)}
-.hero{text-align:center;margin-bottom:40px}
-.hero-label{display:inline-flex;font-weight:700;color:#6366F1;letter-spacing:0.2em;text-transform:uppercase;font-size:13px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:8px 20px;margin-bottom:20px}
-.hero h1{font-size:clamp(36px,7.5vw,72px);font-weight:900;letter-spacing:-0.05em;line-height:0.9;background:linear-gradient(180deg,#FFF 10%,#6B7280 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
-.hero .client-name{font-size:clamp(20px,3vw,32px);font-weight:700;color:#FF6A00;margin-bottom:10px}
-.hero .tagline{font-size:16px;color:rgba(245,247,250,.5)}
-.card{background:linear-gradient(170deg,#161C2A 0%,#0A0D14 100%);border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,.7);margin-bottom:24px;position:relative}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
-.card-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
-.card-title{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
-.dot{width:10px;height:10px;border-radius:50%}
-.dot.orange{background:#FF6A00;box-shadow:0 0 15px rgba(255,106,0,.5)}
-.dot.purple{background:#6366F1;box-shadow:0 0 15px rgba(99,102,241,.6)}
-.dot.teal{background:#10B981;box-shadow:0 0 15px rgba(16,185,129,.6)}
-.card-badge{color:rgba(245,247,250,.5);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600}
-.stats-content{padding:28px;display:flex;gap:24px;align-items:center}
-.score-circle{width:120px;height:120px;border-radius:50%;background:conic-gradient(${scoreColor} ${form.scoreOverall * 3.6}deg,rgba(255,255,255,.08) 0deg);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 40px ${scoreColor}33}
-.score-inner{width:90px;height:90px;border-radius:50%;background:#0A0D14;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.score-value{font-size:32px;font-weight:900;color:${scoreColor}}
-.score-label{font-size:10px;color:rgba(245,247,250,.5);text-transform:uppercase;letter-spacing:0.1em}
-.stats-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat-mini{padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);border-radius:10px}
-.stat-mini-value{font-size:18px;font-weight:800;color:#FFF}
-.stat-mini-label{font-size:10px;color:rgba(245,247,250,.4);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px}
-.stat-mini-bar{height:4px;border-radius:2px;margin-top:6px;background:rgba(255,255,255,.06)}
-.stat-mini-bar-fill{height:100%;border-radius:2px}
-.results-content{padding:20px;display:flex;flex-direction:column;gap:8px}
-.agents{display:flex;flex-wrap:wrap;gap:8px;padding:20px}
-.footer{margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
-.footer-left{display:flex;align-items:center;gap:12px}
-.footer-logo{width:44px;height:44px;background:linear-gradient(135deg,#FF6A00,#6366F1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#FFF}
-.footer-info{font-size:13px;color:rgba(245,247,250,.5)}
-.footer-thanks{font-size:18px;font-weight:700;background:linear-gradient(135deg,#FF6A00,#6366F1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  const scoreDash = Math.round((form.scoreOverall / 100) * 264);
+  const now = new Date();
+  const monthNames = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+  const dateStr = monthNames[now.getMonth()] + " " + now.getFullYear();
+
+  // Result icons with colored SVG icons (rotating colors)
+  const resultIcons = [
+    { color: "teal", bg: "linear-gradient(135deg,#10B981,#34D399)", svg: '<svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>' },
+    { color: "purple", bg: "linear-gradient(135deg,#6366F1,#818CF8)", svg: '<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' },
+    { color: "orange", bg: "linear-gradient(135deg,#FF6A00,#FF8533)", svg: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+    { color: "blue", bg: "linear-gradient(135deg,#3B82F6,#60A5FA)", svg: '<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' },
+    { color: "teal", bg: "linear-gradient(135deg,#10B981,#34D399)", svg: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>' },
+    { color: "purple", bg: "linear-gradient(135deg,#6366F1,#818CF8)", svg: '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>' },
+  ];
+
+  const resultsHTML = form.results.map((r: string, i: number) => {
+    const icon = resultIcons[i % resultIcons.length];
+    return `<div class="result-item">
+      <div class="result-icon" style="background:${icon.bg}">${icon.svg}</div>
+      <span class="result-text">${r}</span>
+    </div>`;
+  }).join("");
+
+  const agentsHTML = form.agents.map((a: string) => `<span style="padding:6px 14px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-size:12px;color:#818CF8;font-weight:600">${a}</span>`).join("");
+
+  // Website screenshot card with siegel overlay
+  const screenshotSection = form.screenshotUrl ? `
+    <div class="card website-section">
+      <div class="card-header">
+        <div class="card-title"><span class="card-dot orange"></span>Website</div>
+        <span class="card-badge">${client.company || client.name}</span>
+      </div>
+      <div class="website-container">
+        <div class="website-frame">
+          <img src="${form.screenshotUrl}" alt="Website Screenshot"/>
+        </div>
+      </div>
+      <div class="siegel-overlay">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#0A0D14" stroke="url(#siegelGrad)" stroke-width="3"/>
+          <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+          <text x="50" y="38" text-anchor="middle" fill="#FF6A00" font-size="10" font-weight="800" letter-spacing="0.1em">AGENT</text>
+          <text x="50" y="52" text-anchor="middle" fill="#fff" font-size="13" font-weight="900" letter-spacing="0.05em">FLOW</text>
+          <text x="50" y="66" text-anchor="middle" fill="#6366F1" font-size="7" font-weight="700" letter-spacing="0.15em">VERIFIED</text>
+          <path d="M38 72 L50 78 L62 72" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"/>
+          <defs><linearGradient id="siegelGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF6A00"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs>
+        </svg>
+      </div>
+    </div>` : "";
+
+  // Workflow nodes from form agents
+  const workflowAgentNames = form.agents.length > 0 ? form.agents : ["Research", "Personalize", "Execute", "Follow-Up", "Complete"];
+  const nodeCount = Math.min(workflowAgentNames.length, 5);
+  const nodeWidth = 130;
+  const svgWidth = 900;
+  const spacing = (svgWidth - nodeCount * nodeWidth) / (nodeCount + 1);
+  const nodeColors = [
+    { grad: "purpleGrad", stroke: "#3A4055", label: "#6366F1" },
+    { grad: "purpleGrad", stroke: "#3A4055", label: "#818CF8" },
+    { grad: "orangeGrad", stroke: "#F97316", label: "#F97316" },
+    { grad: "blueGrad", stroke: "#3A4055", label: "#3B82F6" },
+    { grad: "tealGrad", stroke: "#10B981", label: "#10B981" },
+  ];
+  let workflowNodesHTML = "";
+  const nodePositions: { x: number; cx: number }[] = [];
+  for (let i = 0; i < nodeCount; i++) {
+    const x = spacing + i * (nodeWidth + spacing);
+    const cx = x + nodeWidth / 2;
+    nodePositions.push({ x, cx });
+    const c = nodeColors[i % nodeColors.length];
+    const name = workflowAgentNames[i].toUpperCase().substring(0, 16);
+    const isLast = i === nodeCount - 1;
+    workflowNodesHTML += `<g filter="url(#node3d)">
+      <rect x="${x}" y="30" width="${nodeWidth}" height="70" rx="12" fill="url(#node3dGrad)" stroke="${c.stroke}" stroke-width="2"/>
+      <rect x="${x}" y="30" width="${nodeWidth}" height="24" rx="12" fill="url(#${c.grad})"/>
+      <rect x="${x}" y="46" width="${nodeWidth}" height="8" fill="url(#${c.grad})"/>
+      <text x="${cx}" y="47" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">${name}</text>
+      ${isLast ? `<circle cx="${cx}" cy="78" r="16" fill="#1A2028"/><circle cx="${cx}" cy="78" r="12" fill="url(#${c.grad})" filter="url(#glow3d)"/><path d="M${cx-7} 78 L${cx-2} 83 L${cx+8} 72" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` : `<circle cx="${cx}" cy="78" r="14" fill="#252A3A"/><circle cx="${cx}" cy="78" r="8" fill="url(#${c.grad})" filter="url(#glow3d)"/>`}
+    </g>`;
+  }
+  // Connection lines between nodes
+  let connectionsHTML = "";
+  for (let i = 0; i < nodePositions.length - 1; i++) {
+    const x1 = nodePositions[i].x + nodeWidth;
+    const x2 = nodePositions[i + 1].x;
+    connectionsHTML += `<path d="M${x1} 65 L${x2} 65" stroke="url(#lineGrad)" stroke-width="4" stroke-linecap="round"/>`;
+    connectionsHTML += `<circle cx="${x1}" cy="65" r="5" fill="#6366F1" filter="url(#glow3d)"/>`;
+    connectionsHTML += `<circle cx="${x2}" cy="65" r="5" fill="#10B981" filter="url(#glow3d)"/>`;
+  }
+
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Projektabschluss — ${client.company || client.name} | AgentFlowMarketing</title>
+<style>
+@page { size: A1; margin: 0; }
+:root {
+  --bg-dark: #04060A; --bg-card: #0A0D14; --bg-card2: #0F131C; --bg-card3: #161C2A;
+  --text: #F5F7FA; --text-muted: rgba(245,247,250,.5);
+  --border: rgba(255,255,255,.06); --border-light: rgba(255,255,255,.12);
+  --accent: #FF6A00; --accent-glow: rgba(255,106,0,.5);
+  --purple: #6366F1; --purple-glow: rgba(99,102,241,.6);
+  --teal: #10B981; --teal-glow: rgba(16,185,129,.6);
+  --blue: #3B82F6; --blue-glow: rgba(59,130,246,.5);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+@media screen {
+  html { background: #020304; }
+  body { width: 100%; min-height: 100vh; overflow-y: auto; display: flex; justify-content: center; padding: 40px 20px; }
+  .poster { width: 95vw; max-width: 1000px; border-radius: 20px; box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 60px 180px rgba(0,0,0,.95), 0 0 300px rgba(99,102,241,.08); }
+  .content { padding: 5vw; }
+  .header { margin-bottom: 3.5vw; padding-bottom: 2.5vw; }
+  .brand-icon { width: 5.5vw; height: 5.5vw; min-width: 48px; min-height: 48px; }
+  .brand-name { font-size: max(2.2vw, 17px); }
+  .case-badge { font-size: max(1.1vw, 11px); padding: 0.8vw 1.6vw; }
+  .hero { margin-bottom: 4vw; }
+  .hero-label { font-size: max(1.1vw, 10px); padding: 0.7vw 2vw; margin-bottom: 2vw; }
+  .hero h1 { font-size: max(7.5vw, 34px); margin-bottom: 1.2vw; }
+  .hero .client { font-size: max(3vw, 19px); margin-bottom: 1vw; }
+  .hero .tagline { font-size: max(1.5vw, 12px); }
+  .card { border-radius: 2.2vw; margin-bottom: 3vw; }
+  .card-header { padding: 1.5vw 2vw; }
+  .card-title { font-size: max(1.4vw, 13px); gap: 1vw; }
+  .card-dot { width: max(1vw, 10px); height: max(1vw, 10px); }
+  .card-badge { font-size: max(1vw, 10px); padding: 0.6vw 1.2vw; }
+  .website-container { padding: 2.5vw; }
+  .website-frame { border-radius: 1.5vw; }
+  .siegel-overlay { width: 7vw; height: 7vw; min-width: 50px; min-height: 50px; right: 3.5vw; bottom: 5vw; }
+  .workflow-content { padding: 3.5vw; gap: 2.5vw; }
+  .workflow-header { gap: 2vw; margin-bottom: 2vw; }
+  .agent-badge { width: 9vw; height: 9vw; min-width: 60px; min-height: 60px; }
+  .workflow-title { font-size: max(1.6vw, 14px); }
+  .workflow-subtitle { font-size: max(1.1vw, 11px); }
+  .workflow-canvas { height: 20vw; min-height: 140px; }
+  .bottom-section { gap: 2vw; }
+  .bottom-section .card { margin-bottom: 0; }
+  .stats-content { padding: 2.5vw; gap: 2vw; }
+  .stats-main { gap: 1vw; }
+  .stats-main-circle { width: 11vw; height: 11vw; min-width: 80px; min-height: 80px; }
+  .stats-main-value { font-size: max(3vw, 22px); }
+  .stats-main-label { font-size: max(1vw, 9px); }
+  .stats-grid { gap: 1vw; }
+  .stat-mini { padding: 1vw; border-radius: 0.8vw; }
+  .stat-mini-value { font-size: max(1.6vw, 14px); }
+  .stat-mini-label { font-size: max(0.8vw, 8px); }
+  .stat-mini-bar { height: max(0.4vw, 3px); border-radius: 0.2vw; margin-top: 0.5vw; }
+  .results-content { padding: 1.8vw; gap: 1vw; }
+  .result-item { padding: 0.8vw 1vw; border-radius: 0.8vw; gap: 0.7vw; }
+  .result-icon { width: max(2.4vw, 20px); height: max(2.4vw, 20px); flex-shrink: 0; }
+  .result-text { font-size: max(0.95vw, 8px); }
+  .footer { margin-top: 3.5vw; padding-top: 2.5vw; gap: 2vw; }
+  .footer-logo { width: 5.5vw; height: 5.5vw; min-width: 44px; min-height: 44px; }
+  .footer-info { font-size: max(1.2vw, 11px); }
+  .footer-thanks { font-size: max(1.8vw, 15px); }
+}
+
+@media print {
+  html, body { width: 594mm; height: 841mm; margin: 0; padding: 0; overflow: hidden; }
+  .poster { width: 594mm; height: 841mm; }
+  .content { padding: 22mm 26mm; }
+  .header { margin-bottom: 14mm; padding-bottom: 10mm; }
+  .brand-icon { width: 20mm; height: 20mm; }
+  .brand-name { font-size: 9mm; }
+  .case-badge { font-size: 4.5mm; padding: 3mm 6mm; }
+  .hero { margin-bottom: 16mm; }
+  .hero-label { font-size: 4.5mm; padding: 3mm 7mm; margin-bottom: 6mm; }
+  .hero h1 { font-size: 34mm; margin-bottom: 5mm; }
+  .hero .client { font-size: 13mm; margin-bottom: 4mm; }
+  .hero .tagline { font-size: 6mm; }
+  .card { border-radius: 8mm; margin-bottom: 10mm; }
+  .card-header { padding: 5mm 7mm; }
+  .card-title { font-size: 5.5mm; gap: 3mm; }
+  .card-dot { width: 3.5mm; height: 3.5mm; }
+  .card-badge { font-size: 4mm; padding: 2mm 5mm; }
+  .website-container { padding: 8mm; }
+  .website-frame { border-radius: 6mm; }
+  .siegel-overlay { width: 28mm; height: 28mm; right: 14mm; bottom: 22mm; }
+  .workflow-content { padding: 12mm; gap: 10mm; }
+  .workflow-header { gap: 8mm; margin-bottom: 8mm; }
+  .agent-badge { width: 35mm; height: 35mm; }
+  .workflow-title { font-size: 6mm; }
+  .workflow-subtitle { font-size: 4.5mm; }
+  .workflow-canvas { height: 80mm; }
+  .bottom-section { gap: 10mm; }
+  .stats-content { padding: 10mm; gap: 10mm; }
+  .stats-main-circle { width: 45mm; height: 45mm; }
+  .stats-main-value { font-size: 12mm; }
+  .stats-main-label { font-size: 4mm; }
+  .stats-grid { gap: 5mm; }
+  .stat-mini { padding: 5mm; border-radius: 3mm; }
+  .stat-mini-value { font-size: 7mm; }
+  .stat-mini-label { font-size: 3mm; }
+  .stat-mini-bar { height: 2mm; border-radius: 1mm; margin-top: 2mm; }
+  .results-content { padding: 8mm; gap: 5mm; }
+  .result-item { padding: 4mm 5mm; border-radius: 3mm; gap: 4mm; }
+  .result-icon { width: 12mm; height: 12mm; }
+  .result-text { font-size: 4mm; }
+  .footer { margin-top: 12mm; padding-top: 10mm; }
+  .footer-logo { width: 18mm; height: 18mm; }
+  .footer-info { font-size: 5mm; }
+  .footer-thanks { font-size: 7mm; }
+}
+
+html, body {
+  background: var(--bg-dark);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  color: var(--text);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.poster {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(ellipse 140% 70% at 50% -20%, rgba(99,102,241,.2) 0%, transparent 50%),
+    radial-gradient(ellipse 100% 60% at 120% 50%, rgba(255,106,0,.15) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 70% at -20% 100%, rgba(16,185,129,.12) 0%, transparent 50%),
+    linear-gradient(180deg, #0C0F16 0%, #040608 100%);
+}
+.poster::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
+  pointer-events: none;
+}
+.content { position: relative; z-index: 1; display: flex; flex-direction: column; }
+
+.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+.brand { display: flex; align-items: center; gap: 1.5vw; }
+.brand-icon { background: #000; border-radius: 25%; border: 2px solid var(--border-light); overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,.6), 0 0 40px var(--accent-glow); }
+.brand-name { font-weight: 800; letter-spacing: -0.03em; }
+.brand-name span { color: var(--accent); text-shadow: 0 0 30px var(--accent-glow); }
+.case-badge { background: linear-gradient(135deg, var(--accent), #E55500); color: #000; font-weight: 800; border-radius: 10px; box-shadow: 0 6px 20px var(--accent-glow); }
+
+.hero { text-align: center; }
+.hero-label { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 700; color: var(--purple); letter-spacing: 0.2em; text-transform: uppercase; background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.25); border-radius: 10px; }
+.hero h1 { font-weight: 900; letter-spacing: -0.05em; line-height: 0.9; background: linear-gradient(180deg, #FFFFFF 10%, #6B7280 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero .client { font-weight: 700; color: var(--accent); }
+.hero .tagline { color: var(--text-muted); }
+
+.card { background: linear-gradient(170deg, var(--bg-card3) 0%, var(--bg-card) 100%); border: 1px solid var(--border); overflow: visible; box-shadow: 0 25px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06); position: relative; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent); }
+.card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 100%); }
+.card-title { display: flex; align-items: center; font-weight: 700; }
+.card-dot { border-radius: 50%; box-shadow: 0 0 15px currentColor; }
+.card-dot.orange { background: var(--accent); color: var(--accent-glow); }
+.card-dot.purple { background: var(--purple); color: var(--purple-glow); }
+.card-dot.teal { background: var(--teal); color: var(--teal-glow); }
+.card-badge { color: var(--text-muted); background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; }
+
+.website-section { position: relative; overflow: visible; }
+.website-container { background: linear-gradient(180deg, var(--bg-card2) 0%, var(--bg-card) 100%); }
+.website-frame { position: relative; overflow: hidden; border: 2px solid var(--border-light); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.website-frame img { width: 100%; height: auto; display: block; }
+.website-frame::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 20%; background: linear-gradient(to top, var(--bg-card) 0%, transparent 100%); pointer-events: none; }
+.siegel-overlay { position: absolute; z-index: 10; filter: drop-shadow(0 8px 25px rgba(0,0,0,.8)); border-radius: 50%; overflow: hidden; background: transparent; }
+
+.workflow-content { display: flex; flex-direction: column; background: radial-gradient(ellipse 60% 40% at 50% 20%, rgba(99,102,241,.1) 0%, transparent 60%), linear-gradient(180deg, #0D1018 0%, #080A10 100%); }
+.workflow-header { display: flex; align-items: center; }
+.agent-badge { background: #000; border: 2px solid var(--purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px var(--purple-glow), 0 10px 30px rgba(0,0,0,.6); overflow: hidden; }
+.workflow-info { display: flex; flex-direction: column; gap: 0.3vw; }
+.workflow-title { font-weight: 800; color: var(--text); }
+.workflow-subtitle { color: var(--text-muted); }
+.workflow-canvas { width: 100%; flex: 1; }
+.workflow-svg { width: 100%; height: 100%; }
+
+.bottom-section { display: grid; grid-template-columns: 1fr 1fr; min-height: 32vw; }
+.bottom-section .card { display: flex; flex-direction: column; }
+
+.stats-content { display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse 80% 60% at 30% 50%, rgba(16,185,129,.08) 0%, transparent 60%), linear-gradient(180deg, var(--bg-card2), var(--bg-card)); flex: 1; }
+.stats-main { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.stats-main-circle { position: relative; display: flex; align-items: center; justify-content: center; }
+.stats-main-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); filter: drop-shadow(0 0 20px var(--teal-glow)); }
+.stats-main-circle .track { fill: none; stroke: #1A1F2A; stroke-width: 8; }
+.stats-main-circle .progress { fill: none; stroke: url(#statsGradient); stroke-width: 8; stroke-linecap: round; }
+.stats-main-value { position: absolute; font-weight: 900; color: var(--teal); text-shadow: 0 0 30px var(--teal-glow); }
+.stats-main-label { color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.8vw; white-space: nowrap; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; flex: 1; align-content: center; }
+.stat-mini { display: flex; flex-direction: column; justify-content: center; background: linear-gradient(150deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%); border: 1px solid var(--border); position: relative; }
+.stat-mini::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(16,185,129,.3), transparent); }
+.stat-mini-header { display: flex; justify-content: space-between; align-items: center; }
+.stat-mini-value { font-weight: 800; color: var(--teal); text-shadow: 0 0 15px var(--teal-glow); }
+.stat-mini-label { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-mini-bar { width: 100%; background: rgba(16,185,129,.15); overflow: hidden; }
+.stat-mini-bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), #34D399); border-radius: inherit; box-shadow: 0 0 8px var(--teal-glow); }
+
+.results-content { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(255,106,0,.06) 0%, transparent 60%), linear-gradient(180deg, var(--bg-card2), var(--bg-card)); flex: 1; align-content: stretch; }
+.result-item { display: flex; align-items: center; background: linear-gradient(150deg, rgba(255,255,255,.03) 0%, transparent 100%); border: 1px solid var(--border); position: relative; overflow: hidden; }
+.result-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent); }
+.result-icon { display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; position: relative; }
+.result-icon::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; background: inherit; opacity: 0.3; filter: blur(8px); }
+.result-icon svg { width: 50%; height: 50%; stroke: #fff; stroke-width: 2.5; fill: none; position: relative; z-index: 1; }
+.result-text { font-weight: 700; color: var(--text); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 1.5vw; }
+.footer-logo { background: #000; border: 2px solid var(--border-light); border-radius: 12px; overflow: hidden; box-shadow: 0 0 30px var(--accent-glow); display: flex; align-items: center; justify-content: center; }
+.footer-info { color: var(--text-muted); line-height: 1.6; }
+.footer-info a { color: var(--accent); text-decoration: none; font-weight: 700; }
+.footer-thanks { font-style: italic; color: var(--text); font-weight: 600; }
 </style></head><body>
+
 <div class="poster"><div class="content">
-<div class="header">
+
+<!-- HEADER -->
+<header class="header">
   <div class="brand">
-    <div class="brand-icon"><span style="font-size:24px;font-weight:900;color:#FF6A00">AF</span></div>
-    <div class="brand-name">Agent<span>Flow</span>Marketing</div>
+    <div class="brand-icon"><span style="font-size:max(2.5vw,20px);font-weight:900;color:#FF6A00">AF</span></div>
+    <div class="brand-name">AgentFlow<span>Marketing</span></div>
   </div>
-  <div class="badge">CASE STUDY</div>
-</div>
-<div class="hero">
-  <div class="hero-label">✦ PROJEKTABSCHLUSS ${new Date().getFullYear()}</div>
+  <span class="case-badge">CASE STUDY \u00B7 ${dateStr}</span>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-label">\u2726 Projektabschluss</span>
   <h1>${form.projectType}</h1>
-  <div class="client-name">${client.company || client.name}</div>
-  <div class="tagline">${form.tagline}</div>
-</div>
+  <p class="client">${client.company || client.name}</p>
+  <p class="tagline">${form.tagline}</p>
+</section>
+
+<!-- WEBSITE -->
 ${screenshotSection}
-<div class="card" style="margin-top:24px">
-  <div class="card-header"><div class="card-title"><div class="dot purple"></div>AI-Agenten</div><div class="card-badge">${form.agents.length} Agenten</div></div>
-  <div class="agents">${agentsHTML}</div>
+
+<!-- WORKFLOW -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><span class="card-dot purple"></span>AI Workflow</div>
+    <span class="card-badge">${form.agents.length} Agenten</span>
+  </div>
+  <div class="workflow-content">
+    <div class="workflow-header">
+      <div class="agent-badge">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="35" fill="#252A3A"/>
+          <circle cx="50" cy="50" r="25" fill="url(#agentGlow)"/>
+          <path d="M38 45 C38 35 62 35 62 45 L62 55 C62 65 38 65 38 55Z" fill="#818CF8" opacity="0.8"/>
+          <circle cx="50" cy="38" r="10" fill="#A5B4FC"/>
+          <defs><radialGradient id="agentGlow"><stop offset="0%" stop-color="#6366F1" stop-opacity="0.6"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
+        </svg>
+      </div>
+      <div class="workflow-info">
+        <span class="workflow-title">AI ${form.projectType} Flow</span>
+        <span class="workflow-subtitle">${form.agents.join(" \u2192 ")}</span>
+      </div>
+    </div>
+    <div class="workflow-canvas">
+      <svg class="workflow-svg" viewBox="0 0 ${svgWidth} 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="node3d" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.6"/></filter>
+          <filter id="glow3d" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="lineGlow" x="-20%" y="-100%" width="140%" height="300%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="node3dGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2E3448"/><stop offset="50%" stop-color="#1E2330"/><stop offset="100%" stop-color="#141820"/></linearGradient>
+          <linearGradient id="lineGrad" x1="0%" x2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#10B981"/></linearGradient>
+          <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#818CF8"/><stop offset="100%" stop-color="#6366F1"/></linearGradient>
+          <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FB923C"/><stop offset="100%" stop-color="#F97316"/></linearGradient>
+          <linearGradient id="tealGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#34D399"/><stop offset="100%" stop-color="#10B981"/></linearGradient>
+          <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#60A5FA"/><stop offset="100%" stop-color="#3B82F6"/></linearGradient>
+          <linearGradient id="statsGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#34D399"/></linearGradient>
+        </defs>
+        <g filter="url(#lineGlow)">${connectionsHTML}</g>
+        ${workflowNodesHTML}
+      </svg>
+    </div>
+  </div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-  <div class="card" style="margin-bottom:0">
-    <div class="card-header"><div class="card-title"><div class="dot teal"></div>Performance</div><div class="card-badge">Score</div></div>
+
+<!-- BOTTOM -->
+<div class="bottom-section">
+  <!-- STATS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="card-dot teal"></span>Performance</div>
+      <span class="card-badge">AI Powered</span>
+    </div>
     <div class="stats-content">
-      <div class="score-circle"><div class="score-inner"><div class="score-value">${form.scoreOverall}</div><div class="score-label">Gesamt</div></div></div>
+      <div class="stats-main">
+        <div class="stats-main-circle">
+          <svg viewBox="0 0 100 100">
+            <circle class="track" cx="50" cy="50" r="42"/>
+            <circle class="progress" cx="50" cy="50" r="42" stroke-dasharray="${scoreDash}, 264"/>
+          </svg>
+          <span class="stats-main-value">${form.scoreOverall}</span>
+        </div>
+        <span class="stats-main-label">Gesamt-Score</span>
+      </div>
       <div class="stats-grid">
-        <div class="stat-mini"><div class="stat-mini-value">${form.scoreSeo}</div><div class="stat-mini-label">SEO Score</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSeo}%;background:#6366F1;box-shadow:0 0 8px rgba(99,102,241,.5)"></div></div></div>
-        <div class="stat-mini"><div class="stat-mini-value">${form.scorePerformance}</div><div class="stat-mini-label">Performance</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scorePerformance}%;background:#3B82F6;box-shadow:0 0 8px rgba(59,130,246,.5)"></div></div></div>
-        <div class="stat-mini"><div class="stat-mini-value">${form.scoreSecurity}</div><div class="stat-mini-label">Sicherheit</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSecurity}%;background:#10B981;box-shadow:0 0 8px rgba(16,185,129,.5)"></div></div></div>
-        <div class="stat-mini"><div class="stat-mini-value">${form.loadTime}</div><div class="stat-mini-label">Ladezeit</div><div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:85%;background:#FF6A00;box-shadow:0 0 8px rgba(255,106,0,.5)"></div></div></div>
+        <div class="stat-mini">
+          <div class="stat-mini-header"><span class="stat-mini-value">${form.scoreSeo}</span><span class="stat-mini-label">SEO</span></div>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSeo}%"></div></div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-header"><span class="stat-mini-value">${form.scorePerformance}</span><span class="stat-mini-label">Performance</span></div>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scorePerformance}%"></div></div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-header"><span class="stat-mini-value">${form.scoreSecurity}</span><span class="stat-mini-label">Sicherheit</span></div>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:${form.scoreSecurity}%"></div></div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-header"><span class="stat-mini-value">${form.loadTime}</span><span class="stat-mini-label">Ladezeit</span></div>
+          <div class="stat-mini-bar"><div class="stat-mini-bar-fill" style="width:85%"></div></div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="card" style="margin-bottom:0">
-    <div class="card-header"><div class="card-title"><div class="dot orange"></div>Ergebnisse</div><div class="card-badge">${form.results.length} Punkte</div></div>
+
+  <!-- RESULTS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="card-dot orange"></span>Ergebnisse</div>
+    </div>
     <div class="results-content">${resultsHTML}</div>
   </div>
 </div>
-<div class="footer">
-  <div class="footer-left"><div class="footer-logo">AF</div><div class="footer-info">AgentFlowMarketing<br>agentflowm.de</div></div>
-  <div class="footer-thanks">Danke für die Zusammenarbeit! ✦</div>
-</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">
+    <div class="footer-logo"><span style="font-size:max(2.5vw,18px);font-weight:900;color:#FF6A00">AF</span></div>
+    <div class="footer-info">
+      <a href="mailto:clients@agentflowm.de">clients@agentflowm.de</a> \u00B7 <a href="https://agentflowm.de">agentflowm.de</a>
+    </div>
+  </div>
+  <span class="footer-thanks">Danke f\u00FCr das Vertrauen! \uD83D\uDE80</span>
+</footer>
+
 </div></div></body></html>`;
 }
 
