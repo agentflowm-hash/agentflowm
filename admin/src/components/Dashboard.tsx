@@ -6868,19 +6868,29 @@ function ClientDetailModal({
                       Vorschau
                     </button>
                     <button onClick={() => {
-                      const html = generatePosterHTML(client, posterForm);
-                      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `poster-${client.name.toLowerCase().replace(/\s+/g, "-")}.html`;
-                      a.style.display = "none";
-                      document.body.appendChild(a);
-                      a.click();
-                      setTimeout(() => {
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                      }, 1000);
+                      try {
+                        const html = generatePosterHTML(client, posterForm);
+                        const fileName = `poster-${client.name.toLowerCase().replace(/\s+/g, "-")}.html`;
+                        // Open in new window and trigger save from there
+                        const w = window.open("", "_blank");
+                        if (w) {
+                          w.document.write(html);
+                          w.document.close();
+                          // Inject download button into the opened page
+                          const dlScript = w.document.createElement("script");
+                          dlScript.textContent = `
+                            (function(){
+                              var btn = document.createElement("div");
+                              btn.innerHTML = '<button onclick="this.parentElement.remove();var b=new Blob([document.documentElement.outerHTML],{type:\\'text/html;charset=utf-8\\'});var u=URL.createObjectURL(b);var a=document.createElement(\\'a\\');a.href=u;a.download=\\'${fileName}\\';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},2000);" style="position:fixed;top:20px;right:20px;z-index:99999;padding:14px 28px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(16,185,129,.4);letter-spacing:.02em">\\u2B07 Poster als HTML speichern</button>';
+                              document.body.appendChild(btn);
+                            })();
+                          `;
+                          w.document.head.appendChild(dlScript);
+                        }
+                      } catch (err) {
+                        console.error("Poster download error:", err);
+                        alert("Download fehlgeschlagen: " + (err as Error).message);
+                      }
                     }}
                       className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-[1px] transition-all flex items-center gap-1.5">
                       <ArrowDownTrayIcon className="w-3.5 h-3.5" />
