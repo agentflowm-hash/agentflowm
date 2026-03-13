@@ -5457,7 +5457,7 @@ html, body {
 }
 
 .poster {
-  position: relative; overflow: hidden;
+  position: relative; overflow: hidden; border-radius: 20px;
   background:
     radial-gradient(ellipse 140% 70% at 50% -20%, rgba(99,102,241,.2) 0%, transparent 50%),
     radial-gradient(ellipse 100% 60% at 120% 50%, rgba(255,106,0,.15) 0%, transparent 50%),
