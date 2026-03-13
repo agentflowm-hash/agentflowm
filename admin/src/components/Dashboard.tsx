@@ -5212,74 +5212,57 @@ function generatePosterHTML(client: any, form: any): string {
     </div>`;
   }).join("");
 
-  // Agent SVG robot avatars matching the AgentFlow design (arch helmet, colored eyes, badge icon)
-  const agentSvgMap: Record<string, { eyeColor: string; dotColor: string; bg: string; border: string; text: string; badge: string }> = {
+  // Original Agent SVGs from Agent Character Kit (1:1 exact copies)
+  const agentOriginalSvg: Record<string, { svg: string; bg: string; border: string; text: string; dot: string }> = {
     "E-Mail Agent": {
-      eyeColor: "#3B82F6", dotColor: "#3B82F6", bg: "rgba(59,130,246,.15)", border: "rgba(59,130,246,.3)", text: "#60A5FA",
-      badge: `<rect x="28" y="5" width="11" height="8" rx="2" fill="#3B82F6"/><path d="M29 6.5L33.5 9.5 38 6.5" stroke="#fff" stroke-width="1" fill="none"/>` // envelope
+      bg: "rgba(59,130,246,.15)", border: "rgba(59,130,246,.3)", text: "#60A5FA", dot: "#3b82f6",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><filter id="ge" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#ge)"><circle cx="28" cy="40" r="9" fill="#3b82f6"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#ge)"><circle cx="52" cy="40" r="9" fill="#3b82f6"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><rect x="56" y="4" width="18" height="13" rx="2.5" fill="#3b82f6"/><path d="M58 7 L65 11.5 L72 7" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="58" y1="14" x2="62" y2="11" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/><line x1="72" y1="14" x2="68" y2="11" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/></svg>`
     },
     "Chat Agent": {
-      eyeColor: "#10B981", dotColor: "#F97316", bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399",
-      badge: `<rect x="28" y="5" width="12" height="9" rx="3" fill="#10B981"/><circle cx="31.5" cy="9" r="1" fill="#fff"/><circle cx="34" cy="9" r="1" fill="#fff"/><circle cx="36.5" cy="9" r="1" fill="#fff"/>` // chat dots
+      bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399", dot: "#10b981",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gc" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#gc)"><circle cx="28" cy="40" r="9" fill="#10b981"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#gc)"><circle cx="52" cy="40" r="9" fill="#10b981"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><rect x="54" y="3" width="20" height="14" rx="3" fill="#10b981"/><path d="M54 17 L60 17 L57 22 Z" fill="#10b981"/><circle cx="60" cy="10" r="1.5" fill="#ffffff"/><circle cx="64" cy="10" r="1.5" fill="#ffffff"/><circle cx="68" cy="10" r="1.5" fill="#ffffff"/></svg>`
     },
     "Vertriebs Agent": {
-      eyeColor: "#8B5CF6", dotColor: "#8B5CF6", bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8",
-      badge: `<circle cx="33" cy="9" r="6" fill="#6366F1"/><path d="M33 6L33 12M30 9L36 9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>` // crosshair/target
+      bg: "rgba(139,92,246,.15)", border: "rgba(139,92,246,.3)", text: "#A78BFA", dot: "#8b5cf6",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gs" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#gs)"><circle cx="28" cy="40" r="9" fill="#8b5cf6"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#gs)"><circle cx="52" cy="40" r="9" fill="#8b5cf6"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><circle cx="65" cy="12" r="9" fill="none" stroke="#8b5cf6" stroke-width="2.5"/><circle cx="65" cy="12" r="4.5" fill="none" stroke="#8b5cf6" stroke-width="2"/><circle cx="65" cy="12" r="1.5" fill="#8b5cf6"/><line x1="65" y1="2" x2="65" y2="6" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round"/><line x1="65" y1="18" x2="65" y2="22" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round"/></svg>`
     },
     "Termin Agent": {
-      eyeColor: "#8B5CF6", dotColor: "#8B5CF6", bg: "rgba(139,92,246,.15)", border: "rgba(139,92,246,.3)", text: "#A78BFA",
-      badge: `<circle cx="33" cy="9" r="6" fill="#8B5CF6"/><path d="M33 6V9.5L35.5 11" stroke="#fff" stroke-width="1.3" stroke-linecap="round" fill="none"/>` // clock
+      bg: "rgba(6,182,212,.15)", border: "rgba(6,182,212,.3)", text: "#22D3EE", dot: "#06b6d4",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gt" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#gt)"><circle cx="28" cy="40" r="9" fill="#06b6d4"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#gt)"><circle cx="52" cy="40" r="9" fill="#06b6d4"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><rect x="54" y="5" width="20" height="17" rx="2.5" fill="#06b6d4"/><rect x="54" y="5" width="20" height="5" rx="2.5" fill="#0891b2"/><circle cx="58" cy="7.5" r="1" fill="#ffffff"/><circle cx="70" cy="7.5" r="1" fill="#ffffff"/><rect x="57" y="13" width="4" height="3" rx="0.5" fill="#ffffff"/><rect x="63" y="13" width="4" height="3" rx="0.5" fill="#ffffff"/><rect x="57" y="17.5" width="4" height="3" rx="0.5" fill="#ffffff" opacity="0.5"/><rect x="63" y="17.5" width="4" height="3" rx="0.5" fill="#ffffff" opacity="0.5"/></svg>`
     },
     "Analyse Agent": {
-      eyeColor: "#F97316", dotColor: "#F97316", bg: "rgba(249,115,22,.15)", border: "rgba(249,115,22,.3)", text: "#FB923C",
-      badge: `<rect x="27" y="4" width="12" height="10" rx="2" fill="#F97316"/><path d="M29 11V9M31 11V7M33 11V8M35 11V6M37 11V9" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>` // bar chart
+      bg: "rgba(245,158,11,.15)", border: "rgba(245,158,11,.3)", text: "#FBBF24", dot: "#f59e0b",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><filter id="ga" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#ga)"><circle cx="28" cy="40" r="9" fill="#f59e0b"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#ga)"><circle cx="52" cy="40" r="9" fill="#f59e0b"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><rect x="54" y="4" width="20" height="18" rx="2.5" fill="#f59e0b"/><rect x="57" y="15" width="3" height="5" rx="0.5" fill="#ffffff"/><rect x="61.5" y="11" width="3" height="9" rx="0.5" fill="#ffffff"/><rect x="66" y="7" width="3" height="13" rx="0.5" fill="#ffffff"/><path d="M57 13 L62 9 L68 5" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>`
     },
     "Compliance Agent": {
-      eyeColor: "#10B981", dotColor: "#10B981", bg: "rgba(16,185,129,.15)", border: "rgba(16,185,129,.3)", text: "#34D399",
-      badge: `<circle cx="33" cy="9" r="6" fill="#10B981"/><path d="M30 9L32.5 11.5L36.5 7" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` // checkmark
+      bg: "rgba(5,150,105,.15)", border: "rgba(5,150,105,.3)", text: "#34D399", dot: "#059669",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gco" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#gco)"><circle cx="28" cy="40" r="9" fill="#059669"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#gco)"><circle cx="52" cy="40" r="9" fill="#059669"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><path d="M65 3 L76 6.5 L76 14 C76 19, 71 24, 65 26 C59 24, 54 19, 54 14 L54 6.5 Z" fill="#059669"/><path d="M60 14 L63.5 17.5 L71 10" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
     },
     "Automatisierung": {
-      eyeColor: "#6366F1", dotColor: "#6366F1", bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8",
-      badge: `<circle cx="33" cy="9" r="6" fill="#6366F1"/><circle cx="33" cy="9" r="2.5" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M33 5V6M33 12V13M37 9H38M28 9H29" stroke="#fff" stroke-width="1" stroke-linecap="round"/>` // gear
+      bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.3)", text: "#818CF8", dot: "#6366f1",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gau" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#gau)"><circle cx="28" cy="40" r="9" fill="#6366f1"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#gau)"><circle cx="52" cy="40" r="9" fill="#6366f1"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><circle cx="56" cy="12" r="5" fill="#6366f1" stroke="#ffffff" stroke-width="1.5"/><circle cx="74" cy="12" r="5" fill="#6366f1" stroke="#ffffff" stroke-width="1.5"/><line x1="61" y1="12" x2="69" y2="12" stroke="#6366f1" stroke-width="3"/><path d="M66 8 L70 12 L66 16" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
     },
     "Enterprise Pro": {
-      eyeColor: "#3B82F6", dotColor: "#EAB308", bg: "rgba(234,179,8,.12)", border: "rgba(234,179,8,.3)", text: "#FCD34D",
-      badge: `<path d="M33 3L34.8 7.5L39.5 7.8L35.8 11L37 15.5L33 13L29 15.5L30.2 11L26.5 7.8L31.2 7.5Z" fill="#EAB308"/>` // star
+      bg: "rgba(234,179,8,.12)", border: "rgba(234,179,8,.3)", text: "#FCD34D", dot: "#eab308",
+      svg: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fde047"/><stop offset="100%" stop-color="#eab308"/></linearGradient><filter id="gen" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="starGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M12 64 L12 30 C12 14, 26 8, 40 8 C54 8, 68 14, 68 30 L68 64" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/><g filter="url(#gen)"><circle cx="28" cy="40" r="9" fill="url(#goldGrad)"/></g><circle cx="31" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#gen)"><circle cx="52" cy="40" r="9" fill="url(#goldGrad)"/></g><circle cx="55" cy="37" r="2.5" fill="#ffffff" opacity="0.9"/><g filter="url(#starGlow)"><polygon points="65,1 68,9 76,9 70,14 72,22 65,17 58,22 60,14 54,9 62,9" fill="url(#goldGrad)"/></g></svg>`
     },
   };
-  const defaultAgentSvg = { eyeColor: "#6366F1", dotColor: "#6366F1", bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.25)", text: "#818CF8", badge: "" };
+  const defaultAgentData = { bg: "rgba(99,102,241,.15)", border: "rgba(99,102,241,.25)", text: "#818CF8", dot: "#6366f1", svg: "" };
 
-  // Generate robot SVG for an agent
+  // Get original SVG at specified size
   function agentRobotSvg(name: string, size: number): string {
-    const a = agentSvgMap[name] || defaultAgentSvg;
-    return `<svg viewBox="0 0 44 40" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-      <!-- Antenna -->
-      <line x1="22" y1="8" x2="22" y2="3" stroke="#888" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="22" cy="2" r="1.5" fill="${a.dotColor}"/>
-      <!-- Helmet arch -->
-      <path d="M8 28 Q8 10 22 10 Q36 10 36 28" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- Side connectors -->
-      <circle cx="8" cy="28" r="2" fill="#888"/>
-      <circle cx="36" cy="28" r="2" fill="#888"/>
-      <!-- Left eye -->
-      <circle cx="16" cy="24" r="4.5" fill="#1a1a2e"/>
-      <circle cx="16" cy="24" r="3" fill="${a.eyeColor}" opacity="0.9"/>
-      <circle cx="17" cy="23" r="1" fill="#fff" opacity="0.7"/>
-      <!-- Right eye -->
-      <circle cx="28" cy="24" r="4.5" fill="#1a1a2e"/>
-      <circle cx="28" cy="24" r="3" fill="${a.eyeColor}" opacity="0.9"/>
-      <circle cx="29" cy="23" r="1" fill="#fff" opacity="0.7"/>
-      <!-- Badge icon -->
-      ${a.badge}
-    </svg>`;
+    const a = agentOriginalSvg[name];
+    if (!a) return "";
+    // Replace width/height in the SVG to render at desired size
+    return a.svg.replace(/viewBox="0 0 80 80"/, `viewBox="0 0 80 80" width="${size}" height="${size}"`);
   }
 
   const agentsHTML = form.agents.map((a: string) => {
-    const c = agentSvgMap[a] || defaultAgentSvg;
-    const robotSvg = agentRobotSvg(a, 32);
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;background:${c.bg};border:1px solid ${c.border};border-radius:12px;min-width:90px">
+    const c = agentOriginalSvg[a] || defaultAgentData;
+    const robotSvg = agentRobotSvg(a, 56);
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 12px;background:${c.bg};border:1px solid ${c.border};border-radius:14px;min-width:100px">
       ${robotSvg}
-      <span style="font-size:10px;color:${c.text};font-weight:700;text-align:center;line-height:1.2">${a}</span>
+      <span style="font-size:11px;color:${c.text};font-weight:700;text-align:center;line-height:1.2">${a}</span>
     </div>`;
   }).join("");
 
@@ -5317,11 +5300,11 @@ function generatePosterHTML(client: any, form: any): string {
   const agentNodeColorMap: Record<string, { grad: string; stroke: string; label: string }> = {
     "E-Mail Agent": { grad: "blueGrad", stroke: "#3B82F6", label: "#60A5FA" },
     "Chat Agent": { grad: "tealGrad", stroke: "#10B981", label: "#34D399" },
-    "Vertriebs Agent": { grad: "purpleGrad", stroke: "#6366F1", label: "#818CF8" },
-    "Termin Agent": { grad: "purpleGrad", stroke: "#8B5CF6", label: "#A78BFA" },
-    "Analyse Agent": { grad: "orangeGrad", stroke: "#F97316", label: "#FB923C" },
-    "Compliance Agent": { grad: "tealGrad", stroke: "#10B981", label: "#34D399" },
-    "Automatisierung": { grad: "purpleGrad", stroke: "#6366F1", label: "#818CF8" },
+    "Vertriebs Agent": { grad: "purpleGrad", stroke: "#8b5cf6", label: "#A78BFA" },
+    "Termin Agent": { grad: "blueGrad", stroke: "#06b6d4", label: "#22D3EE" },
+    "Analyse Agent": { grad: "orangeGrad", stroke: "#f59e0b", label: "#FBBF24" },
+    "Compliance Agent": { grad: "tealGrad", stroke: "#059669", label: "#34D399" },
+    "Automatisierung": { grad: "purpleGrad", stroke: "#6366f1", label: "#818CF8" },
     "Enterprise Pro": { grad: "orangeGrad", stroke: "#EAB308", label: "#FCD34D" },
   };
   const defaultNodeColor = { grad: "purpleGrad", stroke: "#3A4055", label: "#6366F1" };
@@ -6699,7 +6682,7 @@ function ClientDetailModal({
                         { name: "E-Mail Agent", color: "blue", dot: "bg-blue-400" },
                         { name: "Chat Agent", color: "green", dot: "bg-green-400" },
                         { name: "Vertriebs Agent", color: "purple", dot: "bg-purple-400" },
-                        { name: "Termin Agent", color: "purple", dot: "bg-purple-400" },
+                        { name: "Termin Agent", color: "cyan", dot: "bg-cyan-400" },
                         { name: "Analyse Agent", color: "orange", dot: "bg-orange-400" },
                         { name: "Compliance Agent", color: "green", dot: "bg-green-400" },
                         { name: "Automatisierung", color: "purple", dot: "bg-purple-400" },
@@ -6712,6 +6695,7 @@ function ClientDetailModal({
                           purple: { active: "bg-purple-500/25", border: "border-purple-500/40", text: "text-purple-300" },
                           orange: { active: "bg-orange-500/25", border: "border-orange-500/40", text: "text-orange-300" },
                           yellow: { active: "bg-yellow-500/20", border: "border-yellow-500/40", text: "text-yellow-300" },
+                          cyan: { active: "bg-cyan-500/25", border: "border-cyan-500/40", text: "text-cyan-300" },
                         };
                         const c = colorMap[agent.color];
                         return (
