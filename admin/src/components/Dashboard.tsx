@@ -5668,9 +5668,13 @@ ${screenshotSection}
         { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/><polyline points="22 4 12 14.01 9 11.01" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Abschluss' },
       ];
       const steps = agentSteps[name] || defaultSteps;
+      const isLast = ai === workflowAgentNames.length - 1;
       return `
     <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:max(1.2vw,10px);${ai > 0 ? 'margin-top:max(0.8vw,6px);' : ''}">
-      <div style="font-size:max(0.85vw,8px);font-weight:700;color:${c.label};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:max(0.8vw,6px)">${name}</div>
+      <div style="display:flex;align-items:center;gap:max(0.5vw,5px);margin-bottom:max(0.8vw,6px)">
+        <span style="font-size:max(0.85vw,8px);font-weight:700;color:${c.label};text-transform:uppercase;letter-spacing:0.1em">${name.replace(' Agent','').replace('Enterprise Pro','Enterprise')} Workflow</span>
+        <span style="font-size:max(0.65vw,6px);padding:1px 6px;border-radius:4px;background:${c.stroke}20;border:1px solid ${c.stroke}30;color:${c.label};font-weight:600">${isLast ? 'Abgeschlossen' : 'Aktiv'}</span>
+      </div>
       <div style="display:flex;align-items:center;gap:max(0.4vw,3px)">
         ${steps.map((s: { svg: string; label: string }, si: number) => `
           <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:max(0.3vw,3px);position:relative">
