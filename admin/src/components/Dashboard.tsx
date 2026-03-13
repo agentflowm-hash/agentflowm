@@ -6871,21 +6871,50 @@ function ClientDetailModal({
                       try {
                         const html = generatePosterHTML(client, posterForm);
                         const fileName = `poster-${client.name.toLowerCase().replace(/\s+/g, "-")}.html`;
-                        // Open in new window and trigger save from there
+                        // Store original HTML as Blob and open preview with save button
+                        const originalBlob = new Blob([html], { type: "text/html;charset=utf-8" });
+                        const originalUrl = URL.createObjectURL(originalBlob);
                         const w = window.open("", "_blank");
                         if (w) {
                           w.document.write(html);
                           w.document.close();
-                          // Inject download button into the opened page
+                          // Store original HTML on window for download
+                          (w as any).__posterHTML = html;
+                          (w as any).__posterFileName = fileName;
                           const dlScript = w.document.createElement("script");
                           dlScript.textContent = `
                             (function(){
                               var btn = document.createElement("div");
-                              btn.innerHTML = '<button onclick="this.parentElement.remove();var b=new Blob([document.documentElement.outerHTML],{type:\\'text/html;charset=utf-8\\'});var u=URL.createObjectURL(b);var a=document.createElement(\\'a\\');a.href=u;a.download=\\'${fileName}\\';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},2000);" style="position:fixed;top:20px;right:20px;z-index:99999;padding:14px 28px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(16,185,129,.4);letter-spacing:.02em">\\u2B07 Poster als HTML speichern</button>';
+                              btn.style.cssText = "position:fixed;top:20px;right:20px;z-index:99999";
+                              var b = document.createElement("button");
+                              b.textContent = "\\u2B07 Poster als HTML speichern";
+                              b.style.cssText = "padding:14px 28px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(16,185,129,.4);letter-spacing:.02em";
+                              b.addEventListener("click", function(){
+                                var blob = new Blob([window.__posterHTML], {type:"text/html;charset=utf-8"});
+                                var url = URL.createObjectURL(blob);
+                                var a = document.createElement("a");
+                                a.href = url;
+                                a.download = window.__posterFileName;
+                                a.style.display = "none";
+                                document.body.appendChild(a);
+                                a.click();
+                                setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 2000);
+                                btn.remove();
+                              });
+                              btn.appendChild(b);
                               document.body.appendChild(btn);
                             })();
                           `;
-                          w.document.head.appendChild(dlScript);
+                          w.document.body.appendChild(dlScript);
+                        } else {
+                          // Fallback: direct download if popup blocked
+                          const a = document.createElement("a");
+                          a.href = originalUrl;
+                          a.download = fileName;
+                          a.style.display = "none";
+                          document.body.appendChild(a);
+                          a.click();
+                          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(originalUrl); }, 3000);
                         }
                       } catch (err) {
                         console.error("Poster download error:", err);
