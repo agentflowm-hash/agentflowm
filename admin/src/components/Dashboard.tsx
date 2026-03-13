@@ -5599,26 +5599,89 @@ ${screenshotSection}
       </div>`;
     }).join("")}
     </div>
-    <!-- Workflow Steps -->
-    <div style="display:flex;align-items:stretch;gap:max(0.8vw,6px);border-top:1px solid rgba(255,255,255,.06);padding-top:max(1.5vw,12px)">
-      ${(() => {
-        const steps = [
-          { icon: '\u26A1', label: 'Trigger', desc: 'Anfrage eingehend' },
-          { icon: '\uD83D\uDD0D', label: 'Analyse', desc: 'Daten auswerten' },
-          { icon: '\u2699\uFE0F', label: 'Verarbeitung', desc: 'KI-Optimierung' },
-          { icon: '\uD83D\uDCE4', label: 'Ausf\u00FChrung', desc: 'Aktion starten' },
-          { icon: '\u2705', label: 'Ergebnis', desc: 'Report erstellen' },
-        ];
-        return steps.map((s, i) => `
-          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:max(0.5vw,4px);position:relative">
-            ${i < steps.length - 1 ? `<div style="position:absolute;top:max(1.2vw,12px);left:55%;right:-45%;height:2px;background:linear-gradient(90deg,rgba(99,102,241,.4),rgba(99,102,241,.1));z-index:0"></div>` : ''}
-            <div style="width:max(2.5vw,24px);height:max(2.5vw,24px);border-radius:50%;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);display:flex;align-items:center;justify-content:center;font-size:max(1.2vw,12px);position:relative;z-index:1">${s.icon}</div>
-            <span style="font-size:max(0.9vw,9px);font-weight:700;color:rgba(245,247,250,.7);white-space:nowrap">${s.label}</span>
-            <span style="font-size:max(0.7vw,7px);color:rgba(245,247,250,.35);white-space:nowrap">${s.desc}</span>
+    <!-- Per-Agent Workflow Steps -->
+    ${workflowAgentNames.map((name: string, ai: number) => {
+      const c = agentNodeColorMap[name] || defaultNodeColor;
+      const agentSteps: Record<string, { svg: string; label: string }[]> = {
+        "E-Mail Agent": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M22 12h-6l-2 3h-4l-2-3H2" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Lead eingehend' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Segmentierung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="FG" stroke-width="2" fill="none"/><polyline points="22,6 12,13 2,6" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'E-Mail versenden' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Tracking' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Follow-up' },
+        ],
+        "Chat Agent": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10" stroke="FG" stroke-width="2" fill="none"/><path d="M12 8v4l3 3" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/></svg>', label: 'Besucher erkannt' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Chat starten' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10" stroke="FG" stroke-width="2" fill="none"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'KI-Beratung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4" stroke="FG" stroke-width="2" fill="none"/><line x1="20" y1="8" x2="20" y2="14" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="23" y1="11" x2="17" y2="11" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'Lead erfassen' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="9 11 12 14 22 4" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Qualifizierung' },
+        ],
+        "Vertriebs Agent": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><rect x="2" y="3" width="20" height="14" rx="2" stroke="FG" stroke-width="2" fill="none"/><line x1="8" y1="21" x2="16" y2="21" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12" y2="21" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'Pipeline pr\u00FCfen' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Lead-Scoring' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><line x1="12" y1="20" x2="12" y2="10" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="18" y1="20" x2="18" y2="4" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="16" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'Priorisierung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="FG" stroke-width="2" fill="none"/><polyline points="14 2 14 8 20 8" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Angebot erstellen' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10" stroke="FG" stroke-width="2" fill="none"/><polyline points="12 6 12 12 16 14" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/></svg>', label: 'Nachverfolgung' },
+        ],
+        "Termin Agent": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2" stroke="FG" stroke-width="2" fill="none"/><line x1="16" y1="2" x2="16" y2="6" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="FG" stroke-width="2"/></svg>', label: 'Verf\u00FCgbarkeit' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10" stroke="FG" stroke-width="2" fill="none"/><polyline points="12 6 12 12 16 14" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/></svg>', label: 'Slot finden' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="FG" stroke-width="2" fill="none"/><polyline points="22,6 12,13 2,6" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Einladung senden' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="FG" stroke-width="2" fill="none"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Erinnerung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="9 11 12 14 22 4" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Best\u00E4tigung' },
+        ],
+        "Analyse Agent": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><ellipse cx="12" cy="5" rx="9" ry="3" stroke="FG" stroke-width="2" fill="none"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="FG" stroke-width="2" fill="none"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Daten sammeln' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Muster erkennen' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><line x1="18" y1="20" x2="18" y2="10" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'KPI berechnen' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'KI-Auswertung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="FG" stroke-width="2" fill="none"/><polyline points="14 2 14 8 20 8" stroke="FG" stroke-width="2" fill="none"/><line x1="16" y1="13" x2="8" y2="13" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="17" x2="8" y2="17" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'Report erstellen' },
+        ],
+        "Compliance Agent": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Scan starten' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="8" stroke="FG" stroke-width="2" fill="none"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'DSGVO-Pr\u00FCfung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2" stroke="FG" stroke-width="2" fill="none"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Datenschutz' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="FG" stroke-width="2" fill="none"/><polyline points="14 2 14 8 20 8" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Dokumentation' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="9 11 12 14 22 4" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Zertifizierung' },
+        ],
+        "Automatisierung": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="FG" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>', label: 'Trigger' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="16 18 22 12 16 6" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8 6 2 12 8 18" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Logik' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="3" stroke="FG" stroke-width="2" fill="none"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Verarbeitung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Monitoring' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/><polyline points="22 4 12 14.01 9 11.01" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Abschluss' },
+        ],
+        "Enterprise Pro": [
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Premium Init' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'KI-Engine' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><rect x="1" y="4" width="22" height="16" rx="2" stroke="FG" stroke-width="2" fill="none"/><line x1="1" y1="10" x2="23" y2="10" stroke="FG" stroke-width="2"/></svg>', label: 'Skalierung' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Security' },
+          { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><line x1="18" y1="20" x2="18" y2="10" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke="FG" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'Analytics' },
+        ],
+      };
+      const defaultSteps = [
+        { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="FG" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>', label: 'Trigger' },
+        { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="8" stroke="FG" stroke-width="2" fill="none"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="FG" stroke-width="2" stroke-linecap="round"/></svg>', label: 'Analyse' },
+        { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="3" stroke="FG" stroke-width="2" fill="none"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="FG" stroke-width="2" fill="none"/></svg>', label: 'Verarbeitung' },
+        { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Monitoring' },
+        { svg: '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round"/><polyline points="22 4 12 14.01 9 11.01" stroke="FG" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>', label: 'Abschluss' },
+      ];
+      const steps = agentSteps[name] || defaultSteps;
+      return `
+    <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:max(1.2vw,10px);${ai > 0 ? 'margin-top:max(0.8vw,6px);' : ''}">
+      <div style="font-size:max(0.85vw,8px);font-weight:700;color:${c.label};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:max(0.8vw,6px)">${name}</div>
+      <div style="display:flex;align-items:center;gap:max(0.4vw,3px)">
+        ${steps.map((s: { svg: string; label: string }, si: number) => `
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:max(0.3vw,3px);position:relative">
+            ${si < steps.length - 1 ? `<div style="position:absolute;top:max(1vw,10px);left:60%;right:-40%;height:1px;background:linear-gradient(90deg,${c.stroke}50,${c.stroke}10);z-index:0"></div>` : ''}
+            <div style="width:max(2.2vw,20px);height:max(2.2vw,20px);border-radius:50%;background:${c.stroke}12;border:1px solid ${c.stroke}30;display:flex;align-items:center;justify-content:center;position:relative;z-index:1">${s.svg.replace(/FG/g, c.label)}</div>
+            <span style="font-size:max(0.7vw,7px);font-weight:600;color:rgba(245,247,250,.5);white-space:nowrap">${s.label}</span>
           </div>
-        `).join('');
-      })()}
-    </div>
+        `).join('')}
+      </div>
+    </div>`;
+    }).join("")}
   </div>
 </div>
 
