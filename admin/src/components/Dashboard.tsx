@@ -6926,25 +6926,34 @@ function ClientDetailModal({
                                 </span>
                               </div>
                             </div>
-                            {/* Action Buttons */}
+                            {/* Action Buttons — Premium Row */}
                             <div className="flex items-center gap-1.5 pt-2 border-t border-white/[0.04]">
                               <button
                                 onClick={() => window.open(`/api/invoices/${inv.id}/pdf`, "_blank")}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg text-[11px] text-white/60 hover:text-white transition-colors"
+                                className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg text-[11px] text-white/60 hover:text-white transition-all"
                               >
-                                <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                                <ArrowDownTrayIcon className="w-3 h-3" />
                                 PDF
                               </button>
-                              {inv.status === "draft" && (
+                              {client.email && inv.status !== "paid" && (
                                 <button
                                   onClick={async () => {
-                                    await fetch(`/api/invoices/${inv.id}/send`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
-                                    fetchClientDocs();
+                                    const subject = encodeURIComponent(`Rechnung ${inv.invoice_number} — AgentFlowMarketing`);
+                                    const dueDate = new Date(inv.due_date).toLocaleDateString("de-DE");
+                                    const body = encodeURIComponent(
+                                      `Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie Ihre Rechnung ${inv.invoice_number} über €${inv.total?.toFixed(2)}.\n\nFällig bis: ${dueDate}\n\nBankverbindung:\nAgentFlowMarketing\nIBAN: DE89 3704 0044 0532 0130 00\nBIC: COBADEFFXXX\nVerwendungszweck: ${inv.invoice_number}\n\nBitte vergessen Sie nicht, die PDF-Rechnung als Anhang beizufügen.\n\nBei Fragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen,\nMo Sul\nAgentFlowMarketing\nkontakt@agentflowm.com | +49 179 949 8247`
+                                    );
+                                    window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
+                                    // Mark as sent
+                                    if (inv.status === "draft") {
+                                      await fetch(`/api/invoices/${inv.id}/send`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+                                      fetchClientDocs();
+                                    }
                                   }}
-                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg text-[11px] text-blue-400 transition-colors"
+                                  className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg text-[11px] text-blue-400 hover:text-blue-300 transition-all"
                                 >
-                                  <PaperAirplaneIcon className="w-3.5 h-3.5" />
-                                  An {client.name.split(" ")[0]} senden
+                                  <EnvelopeIcon className="w-3 h-3" />
+                                  Per E-Mail an {client.name.split(" ")[0]}
                                 </button>
                               )}
                               {(inv.status === "sent" || inv.status === "overdue") && (
@@ -6953,15 +6962,15 @@ function ClientDetailModal({
                                     await fetch(`/api/invoices/${inv.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "paid" }) });
                                     fetchClientDocs();
                                   }}
-                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-green-500/10 hover:bg-green-500/20 rounded-lg text-[11px] text-green-400 transition-colors"
+                                  className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 rounded-lg text-[11px] text-green-400 hover:text-green-300 transition-all"
                                 >
-                                  <CheckCircleIcon className="w-3.5 h-3.5" />
-                                  Als bezahlt
+                                  <CheckCircleIcon className="w-3 h-3" />
+                                  Bezahlt
                                 </button>
                               )}
                               {inv.status === "paid" && (
-                                <span className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-green-400/50">
-                                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                                <span className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-green-400/40">
+                                  <CheckCircleIcon className="w-3 h-3" />
                                   Abgeschlossen
                                 </span>
                               )}
@@ -6998,25 +7007,33 @@ function ClientDetailModal({
                                 </span>
                               </div>
                             </div>
-                            {/* Action Buttons */}
+                            {/* Action Buttons — Premium Row */}
                             <div className="flex items-center gap-1.5 pt-2 border-t border-white/[0.04]">
                               <button
                                 onClick={() => window.open(`/api/agreements/${agr.id}/pdf`, "_blank")}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg text-[11px] text-white/60 hover:text-white transition-colors"
+                                className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg text-[11px] text-white/60 hover:text-white transition-all"
                               >
-                                <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                                <ArrowDownTrayIcon className="w-3 h-3" />
                                 PDF
                               </button>
-                              {agr.status === "draft" && client.email && (
+                              {client.email && agr.status !== "signed" && (
                                 <button
                                   onClick={async () => {
-                                    await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sent" }) });
-                                    fetchClientDocs();
+                                    const subject = encodeURIComponent(`Vereinbarung: ${agr.project_title || "Projektvereinbarung"} — AgentFlowMarketing`);
+                                    const body = encodeURIComponent(
+                                      `Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie unsere Vereinbarung für "${agr.project_title || "das gemeinsame Projekt"}" über €${agr.total_amount?.toFixed(2)}.\n\nBitte prüfen Sie die Vereinbarung und senden Sie uns eine unterschriebene Kopie zurück.\n\nBitte vergessen Sie nicht, die PDF-Vereinbarung als Anhang beizufügen.\n\nBei Fragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen,\nMo Sul\nAgentFlowMarketing\nkontakt@agentflowm.com | +49 179 949 8247`
+                                    );
+                                    window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
+                                    // Mark as sent
+                                    if (agr.status === "draft") {
+                                      await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sent" }) });
+                                      fetchClientDocs();
+                                    }
                                   }}
-                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 rounded-lg text-[11px] text-purple-400 transition-colors"
+                                  className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-lg text-[11px] text-purple-400 hover:text-purple-300 transition-all"
                                 >
-                                  <PaperAirplaneIcon className="w-3.5 h-3.5" />
-                                  An {client.name.split(" ")[0]} senden
+                                  <EnvelopeIcon className="w-3 h-3" />
+                                  Per E-Mail an {client.name.split(" ")[0]}
                                 </button>
                               )}
                               {agr.status === "sent" && (
@@ -7025,15 +7042,15 @@ function ClientDetailModal({
                                     await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "signed" }) });
                                     fetchClientDocs();
                                   }}
-                                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 bg-green-500/10 hover:bg-green-500/20 rounded-lg text-[11px] text-green-400 transition-colors"
+                                  className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 rounded-lg text-[11px] text-green-400 hover:text-green-300 transition-all"
                                 >
-                                  <CheckCircleIcon className="w-3.5 h-3.5" />
-                                  Als unterschrieben
+                                  <CheckCircleIcon className="w-3 h-3" />
+                                  Unterschrieben
                                 </button>
                               )}
                               {agr.status === "signed" && (
-                                <span className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-green-400/50">
-                                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                                <span className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-green-400/40">
+                                  <CheckCircleIcon className="w-3 h-3" />
                                   Abgeschlossen
                                 </span>
                               )}
