@@ -65,6 +65,8 @@ import {
   ScaleIcon,
   DocumentDuplicateIcon,
   ClipboardDocumentListIcon,
+  SunIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
 import {
   StarIcon as StarSolid,
@@ -237,6 +239,19 @@ function formatRelativeTime(dateStr: string): string {
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  // Theme: persist in localStorage + apply to <html>
+  useEffect(() => {
+    const saved = localStorage.getItem("afm-theme") as "dark" | "light" | null;
+    if (saved) { setTheme(saved); document.documentElement.classList.toggle("light", saved === "light"); }
+  }, []);
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("afm-theme", next);
+    document.documentElement.classList.toggle("light", next === "light");
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -634,6 +649,15 @@ export function Dashboard() {
               <ArrowPathIcon
                 className={`w-5 h-5 text-white/40 ${refreshing ? "animate-spin" : ""}`}
               />
+            </button>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 hover:bg-white/5 rounded-xl transition-colors"
+              title={theme === "dark" ? "Hell-Modus" : "Dunkel-Modus"}
+            >
+              {theme === "dark" ? <SunIcon className="w-5 h-5 text-white/40" /> : <MoonIcon className="w-5 h-5 text-white/40" />}
             </button>
 
             {/* Notifications */}
