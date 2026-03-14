@@ -414,6 +414,7 @@ export function Dashboard() {
     {
       label: "Verwaltung",
       items: [
+        { id: "settings" as Tab, label: "Einstellungen", icon: Cog6ToothIcon, badge: null },
         { id: "privacy" as Tab, label: "Datenschutz", icon: ShieldCheckIcon, badge: null },
       ],
     },
@@ -452,7 +453,7 @@ export function Dashboard() {
       `}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/[0.06]">
+        <div className="shrink-0 h-16 flex items-center justify-between px-4 border-b border-white/[0.06]">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-3">
               <img
@@ -490,7 +491,7 @@ export function Dashboard() {
 
         {/* Quick Stats Mini */}
         {!sidebarCollapsed && (
-          <div className="p-3 border-b border-white/[0.06]">
+          <div className="shrink-0 p-3 border-b border-white/[0.06]">
             <div className="grid grid-cols-2 gap-2">
               <MiniStatCard
                 value={stats?.leads.total || 0}
