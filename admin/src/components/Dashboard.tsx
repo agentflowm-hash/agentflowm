@@ -6937,17 +6937,69 @@ function ClientDetailModal({
                               </button>
                               {client.email && inv.status !== "paid" && (
                                 <button
-                                  onClick={async () => {
-                                    const subject = encodeURIComponent(`Rechnung ${inv.invoice_number} — AgentFlowMarketing`);
-                                    const dueDate = new Date(inv.due_date).toLocaleDateString("de-DE");
-                                    const body = encodeURIComponent(
-                                      `Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie Ihre Rechnung ${inv.invoice_number} über €${inv.total?.toFixed(2)}.\n\nFällig bis: ${dueDate}\n\nBankverbindung:\nAgentFlowMarketing\nIBAN: DE89 3704 0044 0532 0130 00\nBIC: COBADEFFXXX\nVerwendungszweck: ${inv.invoice_number}\n\nBitte vergessen Sie nicht, die PDF-Rechnung als Anhang beizufügen.\n\nBei Fragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen,\nMo Sul\nAgentFlowMarketing\nkontakt@agentflowm.com | +49 179 949 8247`
-                                    );
-                                    window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
-                                    // Mark as sent
-                                    if (inv.status === "draft") {
-                                      await fetch(`/api/invoices/${inv.id}/send`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
-                                      fetchClientDocs();
+                                  onClick={async (e) => {
+                                    const btn = e.currentTarget;
+                                    const orig = btn.innerHTML;
+                                    btn.innerHTML = '<span class="animate-spin inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full"></span> Sende...';
+                                    btn.disabled = true;
+                                    try {
+                                      const dueDate = new Date(inv.due_date).toLocaleDateString("de-DE");
+                                      const pdfUrl = `${window.location.origin}/api/invoices/${inv.id}/pdf`;
+                                      const res = await fetch("/api/emails", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        credentials: "include",
+                                        body: JSON.stringify({
+                                          to: client.email,
+                                          subject: `Rechnung ${inv.invoice_number} — AgentFlowMarketing`,
+                                          client_id: client.id,
+                                          html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#333">
+                                            <div style="text-align:center;margin-bottom:32px">
+                                              <div style="font-size:22px;font-weight:800;color:#FF6A00">Agent<span style="color:#333">FlowMarketing</span></div>
+                                            </div>
+                                            <p style="font-size:16px">Hallo ${client.name.split(" ")[0]},</p>
+                                            <p>anbei finden Sie Ihre Rechnung f\u00FCr unsere Zusammenarbeit.</p>
+                                            <div style="background:#f8f9fa;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #FF6A00">
+                                              <div style="font-size:13px;color:#666">Rechnung ${inv.invoice_number}</div>
+                                              <div style="font-size:28px;font-weight:800;color:#1a1a1a;margin:8px 0">\u20AC${inv.total?.toFixed(2)}</div>
+                                              <div style="font-size:13px;color:#666">F\u00E4llig bis: ${dueDate}</div>
+                                            </div>
+                                            <div style="background:#f0f7ff;padding:20px;border-radius:8px;margin:20px 0">
+                                              <strong>Bankverbindung:</strong><br>
+                                              AgentFlowMarketing<br>
+                                              IBAN: DE89 3704 0044 0532 0130 00<br>
+                                              BIC: COBADEFFXXX<br>
+                                              Verwendungszweck: ${inv.invoice_number}
+                                            </div>
+                                            <p style="text-align:center;margin:28px 0">
+                                              <a href="${pdfUrl}" style="display:inline-block;background:#FF6A00;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700">Rechnung als PDF ansehen</a>
+                                            </p>
+                                            <p>Bei Fragen stehe ich Ihnen gerne zur Verf\u00FCgung.</p>
+                                            <p>Mit freundlichen Gr\u00FC\u00DFen,<br><strong>Mo Sul</strong><br>AgentFlowMarketing</p>
+                                            <div style="text-align:center;color:#999;font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid #eee">
+                                              AgentFlowMarketing | kontakt@agentflowm.com | +49 179 949 8247
+                                            </div>
+                                          </div>`,
+                                        }),
+                                      });
+                                      const data = await res.json();
+                                      if (data.success) {
+                                        btn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Gesendet!';
+                                        btn.className = btn.className.replace(/bg-blue-500/g, "bg-green-500").replace(/text-blue/g, "text-green").replace(/border-blue/g, "border-green");
+                                        if (inv.status === "draft") {
+                                          await fetch(`/api/invoices/${inv.id}/send`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+                                        }
+                                        fetchClientDocs();
+                                      } else {
+                                        throw new Error(data.error || "Senden fehlgeschlagen");
+                                      }
+                                    } catch (err: any) {
+                                      btn.innerHTML = orig;
+                                      btn.disabled = false;
+                                      alert("E-Mail konnte nicht gesendet werden: " + err.message + "\n\nFallback: E-Mail wird im Mail-Client ge\u00F6ffnet.");
+                                      const subject = encodeURIComponent(`Rechnung ${inv.invoice_number} \u2014 AgentFlowMarketing`);
+                                      const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie Ihre Rechnung ${inv.invoice_number} \u00FCber \u20AC${inv.total?.toFixed(2)}.\n\nMit freundlichen Gr\u00FC\u00DFen,\nMo Sul\nAgentFlowMarketing`);
+                                      window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
                                     }
                                   }}
                                   className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg text-[11px] text-blue-400 hover:text-blue-300 transition-all"
@@ -7018,16 +7070,62 @@ function ClientDetailModal({
                               </button>
                               {client.email && agr.status !== "signed" && (
                                 <button
-                                  onClick={async () => {
-                                    const subject = encodeURIComponent(`Vereinbarung: ${agr.project_title || "Projektvereinbarung"} — AgentFlowMarketing`);
-                                    const body = encodeURIComponent(
-                                      `Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie unsere Vereinbarung für "${agr.project_title || "das gemeinsame Projekt"}" über €${agr.total_amount?.toFixed(2)}.\n\nBitte prüfen Sie die Vereinbarung und senden Sie uns eine unterschriebene Kopie zurück.\n\nBitte vergessen Sie nicht, die PDF-Vereinbarung als Anhang beizufügen.\n\nBei Fragen stehe ich Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen,\nMo Sul\nAgentFlowMarketing\nkontakt@agentflowm.com | +49 179 949 8247`
-                                    );
-                                    window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
-                                    // Mark as sent
-                                    if (agr.status === "draft") {
-                                      await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sent" }) });
-                                      fetchClientDocs();
+                                  onClick={async (e) => {
+                                    const btn = e.currentTarget;
+                                    const orig = btn.innerHTML;
+                                    btn.innerHTML = '<span class="animate-spin inline-block w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full"></span> Sende...';
+                                    btn.disabled = true;
+                                    try {
+                                      const pdfUrl = `${window.location.origin}/api/agreements/${agr.id}/pdf`;
+                                      const res = await fetch("/api/emails", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        credentials: "include",
+                                        body: JSON.stringify({
+                                          to: client.email,
+                                          subject: `Vereinbarung: ${agr.project_title || "Projektvereinbarung"} \u2014 AgentFlowMarketing`,
+                                          client_id: client.id,
+                                          html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#333">
+                                            <div style="text-align:center;margin-bottom:32px">
+                                              <div style="font-size:22px;font-weight:800;color:#FF6A00">Agent<span style="color:#333">FlowMarketing</span></div>
+                                            </div>
+                                            <p style="font-size:16px">Hallo ${client.name.split(" ")[0]},</p>
+                                            <p>anbei finden Sie unsere Vereinbarung f\u00FCr unser gemeinsames Projekt.</p>
+                                            <div style="background:#f3f0ff;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #6366F1">
+                                              <div style="font-size:13px;color:#666">Vereinbarung</div>
+                                              <div style="font-size:18px;font-weight:700;color:#1a1a1a;margin:8px 0">${agr.project_title || "Projektvereinbarung"}</div>
+                                              <div style="font-size:24px;font-weight:800;color:#1a1a1a;margin:8px 0">\u20AC${agr.total_amount?.toFixed(2)}</div>
+                                            </div>
+                                            <p>Bitte pr\u00FCfen Sie die Vereinbarung und senden Sie uns eine unterschriebene Kopie zur\u00FCck.</p>
+                                            <p style="text-align:center;margin:28px 0">
+                                              <a href="${pdfUrl}" style="display:inline-block;background:#6366F1;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700">Vereinbarung als PDF ansehen</a>
+                                            </p>
+                                            <p>Bei Fragen stehe ich Ihnen gerne zur Verf\u00FCgung.</p>
+                                            <p>Mit freundlichen Gr\u00FC\u00DFen,<br><strong>Mo Sul</strong><br>AgentFlowMarketing</p>
+                                            <div style="text-align:center;color:#999;font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid #eee">
+                                              AgentFlowMarketing | kontakt@agentflowm.com | +49 179 949 8247
+                                            </div>
+                                          </div>`,
+                                        }),
+                                      });
+                                      const data = await res.json();
+                                      if (data.success) {
+                                        btn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Gesendet!';
+                                        btn.className = btn.className.replace(/bg-purple-500/g, "bg-green-500").replace(/text-purple/g, "text-green").replace(/border-purple/g, "border-green");
+                                        if (agr.status === "draft") {
+                                          await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sent" }) });
+                                        }
+                                        fetchClientDocs();
+                                      } else {
+                                        throw new Error(data.error || "Senden fehlgeschlagen");
+                                      }
+                                    } catch (err: any) {
+                                      btn.innerHTML = orig;
+                                      btn.disabled = false;
+                                      alert("E-Mail konnte nicht gesendet werden: " + err.message + "\n\nFallback: E-Mail wird im Mail-Client ge\u00F6ffnet.");
+                                      const subject = encodeURIComponent(`Vereinbarung: ${agr.project_title || "Projektvereinbarung"} \u2014 AgentFlowMarketing`);
+                                      const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie unsere Vereinbarung.\n\nMit freundlichen Gr\u00FC\u00DFen,\nMo Sul\nAgentFlowMarketing`);
+                                      window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
                                     }
                                   }}
                                   className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-lg text-[11px] text-purple-400 hover:text-purple-300 transition-all"

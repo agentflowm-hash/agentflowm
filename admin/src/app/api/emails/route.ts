@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     if (!schedule_at && transporter) {
       try {
         const result = await transporter.sendMail({
-          from: process.env.SMTP_FROM || "AgentFlowMarketing <noreply@agentflowm.de>",
+          from: process.env.EMAIL_FROM ? `AgentFlowMarketing <${process.env.EMAIL_FROM}>` : (process.env.SMTP_FROM || "AgentFlowMarketing <kontakt@agentflowm.com>"),
           to: Array.isArray(to) ? to.join(", ") : to,
           subject: emailSubject,
           html: emailHtml,
