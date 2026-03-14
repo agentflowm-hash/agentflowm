@@ -155,54 +155,101 @@ html.light .admin-select {
 html.light .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1) !important; }
 html.light .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.06) !important; }
 
-/* === Logo: show light version or add background === */
+/* === Logo: invert for light mode === */
 html.light img[src*="logo-dark"],
 html.light img[src*="app-icon-dark"] {
-    filter: none;
+    filter: invert(1) hue-rotate(180deg);
 }
 
 /* === Backdrop blur for header === */
 html.light .backdrop-blur-xl { backdrop-filter: blur(20px) saturate(1.5); }
+html.light .backdrop-blur-sm { backdrop-filter: blur(8px); }
 
-/* === Colored accent backgrounds stay vibrant === */
-html.light .bg-\[\#FC682C\] { background: #fc682c !important; }
-html.light .bg-\[\#0088cc\] { background: #0088cc !important; }
+/* === Accent colors stay vibrant === */
+html.light .bg-\[\#FC682C\] { background: #fc682c !important; color: #fff !important; }
+html.light .bg-\[\#0088cc\] { background: #0088cc !important; color: #fff !important; }
 html.light .text-\[\#FC682C\] { color: #fc682c !important; }
 html.light .text-\[\#FF6A00\] { color: #e85d00 !important; }
+html.light .text-\[\#29B6F6\] { color: #0288d1 !important; }
 
-/* === Fix gradient text in light mode === */
-html.light .bg-gradient-to-br.from-\[\#FC682C\].to-\[\#9D65C9\] {
-    background: linear-gradient(to bottom right, #fc682c, #9D65C9) !important;
+/* === Solid gradient buttons: ALWAYS white text === */
+html.light [class*="from-\[\#FC682C\]"][class*="to-\[\#9D65C9\]"],
+html.light [class*="from-\[\#FC682C\]"][class*="to-\[\#FF8F5C\]"],
+html.light [class*="from-emerald-500"][class*="to-teal-500"],
+html.light [class*="from-blue-500"][class*="to-blue-600"],
+html.light [class*="from-green-500"][class*="to-green-600"] {
+    color: #ffffff !important;
 }
-html.light .bg-gradient-to-br.from-\[\#FC682C\].to-\[\#9D65C9\] .text-white,
-html.light .bg-gradient-to-r.from-emerald-500.to-teal-500 .text-white,
-html.light .bg-gradient-to-r.from-\[\#FC682C\].to-\[\#FF8F5C\] .text-white {
+html.light [class*="from-\[\#FC682C\]"][class*="to-\[\#9D65C9\]"] *,
+html.light [class*="from-\[\#FC682C\]"][class*="to-\[\#FF8F5C\]"] *,
+html.light [class*="from-emerald-500"][class*="to-teal-500"] *,
+html.light [class*="from-blue-500"][class*="to-blue-600"] * {
     color: #ffffff !important;
 }
 
-/* === Ensure colored buttons keep white text === */
-html.light .bg-\[\#FC682C\] .text-white,
-html.light .bg-green-500 .text-white,
-html.light .bg-blue-500 .text-white,
-html.light .bg-red-500 .text-white,
-html.light .bg-\[\#0088cc\] .text-white,
-html.light [class*="bg-gradient"] .text-white,
-html.light button.bg-gradient-to-r .text-white { color: #ffffff !important; }
+/* === Solid bg buttons: keep white text === */
+html.light .bg-\[\#FC682C\] *,
+html.light .bg-green-500 *,
+html.light .bg-blue-500 *,
+html.light .bg-red-500 *,
+html.light .bg-\[\#0088cc\] * { color: #ffffff !important; }
 
-/* Buttons with solid bg keep white text */
-html.light .bg-\[\#FC682C\],
-html.light .bg-gradient-to-r { color: #ffffff; }
-
-/* Status badges keep their colors */
-html.light .bg-green-500\/20 { background: rgba(34,197,94,0.15) !important; }
-html.light .bg-blue-500\/20 { background: rgba(59,130,246,0.15) !important; }
-html.light .bg-yellow-500\/20 { background: rgba(234,179,8,0.15) !important; }
-html.light .bg-red-500\/20 { background: rgba(239,68,68,0.15) !important; }
+/* === Status badge colors (keep vibrant) === */
+html.light .bg-green-500\/20 { background: rgba(34,197,94,0.12) !important; }
+html.light .bg-green-500\/15 { background: rgba(34,197,94,0.1) !important; }
 html.light .bg-green-500\/10 { background: rgba(34,197,94,0.08) !important; }
+html.light .bg-blue-500\/20 { background: rgba(59,130,246,0.12) !important; }
 html.light .bg-blue-500\/10 { background: rgba(59,130,246,0.08) !important; }
-html.light .bg-purple-500\/10 { background: rgba(139,92,246,0.08) !important; }
+html.light .bg-yellow-500\/20 { background: rgba(234,179,8,0.12) !important; }
+html.light .bg-yellow-500\/15 { background: rgba(234,179,8,0.1) !important; }
+html.light .bg-red-500\/20 { background: rgba(239,68,68,0.12) !important; }
 html.light .bg-red-500\/10 { background: rgba(239,68,68,0.08) !important; }
+html.light .bg-purple-500\/20 { background: rgba(139,92,246,0.12) !important; }
+html.light .bg-purple-500\/10 { background: rgba(139,92,246,0.08) !important; }
 html.light .bg-\[\#0088cc\]\/10 { background: rgba(0,136,204,0.08) !important; }
+html.light .bg-\[\#0088cc\]\/20 { background: rgba(0,136,204,0.12) !important; }
+html.light .bg-\[\#FC682C\]\/10 { background: rgba(252,104,44,0.08) !important; }
+html.light .bg-\[\#FC682C\]\/20 { background: rgba(252,104,44,0.12) !important; }
+
+/* === Badge text colors stay as-is in light mode === */
+html.light .text-green-400 { color: #16a34a !important; }
+html.light .text-green-300 { color: #22c55e !important; }
+html.light .text-blue-400 { color: #2563eb !important; }
+html.light .text-blue-300 { color: #3b82f6 !important; }
+html.light .text-purple-400 { color: #7c3aed !important; }
+html.light .text-purple-300 { color: #8b5cf6 !important; }
+html.light .text-yellow-400 { color: #ca8a04 !important; }
+html.light .text-red-400 { color: #dc2626 !important; }
+html.light .text-orange-400 { color: #ea580c !important; }
+html.light .text-teal-400 { color: #0d9488 !important; }
+
+/* === Colored text opacities for light === */
+html.light .text-green-400\/50,
+html.light .text-green-400\/40 { color: rgba(22,163,74,0.5) !important; }
+
+/* === Border accent colors stay === */
+html.light .border-\[\#FC682C\] { border-color: #fc682c !important; }
+html.light .border-\[\#FC682C\]\/20 { border-color: rgba(252,104,44,0.25) !important; }
+html.light .border-\[\#FC682C\]\/40 { border-color: rgba(252,104,44,0.45) !important; }
+html.light .border-green-500\/20 { border-color: rgba(34,197,94,0.25) !important; }
+html.light .border-blue-500\/20 { border-color: rgba(59,130,246,0.25) !important; }
+html.light .border-purple-500\/20 { border-color: rgba(139,92,246,0.25) !important; }
+
+/* === Active tab in sidebar === */
+html.light .text-\[\#FC682C\] { color: #fc682c !important; }
+html.light .border-\[\#FC682C\] { border-color: #fc682c !important; }
+
+/* === Border for avatar in header === */
+html.light .border-\[\#0f0f12\] { border-color: #ffffff !important; }
+
+/* === Font-mono code display === */
+html.light .font-mono.text-\[\#FC682C\] { color: #e85d00 !important; }
+
+/* === Animate spin border color === */
+html.light .border-t-transparent { border-top-color: transparent !important; }
+
+/* === Ring colors === */
+html.light .ring-red-500\/20 { --tw-ring-color: rgba(239,68,68,0.15) !important; }
 
 * {
     box-sizing: border-box;

@@ -533,7 +533,7 @@ export function Dashboard() {
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all group relative ${
                       activeTab === item.id
-                        ? "bg-gradient-to-r from-[#FC682C]/20 via-[#FC682C]/10 to-transparent text-white"
+                        ? "bg-gradient-to-r from-[#FC682C]/20 via-[#FC682C]/10 to-transparent text-[#FC682C] font-semibold"
                         : "text-white/50 hover:text-white hover:bg-white/[0.04]"
                     }`}
                   >
@@ -6418,32 +6418,32 @@ function ClientDetailModal({
               {/* Quick Actions */}
               <div className="grid grid-cols-4 gap-2">
                 <button
-                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); setShowPosterGen(false); }}
+                  onClick={() => { setShowCreateInvoice(true); setShowCreateOffer(false); setShowCreateAgreement(false); setShowPosterGen(false); }}
                   className="p-3 bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20 rounded-xl hover:border-[#FC682C]/40 transition-colors text-center"
                 >
                   <CurrencyEuroIcon className="w-5 h-5 text-[#FC682C] mx-auto mb-1" />
-                  <span className="text-xs font-medium text-white">Rechnung</span>
+                  <span className="text-xs font-medium text-[#FC682C]">Rechnung</span>
                 </button>
                 <button
-                  onClick={() => { setShowCreateAgreement(true); setShowCreateInvoice(false); setShowPosterGen(false); }}
+                  onClick={() => { setShowCreateAgreement(true); setShowCreateOffer(false); setShowCreateInvoice(false); setShowPosterGen(false); }}
                   className="p-3 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-xl hover:border-purple-500/40 transition-colors text-center"
                 >
                   <DocumentTextIcon className="w-5 h-5 text-purple-400 mx-auto mb-1" />
-                  <span className="text-xs font-medium text-white">Vereinbarung</span>
+                  <span className="text-xs font-medium text-purple-400">Vereinbarung</span>
                 </button>
                 <button
                   onClick={() => { setShowCreateOffer(true); setShowCreateInvoice(false); setShowCreateAgreement(false); setShowPosterGen(false); }}
                   className="p-3 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-xl hover:border-blue-500/40 transition-colors text-center"
                 >
                   <DocumentTextIcon className="w-5 h-5 text-blue-400 mx-auto mb-1" />
-                  <span className="text-xs font-medium text-white">Angebot</span>
+                  <span className="text-xs font-medium text-blue-400">Angebot</span>
                 </button>
                 <button
-                  onClick={() => { setShowPosterGen(true); setShowCreateInvoice(false); setShowCreateAgreement(false); }}
+                  onClick={() => { setShowPosterGen(true); setShowCreateOffer(false); setShowCreateInvoice(false); setShowCreateAgreement(false); }}
                   className="p-3 bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-xl hover:border-green-500/40 transition-colors text-center"
                 >
                   <SparklesIcon className="w-5 h-5 text-green-400 mx-auto mb-1" />
-                  <span className="text-xs font-medium text-white">Poster</span>
+                  <span className="text-xs font-medium text-green-400">Poster</span>
                 </button>
               </div>
 
