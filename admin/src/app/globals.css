@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-    --color-bg: #0a0a0a;
-    --color-bg-secondary: #111111;
+    --color-bg: #0B0F19;
+    --color-bg-secondary: #111827;
     --color-accent: #fc682c;
     --color-accent-dark: #e55a1f;
     --color-text: #ffffff;
@@ -37,14 +37,14 @@ html.light body {
 }
 
 /* === Core backgrounds === */
-html.light .bg-\[\#09090b\] { background: #f5f6fa !important; }
-html.light .bg-\[\#09090b\]\/80 { background: rgba(245,246,250,0.85) !important; backdrop-filter: blur(20px); }
-html.light .bg-\[\#0f0f12\] { background: #ffffff !important; }
-html.light .bg-\[\#0f0f12\]\/80 { background: rgba(255,255,255,0.85) !important; }
-html.light .bg-\[\#0f0f12\]\/95 { background: rgba(255,255,255,0.95) !important; }
-html.light .bg-\[\#121215\] { background: #f8f9fc !important; }
-html.light .bg-\[\#1a1a2e\],
-html.light .bg-\[\#1a1a1f\] { background: #ffffff !important; }
+html.light .bg-\[\#0B0F19\] { background: #f5f6fa !important; }
+html.light .bg-\[\#0B0F19\]\/80 { background: rgba(245,246,250,0.85) !important; backdrop-filter: blur(20px); }
+html.light .bg-\[\#111827\] { background: #ffffff !important; }
+html.light .bg-\[\#111827\]\/80 { background: rgba(255,255,255,0.85) !important; }
+html.light .bg-\[\#111827\]\/95 { background: rgba(255,255,255,0.95) !important; }
+html.light .bg-\[\#0F1629\] { background: #f8f9fc !important; }
+html.light .bg-\[\#1a2235\],
+html.light .bg-\[\#1a2235\] { background: #ffffff !important; }
 
 /* === Sidebar === */
 html.light aside,
@@ -236,7 +236,7 @@ html.light .text-\[\#FC682C\] { color: #fc682c !important; }
 html.light .border-\[\#FC682C\] { border-color: #fc682c !important; }
 
 /* === Border for avatar in header === */
-html.light .border-\[\#0f0f12\] { border-color: #ffffff !important; }
+html.light .border-\[\#111827\] { border-color: #ffffff !important; }
 
 /* === Font-mono code display === */
 html.light .font-mono.text-\[\#FC682C\] { color: #e85d00 !important; }

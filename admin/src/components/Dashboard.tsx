@@ -423,7 +423,7 @@ export function Dashboard() {
   const navItems = navSections.flatMap((s) => s.items);
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex">
+    <div className="min-h-screen bg-[#0B0F19] flex">
       {/* Keyboard Shortcuts */}
       <KeyboardShortcuts
         onTabChange={(tab) => setActiveTab(tab as Tab)}
@@ -445,7 +445,7 @@ export function Dashboard() {
       {/* Sidebar */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z-50 bg-[#0f0f12] border-r border-white/[0.06] transform transition-all duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 bg-[#111827] border-r border-white/[0.06] transform transition-all duration-300 ease-in-out
         ${sidebarCollapsed ? "w-[72px]" : "w-64"}
         lg:relative lg:translate-x-0
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -568,7 +568,7 @@ export function Dashboard() {
         </nav>
 
         {/* Bottom Section - Compact */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-white/[0.06] bg-[#0f0f12]">
+        <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-white/[0.06] bg-[#111827]">
           {!sidebarCollapsed && (
             <div className="mb-2 p-2 rounded-lg bg-gradient-to-br from-[#FC682C]/10 to-[#9D65C9]/10 border border-[#FC682C]/20">
               <div className="flex items-center gap-2">
@@ -605,7 +605,7 @@ export function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 lg:px-6 border-b border-white/[0.06] bg-[#09090b]/80 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 lg:px-6 border-b border-white/[0.06] bg-[#0B0F19]/80 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -694,7 +694,7 @@ export function Dashboard() {
               {showProfileMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
-                  <div className="absolute right-0 top-12 w-52 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="absolute right-0 top-12 w-52 bg-[#1a2235] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
                     <button
                       onClick={() => { setActiveTab("settings" as Tab); setShowProfileMenu(false); }}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
@@ -745,7 +745,7 @@ export function Dashboard() {
         </div>
 
         {/* Mobile Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-[#0f0f12]/95 backdrop-blur-xl border-t border-white/[0.08] safe-area-bottom">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-[#111827]/95 backdrop-blur-xl border-t border-white/[0.08] safe-area-bottom">
           <div className="flex items-center justify-around px-2 py-2">
             {[
               { id: "dashboard" as Tab, icon: HomeIcon, label: "Home" },
@@ -856,7 +856,7 @@ function NotificationDropdown({
   };
 
   return (
-    <div className="absolute right-0 top-12 w-80 bg-[#121215] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50">
+    <div className="absolute right-0 top-12 w-80 bg-[#0F1629] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50">
       <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
         <h3 className="font-semibold text-white">Benachrichtigungen</h3>
         {notifications.length > 0 && (
@@ -1010,7 +1010,7 @@ function CommandPalette({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-[#121215] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-lg bg-[#0F1629] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 p-4 border-b border-white/[0.06]">
@@ -1845,7 +1845,7 @@ function KanbanCard({
   return (
     <div 
       onClick={(e) => { if (!showMenu) onClick?.(); }}
-      className={`relative p-4 bg-[#0f0f12] border border-white/[0.06] rounded-xl hover:border-white/[0.15] hover:bg-white/[0.02] transition-all cursor-pointer group ${lead.priority === 'high' ? 'ring-2 ring-red-500/20' : ''}`}
+      className={`relative p-4 bg-[#111827] border border-white/[0.06] rounded-xl hover:border-white/[0.15] hover:bg-white/[0.02] transition-all cursor-pointer group ${lead.priority === 'high' ? 'ring-2 ring-red-500/20' : ''}`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5">
@@ -1909,7 +1909,7 @@ function KanbanCard({
 
       {/* Quick Move Menu */}
       {showMenu && (
-        <div className="absolute right-0 top-10 z-20 w-44 py-2 bg-[#1a1a1f] border border-white/10 rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute right-0 top-10 z-20 w-44 py-2 bg-[#1a2235] border border-white/10 rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
           <div className="px-3 py-1.5 text-[10px] uppercase text-white/30 font-medium">Status ändern</div>
           {[
             { id: "new", label: "Neu", color: "text-blue-400" },
@@ -2327,7 +2327,7 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl bg-[#0f0f12] border border-white/[0.08] rounded-2xl overflow-hidden"
+        className="w-full max-w-3xl bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -2497,7 +2497,7 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
               <div className="relative pl-6 border-l-2 border-white/10 space-y-6">
                 {activities.map((activity, i) => (
                   <div key={i} className="relative">
-                    <div className="absolute -left-[25px] w-4 h-4 rounded-full bg-[#0f0f12] border-2 border-white/20 flex items-center justify-center">
+                    <div className="absolute -left-[25px] w-4 h-4 rounded-full bg-[#111827] border-2 border-white/20 flex items-center justify-center">
                       <div
                         className={`w-2 h-2 rounded-full ${activity.type === "email" ? "bg-blue-400" : activity.type === "status" ? "bg-[#FC682C]" : "bg-green-400"}`}
                       />
@@ -2633,7 +2633,7 @@ function EmailTemplateModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-[#0f0f12] border border-white/[0.08] rounded-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -2790,7 +2790,7 @@ function EmailModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-[#0f0f12] border border-white/[0.08] rounded-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -3331,7 +3331,7 @@ function CheckDetailModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-[#0f0f12] border border-white/[0.08] rounded-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -3797,7 +3797,7 @@ function ReferralModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-[#0f0f12] border border-white/[0.08] rounded-2xl overflow-hidden"
+        className="w-full max-w-lg bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -5040,7 +5040,7 @@ function ClientsTab() {
       )}
 
       {/* Client List */}
-      <div className="bg-[#0f0f12]/80 backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden">
+      <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden">
         {/* Table Header */}
         <div className="hidden md:flex items-center gap-4 px-4 py-3 bg-white/[0.02] border-b border-white/[0.06] text-xs text-white/50 font-medium">
           <div className="w-8">
@@ -6132,7 +6132,7 @@ function ClientDetailModal({
       onClick={onClose}
     >
       <div
-        className="bg-[#0f0f12] border border-white/[0.06] rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
+        className="bg-[#111827] border border-white/[0.06] rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header — Premium */}
@@ -6145,7 +6145,7 @@ function ClientDetailModal({
                     {client.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                   </span>
                 </div>
-                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#0f0f12] ${client.status === "active" ? "bg-green-500" : client.status === "paused" ? "bg-yellow-500" : "bg-white/30"}`} />
+                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#111827] ${client.status === "active" ? "bg-green-500" : client.status === "paused" ? "bg-yellow-500" : "bg-white/30"}`} />
               </div>
               <div>
                 <div className="flex items-center gap-2.5">
@@ -7981,7 +7981,7 @@ function CreateClientModal({
       onClick={onClose}
     >
       <div
-        className="bg-[#0f0f12] border border-white/[0.06] rounded-2xl w-full max-w-md"
+        className="bg-[#111827] border border-white/[0.06] rounded-2xl w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
@@ -8224,7 +8224,7 @@ function NewLeadModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-[#0f0f12] border border-white/[0.08] rounded-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
