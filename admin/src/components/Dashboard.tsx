@@ -446,9 +446,9 @@ export function Dashboard() {
       {/* Sidebar */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z-50 bg-[#111827] border-r border-white/[0.06] transform transition-all duration-300 ease-in-out flex flex-col
+        fixed inset-y-0 left-0 z-50 bg-[#111827] border-r border-white/[0.06] transform transition-all duration-300 ease-in-out flex flex-col h-screen
         ${sidebarCollapsed ? "w-[72px]" : "w-64"}
-        lg:relative lg:translate-x-0
+        lg:sticky lg:top-0 lg:translate-x-0
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
