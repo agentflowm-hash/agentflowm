@@ -5824,6 +5824,14 @@ function ClientDetailModal({
     notes: "",
     newService: "",
   });
+  const [showCreateOffer, setShowCreateOffer] = useState(false);
+  const [offerForm, setOfferForm] = useState({
+    valid_until: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+    tax_rate: 19,
+    discount_percent: 0,
+    notes: "Dieses Angebot ist 30 Tage gültig.",
+    items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
+  });
   const [showPosterGen, setShowPosterGen] = useState(false);
   const [posterForm, setPosterForm] = useState({
     projectType: "Growth Website",
@@ -6424,7 +6432,7 @@ function ClientDetailModal({
                   <span className="text-xs font-medium text-white">Vereinbarung</span>
                 </button>
                 <button
-                  onClick={() => { setShowCreateInvoice(true); setShowCreateAgreement(false); setShowPosterGen(false); }}
+                  onClick={() => { setShowCreateOffer(true); setShowCreateInvoice(false); setShowCreateAgreement(false); setShowPosterGen(false); }}
                   className="p-3 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-xl hover:border-blue-500/40 transition-colors text-center"
                 >
                   <DocumentTextIcon className="w-5 h-5 text-blue-400 mx-auto mb-1" />
@@ -6596,6 +6604,142 @@ function ClientDetailModal({
                       className="px-4 py-2 bg-[#FC682C] text-white rounded-lg text-xs font-medium hover:bg-[#FC682C]/90 disabled:opacity-50 flex items-center gap-1.5"
                     >
                       {creatingDoc ? "Wird erstellt..." : "Rechnung erstellen"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Create Offer Form */}
+              {showCreateOffer && (
+                <div className="p-4 bg-white/[0.03] border border-blue-500/20 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">Neues Angebot für {client.name}</h4>
+                    <button onClick={() => setShowCreateOffer(false)} className="p-1 hover:bg-white/10 rounded-lg">
+                      <XMarkIcon className="w-4 h-4 text-white/40" />
+                    </button>
+                  </div>
+                  {/* Schnell-Vorlagen */}
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Schnell-Vorlage</label>
+                    <div className="flex flex-wrap gap-1">
+                      {[
+                        { label: "Growth Website", price: 2000 },
+                        { label: "Business Website", price: 3500 },
+                        { label: "One-Page Website", price: 500 },
+                        { label: "Website-Check", price: 0 },
+                        { label: "SEO-Optimierung", price: 800 },
+                        { label: "Logo & Branding", price: 600 },
+                        { label: "Wartung/Monat", price: 150 },
+                        { label: "Hosting/Jahr", price: 200 },
+                      ].map((tpl) => (
+                        <button key={tpl.label} onClick={() => setOfferForm({ ...offerForm, items: [{ description: tpl.label, quantity: 1, unit_price: tpl.price, total: tpl.price }] })}
+                          className="px-2 py-1 bg-white/[0.04] hover:bg-blue-500/10 border border-white/[0.06] hover:border-blue-500/30 rounded-lg text-[10px] text-white/60 hover:text-blue-400 transition-all">
+                          {tpl.label} €{tpl.price}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Positionen */}
+                  {offerForm.items.map((item, idx) => (
+                    <div key={idx} className="grid grid-cols-[1fr_80px_100px] gap-2">
+                      <div>
+                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Beschreibung</label>}
+                        <input placeholder="Leistung..." value={item.description}
+                          onChange={(e) => { const items = [...offerForm.items]; items[idx].description = e.target.value; setOfferForm({ ...offerForm, items }); }}
+                          className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 placeholder:text-white/20 transition-all" />
+                      </div>
+                      <div>
+                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Menge</label>}
+                        <input type="number" value={item.quantity}
+                          onChange={(e) => { const items = [...offerForm.items]; items[idx].quantity = parseInt(e.target.value) || 1; setOfferForm({ ...offerForm, items }); }}
+                          className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                      </div>
+                      <div>
+                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Preis (€)</label>}
+                        <input type="number" value={item.unit_price}
+                          onChange={(e) => { const items = [...offerForm.items]; items[idx].unit_price = parseFloat(e.target.value) || 0; setOfferForm({ ...offerForm, items }); }}
+                          className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={() => setOfferForm({ ...offerForm, items: [...offerForm.items, { description: "", quantity: 1, unit_price: 0, total: 0 }] })}
+                    className="text-[11px] text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                    <PlusIcon className="w-3 h-3" /> Position hinzufügen
+                  </button>
+                  {/* Details */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Gültig bis</label>
+                      <input type="date" value={offerForm.valid_until}
+                        onChange={(e) => setOfferForm({ ...offerForm, valid_until: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">MwSt %</label>
+                      <input type="number" value={offerForm.tax_rate}
+                        onChange={(e) => setOfferForm({ ...offerForm, tax_rate: parseFloat(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Rabatt %</label>
+                      <input type="number" value={offerForm.discount_percent}
+                        onChange={(e) => setOfferForm({ ...offerForm, discount_percent: parseFloat(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1">Notizen</label>
+                    <textarea value={offerForm.notes} rows={2}
+                      onChange={(e) => setOfferForm({ ...offerForm, notes: e.target.value })}
+                      className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 placeholder:text-white/20 transition-all resize-none" />
+                  </div>
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                    <div className="text-xs text-white/50">
+                      Summe: €{offerForm.items.reduce((s, i) => s + i.quantity * i.unit_price, 0).toFixed(2)} + {offerForm.tax_rate}% MwSt
+                    </div>
+                    <button
+                      disabled={creatingDoc}
+                      onClick={async () => {
+                        setCreatingDoc(true);
+                        try {
+                          const items = offerForm.items.map(item => ({ ...item, total: item.quantity * item.unit_price }));
+                          const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+                          const res = await fetch("/api/invoices", {
+                            credentials: "include",
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              client_name: client.name,
+                              client_email: client.email,
+                              client_company: client.company || "",
+                              client_address: "",
+                              due_date: offerForm.valid_until,
+                              tax_rate: offerForm.tax_rate,
+                              discount_percent: offerForm.discount_percent,
+                              notes: offerForm.notes,
+                              items,
+                              subtotal,
+                              type: "offer",
+                            }),
+                          });
+                          if (res.ok) {
+                            setShowCreateOffer(false);
+                            setOfferForm({
+                              valid_until: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+                              tax_rate: 19, discount_percent: 0, notes: "Dieses Angebot ist 30 Tage gültig.",
+                              items: [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
+                            });
+                            fetchClientDocs();
+                          }
+                        } catch (error) {
+                          console.error("Failed to create offer:", error);
+                        }
+                        setCreatingDoc(false);
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-blue-500/20 transition-all disabled:opacity-50"
+                    >
+                      {creatingDoc ? "..." : "Angebot erstellen"}
                     </button>
                   </div>
                 </div>
