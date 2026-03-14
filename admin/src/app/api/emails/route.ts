@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       emailHtml += `<img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://admin.agentflowm.de'}/api/emails/track/${trackingId}/open" width="1" height="1" style="display:none" />`;
     }
 
-    // Email in DB speichern
+    // Email in DB speichern (nur existierende Spalten)
     const { data: emailRecord, error: dbError } = await db
       .from("portal_emails")
       .insert({
@@ -136,24 +136,22 @@ export async function POST(request: NextRequest) {
         subject: emailSubject,
         body: emailHtml,
         client_id: client_id || null,
-        template_id: template_id || null,
-        scheduled_at: schedule_at || null,
-        sent_at: schedule_at ? null : new Date().toISOString(),
-        status: schedule_at ? "scheduled" : "sending",
+        sent_at: new Date().toISOString(),
+        status: "sending",
       })
       .select()
       .single();
 
     if (dbError) {
       console.error("Email DB error:", dbError);
-      return NextResponse.json({ error: "Database error" }, { status: 500 });
+      return NextResponse.json({ error: "Database error: " + dbError.message }, { status: 500 });
     }
 
-    // Email senden (wenn nicht geplant)
-    if (!schedule_at && transporter) {
+    // Email senden via SMTP
+    if (transporter) {
       try {
         const result = await transporter.sendMail({
-          from: process.env.EMAIL_FROM ? `AgentFlowMarketing <${process.env.EMAIL_FROM}>` : (process.env.SMTP_FROM || "AgentFlowMarketing <kontakt@agentflowm.com>"),
+          from: process.env.EMAIL_FROM ? `AgentFlowMarketing <${process.env.EMAIL_FROM}>` : "AgentFlowMarketing <kontakt@agentflowm.de>",
           to: Array.isArray(to) ? to.join(", ") : to,
           subject: emailSubject,
           html: emailHtml,
@@ -163,26 +161,26 @@ export async function POST(request: NextRequest) {
         // Status aktualisieren
         await db
           .from("portal_emails")
-          .update({ status: "sent", resend_id: result.messageId })
+          .update({ status: "sent" })
           .eq("id", emailRecord.id);
 
-        return NextResponse.json({ 
-          success: true, 
+        return NextResponse.json({
+          success: true,
           email: emailRecord,
-          message_id: result.messageId 
+          message_id: result.messageId
         });
       } catch (sendError) {
         console.error("SMTP send error:", sendError);
         await db
           .from("portal_emails")
-          .update({ status: "failed", error: String(sendError) })
+          .update({ status: "failed" })
           .eq("id", emailRecord.id);
 
-        return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+        return NextResponse.json({ error: "SMTP Fehler: " + String(sendError) }, { status: 500 });
       }
+    } else {
+      return NextResponse.json({ error: "SMTP nicht konfiguriert" }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true, email: emailRecord });
   } catch (error) {
     console.error("Email POST error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
