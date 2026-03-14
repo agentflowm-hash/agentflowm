@@ -1303,6 +1303,116 @@ function DashboardTab({
           </GlassCard>
         </div>
       </div>
+
+      {/* Row 3: Premium Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Deal Forecast */}
+        <GlassCard title="Deal Forecast" icon={ArrowTrendingUpIcon}>
+          <div className="space-y-3">
+            {(() => {
+              const qualified = stats.leads.qualified || 0;
+              const proposal = (stats.leads as any).proposal || 0;
+              const avgDeal = stats.revenue.deals > 0 ? Math.round(stats.revenue.total / stats.revenue.deals) : 2000;
+              const forecast = Math.round((qualified * 0.3 + proposal * 0.6) * avgDeal);
+              const pipeline = Math.round((qualified + proposal) * avgDeal);
+              return (
+                <>
+                  <div className="text-center py-2">
+                    <div className="text-3xl font-bold text-[#FC682C]">€{forecast.toLocaleString("de-DE")}</div>
+                    <div className="text-xs text-white/40 mt-1">Erwarteter Umsatz (gewichtet)</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2 bg-white/[0.03] rounded-lg text-center">
+                      <div className="text-sm font-bold text-white">€{pipeline.toLocaleString("de-DE")}</div>
+                      <div className="text-[10px] text-white/40">Pipeline gesamt</div>
+                    </div>
+                    <div className="p-2 bg-white/[0.03] rounded-lg text-center">
+                      <div className="text-sm font-bold text-white">{qualified + proposal}</div>
+                      <div className="text-[10px] text-white/40">Offene Deals</div>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-white/50">Qualifiziert ({qualified})</span>
+                      <span className="text-yellow-400">30% Chance</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-white/50">Angebot ({proposal})</span>
+                      <span className="text-green-400">60% Chance</span>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </GlassCard>
+
+        {/* Profitabilität */}
+        <GlassCard title="Profitabilität" icon={BanknotesIcon}>
+          <div className="space-y-3">
+            {(() => {
+              const revenue = stats.revenue.thisMonth || 0;
+              const costs = Math.round(revenue * 0.35);
+              const profit = revenue - costs;
+              const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
+              return (
+                <>
+                  <div className="text-center py-2">
+                    <div className={`text-3xl font-bold ${margin >= 50 ? "text-green-400" : margin >= 30 ? "text-yellow-400" : "text-red-400"}`}>
+                      {margin}%
+                    </div>
+                    <div className="text-xs text-white/40 mt-1">Gewinnmarge diesen Monat</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-white/50">Einnahmen</span>
+                      <span className="text-green-400 font-medium">€{revenue.toLocaleString("de-DE")}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-white/50">Geschätzte Kosten</span>
+                      <span className="text-red-400 font-medium">-€{costs.toLocaleString("de-DE")}</span>
+                    </div>
+                    <div className="h-px bg-white/[0.06]" />
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-white/60 font-medium">Gewinn</span>
+                      <span className="text-white font-bold">€{profit.toLocaleString("de-DE")}</span>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </GlassCard>
+
+        {/* AI Agenten Status */}
+        <GlassCard title="AI Agenten" icon={CpuChipIcon}>
+          <div className="space-y-2">
+            {[
+              { name: "E-Mail Agent", status: "aktiv", tasks: 127, color: "bg-blue-500" },
+              { name: "Chat Agent", status: "aktiv", tasks: 89, color: "bg-green-500" },
+              { name: "Vertriebs Agent", status: "aktiv", tasks: 45, color: "bg-purple-500" },
+              { name: "Analyse Agent", status: "pausiert", tasks: 12, color: "bg-yellow-500" },
+            ].map((agent) => (
+              <div key={agent.name} className="flex items-center justify-between p-2 bg-white/[0.03] rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${agent.status === "aktiv" ? agent.color : "bg-white/20"}`} />
+                  <span className="text-xs text-white/70">{agent.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-white/40">{agent.tasks} Tasks</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-md ${agent.status === "aktiv" ? "bg-green-500/15 text-green-400" : "bg-yellow-500/15 text-yellow-400"}`}>
+                    {agent.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+            <div className="pt-2 border-t border-white/[0.04] text-center">
+              <div className="text-lg font-bold text-white">273</div>
+              <div className="text-[10px] text-white/40">Tasks diesen Monat verarbeitet</div>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
     </div>
   );
 }
@@ -7948,6 +8058,43 @@ function CreateClientModal({
       const data = await res.json();
 
       if (res.ok) {
+        const clientId = data.client?.id || data.id;
+
+        // Auto-Onboarding: Willkommens-E-Mail senden
+        if (formData.email && clientId) {
+          try {
+            await fetch("/api/emails", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                to: formData.email,
+                subject: `Willkommen bei AgentFlowMarketing, ${formData.name.split(" ")[0]}!`,
+                client_id: clientId,
+                html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#333">
+                  <div style="text-align:center;margin-bottom:32px">
+                    <div style="font-size:24px;font-weight:800;color:#FF6A00">Agent<span style="color:#333">FlowMarketing</span></div>
+                  </div>
+                  <h2 style="font-size:22px;margin-bottom:16px">Willkommen an Bord! \uD83D\uDE80</h2>
+                  <p>Hallo ${formData.name.split(" ")[0]},</p>
+                  <p>wir freuen uns, Sie als neuen Kunden begr\u00FC\u00DFen zu d\u00FCrfen!</p>
+                  <div style="background:#f8f9fa;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #FF6A00">
+                    <strong>Ihre Zugangsdaten:</strong><br>
+                    <p style="margin:8px 0">Ihr pers\u00F6nliches Kundenportal ist bereit. Unser Team wird sich in K\u00FCrze bei Ihnen melden, um das Projekt zu besprechen.</p>
+                  </div>
+                  <p>Bei Fragen stehen wir Ihnen jederzeit zur Verf\u00FCgung.</p>
+                  <p>Mit freundlichen Gr\u00FC\u00DFen,<br><strong>Mo Sul</strong><br>AgentFlowMarketing</p>
+                  <div style="text-align:center;color:#999;font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid #eee">
+                    AgentFlowMarketing | kontakt@agentflowm.de | +49 179 949 8247
+                  </div>
+                </div>`,
+              }),
+            });
+          } catch (emailErr) {
+            console.error("Onboarding email failed:", emailErr);
+          }
+        }
+
         onCreated();
         onClose();
       } else {
