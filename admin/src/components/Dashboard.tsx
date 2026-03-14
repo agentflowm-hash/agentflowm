@@ -445,7 +445,7 @@ export function Dashboard() {
       {/* Sidebar */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z-50 bg-[#111827] border-r border-white/[0.06] transform transition-all duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 bg-[#111827] border-r border-white/[0.06] transform transition-all duration-300 ease-in-out flex flex-col
         ${sidebarCollapsed ? "w-[72px]" : "w-64"}
         lg:relative lg:translate-x-0
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -508,8 +508,7 @@ export function Dashboard() {
 
         {/* Nav - Scrollable */}
         <nav
-          className="flex-1 p-2 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
-          style={{ maxHeight: "calc(100vh - 240px)" }}
+          className="flex-1 min-h-0 p-2 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
         >
           {navSections.map((section, sIdx) => (
             <div key={section.label} className={sIdx > 0 ? "mt-4" : ""}>
@@ -567,23 +566,8 @@ export function Dashboard() {
           ))}
         </nav>
 
-        {/* Bottom Section - Compact */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-white/[0.06] bg-[#111827]">
-          {!sidebarCollapsed && (
-            <div className="mb-2 p-2 rounded-lg bg-gradient-to-br from-[#FC682C]/10 to-[#9D65C9]/10 border border-[#FC682C]/20">
-              <div className="flex items-center gap-2">
-                <SparklesIcon className="w-3.5 h-3.5 text-[#FC682C]" />
-                <span className="text-[11px] font-medium text-white">Pro Tipp</span>
-              </div>
-              <p className="text-[10px] text-white/50 mt-1">
-                Drücke{" "}
-                <kbd className="px-1 py-0.5 bg-white/10 rounded text-[9px]">
-                  ⌘K
-                </kbd>{" "}
-                für Schnellzugriff
-              </p>
-            </div>
-          )}
+        {/* Bottom Section */}
+        <div className="shrink-0 p-2 border-t border-white/[0.06]">
           <button
             onClick={handleLogout}
             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors ${sidebarCollapsed ? "justify-center" : ""}`}
