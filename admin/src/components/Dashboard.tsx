@@ -456,7 +456,7 @@ export function Dashboard() {
           {!sidebarCollapsed && (
             <div className="flex items-center gap-3">
               <img
-                src="/logo-dark.png"
+                src={theme === "light" ? "/logo-compact-light.png" : "/logo-dark.png"}
                 alt="AgentFlow"
                 className="h-9 w-auto"
               />
@@ -464,7 +464,7 @@ export function Dashboard() {
           )}
           {sidebarCollapsed && (
             <img
-              src="/logo-dark.png"
+              src={theme === "light" ? "/logo-compact-light.png" : "/logo-dark.png"}
               alt="AgentFlow"
               className="h-8 w-auto mx-auto object-contain"
             />

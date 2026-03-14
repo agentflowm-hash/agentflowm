@@ -155,11 +155,7 @@ html.light .admin-select {
 html.light .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1) !important; }
 html.light .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.06) !important; }
 
-/* === Logo: invert for light mode === */
-html.light img[src*="logo-dark"],
-html.light img[src*="app-icon-dark"] {
-    filter: invert(1) hue-rotate(180deg);
-}
+/* === Logo handled via theme-aware src in component === */
 
 /* === Backdrop blur for header === */
 html.light .backdrop-blur-xl { backdrop-filter: blur(20px) saturate(1.5); }
