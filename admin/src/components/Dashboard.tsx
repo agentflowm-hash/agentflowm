@@ -456,17 +456,17 @@ export function Dashboard() {
           {!sidebarCollapsed && (
             <div className="flex items-center gap-3">
               <img
-                src={theme === "light" ? "/logo-compact-light.png" : "/logo-dark.png"}
+                src={theme === "light" ? "/logo-compact-light.png" : "/logo-compact-dark.png"}
                 alt="AgentFlow"
-                className="h-9 w-auto"
+                className="h-10 w-auto rounded-xl"
               />
             </div>
           )}
           {sidebarCollapsed && (
             <img
-              src={theme === "light" ? "/logo-compact-light.png" : "/logo-dark.png"}
+              src={theme === "light" ? "/logo-compact-light.png" : "/logo-compact-dark.png"}
               alt="AgentFlow"
-              className="h-8 w-auto mx-auto object-contain"
+              className="h-9 w-auto mx-auto object-contain rounded-xl"
             />
           )}
           <button
