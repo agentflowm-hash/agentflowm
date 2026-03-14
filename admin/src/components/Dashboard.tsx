@@ -8183,17 +8183,29 @@ function CreateClientModal({
 
           <div>
             <label className="block text-xs text-white/40 mb-2">Paket</label>
-            <select
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {["Starter", "Business", "Premium", "Growth Website", "One-Page Website", "SEO-Paket", "Logo & Branding", "Wartung", "Enterprise"].map((pkg) => (
+                <button
+                  key={pkg}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, packageType: pkg })}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                    formData.packageType === pkg
+                      ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20"
+                      : "bg-white/[0.04] text-white/50 border border-white/[0.06] hover:border-[#FC682C]/30 hover:text-white"
+                  }`}
+                >
+                  {pkg}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
               value={formData.packageType}
-              onChange={(e) =>
-                setFormData({ ...formData, packageType: e.target.value })
-              }
-              className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none"
-            >
-              <option value="Starter">Starter</option>
-              <option value="Business">Business</option>
-              <option value="Premium">Premium</option>
-            </select>
+              onChange={(e) => setFormData({ ...formData, packageType: e.target.value })}
+              placeholder="Oder eigenes Paket eingeben..."
+              className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none placeholder:text-white/20"
+            />
           </div>
 
           <button
