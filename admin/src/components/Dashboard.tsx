@@ -6103,32 +6103,37 @@ function ClientDetailModal({
         className="bg-[#0f0f12] border border-white/[0.06] rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FC682C]/20 to-[#9D65C9]/20 flex items-center justify-center">
-              <span className="text-sm font-medium text-white">
-                {client.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)}
-              </span>
-            </div>
-            <div>
-              <h3 className="font-semibold text-white">{client.name}</h3>
-              <div className="text-sm text-white/40">
-                {client.company || client.email}
+        {/* Header — Premium */}
+        <div className="p-5 border-b border-white/[0.06] bg-gradient-to-r from-white/[0.02] to-transparent">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FC682C] to-[#9D65C9] flex items-center justify-center shadow-lg shadow-[#FC682C]/20">
+                  <span className="text-lg font-bold text-white">
+                    {client.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                  </span>
+                </div>
+                <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#0f0f12] ${client.status === "active" ? "bg-green-500" : client.status === "paused" ? "bg-yellow-500" : "bg-white/30"}`} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h3 className="text-lg font-bold text-white">{client.name}</h3>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide uppercase ${client.status === "active" ? "bg-green-500/15 text-green-400 border border-green-500/20" : client.status === "paused" ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20" : "bg-white/10 text-white/40 border border-white/10"}`}>
+                    {client.status === "active" ? "Aktiv" : client.status === "paused" ? "Pausiert" : "Inaktiv"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mt-1">
+                  {client.company && <span className="text-sm text-white/50 font-medium">{client.company}</span>}
+                  {client.company && client.email && <span className="text-white/20">·</span>}
+                  <span className="text-sm text-white/30">{client.email}</span>
+                </div>
+                <div className="text-[11px] text-white/25 mt-1">Kunde seit {new Date(client.created_at).toLocaleDateString("de-DE", { month: "long", year: "numeric" })}</div>
               </div>
             </div>
+            <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors mt-1">
+              <XMarkIcon className="w-5 h-5 text-white/40" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/5 rounded-lg transition-colors"
-          >
-            <XMarkIcon className="w-5 h-5 text-white/40" />
-          </button>
         </div>
 
         {/* Tabs */}
@@ -6269,112 +6274,110 @@ function ClientDetailModal({
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-white/[0.02] rounded-xl">
-                    <div className="text-xs text-white/40 mb-1">E-Mail</div>
-                    <div className="text-sm text-white">
-                      {client.email || "-"}
+                <>
+                  {/* Quick Contact Bar */}
+                  <div className="flex items-center gap-2">
+                    {client.email && (
+                      <a href={`mailto:${client.email}`} className="flex-1 flex items-center gap-2.5 p-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-blue-500/30 rounded-xl transition-all group">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                          <EnvelopeIcon className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[10px] text-white/30 uppercase tracking-wider">E-Mail</div>
+                          <div className="text-xs text-white truncate">{client.email}</div>
+                        </div>
+                      </a>
+                    )}
+                    {client.phone && (
+                      <a href={`tel:${client.phone}`} className="flex-1 flex items-center gap-2.5 p-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-green-500/30 rounded-xl transition-all group">
+                        <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+                          <PhoneIcon className="w-4 h-4 text-green-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[10px] text-white/30 uppercase tracking-wider">Telefon</div>
+                          <div className="text-xs text-white">{client.phone}</div>
+                        </div>
+                      </a>
+                    )}
+                    {client.telegram_username && (
+                      <a href={`https://t.me/${client.telegram_username}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center gap-2.5 p-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-[#0088cc]/30 rounded-xl transition-all group">
+                        <div className="w-8 h-8 rounded-lg bg-[#0088cc]/10 flex items-center justify-center group-hover:bg-[#0088cc]/20 transition-colors">
+                          <svg className="w-4 h-4 text-[#29B6F6]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.141.121.099.154.232.17.325.015.093.034.305.019.471z"/></svg>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[10px] text-white/30 uppercase tracking-wider">Telegram</div>
+                          <div className="text-xs text-white">@{client.telegram_username}</div>
+                        </div>
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Info Grid */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+                      <div className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Zugangscode</div>
+                      <div className="text-sm font-mono font-bold text-[#FC682C]">{client.access_code}</div>
+                    </div>
+                    <div className="p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+                      <div className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Erstellt</div>
+                      <div className="text-sm text-white">{new Date(client.created_at).toLocaleDateString("de-DE")}</div>
+                    </div>
+                    <div className="p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+                      <div className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Letzter Login</div>
+                      <div className="text-sm text-white">{client.last_login ? new Date(client.last_login).toLocaleDateString("de-DE") : "—"}</div>
                     </div>
                   </div>
-                  <div className="p-3 bg-white/[0.02] rounded-xl">
-                    <div className="text-xs text-white/40 mb-1">Telefon</div>
-                    <div className="text-sm text-white">
-                      {client.phone || "-"}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white/[0.02] rounded-xl">
-                    <div className="text-xs text-white/40 mb-1">Telegram</div>
-                    <div className="text-sm text-white">
-                      {client.telegram_username
-                        ? `@${client.telegram_username}`
-                        : "-"}
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white/[0.02] rounded-xl">
-                    <div className="text-xs text-white/40 mb-1">Zugangscode</div>
-                    <div className="text-sm font-mono text-[#FC682C]">
-                      {client.access_code}
-                    </div>
-                  </div>
-                </div>
+                </>
               )}
 
-              {/* Telegram Actions */}
+              {/* Quick Actions */}
               <div className="space-y-2">
-                <h4 className="text-xs text-white/40 uppercase tracking-wider">
-                  Aktionen
-                </h4>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <h4 className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">Schnellaktionen</h4>
+                <div className="flex gap-2">
                   <button
                     onClick={async () => {
                       if (!client.telegram_id) {
-                        alert(
-                          "Kunde hat keine Telegram-Verbindung. Der Kunde muss sich erst mit dem Bot verbinden (@Agentflowzbot).",
-                        );
+                        alert("Kunde hat keine Telegram-Verbindung. Der Kunde muss sich erst mit dem Bot verbinden (@Agentflowzbot).");
                         return;
                       }
                       try {
-                        const res = await fetch(
-                          `/api/clients/${client.id}/send-code`,
-                          { method: "POST" },
-                        );
+                        const res = await fetch(`/api/clients/${client.id}/send-code`, { method: "POST" });
                         const data = await res.json();
-                        if (data.success) {
-                          alert("Zugangscode wurde per Telegram gesendet!");
-                        } else {
-                          alert(data.error || "Fehler beim Senden");
-                        }
-                      } catch {
-                        alert("Verbindungsfehler");
-                      }
+                        if (data.success) alert("Zugangscode wurde per Telegram gesendet!");
+                        else alert(data.error || "Fehler beim Senden");
+                      } catch { alert("Verbindungsfehler"); }
                     }}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#0088cc] hover:bg-[#0099dd] text-white rounded-xl text-sm font-medium transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#0088cc]/10 hover:bg-[#0088cc]/20 border border-[#0088cc]/20 text-[#29B6F6] rounded-xl text-xs font-medium transition-all"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.141.121.099.154.232.17.325.015.093.034.305.019.471z" />
-                    </svg>
-                    Zugangscode per Telegram senden
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.141.121.099.154.232.17.325.015.093.034.305.019.471z"/></svg>
+                    Code senden
                   </button>
+                  {client.email && (
+                    <a href={`mailto:${client.email}`} className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 rounded-xl text-xs font-medium transition-all">
+                      <EnvelopeIcon className="w-4 h-4" />
+                      E-Mail
+                    </a>
+                  )}
+                  {client.phone && (
+                    <a href={`tel:${client.phone}`} className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 rounded-xl text-xs font-medium transition-all">
+                      <PhoneIcon className="w-4 h-4" />
+                      Anrufen
+                    </a>
+                  )}
                   {client.telegram_username && (
-                    <a
-                      href={`https://t.me/${client.telegram_username}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 px-4 py-3 bg-white/[0.06] hover:bg-white/[0.1] text-white rounded-xl text-sm font-medium transition-colors"
-                    >
+                    <a href={`https://t.me/${client.telegram_username}`} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-white/70 rounded-xl text-xs font-medium transition-all">
                       <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                      Chat öffnen
+                      Chat
                     </a>
                   )}
                 </div>
                 {!client.telegram_id && (
-                  <p className="text-xs text-yellow-400/70 flex items-center gap-1">
-                    <ExclamationCircleIcon className="w-4 h-4" />
-                    Kunde muss sich erst mit @Agentflowzbot verbinden
+                  <p className="text-[11px] text-yellow-400/60 flex items-center gap-1.5">
+                    <ExclamationCircleIcon className="w-3.5 h-3.5" />
+                    Telegram nicht verbunden — @Agentflowzbot
                   </p>
                 )}
               </div>
-
-              <div className="p-3 bg-white/[0.02] rounded-xl">
-                <div className="text-xs text-white/40 mb-1">Erstellt am</div>
-                <div className="text-sm text-white">
-                  {new Date(client.created_at).toLocaleDateString("de-DE")}
-                </div>
-              </div>
-              {client.last_login && (
-                <div className="p-3 bg-white/[0.02] rounded-xl">
-                  <div className="text-xs text-white/40 mb-1">
-                    Letzter Login
-                  </div>
-                  <div className="text-sm text-white">
-                    {new Date(client.last_login).toLocaleString("de-DE")}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
