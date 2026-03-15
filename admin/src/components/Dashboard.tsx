@@ -7000,7 +7000,7 @@ function ClientDetailModal({
                 </div>
               )}
 
-              {/* Create Agreement Form */}
+              {/* Create Agreement Form — Premium */}
               {showCreateAgreement && (
                 <div className="p-4 bg-white/[0.03] border border-purple-500/20 rounded-xl space-y-3">
                   <div className="flex items-center justify-between">
@@ -7009,107 +7009,94 @@ function ClientDetailModal({
                       <XMarkIcon className="w-4 h-4 text-white/40" />
                     </button>
                   </div>
+                  {/* Paket-Vorlagen — Ein Klick füllt alles aus */}
+                  <div>
+                    <label className="text-[10px] text-white/40 block mb-1.5">Paket-Vorlage wählen</label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[
+                        { title: "Growth Website", amount: 2000, duration: "3-4 Wochen", payment: "50% Start, 50% Go-Live", desc: "Professionelle Website mit modernem Design, SEO-Optimierung und CMS-Integration.", services: ["Responsive Webdesign", "SEO-Optimierung", "CMS-Integration (WordPress/Next.js)", "SSL-Zertifikat & Hosting-Setup", "Kontaktformular & Analytics", "30 Tage Support nach Launch"] },
+                        { title: "Business Website", amount: 3500, duration: "4-6 Wochen", payment: "40% Start, 30% Design, 30% Go-Live", desc: "Premium Business-Website mit erweiterten Funktionen, Blog und individueller Gestaltung.", services: ["Premium UI/UX Design", "Responsive Entwicklung", "Blog & Content-System", "SEO & Performance-Optimierung", "DSGVO-konforme Datenschutzlösung", "Analytics & Tracking Setup", "E-Mail-Integration", "60 Tage Support nach Launch"] },
+                        { title: "One-Page Website", amount: 500, duration: "1 Woche", payment: "100% bei Vertragsstart", desc: "Kompakte One-Page Website — ideal für Startups und kleine Unternehmen.", services: ["One-Page Responsive Design", "Mobile-First Entwicklung", "Kontaktformular", "SSL-Zertifikat", "Basic SEO"] },
+                        { title: "SEO-Paket", amount: 800, duration: "Laufend (monatlich)", payment: "Monatliche Abrechnung", desc: "Umfassende SEO-Betreuung für bessere Sichtbarkeit und mehr organischen Traffic.", services: ["Initiales SEO-Audit", "Keyword-Recherche & Strategie", "On-Page Optimierung", "Technisches SEO", "Monatliches Reporting", "Backlink-Aufbau"] },
+                        { title: "Logo & Branding", amount: 600, duration: "1-2 Wochen", payment: "100% bei Vertragsstart", desc: "Professionelles Logo-Design und Branding-Paket für Ihren Markenauftritt.", services: ["3 Logo-Entwürfe", "Farbpalette & Typografie", "Visitenkarten-Design", "Social Media Kit", "Brand Guidelines PDF"] },
+                        { title: "AI-Agenten Paket", amount: 1500, duration: "2-3 Wochen", payment: "50% Start, 50% Fertigstellung", desc: "Individuelle KI-Agenten für automatisierte Kundenbetreuung, E-Mail und Vertrieb.", services: ["E-Mail Automation Agent", "Chat-Bot Integration", "Lead-Qualifizierung Agent", "CRM-Integration", "n8n Workflow Setup", "Schulung & Dokumentation", "30 Tage Support"] },
+                      ].map(tpl => (
+                        <button key={tpl.title} onClick={() => setAgreementForm({
+                          ...agreementForm, project_title: tpl.title, amount: tpl.amount,
+                          project_duration: tpl.duration, payment_terms: tpl.payment,
+                          project_description: tpl.desc, services: tpl.services, newService: "",
+                        })}
+                          className={`p-2.5 rounded-xl text-left transition-all ${agreementForm.project_title === tpl.title ? "bg-purple-500/15 border border-purple-500/40" : "bg-white/[0.03] border border-white/[0.06] hover:border-purple-500/30"}`}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-white">{tpl.title}</span>
+                            <span className="text-[10px] font-bold text-purple-400">€{tpl.amount.toLocaleString("de-DE")}</span>
+                          </div>
+                          <div className="text-[9px] text-white/30 mt-0.5">{tpl.duration} · {tpl.services.length} Leistungen</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Ausgefülltes Formular */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[10px] text-white/40 block mb-1">Projekttitel *</label>
-                      <input
-                        type="text"
-                        value={agreementForm.project_title}
-                        onChange={(e) => setAgreementForm({ ...agreementForm, project_title: e.target.value })}
-                        placeholder="z.B. Growth Website"
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
-                      />
+                      <input type="text" value={agreementForm.project_title} onChange={(e) => setAgreementForm({ ...agreementForm, project_title: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50" />
                     </div>
                     <div>
                       <label className="text-[10px] text-white/40 block mb-1">Betrag (€ netto)</label>
-                      <input
-                        type="number"
-                        value={agreementForm.amount}
-                        onChange={(e) => setAgreementForm({ ...agreementForm, amount: Number(e.target.value) })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
-                      />
+                      <input type="number" value={agreementForm.amount} onChange={(e) => setAgreementForm({ ...agreementForm, amount: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50" />
                     </div>
                   </div>
                   <div>
                     <label className="text-[10px] text-white/40 block mb-1">Projektbeschreibung</label>
-                    <textarea
-                      value={agreementForm.project_description}
-                      onChange={(e) => setAgreementForm({ ...agreementForm, project_description: e.target.value })}
-                      rows={2}
-                      className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50 resize-none"
-                    />
+                    <textarea value={agreementForm.project_description} onChange={(e) => setAgreementForm({ ...agreementForm, project_description: e.target.value })} rows={2}
+                      className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50 resize-none" />
                   </div>
-                  {/* Services */}
+                  {/* Services Tags */}
                   <div>
-                    <label className="text-[10px] text-white/40 block mb-1">Leistungen</label>
+                    <label className="text-[10px] text-white/40 block mb-1">Leistungen ({agreementForm.services.length})</label>
                     <div className="flex flex-wrap gap-1 mb-2">
                       {agreementForm.services.map((s, i) => (
-                        <span key={i} className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded-lg text-xs flex items-center gap-1">
+                        <span key={i} className="px-2 py-0.5 bg-purple-500/15 text-purple-300 rounded-md text-[10px] flex items-center gap-1">
                           {s}
-                          <button onClick={() => setAgreementForm({
-                            ...agreementForm,
-                            services: agreementForm.services.filter((_, idx) => idx !== i),
-                          })}>
-                            <XMarkIcon className="w-3 h-3" />
+                          <button onClick={() => setAgreementForm({ ...agreementForm, services: agreementForm.services.filter((_, idx) => idx !== i) })}>
+                            <XMarkIcon className="w-2.5 h-2.5" />
                           </button>
                         </span>
                       ))}
                     </div>
-                    <div className="flex gap-1">
-                      <input
-                        type="text"
-                        value={agreementForm.newService}
-                        onChange={(e) => setAgreementForm({ ...agreementForm, newService: e.target.value })}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && agreementForm.newService.trim()) {
-                            setAgreementForm({
-                              ...agreementForm,
-                              services: [...agreementForm.services, agreementForm.newService.trim()],
-                              newService: "",
-                            });
-                          }
-                        }}
-                        placeholder="Leistung eingeben + Enter"
-                        className="flex-1 px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
-                      />
-                    </div>
+                    <input type="text" value={agreementForm.newService} onChange={(e) => setAgreementForm({ ...agreementForm, newService: e.target.value })}
+                      onKeyDown={(e) => { if (e.key === "Enter" && agreementForm.newService.trim()) { setAgreementForm({ ...agreementForm, services: [...agreementForm.services, agreementForm.newService.trim()], newService: "" }); } }}
+                      placeholder="+ Leistung hinzufügen (Enter)"
+                      className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50" />
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div>
                       <label className="text-[10px] text-white/40 block mb-1">Laufzeit</label>
-                      <input
-                        type="text"
-                        value={agreementForm.project_duration}
-                        onChange={(e) => setAgreementForm({ ...agreementForm, project_duration: e.target.value })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
-                      />
+                      <input type="text" value={agreementForm.project_duration} onChange={(e) => setAgreementForm({ ...agreementForm, project_duration: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50" />
                     </div>
                     <div>
                       <label className="text-[10px] text-white/40 block mb-1">Zahlung</label>
-                      <input
-                        type="text"
-                        value={agreementForm.payment_terms}
-                        onChange={(e) => setAgreementForm({ ...agreementForm, payment_terms: e.target.value })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
-                      />
+                      <input type="text" value={agreementForm.payment_terms} onChange={(e) => setAgreementForm({ ...agreementForm, payment_terms: e.target.value })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50" />
                     </div>
                     <div>
                       <label className="text-[10px] text-white/40 block mb-1">MwSt %</label>
-                      <input
-                        type="number"
-                        value={agreementForm.tax_rate}
-                        onChange={(e) => setAgreementForm({ ...agreementForm, tax_rate: Number(e.target.value) })}
-                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50"
-                      />
+                      <input type="number" value={agreementForm.tax_rate} onChange={(e) => setAgreementForm({ ...agreementForm, tax_rate: Number(e.target.value) })}
+                        className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50" />
                     </div>
                   </div>
-                  <div className="flex justify-end pt-2 border-t border-white/10">
-                    <button
-                      onClick={handleCreateAgreement}
-                      disabled={creatingDoc || !agreementForm.project_title}
-                      className="px-4 py-2 bg-purple-500 text-white rounded-lg text-xs font-medium hover:bg-purple-500/90 disabled:opacity-50 flex items-center gap-1.5"
-                    >
-                      {creatingDoc ? "Wird erstellt..." : "Vereinbarung erstellen"}
+                  {/* Summe + Erstellen */}
+                  <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+                    <div>
+                      <div className="text-xs text-white/50">Gesamt: <span className="text-white font-bold">€{(agreementForm.amount * (1 + agreementForm.tax_rate / 100)).toFixed(2)}</span> <span className="text-white/30">inkl. {agreementForm.tax_rate}% MwSt</span></div>
+                    </div>
+                    <button onClick={handleCreateAgreement} disabled={creatingDoc || !agreementForm.project_title}
+                      className="px-5 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-purple-500/20 disabled:opacity-50 transition-all">
+                      {creatingDoc ? "Erstelle..." : "Vereinbarung erstellen"}
                     </button>
                   </div>
                 </div>
@@ -7625,6 +7612,39 @@ function ClientDetailModal({
                                 </span>
                               )}
                             </div>
+                            {/* Versand-Optionen */}
+                            {(agr.status === "draft" || agr.status === "sent") && client.email && (
+                              <div className="flex items-center gap-1 pt-2 border-t border-white/[0.04] mt-2">
+                                <span className="text-[9px] text-white/25 mr-1">Senden via:</span>
+                                <button onClick={() => {
+                                  const subject = encodeURIComponent(`Vereinbarung: ${agr.project_title || "Projekt"} — AgentFlowMarketing`);
+                                  const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nhier ist Ihre Vereinbarung für "${agr.project_title}".\n\nBitte prüfen und unterschreiben Sie diese.\n\nMit freundlichen Grüßen,\nAgentFlowMarketing`);
+                                  window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
+                                }} className="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/15 rounded-md text-[9px] text-blue-400 transition-all flex items-center gap-1">
+                                  <EnvelopeIcon className="w-2.5 h-2.5" />E-Mail
+                                </button>
+                                {client.phone && (
+                                  <a href={`https://wa.me/${client.phone.replace(/[^0-9+]/g, "")}?text=${encodeURIComponent(`Hallo ${client.name.split(" ")[0]}, hier ist Ihre Vereinbarung für "${agr.project_title}" von AgentFlowMarketing. Bitte prüfen und unterschreiben Sie diese.`)}`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="px-2 py-1 bg-green-500/10 hover:bg-green-500/20 border border-green-500/15 rounded-md text-[9px] text-green-400 transition-all flex items-center gap-1">
+                                    <ChatBubbleLeftRightIcon className="w-2.5 h-2.5" />WhatsApp
+                                  </a>
+                                )}
+                                {client.phone && (
+                                  <a href={`sms:${client.phone}?body=${encodeURIComponent(`Ihre Vereinbarung für "${agr.project_title}" von AgentFlowMarketing ist bereit. Bitte prüfen und unterschreiben.`)}`}
+                                    className="px-2 py-1 bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] rounded-md text-[9px] text-white/50 transition-all flex items-center gap-1">
+                                    <PhoneIcon className="w-2.5 h-2.5" />SMS
+                                  </a>
+                                )}
+                                <button onClick={() => {
+                                  const portalUrl = `https://portal.agentflowm.de/login?code=${client.access_code}`;
+                                  navigator.clipboard.writeText(portalUrl);
+                                  showToast("success", "Portal-Link kopiert!");
+                                }} className="px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/15 rounded-md text-[9px] text-purple-400 transition-all flex items-center gap-1">
+                                  <LinkIcon className="w-2.5 h-2.5" />Portal
+                                </button>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
