@@ -7014,15 +7014,15 @@ function ClientDetailModal({
                     <label className="text-[10px] text-white/40 block mb-1.5">Paket-Vorlage wählen</label>
                     <div className="grid grid-cols-2 gap-1.5">
                       {[
-                        { title: "Growth Website", amount: 2000, duration: "3-4 Wochen", payment: "50% Start, 50% Go-Live", desc: "Professionelle Website mit modernem Design, SEO-Optimierung und CMS-Integration.", services: ["Responsive Webdesign", "SEO-Optimierung", "CMS-Integration (WordPress/Next.js)", "SSL-Zertifikat & Hosting-Setup", "Kontaktformular & Analytics", "30 Tage Support nach Launch"] },
-                        { title: "Business Website", amount: 3500, duration: "4-6 Wochen", payment: "40% Start, 30% Design, 30% Go-Live", desc: "Premium Business-Website mit erweiterten Funktionen, Blog und individueller Gestaltung.", services: ["Premium UI/UX Design", "Responsive Entwicklung", "Blog & Content-System", "SEO & Performance-Optimierung", "DSGVO-konforme Datenschutzlösung", "Analytics & Tracking Setup", "E-Mail-Integration", "60 Tage Support nach Launch"] },
-                        { title: "One-Page Website", amount: 500, duration: "1 Woche", payment: "100% bei Vertragsstart", desc: "Kompakte One-Page Website — ideal für Startups und kleine Unternehmen.", services: ["One-Page Responsive Design", "Mobile-First Entwicklung", "Kontaktformular", "SSL-Zertifikat", "Basic SEO"] },
-                        { title: "SEO-Paket", amount: 800, duration: "Laufend (monatlich)", payment: "Monatliche Abrechnung", desc: "Umfassende SEO-Betreuung für bessere Sichtbarkeit und mehr organischen Traffic.", services: ["Initiales SEO-Audit", "Keyword-Recherche & Strategie", "On-Page Optimierung", "Technisches SEO", "Monatliches Reporting", "Backlink-Aufbau"] },
-                        { title: "Logo & Branding", amount: 600, duration: "1-2 Wochen", payment: "100% bei Vertragsstart", desc: "Professionelles Logo-Design und Branding-Paket für Ihren Markenauftritt.", services: ["3 Logo-Entwürfe", "Farbpalette & Typografie", "Visitenkarten-Design", "Social Media Kit", "Brand Guidelines PDF"] },
-                        { title: "AI-Agenten Paket", amount: 1500, duration: "2-3 Wochen", payment: "50% Start, 50% Fertigstellung", desc: "Individuelle KI-Agenten für automatisierte Kundenbetreuung, E-Mail und Vertrieb.", services: ["E-Mail Automation Agent", "Chat-Bot Integration", "Lead-Qualifizierung Agent", "CRM-Integration", "n8n Workflow Setup", "Schulung & Dokumentation", "30 Tage Support"] },
+                        { title: "Growth Website", amount: 2000, duration: "3-4 Wochen", payment: "50% Start, 50% Go-Live", desc: `Entwicklung einer professionellen, modernen Website für ${client.company || client.name}. Inklusive responsivem Design, SEO-Grundoptimierung, CMS-Integration und vollständiger Einrichtung. Die Website wird auf die individuellen Anforderungen und das Corporate Design des Kunden zugeschnitten.`, services: ["Konzept & Wireframes", "Responsive Webdesign (Desktop, Tablet, Mobile)", "SEO-Grundoptimierung (Meta-Tags, Sitemap, robots.txt)", "CMS-Integration (WordPress oder Next.js)", "SSL-Zertifikat & Hosting-Setup", "Kontaktformular mit E-Mail-Benachrichtigung", "Google Analytics & Search Console", "Cookie-Banner (DSGVO)", "30 Tage Support nach Go-Live"] },
+                        { title: "Business Website", amount: 3500, duration: "4-6 Wochen", payment: "40% Start, 30% Design-Freigabe, 30% Go-Live", desc: `Premium Business-Webpräsenz für ${client.company || client.name} mit erweitertem Funktionsumfang. Individuelles UI/UX Design, integrierter Blog, erweiterte SEO-Optimierung und Performance-Tuning. Inklusive umfassender Schulung und 60 Tagen Premium-Support.`, services: ["Individuelles UI/UX Design (3 Entwürfe)", "Responsive Entwicklung (alle Endgeräte)", "Blog & Content-Management-System", "Erweiterte SEO-Optimierung", "DSGVO-konforme Datenschutzlösung", "Performance-Optimierung (PageSpeed 90+)", "Analytics, Tracking & Conversion-Setup", "E-Mail-Integration & Newsletter-Anbindung", "Social Media Integration", "Schulung (2h) & Dokumentation", "60 Tage Premium-Support nach Go-Live"] },
+                        { title: "One-Page Website", amount: 500, duration: "1 Woche", payment: "100% bei Vertragsstart", desc: `Kompakte, moderne One-Page Website für ${client.company || client.name}. Perfekt für Startups, Freelancer und kleine Unternehmen die eine professionelle Online-Präsenz benötigen.`, services: ["One-Page Responsive Design", "Mobile-First Entwicklung", "Kontaktformular mit E-Mail", "SSL-Zertifikat", "Basic SEO (Meta-Tags)", "Cookie-Banner (DSGVO)"] },
+                        { title: "SEO-Paket", amount: 800, duration: "Laufend (monatlich)", payment: "Monatliche Abrechnung", desc: `Umfassende SEO-Betreuung für ${client.company || client.name}. Ziel: Bessere Sichtbarkeit in Google, mehr organischer Traffic und höhere Conversion-Rates. Monatliches Reporting mit transparenten KPIs.`, services: ["Initiales SEO-Audit & Wettbewerbsanalyse", "Keyword-Recherche & Content-Strategie", "On-Page Optimierung (Titel, Meta, Struktur)", "Technisches SEO (Core Web Vitals, Schema)", "Content-Empfehlungen & Briefings", "Backlink-Aufbau (White-Hat)", "Monatliches Performance-Reporting", "Google Search Console Monitoring"] },
+                        { title: "Logo & Branding", amount: 600, duration: "1-2 Wochen", payment: "100% bei Vertragsstart", desc: `Professionelles Logo-Design und Branding-Paket für ${client.company || client.name}. Entwicklung einer einzigartigen visuellen Identität die Ihre Marke repräsentiert.`, services: ["3 individuelle Logo-Entwürfe", "Farbpalette & Typografie-System", "Visitenkarten-Design (Print-Ready)", "Social Media Profilbilder & Banner", "Brand Guidelines PDF", "Alle Dateiformate (SVG, PNG, PDF, AI)"] },
+                        { title: "AI-Agenten Paket", amount: 1500, duration: "2-3 Wochen", payment: "50% Start, 50% Fertigstellung", desc: `Individuelle KI-Agenten für ${client.company || client.name}. Automatisierte Kundenbetreuung, E-Mail-Marketing und Vertriebs-Workflows. Integration in bestehende Systeme mit n8n-Automatisierung.`, services: ["E-Mail Automation Agent (Willkommen, Follow-up, Newsletter)", "KI-Chat-Bot für Website (24/7 Kundenbetreuung)", "Lead-Qualifizierung & Scoring Agent", "CRM-Integration & Datensynchronisation", "n8n Workflow-Automatisierung (bis zu 5 Workflows)", "Vertriebs-Agent (Angebote, Nachfass)", "Schulung & Dokumentation (3h)", "30 Tage Support & Optimierung"] },
                       ].map(tpl => (
                         <button key={tpl.title} onClick={() => setAgreementForm({
-                          ...agreementForm, project_title: tpl.title, amount: tpl.amount,
+                          ...agreementForm, project_title: `${tpl.title} — ${client.company || client.name}`, amount: tpl.amount,
                           project_duration: tpl.duration, payment_terms: tpl.payment,
                           project_description: tpl.desc, services: tpl.services, newService: "",
                         })}
@@ -7390,7 +7390,7 @@ function ClientDetailModal({
                                             <p>Bei Fragen stehe ich Ihnen gerne zur Verf\u00FCgung.</p>
                                             <p>Mit freundlichen Gr\u00FC\u00DFen,<br><strong>Mo Sul</strong><br>AgentFlowMarketing</p>
                                             <div style="text-align:center;color:#999;font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid #eee">
-                                              AgentFlowMarketing | kontakt@agentflowm.com | +49 179 949 8247
+                                              AgentFlowMarketing | kontakt@agentflowm.de | +49 179 949 8247
                                             </div>
                                           </div>`,
                                         }),
@@ -7409,7 +7409,7 @@ function ClientDetailModal({
                                     } catch (err: any) {
                                       btn.innerHTML = orig;
                                       btn.disabled = false;
-                                      showToast("warning", "SMTP fehlgeschlagen — Mail-Client wird ge\u00F6ffnet");
+                                      showToast("info", "E-Mail wird im Mail-Client ge\u00F6ffnet");
                                       const subject = encodeURIComponent(`Rechnung ${inv.invoice_number} \u2014 AgentFlowMarketing`);
                                       const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie Ihre Rechnung ${inv.invoice_number} \u00FCber \u20AC${inv.total?.toFixed(2)}.\n\nMit freundlichen Gr\u00FC\u00DFen,\nMo Sul\nAgentFlowMarketing`);
                                       window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
@@ -7516,7 +7516,7 @@ function ClientDetailModal({
                                             <p>Bei Fragen stehe ich Ihnen gerne zur Verf\u00FCgung.</p>
                                             <p>Mit freundlichen Gr\u00FC\u00DFen,<br><strong>Mo Sul</strong><br>AgentFlowMarketing</p>
                                             <div style="text-align:center;color:#999;font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid #eee">
-                                              AgentFlowMarketing | kontakt@agentflowm.com | +49 179 949 8247
+                                              AgentFlowMarketing | kontakt@agentflowm.de | +49 179 949 8247
                                             </div>
                                           </div>`,
                                         }),
@@ -7535,10 +7535,15 @@ function ClientDetailModal({
                                     } catch (err: any) {
                                       btn.innerHTML = orig;
                                       btn.disabled = false;
-                                      showToast("warning", "SMTP fehlgeschlagen — Mail-Client wird ge\u00F6ffnet");
+                                      showToast("info", "E-Mail wird im Mail-Client ge\u00F6ffnet");
                                       const subject = encodeURIComponent(`Vereinbarung: ${agr.project_title || "Projektvereinbarung"} \u2014 AgentFlowMarketing`);
-                                      const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie unsere Vereinbarung.\n\nMit freundlichen Gr\u00FC\u00DFen,\nMo Sul\nAgentFlowMarketing`);
+                                      const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie unsere Vereinbarung f\u00FCr "${agr.project_title || "unser gemeinsames Projekt"}" \u00FCber \u20AC${agr.total_amount?.toFixed(2)}.\n\nBitte pr\u00FCfen Sie die Vereinbarung und senden Sie uns eine unterschriebene Kopie zur\u00FCck.\n\nBei Fragen stehe ich Ihnen gerne zur Verf\u00FCgung.\n\nMit freundlichen Gr\u00FC\u00DFen,\nMo Sul\nAgentFlowMarketing\nkontakt@agentflowm.de | +49 179 949 8247`);
                                       window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
+                                      // Status trotzdem auf sent setzen
+                                      if (agr.status === "draft") {
+                                        await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sent" }) });
+                                        fetchClientDocs();
+                                      }
                                     }
                                   }}
                                   className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-lg text-[11px] text-purple-400 hover:text-purple-300 transition-all"
