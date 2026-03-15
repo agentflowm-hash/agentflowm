@@ -6295,7 +6295,7 @@ function ClientDetailModal({
       onClick={onClose}
     >
       <div
-        className="bg-[#111827] border border-white/[0.06] rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden"
+        className="bg-[#111827] border border-white/[0.06] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header — Premium */}
@@ -7071,6 +7071,18 @@ function ClientDetailModal({
                       onKeyDown={(e) => { if (e.key === "Enter" && agreementForm.newService.trim()) { setAgreementForm({ ...agreementForm, services: [...agreementForm.services, agreementForm.newService.trim()], newService: "" }); } }}
                       placeholder="+ Leistung hinzufügen (Enter)"
                       className="w-full px-2 py-1.5 bg-white/[0.06] border border-white/10 rounded-lg text-white text-xs outline-none focus:border-purple-500/50" />
+                    {/* Schnell-Vorschläge */}
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {["Responsive Design", "SEO-Optimierung", "CMS-Integration", "DSGVO-Konformität", "SSL-Zertifikat", "Analytics Setup", "Performance-Tuning", "Schulung", "Support (30 Tage)", "Support (60 Tage)", "Hosting-Setup", "E-Mail-Integration", "Blog-System", "Kontaktformular", "Social Media Kit", "Backlink-Aufbau", "Content-Erstellung", "Logo-Design", "n8n Workflows", "KI-Chatbot"]
+                        .filter(s => !agreementForm.services.includes(s))
+                        .slice(0, 8)
+                        .map(s => (
+                          <button key={s} type="button" onClick={() => setAgreementForm({ ...agreementForm, services: [...agreementForm.services, s] })}
+                            className="px-1.5 py-0.5 bg-white/[0.03] hover:bg-purple-500/15 border border-white/[0.06] hover:border-purple-500/30 rounded text-[9px] text-white/35 hover:text-purple-300 transition-all">
+                            + {s}
+                          </button>
+                        ))}
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <div>
@@ -7458,7 +7470,7 @@ function ClientDetailModal({
                                 <DocumentTextIcon className="w-4 h-4 text-purple-400" />
                                 <div>
                                   <div className="text-sm text-white font-medium">{agr.project_title || agr.agreement_number}</div>
-                                  <div className="text-[11px] text-white/40">{new Date(agr.created_at).toLocaleDateString("de-DE")}</div>
+                                  <div className="text-[11px] text-white/40">{new Date(agr.created_at).toLocaleDateString("de-DE")}{agr.project_duration ? ` · ${agr.project_duration}` : ""}{agr.services?.length ? ` · ${agr.services.length} Leistungen` : ""}</div>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
@@ -7552,7 +7564,7 @@ function ClientDetailModal({
                                   Per E-Mail an {client.name.split(" ")[0]}
                                 </button>
                               )}
-                              {agr.status === "sent" && (
+                              {(agr.status === "sent" || agr.status === "draft") && (
                                 <button
                                   onClick={() => {
                                     // Open E-Signature Modal
