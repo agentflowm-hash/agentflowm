@@ -7601,7 +7601,7 @@ function ClientDetailModal({
                                       const sigData = canvas.toDataURL("image/png");
                                       signBtn.textContent = "Speichere..."; signBtn.style.opacity = "0.5";
                                       await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "signed", signature_data: sigData }) });
-                                      overlay.remove(); modal.remove();
+                                      overlay.remove();
                                       fetchClientDocs();
                                       showToast("success", "Vereinbarung digital unterschrieben!");
                                     };
@@ -8457,6 +8457,7 @@ function CreateClientModal({
 }
 
 function SettingsTab() {
+  const { showToast } = useToast();
   const [settingsTab, setSettingsTab] = useState<"company" | "team" | "templates" | "goals" | "notifications">("company");
   const [company, setCompany] = useState({ name: "AgentFlowMarketing", address: "", email: "kontakt@agentflowm.de", phone: "+49 179 949 8247", taxId: "", iban: "DE89 3704 0044 0532 0130 00", bic: "COBADEFFXXX" });
   const [goals, setGoals] = useState({ leads: 50, revenue: 15000, checks: 100 });
@@ -8482,7 +8483,11 @@ function SettingsTab() {
 
   const saveSettings = async (key: string, value: any) => {
     setSaving(true);
-    await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ key, value }) });
+    try {
+      const res = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ key, value }) });
+      if (res.ok) showToast("success", "Einstellungen gespeichert");
+      else showToast("error", "Fehler beim Speichern");
+    } catch { showToast("error", "Verbindungsfehler"); }
     setSaving(false);
   };
 
@@ -8556,7 +8561,7 @@ function SettingsTab() {
                     <button onClick={async () => {
                       if (!(await showConfirm(`"${m.name}" aus dem Team entfernen?`))) return;
                       await fetch(`/api/team/${m.id}`, { method: "DELETE", credentials: "include" });
-                      setTeam(team.filter(t => t.id !== m.id));
+                      setTeam(team.filter(t => t.id !== m.id)); showToast("success", "Mitglied entfernt");
                     }} className="p-1 hover:bg-red-500/20 rounded-lg transition-colors">
                       <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
                     </button>
@@ -8592,7 +8597,7 @@ function SettingsTab() {
                   if (!newMember.name || !newMember.email) return;
                   const res = await fetch("/api/team", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(newMember) });
                   const data = await res.json();
-                  if (data.member) { setTeam([...team, data.member]); setNewMember({ name: "", email: "", role: "member", phone: "" }); setShowAddTeam(false); }
+                  if (data.member) { setTeam([...team, data.member]); setNewMember({ name: "", email: "", role: "member", phone: "" }); setShowAddTeam(false); showToast("success", "Team-Mitglied hinzugefügt"); } else { showToast("error", data.error || "Fehler"); }
                 }} className="px-4 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Hinzufügen</button>
               </div>
             </div>
@@ -8618,7 +8623,7 @@ function SettingsTab() {
                 <button onClick={async () => {
                   if (!(await showConfirm(`Vorlage "${t.name}" löschen?`))) return;
                   await fetch(`/api/templates/${t.id}`, { method: "DELETE", credentials: "include" });
-                  setTemplates(templates.filter(x => x.id !== t.id));
+                  setTemplates(templates.filter(x => x.id !== t.id)); showToast("success", "Vorlage gelöscht");
                 }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
                   <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
                 </button>
@@ -8655,7 +8660,7 @@ function SettingsTab() {
                   };
                   const res = await fetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) });
                   const data = await res.json();
-                  if (data.template) { setTemplates([...templates, data.template]); setNewTemplate({ name: "", package: "", default_price: 0, milestones: "", services: "" }); setShowAddTemplate(false); }
+                  if (data.template) { setTemplates([...templates, data.template]); setNewTemplate({ name: "", package: "", default_price: 0, milestones: "", services: "" }); setShowAddTemplate(false); showToast("success", "Vorlage erstellt"); } else { showToast("error", data.error || "Fehler"); }
                 }} className="px-4 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Erstellen</button>
               </div>
             </div>
