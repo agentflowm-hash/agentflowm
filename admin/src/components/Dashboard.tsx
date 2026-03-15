@@ -1776,10 +1776,40 @@ function DokumenteTab() {
 
 function VertriebTab() {
   const [vertriebView, setVertriebView] = useState<"kanban" | "tabelle">("kanban");
+  const [pipelines, setPipelines] = useState<any[]>([]);
+  const [activePipeline, setActivePipeline] = useState<string>("default");
+
+  useEffect(() => {
+    fetch("/api/pipelines", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => {
+        const pips = d.pipelines || [];
+        setPipelines(pips);
+        const def = pips.find((p: any) => p.is_default);
+        if (def) setActivePipeline(String(def.id));
+      })
+      .catch(() => {});
+  }, []);
+
+  const currentPipeline = pipelines.find(p => String(p.id) === activePipeline);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-white">Vertrieb</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-white">Vertrieb</h2>
+          {pipelines.length > 1 && (
+            <div className="flex items-center gap-1 bg-white/[0.04] rounded-lg p-0.5 border border-white/[0.06]">
+              {pipelines.map((p: any) => (
+                <button key={p.id} onClick={() => setActivePipeline(String(p.id))}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${String(p.id) === activePipeline ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"}`}>
+                  <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ background: p.color || "#FC682C" }} />
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-1 bg-white/[0.06] rounded-lg p-1">
           <button
             onClick={() => setVertriebView("kanban")}
@@ -1803,7 +1833,7 @@ function VertriebTab() {
           </button>
         </div>
       </div>
-      {vertriebView === "kanban" ? <PipelineTab /> : <LeadsTab />}
+      {vertriebView === "kanban" ? <PipelineTab customStages={currentPipeline?.stages} /> : <LeadsTab />}
     </div>
   );
 }
@@ -1812,7 +1842,7 @@ function VertriebTab() {
 //                    PIPELINE TAB (KANBAN)
 // ═══════════════════════════════════════════════════════════════
 
-function PipelineTab() {
+function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
   const [view, setView] = useState<PipelineView>("kanban");
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1829,23 +1859,18 @@ function PipelineTab() {
       .catch(() => setLoading(false));
   }, []);
 
-  const stages = [
+  const defaultStages = [
     { id: "new", label: "Neu", color: "blue", icon: SparklesIcon },
     { id: "contacted", label: "Kontaktiert", color: "yellow", icon: PhoneIcon },
-    {
-      id: "qualified",
-      label: "Qualifiziert",
-      color: "purple",
-      icon: CheckCircleIcon,
-    },
-    {
-      id: "proposal",
-      label: "Angebot",
-      color: "orange",
-      icon: DocumentTextIcon,
-    },
+    { id: "qualified", label: "Qualifiziert", color: "purple", icon: CheckCircleIcon },
+    { id: "proposal", label: "Angebot", color: "orange", icon: DocumentTextIcon },
     { id: "won", label: "Gewonnen", color: "green", icon: StarIcon },
   ];
+  const iconMap: Record<string, any> = { SparklesIcon, PhoneIcon, CheckCircleIcon, DocumentTextIcon, StarIcon, ChartBarIcon, EyeIcon, BoltIcon, GlobeAltIcon };
+  const colorCycle = ["blue", "yellow", "purple", "orange", "green", "teal"];
+  const stages = customStages && customStages.length > 0
+    ? customStages.map((s: any, i: number) => ({ id: s.id, label: s.label, color: colorCycle[i % colorCycle.length], icon: defaultStages[i]?.icon || CheckCircleIcon }))
+    : defaultStages;
 
   const updateStatus = async (id: number, status: string) => {
     await fetch(`/api/leads/${id}`, {
@@ -7537,20 +7562,66 @@ function ClientDetailModal({
                               )}
                               {agr.status === "sent" && (
                                 <button
-                                  onClick={async () => {
-                                    await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "signed" }) });
-                                    fetchClientDocs();
+                                  onClick={() => {
+                                    // Open E-Signature Modal
+                                    const overlay = document.createElement("div");
+                                    overlay.style.cssText = "position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center";
+                                    const modal = document.createElement("div");
+                                    modal.style.cssText = "background:#111827;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;width:480px;max-width:90vw;box-shadow:0 25px 80px rgba(0,0,0,0.5)";
+                                    modal.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                                      <div><div style="color:#fff;font-size:16px;font-weight:700">E-Signatur</div><div style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:2px">${agr.project_title || agr.agreement_number}</div></div>
+                                      <button id="sig-close" style="padding:6px;background:rgba(255,255,255,0.06);border:none;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.5);font-size:18px">&times;</button>
+                                    </div>
+                                    <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:12px">Bitte unterschreiben Sie im Feld unten:</div>`;
+                                    const canvas = document.createElement("canvas");
+                                    canvas.width = 432; canvas.height = 160;
+                                    canvas.style.cssText = "width:100%;height:160px;background:#0B0F19;border:2px dashed rgba(255,255,255,0.15);border-radius:12px;cursor:crosshair";
+                                    modal.appendChild(canvas);
+                                    const ctx = canvas.getContext("2d")!;
+                                    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.lineJoin = "round";
+                                    let drawing = false;
+                                    canvas.onmousedown = (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+                                    canvas.onmousemove = (e) => { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+                                    canvas.onmouseup = () => { drawing = false; };
+                                    canvas.onmouseleave = () => { drawing = false; };
+                                    // Touch support
+                                    canvas.ontouchstart = (e) => { e.preventDefault(); drawing = true; const r = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); };
+                                    canvas.ontouchmove = (e) => { e.preventDefault(); if (drawing) { const r = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.lineTo(t.clientX - r.left, t.clientY - r.top); ctx.stroke(); } };
+                                    canvas.ontouchend = () => { drawing = false; };
+                                    const btnRow = document.createElement("div");
+                                    btnRow.style.cssText = "display:flex;gap:8px;justify-content:flex-end;margin-top:16px";
+                                    const clearBtn = document.createElement("button");
+                                    clearBtn.textContent = "Löschen";
+                                    clearBtn.style.cssText = "padding:8px 20px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.1);border-radius:10px;cursor:pointer;font-size:13px";
+                                    clearBtn.onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
+                                    const signBtn = document.createElement("button");
+                                    signBtn.textContent = "Unterschrift bestätigen";
+                                    signBtn.style.cssText = "padding:8px 24px;background:#10B981;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600";
+                                    signBtn.onclick = async () => {
+                                      const sigData = canvas.toDataURL("image/png");
+                                      signBtn.textContent = "Speichere..."; signBtn.style.opacity = "0.5";
+                                      await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "signed", signature_data: sigData }) });
+                                      overlay.remove(); modal.remove();
+                                      fetchClientDocs();
+                                      showToast("success", "Vereinbarung digital unterschrieben!");
+                                    };
+                                    btnRow.appendChild(clearBtn); btnRow.appendChild(signBtn);
+                                    modal.appendChild(btnRow);
+                                    overlay.appendChild(modal);
+                                    document.body.appendChild(overlay);
+                                    modal.querySelector("#sig-close")!.addEventListener("click", () => { overlay.remove(); });
+                                    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
                                   }}
                                   className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 rounded-lg text-[11px] text-green-400 hover:text-green-300 transition-all"
                                 >
-                                  <CheckCircleIcon className="w-3 h-3" />
-                                  Unterschrieben
+                                  <PencilIcon className="w-3 h-3" />
+                                  E-Signatur
                                 </button>
                               )}
                               {agr.status === "signed" && (
                                 <span className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-green-400/40">
                                   <CheckCircleIcon className="w-3 h-3" />
-                                  Abgeschlossen
+                                  Unterschrieben
                                 </span>
                               )}
                             </div>
