@@ -4847,6 +4847,7 @@ interface PortalClient {
 }
 
 function ClientsTab() {
+  const { showToast } = useToast();
   const [clients, setClients] = useState<PortalClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState<PortalClient | null>(null);
@@ -4978,7 +4979,7 @@ function ClientsTab() {
 
   const copyPortalLink = (code: string) => {
     navigator.clipboard.writeText(`https://portal.agentflowm.de/login?code=${code}`);
-    alert("Portal-Link kopiert!");
+    showToast("success", "Portal-Link kopiert!");
   };
 
   const handleQuickInvoice = (client: PortalClient) => {
@@ -5880,6 +5881,7 @@ function ClientDetailModal({
   onUpdate: () => void;
   initialTab?: "details" | "project" | "messages" | "approvals" | "dokumente";
 }) {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<
     "details" | "project" | "messages" | "approvals" | "dokumente"
   >(initialTab || "details");
@@ -5976,10 +5978,10 @@ function ClientDetailModal({
         setIsEditing(false);
         onUpdate();
       } else {
-        alert("Fehler beim Speichern");
+        showToast("error", "Fehler beim Speichern");
       }
     } catch (error) {
-      alert("Verbindungsfehler");
+      showToast("error", "Verbindungsfehler");
     }
     setSaving(false);
   };
@@ -5997,10 +5999,10 @@ function ClientDetailModal({
         onClose();
         onUpdate();
       } else {
-        alert("Fehler beim Löschen");
+        showToast("error", "Fehler beim Löschen");
       }
     } catch (error) {
-      alert("Verbindungsfehler");
+      showToast("error", "Verbindungsfehler");
     }
     setDeleting(false);
   };
@@ -6466,15 +6468,16 @@ function ClientDetailModal({
                   <button
                     onClick={async () => {
                       if (!client.telegram_id) {
-                        alert("Kunde hat keine Telegram-Verbindung. Der Kunde muss sich erst mit dem Bot verbinden (@Agentflowzbot).");
+                        showToast("warning", "Kunde hat keine Telegram-Verbindung — @Agentflowzbot");
                         return;
                       }
                       try {
                         const res = await fetch(`/api/clients/${client.id}/send-code`, { method: "POST" });
                         const data = await res.json();
-                        if (data.success) alert("Zugangscode wurde per Telegram gesendet!");
-                        else alert(data.error || "Fehler beim Senden");
-                      } catch { alert("Verbindungsfehler"); }
+                        if (data.success) showToast("success", "Zugangscode per Telegram gesendet!");
+                        else showToast("error", data.error || "Fehler beim Senden");
+                      } catch { showToast("error", "Verbindungsfehler"); }
+
                     }}
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#0088cc]/10 hover:bg-[#0088cc]/20 border border-[#0088cc]/20 text-[#29B6F6] rounded-xl text-xs font-medium transition-all"
                   >
@@ -7242,7 +7245,7 @@ function ClientDetailModal({
                         setTimeout(() => document.body.removeChild(a), 500);
                       } catch (err) {
                         console.error("Poster download error:", err);
-                        alert("Download fehlgeschlagen: " + (err as Error).message);
+                        showToast("error", "Download fehlgeschlagen: " + (err as Error).message);
                       }
                     }}
                       className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-[1px] transition-all flex items-center gap-1.5">
@@ -7355,7 +7358,7 @@ function ClientDetailModal({
                                     } catch (err: any) {
                                       btn.innerHTML = orig;
                                       btn.disabled = false;
-                                      alert("E-Mail konnte nicht gesendet werden: " + err.message + "\n\nFallback: E-Mail wird im Mail-Client ge\u00F6ffnet.");
+                                      showToast("warning", "SMTP fehlgeschlagen — Mail-Client wird ge\u00F6ffnet");
                                       const subject = encodeURIComponent(`Rechnung ${inv.invoice_number} \u2014 AgentFlowMarketing`);
                                       const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie Ihre Rechnung ${inv.invoice_number} \u00FCber \u20AC${inv.total?.toFixed(2)}.\n\nMit freundlichen Gr\u00FC\u00DFen,\nMo Sul\nAgentFlowMarketing`);
                                       window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
@@ -7481,7 +7484,7 @@ function ClientDetailModal({
                                     } catch (err: any) {
                                       btn.innerHTML = orig;
                                       btn.disabled = false;
-                                      alert("E-Mail konnte nicht gesendet werden: " + err.message + "\n\nFallback: E-Mail wird im Mail-Client ge\u00F6ffnet.");
+                                      showToast("warning", "SMTP fehlgeschlagen — Mail-Client wird ge\u00F6ffnet");
                                       const subject = encodeURIComponent(`Vereinbarung: ${agr.project_title || "Projektvereinbarung"} \u2014 AgentFlowMarketing`);
                                       const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei finden Sie unsere Vereinbarung.\n\nMit freundlichen Gr\u00FC\u00DFen,\nMo Sul\nAgentFlowMarketing`);
                                       window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
@@ -7540,9 +7543,35 @@ function ClientDetailModal({
                     <div className="flex gap-2">
                       <button
                         onClick={async () => {
-                          const newProgress = prompt("Neuer Fortschritt (0-100):", String(projectData.project.progress));
-                          if (newProgress !== null) {
-                            const progress = Math.min(100, Math.max(0, parseInt(newProgress) || 0));
+                          const input = document.createElement("input");
+                          input.type = "number"; input.min = "0"; input.max = "100"; input.value = String(projectData.project.progress);
+                          input.style.cssText = "width:60px;padding:4px 8px;background:#1a2235;color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;text-align:center;font-size:14px";
+                          const container = document.createElement("div");
+                          container.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:#111827;padding:24px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;align-items:center;gap:12px";
+                          container.innerHTML = '<div style="color:#fff;font-size:14px;font-weight:600">Fortschritt setzen</div>';
+                          container.appendChild(input);
+                          const btnRow = document.createElement("div");
+                          btnRow.style.cssText = "display:flex;gap:8px";
+                          const cancelBtn = document.createElement("button");
+                          cancelBtn.textContent = "Abbrechen";
+                          cancelBtn.style.cssText = "padding:6px 16px;background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px";
+                          cancelBtn.onclick = () => { overlay.remove(); };
+                          const saveBtn = document.createElement("button");
+                          saveBtn.textContent = "Speichern";
+                          saveBtn.style.cssText = "padding:6px 16px;background:#FC682C;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600";
+                          btnRow.appendChild(cancelBtn);
+                          btnRow.appendChild(saveBtn);
+                          container.appendChild(btnRow);
+                          const overlay = document.createElement("div");
+                          overlay.style.cssText = "position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5)";
+                          overlay.onclick = () => overlay.remove();
+                          document.body.appendChild(overlay);
+                          document.body.appendChild(container);
+                          input.focus();
+                          input.select();
+                          const doSave = async () => {
+                            const progress = Math.min(100, Math.max(0, parseInt(input.value) || 0));
+                            overlay.remove(); container.remove();
                             await fetch(`/api/projects/${projectData.project.id}`, {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
@@ -7551,7 +7580,10 @@ function ClientDetailModal({
                             });
                             setProjectData({ ...projectData, project: { ...projectData.project, progress } });
                             onUpdate();
-                          }
+                            showToast("success", `Fortschritt auf ${progress}% gesetzt`);
+                          };
+                          saveBtn.onclick = () => doSave();
+                          input.onkeydown = (e: any) => { if (e.key === "Enter") doSave(); if (e.key === "Escape") { overlay.remove(); container.remove(); } };
                         }}
                         className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white flex items-center gap-1.5 transition-colors"
                       >
@@ -7663,10 +7695,10 @@ function ClientDetailModal({
                               },
                             );
                             if (res.ok) {
-                              alert("Preview-URL gespeichert!");
+                              showToast("success", "Preview-URL gespeichert!");
                             }
                           } catch {
-                            alert("Fehler beim Speichern");
+                            showToast("error", "Fehler beim Speichern");
                           }
                         }}
                         className="px-4 py-2 bg-[#FC682C] text-white rounded-lg text-sm font-medium"
@@ -7721,7 +7753,7 @@ function ClientDetailModal({
                       <h4 className="text-sm font-medium text-white/70">Meilensteine</h4>
                       <button
                         onClick={async () => {
-                          const title = prompt("Meilenstein-Titel:");
+                          const title = window.prompt("Meilenstein-Titel:");
                           if (title) {
                             await fetch(`/api/projects/${projectData.project.id}/milestones`, {
                               method: "POST",
