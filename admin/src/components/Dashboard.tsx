@@ -96,6 +96,45 @@ function unwrapApiResponse<T>(response: unknown): T {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//                    CONFIRM DIALOG (replaces browser confirm())
+// ═══════════════════════════════════════════════════════════════
+function showConfirm(message: string, destructive = true): Promise<boolean> {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center";
+    const modal = document.createElement("div");
+    modal.style.cssText = "background:#111827;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;max-width:400px;width:90%;box-shadow:0 25px 50px rgba(0,0,0,0.4)";
+    modal.innerHTML = `<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px">
+      <div style="width:36px;height:36px;border-radius:10px;background:${destructive ? "rgba(239,68,68,0.15)" : "rgba(59,130,246,0.15)"};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${destructive ? "#EF4444" : "#3B82F6"}" stroke-width="2" stroke-linecap="round"><path d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+      </div>
+      <div><div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:4px">${destructive ? "Bist du sicher?" : "Bestätigung"}</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.5">${message}</div></div>
+    </div>`;
+    const btnRow = document.createElement("div");
+    btnRow.style.cssText = "display:flex;gap:8px;justify-content:flex-end";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Abbrechen";
+    cancelBtn.style.cssText = "padding:8px 20px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.1);border-radius:10px;cursor:pointer;font-size:13px;font-weight:500";
+    const confirmBtn = document.createElement("button");
+    confirmBtn.textContent = destructive ? "Löschen" : "Bestätigen";
+    confirmBtn.style.cssText = `padding:8px 20px;background:${destructive ? "#EF4444" : "#3B82F6"};color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600`;
+    btnRow.appendChild(cancelBtn);
+    btnRow.appendChild(confirmBtn);
+    modal.appendChild(btnRow);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    confirmBtn.focus();
+    const cleanup = (result: boolean) => { overlay.remove(); resolve(result); };
+    cancelBtn.onclick = () => cleanup(false);
+    confirmBtn.onclick = () => cleanup(true);
+    overlay.onclick = (e) => { if (e.target === overlay) cleanup(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { cleanup(false); document.removeEventListener("keydown", onKey); } if (e.key === "Enter") { cleanup(true); document.removeEventListener("keydown", onKey); } };
+    document.addEventListener("keydown", onKey);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
 //                    TYPES
 // ═══════════════════════════════════════════════════════════════
 
@@ -2383,14 +2422,14 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
   };
 
   const deleteLead = async () => {
-    if (confirm("Möchtest du diesen Lead wirklich löschen?")) {
+    if (await showConfirm("Möchtest du diesen Lead wirklich löschen?")) {
       await fetch(`/api/leads/${lead.id}`, { credentials: "include", method: "DELETE" });
       onClose();
     }
   };
 
   const convertToClient = async () => {
-    if (!confirm(`Lead "${lead.name}" zu Portal-Client konvertieren?`)) return;
+    if (!(await showConfirm(`"${lead.name}" zu Portal-Client konvertieren?`, false))) return;
     setConverting(true);
     try {
       const res = await fetch(`/api/leads/${lead.id}/convert`, {
@@ -4934,7 +4973,7 @@ function ClientsTab() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`${selectedIds.size} Kunden wirklich löschen?`)) return;
+    if (!(await showConfirm(`${selectedIds.size} Kunden wirklich löschen?`))) return;
     for (const id of Array.from(selectedIds)) {
       await fetch(`/api/clients/${id}`, { method: "DELETE", credentials: "include" });
     }
@@ -5988,7 +6027,7 @@ function ClientDetailModal({
 
   // Delete Client
   const handleDeleteClient = async () => {
-    if (!confirm(`Kunde "${client.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!`)) return;
+    if (!(await showConfirm(`"${client.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!`))) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/clients/${client.id}`, {
@@ -6009,7 +6048,7 @@ function ClientDetailModal({
 
   // Delete Message
   const handleDeleteMessage = async (messageId: number) => {
-    if (!confirm("Nachricht wirklich löschen?")) return;
+    if (!(await showConfirm("Nachricht wirklich löschen?"))) return;
     try {
       const res = await fetch(`/api/messages/${messageId}`, {
         method: "DELETE",
@@ -6027,7 +6066,7 @@ function ClientDetailModal({
 
   // Delete Approval
   const handleDeleteApproval = async (approvalId: number) => {
-    if (!confirm("Freigabe-Anfrage wirklich löschen?")) return;
+    if (!(await showConfirm("Freigabe-Anfrage wirklich löschen?"))) return;
     try {
       const res = await fetch(`/api/approvals/${approvalId}`, {
         method: "DELETE",
@@ -7611,7 +7650,7 @@ function ClientDetailModal({
                       </select>
                       <button
                         onClick={async () => {
-                          if (!confirm("Projekt wirklich löschen? Alle Meilensteine, Nachrichten und Dateien werden gelöscht!")) return;
+                          if (!(await showConfirm("Projekt wirklich löschen? Alle Meilensteine, Nachrichten und Dateien gehen verloren!"))) return;
                           await fetch(`/api/projects/${projectData.project.id}`, {
                             method: "DELETE",
                             credentials: "include",
@@ -7810,7 +7849,7 @@ function ClientDetailModal({
                         </div>
                         <button
                           onClick={async () => {
-                            if (!confirm("Meilenstein löschen?")) return;
+                            if (!(await showConfirm("Meilenstein löschen?"))) return;
                             await fetch(`/api/projects/${projectData.project.id}/milestones/${m.id}`, {
                               method: "DELETE",
                               credentials: "include",
@@ -8112,7 +8151,7 @@ function ClientDetailModal({
                           )}
                           <button
                             onClick={async () => {
-                              if (confirm("Freigabe-Anfrage löschen?")) {
+                              if (await showConfirm("Freigabe-Anfrage löschen?")) {
                                 await fetch(
                                   `/api/approvals?id=${approval.id}`,
                                   { method: "DELETE" },
@@ -8444,7 +8483,7 @@ function SettingsTab() {
                   </span>
                   {m.role !== "admin" && (
                     <button onClick={async () => {
-                      if (!confirm(`${m.name} entfernen?`)) return;
+                      if (!(await showConfirm(`"${m.name}" aus dem Team entfernen?`))) return;
                       await fetch(`/api/team/${m.id}`, { method: "DELETE", credentials: "include" });
                       setTeam(team.filter(t => t.id !== m.id));
                     }} className="p-1 hover:bg-red-500/20 rounded-lg transition-colors">
@@ -8506,7 +8545,7 @@ function SettingsTab() {
                   </div>
                 </div>
                 <button onClick={async () => {
-                  if (!confirm(`"${t.name}" löschen?`)) return;
+                  if (!(await showConfirm(`Vorlage "${t.name}" löschen?`))) return;
                   await fetch(`/api/templates/${t.id}`, { method: "DELETE", credentials: "include" });
                   setTemplates(templates.filter(x => x.id !== t.id));
                 }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
