@@ -5920,6 +5920,8 @@ function ClientDetailModal({
     newService: "",
   });
   const [showCreateOffer, setShowCreateOffer] = useState(false);
+  const [showCreateSub, setShowCreateSub] = useState(false);
+  const [subForm, setSubForm] = useState({ plan: "Wartung & Support", amount: 150, interval: "monthly", notes: "" });
   const [offerForm, setOfferForm] = useState({
     valid_until: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
     tax_rate: 19,
@@ -6511,30 +6513,37 @@ function ClientDetailModal({
           {activeTab === "dokumente" && (
             <div className="space-y-4">
               {/* Quick Actions */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-5 gap-2">
                 <button
-                  onClick={() => { setShowCreateInvoice(true); setShowCreateOffer(false); setShowCreateAgreement(false); setShowPosterGen(false); }}
+                  onClick={() => { setShowCreateInvoice(true); setShowCreateOffer(false); setShowCreateAgreement(false); setShowPosterGen(false); setShowCreateSub(false); }}
                   className="p-3 bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20 rounded-xl hover:border-[#FC682C]/40 transition-colors text-center"
                 >
                   <CurrencyEuroIcon className="w-5 h-5 text-[#FC682C] mx-auto mb-1" />
                   <span className="text-xs font-medium text-[#FC682C]">Rechnung</span>
                 </button>
                 <button
-                  onClick={() => { setShowCreateAgreement(true); setShowCreateOffer(false); setShowCreateInvoice(false); setShowPosterGen(false); }}
+                  onClick={() => { setShowCreateAgreement(true); setShowCreateOffer(false); setShowCreateInvoice(false); setShowPosterGen(false); setShowCreateSub(false); }}
                   className="p-3 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-xl hover:border-purple-500/40 transition-colors text-center"
                 >
                   <DocumentTextIcon className="w-5 h-5 text-purple-400 mx-auto mb-1" />
                   <span className="text-xs font-medium text-purple-400">Vereinbarung</span>
                 </button>
                 <button
-                  onClick={() => { setShowCreateOffer(true); setShowCreateInvoice(false); setShowCreateAgreement(false); setShowPosterGen(false); }}
+                  onClick={() => { setShowCreateOffer(true); setShowCreateInvoice(false); setShowCreateAgreement(false); setShowPosterGen(false); setShowCreateSub(false); }}
                   className="p-3 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-xl hover:border-blue-500/40 transition-colors text-center"
                 >
                   <DocumentTextIcon className="w-5 h-5 text-blue-400 mx-auto mb-1" />
                   <span className="text-xs font-medium text-blue-400">Angebot</span>
                 </button>
                 <button
-                  onClick={() => { setShowPosterGen(true); setShowCreateOffer(false); setShowCreateInvoice(false); setShowCreateAgreement(false); }}
+                  onClick={() => { setShowCreateSub(true); setShowCreateInvoice(false); setShowCreateOffer(false); setShowCreateAgreement(false); setShowPosterGen(false); }}
+                  className="p-3 bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-500/20 rounded-xl hover:border-teal-500/40 transition-colors text-center"
+                >
+                  <ArrowPathIcon className="w-5 h-5 text-teal-400 mx-auto mb-1" />
+                  <span className="text-xs font-medium text-teal-400">Abo</span>
+                </button>
+                <button
+                  onClick={() => { setShowPosterGen(true); setShowCreateOffer(false); setShowCreateInvoice(false); setShowCreateAgreement(false); setShowCreateSub(false); }}
                   className="p-3 bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-xl hover:border-green-500/40 transition-colors text-center"
                 >
                   <SparklesIcon className="w-5 h-5 text-green-400 mx-auto mb-1" />
@@ -6835,6 +6844,90 @@ function ClientDetailModal({
                       className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-blue-500/20 transition-all disabled:opacity-50"
                     >
                       {creatingDoc ? "..." : "Angebot erstellen"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Create Subscription Form */}
+              {showCreateSub && (
+                <div className="p-4 bg-white/[0.03] border border-teal-500/20 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">Neues Abo für {client.name}</h4>
+                    <button onClick={() => setShowCreateSub(false)} className="p-1 hover:bg-white/10 rounded-lg">
+                      <XMarkIcon className="w-4 h-4 text-white/40" />
+                    </button>
+                  </div>
+                  {/* Quick-Vorlagen */}
+                  <div className="flex flex-wrap gap-1">
+                    {[
+                      { label: "Wartung & Support", price: 150 },
+                      { label: "Hosting", price: 200 },
+                      { label: "SEO-Betreuung", price: 500 },
+                      { label: "Content-Pflege", price: 300 },
+                      { label: "AI-Agenten Paket", price: 250 },
+                    ].map(tpl => (
+                      <button key={tpl.label} onClick={() => setSubForm({ ...subForm, plan: tpl.label, amount: tpl.price })}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all ${subForm.plan === tpl.label ? "bg-teal-500/20 text-teal-400 border border-teal-500/30" : "bg-white/[0.04] text-white/50 border border-white/[0.06] hover:border-teal-500/30"}`}>
+                        {tpl.label} €{tpl.price}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] text-white/40 block mb-1">Plan</label>
+                      <input value={subForm.plan} onChange={e => setSubForm({ ...subForm, plan: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-teal-500/30" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Betrag (€)</label>
+                      <input type="number" value={subForm.amount} onChange={e => setSubForm({ ...subForm, amount: parseFloat(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-teal-500/30" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Intervall</label>
+                      <select value={subForm.interval} onChange={e => setSubForm({ ...subForm, interval: e.target.value })}
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-teal-500/30">
+                        <option value="monthly">Monatlich</option>
+                        <option value="quarterly">Vierteljährlich</option>
+                        <option value="yearly">Jährlich</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-white/40 block mb-1">Notizen</label>
+                      <input value={subForm.notes} onChange={e => setSubForm({ ...subForm, notes: e.target.value })} placeholder="Optional..."
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-teal-500/30 placeholder:text-white/20" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                    <div className="text-xs text-white/50">
+                      €{subForm.amount.toFixed(2)} / {subForm.interval === "monthly" ? "Monat" : subForm.interval === "quarterly" ? "Quartal" : "Jahr"}
+                    </div>
+                    <button disabled={creatingDoc} onClick={async () => {
+                      setCreatingDoc(true);
+                      try {
+                        const nextBilling = new Date();
+                        if (subForm.interval === "monthly") nextBilling.setMonth(nextBilling.getMonth() + 1);
+                        else if (subForm.interval === "quarterly") nextBilling.setMonth(nextBilling.getMonth() + 3);
+                        else nextBilling.setFullYear(nextBilling.getFullYear() + 1);
+                        await fetch("/api/subscriptions", {
+                          method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
+                          body: JSON.stringify({
+                            client_id: client.id, client_name: client.name, client_email: client.email,
+                            plan: subForm.plan, amount: subForm.amount, interval: subForm.interval,
+                            next_billing: nextBilling.toISOString().split("T")[0], notes: subForm.notes,
+                          }),
+                        });
+                        setShowCreateSub(false);
+                        setSubForm({ plan: "Wartung & Support", amount: 150, interval: "monthly", notes: "" });
+                        fetchClientDocs();
+                      } catch (err) { console.error(err); }
+                      setCreatingDoc(false);
+                    }}
+                      className="px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-teal-500/20 transition-all disabled:opacity-50">
+                      {creatingDoc ? "..." : "Abo erstellen"}
                     </button>
                   </div>
                 </div>
@@ -8222,63 +8315,262 @@ function CreateClientModal({
 }
 
 function SettingsTab() {
+  const [settingsTab, setSettingsTab] = useState<"company" | "team" | "templates" | "goals" | "notifications">("company");
+  const [company, setCompany] = useState({ name: "AgentFlowMarketing", address: "", email: "kontakt@agentflowm.de", phone: "+49 179 949 8247", taxId: "", iban: "DE89 3704 0044 0532 0130 00", bic: "COBADEFFXXX" });
+  const [goals, setGoals] = useState({ leads: 50, revenue: 15000, checks: 100 });
+  const [notifSettings, setNotifSettings] = useState({ emailOnNewLead: true, telegramAlerts: true, dailySummary: false });
+  const [team, setTeam] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [showAddTeam, setShowAddTeam] = useState(false);
+  const [newMember, setNewMember] = useState({ name: "", email: "", role: "member", phone: "" });
+  const [showAddTemplate, setShowAddTemplate] = useState(false);
+  const [newTemplate, setNewTemplate] = useState({ name: "", package: "", default_price: 0, milestones: "" as string, services: "" as string });
+
+  // Load settings from API
+  useEffect(() => {
+    fetch("/api/settings", { credentials: "include" }).then(r => r.json()).then(d => {
+      if (d.settings?.company) setCompany(d.settings.company);
+      if (d.settings?.goals) setGoals(d.settings.goals);
+      if (d.settings?.notifications) setNotifSettings(d.settings.notifications);
+    }).catch(() => {});
+    fetch("/api/team", { credentials: "include" }).then(r => r.json()).then(d => setTeam(d.members || [])).catch(() => {});
+    fetch("/api/templates", { credentials: "include" }).then(r => r.json()).then(d => setTemplates(d.templates || [])).catch(() => {});
+  }, []);
+
+  const saveSettings = async (key: string, value: any) => {
+    setSaving(true);
+    await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ key, value }) });
+    setSaving(false);
+  };
+
+  const tabs = [
+    { id: "company" as const, label: "Firmenprofil", icon: Cog6ToothIcon },
+    { id: "team" as const, label: "Team", icon: UserGroupIcon },
+    { id: "templates" as const, label: "Vorlagen", icon: DocumentDuplicateIcon },
+    { id: "goals" as const, label: "Ziele", icon: RocketLaunchIcon },
+    { id: "notifications" as const, label: "Benachrichtigungen", icon: BellIcon },
+  ];
+
   return (
-    <div className="max-w-2xl space-y-6">
-      <GlassCard title="Profil" icon={UsersIcon}>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs text-white/40 mb-2">Name</label>
-            <input
-              type="text"
-              defaultValue="Admin"
-              className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white focus:border-[#FC682C]/50 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-white/40 mb-2">E-Mail</label>
-            <input
-              type="email"
-              defaultValue="admin@agentflow.de"
-              className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white focus:border-[#FC682C]/50 outline-none"
-            />
-          </div>
-        </div>
-      </GlassCard>
-
-      <GlassCard title="Benachrichtigungen" icon={BellIcon}>
-        <div className="space-y-4">
-          <SettingToggle label="E-Mail bei neuem Lead" defaultChecked />
-          <SettingToggle label="Telegram-Benachrichtigungen" defaultChecked />
-          <SettingToggle label="Tägliche Zusammenfassung" />
-        </div>
-      </GlassCard>
-
-      <GlassCard title="Gefährliche Zone" icon={ExclamationCircleIcon}>
-        <div className="flex gap-3">
-          <button
-            onClick={() => {
-              if (confirm("Alle Rate-Limit-Einträge löschen?")) {
-                fetch("/api/notifications", { method: "DELETE", credentials: "include" })
-                  .then(() => alert("Cache geleert."))
-                  .catch(() => alert("Fehler beim Leeren."));
-              }
-            }}
-            className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm hover:bg-red-500/30 transition-colors"
-          >
-            Cache leeren
+    <div className="max-w-3xl space-y-4">
+      {/* Settings Tabs */}
+      <div className="flex gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.06]">
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setSettingsTab(t.id)}
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${settingsTab === t.id ? "bg-[#FC682C]/20 text-[#FC682C]" : "text-white/40 hover:text-white/60 hover:bg-white/[0.03]"}`}>
+            <t.icon className="w-4 h-4" />{t.label}
           </button>
-          <button
-            onClick={() => {
-              if (confirm("Alle alten Logs löschen? Diese Aktion kann nicht rückgängig gemacht werden.")) {
-                alert("Logs wurden geleert.");
-              }
-            }}
-            className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl text-sm hover:bg-red-500/30 transition-colors"
-          >
-            Alle Logs löschen
+        ))}
+      </div>
+
+      {/* Company Profile */}
+      {settingsTab === "company" && (
+        <GlassCard title="Firmenprofil" icon={Cog6ToothIcon}>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: "Firmenname", key: "name", type: "text" },
+              { label: "E-Mail", key: "email", type: "email" },
+              { label: "Telefon", key: "phone", type: "tel" },
+              { label: "Adresse", key: "address", type: "text" },
+              { label: "Steuernummer", key: "taxId", type: "text" },
+              { label: "IBAN", key: "iban", type: "text" },
+              { label: "BIC", key: "bic", type: "text" },
+            ].map(f => (
+              <div key={f.key} className={f.key === "address" ? "col-span-2" : ""}>
+                <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">{f.label}</label>
+                <input type={f.type} value={(company as any)[f.key] || ""} onChange={e => setCompany({ ...company, [f.key]: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
+              </div>
+            ))}
+          </div>
+          <button onClick={() => saveSettings("company", company)} disabled={saving}
+            className="mt-4 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50">
+            {saving ? "Speichere..." : "Firmenprofil speichern"}
           </button>
-        </div>
-      </GlassCard>
+        </GlassCard>
+      )}
+
+      {/* Team */}
+      {settingsTab === "team" && (
+        <GlassCard title="Team-Mitglieder" icon={UserGroupIcon}>
+          <div className="space-y-2">
+            {team.map((m: any) => (
+              <div key={m.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.04]">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FC682C]/30 to-[#9D65C9]/30 flex items-center justify-center text-white text-sm font-bold">
+                    {m.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
+                  </div>
+                  <div>
+                    <div className="text-sm text-white font-medium">{m.name}</div>
+                    <div className="text-[11px] text-white/40">{m.email}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${m.role === "admin" ? "bg-[#FC682C]/15 text-[#FC682C]" : m.role === "manager" ? "bg-purple-500/15 text-purple-400" : "bg-white/10 text-white/50"}`}>
+                    {m.role === "admin" ? "Admin" : m.role === "manager" ? "Manager" : "Mitarbeiter"}
+                  </span>
+                  {m.role !== "admin" && (
+                    <button onClick={async () => {
+                      if (!confirm(`${m.name} entfernen?`)) return;
+                      await fetch(`/api/team/${m.id}`, { method: "DELETE", credentials: "include" });
+                      setTeam(team.filter(t => t.id !== m.id));
+                    }} className="p-1 hover:bg-red-500/20 rounded-lg transition-colors">
+                      <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {team.length === 0 && <p className="text-sm text-white/30 text-center py-4">Noch keine Team-Mitglieder</p>}
+          </div>
+          {!showAddTeam ? (
+            <button onClick={() => setShowAddTeam(true)} className="mt-3 text-xs text-[#FC682C] hover:text-[#FF8F5C] flex items-center gap-1">
+              <PlusIcon className="w-3.5 h-3.5" /> Mitglied hinzufügen
+            </button>
+          ) : (
+            <div className="mt-3 p-3 bg-white/[0.03] rounded-xl border border-[#FC682C]/20 space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <input placeholder="Name" value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                <input placeholder="E-Mail" value={newMember.email} onChange={e => setNewMember({ ...newMember, email: e.target.value })}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                <input placeholder="Telefon" value={newMember.phone} onChange={e => setNewMember({ ...newMember, phone: e.target.value })}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                <select value={newMember.role} onChange={e => setNewMember({ ...newMember, role: e.target.value })}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none">
+                  <option value="member">Mitarbeiter</option>
+                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setShowAddTeam(false)} className="px-3 py-1.5 text-xs text-white/50 hover:text-white">Abbrechen</button>
+                <button onClick={async () => {
+                  if (!newMember.name || !newMember.email) return;
+                  const res = await fetch("/api/team", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(newMember) });
+                  const data = await res.json();
+                  if (data.member) { setTeam([...team, data.member]); setNewMember({ name: "", email: "", role: "member", phone: "" }); setShowAddTeam(false); }
+                }} className="px-4 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Hinzufügen</button>
+              </div>
+            </div>
+          )}
+        </GlassCard>
+      )}
+
+      {/* Templates */}
+      {settingsTab === "templates" && (
+        <GlassCard title="Projekt-Vorlagen" icon={DocumentDuplicateIcon}>
+          <div className="space-y-2">
+            {templates.map((t: any) => (
+              <div key={t.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.04]">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-white font-medium">{t.name}</span>
+                    {t.is_default && <span className="px-1.5 py-0.5 bg-[#FC682C]/15 text-[#FC682C] rounded text-[9px] font-bold">DEFAULT</span>}
+                  </div>
+                  <div className="text-[11px] text-white/40 mt-0.5">
+                    {t.package} · €{Number(t.default_price).toLocaleString("de-DE")} · {(t.milestones || []).length} Meilensteine · {(t.services || []).length} Services
+                  </div>
+                </div>
+                <button onClick={async () => {
+                  if (!confirm(`"${t.name}" löschen?`)) return;
+                  await fetch(`/api/templates/${t.id}`, { method: "DELETE", credentials: "include" });
+                  setTemplates(templates.filter(x => x.id !== t.id));
+                }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
+                  <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
+                </button>
+              </div>
+            ))}
+            {templates.length === 0 && <p className="text-sm text-white/30 text-center py-4">Noch keine Vorlagen</p>}
+          </div>
+          {!showAddTemplate ? (
+            <button onClick={() => setShowAddTemplate(true)} className="mt-3 text-xs text-[#FC682C] hover:text-[#FF8F5C] flex items-center gap-1">
+              <PlusIcon className="w-3.5 h-3.5" /> Vorlage erstellen
+            </button>
+          ) : (
+            <div className="mt-3 p-3 bg-white/[0.03] rounded-xl border border-[#FC682C]/20 space-y-2">
+              <div className="grid grid-cols-3 gap-2">
+                <input placeholder="Name (z.B. Growth Website)" value={newTemplate.name} onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                  className="col-span-2 px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                <input placeholder="Preis €" type="number" value={newTemplate.default_price || ""} onChange={e => setNewTemplate({ ...newTemplate, default_price: parseFloat(e.target.value) || 0 })}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+              </div>
+              <input placeholder="Paket-Typ (z.B. Growth, Business)" value={newTemplate.package} onChange={e => setNewTemplate({ ...newTemplate, package: e.target.value })}
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+              <input placeholder="Meilensteine (kommagetrennt)" value={newTemplate.milestones} onChange={e => setNewTemplate({ ...newTemplate, milestones: e.target.value })}
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+              <input placeholder="Services (kommagetrennt)" value={newTemplate.services} onChange={e => setNewTemplate({ ...newTemplate, services: e.target.value })}
+                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+              <div className="flex gap-2">
+                <button onClick={() => setShowAddTemplate(false)} className="px-3 py-1.5 text-xs text-white/50 hover:text-white">Abbrechen</button>
+                <button onClick={async () => {
+                  if (!newTemplate.name) return;
+                  const payload = {
+                    name: newTemplate.name, package: newTemplate.package, default_price: newTemplate.default_price,
+                    milestones: newTemplate.milestones.split(",").map(s => s.trim()).filter(Boolean),
+                    services: newTemplate.services.split(",").map(s => s.trim()).filter(Boolean),
+                  };
+                  const res = await fetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) });
+                  const data = await res.json();
+                  if (data.template) { setTemplates([...templates, data.template]); setNewTemplate({ name: "", package: "", default_price: 0, milestones: "", services: "" }); setShowAddTemplate(false); }
+                }} className="px-4 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Erstellen</button>
+              </div>
+            </div>
+          )}
+        </GlassCard>
+      )}
+
+      {/* Goals */}
+      {settingsTab === "goals" && (
+        <GlassCard title="Monatsziele" icon={RocketLaunchIcon}>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Leads Ziel</label>
+              <input type="number" value={goals.leads} onChange={e => setGoals({ ...goals, leads: parseInt(e.target.value) || 0 })}
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Umsatz Ziel (€)</label>
+              <input type="number" value={goals.revenue} onChange={e => setGoals({ ...goals, revenue: parseInt(e.target.value) || 0 })}
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
+            </div>
+            <div>
+              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Checks Ziel</label>
+              <input type="number" value={goals.checks} onChange={e => setGoals({ ...goals, checks: parseInt(e.target.value) || 0 })}
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
+            </div>
+          </div>
+          <button onClick={() => saveSettings("goals", goals)} disabled={saving}
+            className="mt-4 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50">
+            {saving ? "Speichere..." : "Ziele speichern"}
+          </button>
+        </GlassCard>
+      )}
+
+      {/* Notifications */}
+      {settingsTab === "notifications" && (
+        <GlassCard title="Benachrichtigungen" icon={BellIcon}>
+          <div className="space-y-4">
+            {[
+              { label: "E-Mail bei neuem Lead", key: "emailOnNewLead" },
+              { label: "Telegram-Benachrichtigungen", key: "telegramAlerts" },
+              { label: "Tägliche Zusammenfassung", key: "dailySummary" },
+            ].map(n => (
+              <div key={n.key} className="flex items-center justify-between">
+                <span className="text-sm text-white/70">{n.label}</span>
+                <button onClick={() => {
+                  const updated = { ...notifSettings, [n.key]: !(notifSettings as any)[n.key] };
+                  setNotifSettings(updated);
+                  saveSettings("notifications", updated);
+                }} className={`relative w-12 h-6 rounded-full transition-colors ${(notifSettings as any)[n.key] ? "bg-[#FC682C]" : "bg-white/20"}`}>
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${(notifSettings as any)[n.key] ? "left-7" : "left-1"}`} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      )}
     </div>
   );
 }
