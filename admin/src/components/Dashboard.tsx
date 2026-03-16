@@ -1890,6 +1890,7 @@ function VertriebTab() {
   const [vertriebView, setVertriebView] = useState<"kanban" | "tabelle">("kanban");
   const [pipelines, setPipelines] = useState<any[]>([]);
   const [activePipeline, setActivePipeline] = useState<string>("default");
+  const [leads, setLeads] = useState<Lead[]>([]);
 
   useEffect(() => {
     fetch("/api/pipelines", { credentials: "include" })
@@ -1901,50 +1902,161 @@ function VertriebTab() {
         if (def) setActivePipeline(String(def.id));
       })
       .catch(() => {});
+    fetch("/api/leads", { credentials: "include" })
+      .then(r => r.json())
+      .then(data => setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []))
+      .catch(() => {});
   }, []);
 
   const currentPipeline = pipelines.find(p => String(p.id) === activePipeline);
 
+  // KPI Berechnungen
+  const totalValue = leads.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
+  const wonLeads = leads.filter(l => l.status === "won");
+  const wonValue = wonLeads.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
+  const activeLeads = leads.filter(l => !["won", "lost", "converted"].includes(l.status));
+  const hotLeads = leads.filter(l => l.priority === "high" && !["won", "lost", "converted"].includes(l.status));
+  const idleLeads = leads.filter(l => {
+    const days = Math.floor((Date.now() - new Date(l.updatedAt || l.createdAt).getTime()) / 86400000);
+    return days >= 3 && !["won", "lost", "converted"].includes(l.status);
+  });
+  const conversionRate = leads.length > 0 ? Math.round((wonLeads.length / leads.length) * 100) : 0;
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      {/* Premium KPI Header */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* Pipeline-Wert */}
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[#FC682C]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="text-[10px] uppercase tracking-wider text-[#FC682C]/70 font-semibold mb-1">Pipeline-Wert</div>
+          <div className="text-2xl font-bold text-white">{totalValue > 0 ? `€${totalValue.toLocaleString("de-DE")}` : "€0"}</div>
+          <div className="text-[10px] text-white/30 mt-1">{leads.length} Leads gesamt</div>
+        </div>
+        {/* Gewonnen */}
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="text-[10px] uppercase tracking-wider text-green-400/70 font-semibold mb-1">Gewonnen</div>
+          <div className="text-2xl font-bold text-white">{wonValue > 0 ? `€${wonValue.toLocaleString("de-DE")}` : "€0"}</div>
+          <div className="text-[10px] text-white/30 mt-1">{wonLeads.length} Deals abgeschlossen</div>
+        </div>
+        {/* Conversion Rate */}
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="text-[10px] uppercase tracking-wider text-purple-400/70 font-semibold mb-1">Conversion</div>
+          <div className="text-2xl font-bold text-white">{conversionRate}%</div>
+          <div className="flex items-center gap-1 mt-1">
+            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-purple-500 to-[#FC682C] rounded-full" style={{ width: `${conversionRate}%` }} />
+            </div>
+          </div>
+        </div>
+        {/* Hot Leads */}
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-500/5 border border-red-500/20">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="text-[10px] uppercase tracking-wider text-red-400/70 font-semibold mb-1">Hot Leads</div>
+          <div className="text-2xl font-bold text-white">{hotLeads.length}</div>
+          <div className="text-[10px] text-white/30 mt-1">{hotLeads.length > 0 ? "Sofort kontaktieren!" : "Keine dringenden"}</div>
+        </div>
+        {/* Attention Needed */}
+        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="text-[10px] uppercase tracking-wider text-yellow-400/70 font-semibold mb-1">Brauchen Aktion</div>
+          <div className="text-2xl font-bold text-white">{idleLeads.length}</div>
+          <div className="text-[10px] text-white/30 mt-1">{idleLeads.length > 0 ? "Follow-up überfällig" : "Alles im Griff"}</div>
+        </div>
+      </div>
+
+      {/* Conversion Funnel Mini-Bar */}
+      {leads.length > 0 && (
+        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden">
+            {[
+              { id: "new", color: "bg-blue-500", label: "Neu" },
+              { id: "contacted", color: "bg-yellow-500", label: "Kontaktiert" },
+              { id: "qualified", color: "bg-purple-500", label: "Qualifiziert" },
+              { id: "proposal", color: "bg-[#FC682C]", label: "Angebot" },
+              { id: "won", color: "bg-green-500", label: "Gewonnen" },
+            ].map(stage => {
+              const count = leads.filter(l => l.status === stage.id).length;
+              const pct = (count / leads.length) * 100;
+              return pct > 0 ? (
+                <div key={stage.id} className={`${stage.color} h-full rounded-sm relative group cursor-default`} style={{ width: `${pct}%`, minWidth: pct > 0 ? "8px" : 0 }}>
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block px-2 py-1 bg-[#1a2235] border border-white/10 rounded-lg text-[10px] text-white whitespace-nowrap z-10 shadow-xl">
+                    {stage.label}: {count} ({Math.round(pct)}%)
+                  </div>
+                </div>
+              ) : null;
+            })}
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            {[
+              { id: "new", color: "bg-blue-500", label: "Neu" },
+              { id: "contacted", color: "bg-yellow-500", label: "Kontaktiert" },
+              { id: "qualified", color: "bg-purple-500", label: "Qualifiziert" },
+              { id: "proposal", color: "bg-[#FC682C]", label: "Angebot" },
+              { id: "won", color: "bg-green-500", label: "Gewonnen" },
+            ].map(stage => {
+              const count = leads.filter(l => l.status === stage.id).length;
+              return (
+                <div key={stage.id} className="flex items-center gap-1.5 text-[10px] text-white/40">
+                  <span className={`w-1.5 h-1.5 rounded-full ${stage.color}`} />
+                  {stage.label} ({count})
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Toolbar */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold text-white">Vertrieb</h2>
+          {/* View Toggle */}
+          <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06]">
+            <button
+              onClick={() => setVertriebView("kanban")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                vertriebView === "kanban"
+                  ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20"
+                  : "text-white/50 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Squares2X2Icon className="w-3.5 h-3.5" /> Kanban
+            </button>
+            <button
+              onClick={() => setVertriebView("tabelle")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                vertriebView === "tabelle"
+                  ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20"
+                  : "text-white/50 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <ListBulletIcon className="w-3.5 h-3.5" /> Tabelle
+            </button>
+          </div>
+          {/* Pipeline Selector */}
           {pipelines.length > 1 && (
-            <div className="flex items-center gap-1 bg-white/[0.04] rounded-lg p-0.5 border border-white/[0.06]">
+            <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06]">
               {pipelines.map((p: any) => (
                 <button key={p.id} onClick={() => setActivePipeline(String(p.id))}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${String(p.id) === activePipeline ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"}`}>
-                  <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ background: p.color || "#FC682C" }} />
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${String(p.id) === activePipeline ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60 hover:bg-white/5"}`}>
+                  <span className="w-2 h-2 rounded-full" style={{ background: p.color || "#FC682C" }} />
                   {p.name}
                 </button>
               ))}
             </div>
           )}
         </div>
-        <div className="flex items-center gap-1 bg-white/[0.06] rounded-lg p-1">
-          <button
-            onClick={() => setVertriebView("kanban")}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              vertriebView === "kanban"
-                ? "bg-[#FC682C] text-white shadow-lg"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            Kanban
-          </button>
-          <button
-            onClick={() => setVertriebView("tabelle")}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              vertriebView === "tabelle"
-                ? "bg-[#FC682C] text-white shadow-lg"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            Tabelle
-          </button>
-        </div>
+        {/* Idle Alert */}
+        {idleLeads.length > 0 && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-[11px] text-yellow-400 font-medium animate-pulse">
+            <ExclamationCircleIcon className="w-4 h-4" />
+            {idleLeads.length} Lead{idleLeads.length > 1 ? "s" : ""} brauchen Follow-up
+          </div>
+        )}
       </div>
+
       {vertriebView === "kanban" ? <PipelineTab customStages={currentPipeline?.stages} /> : <LeadsTab />}
     </div>
   );
@@ -1955,13 +2067,14 @@ function VertriebTab() {
 // ═══════════════════════════════════════════════════════════════
 
 function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
-  const [view, setView] = useState<PipelineView>("kanban");
+  const { showToast } = useToast();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewLeadModal, setShowNewLeadModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
 
-  useEffect(() => {
+  const refreshLeads = useCallback(() => {
     fetch("/api/leads", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
@@ -1971,133 +2084,159 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
       .catch(() => setLoading(false));
   }, []);
 
+  useEffect(() => { refreshLeads(); }, [refreshLeads]);
+
   const defaultStages = [
-    { id: "new", label: "Neu", color: "blue", icon: SparklesIcon },
-    { id: "contacted", label: "Kontaktiert", color: "yellow", icon: PhoneIcon },
-    { id: "qualified", label: "Qualifiziert", color: "purple", icon: CheckCircleIcon },
-    { id: "proposal", label: "Angebot", color: "orange", icon: DocumentTextIcon },
-    { id: "won", label: "Gewonnen", color: "green", icon: StarIcon },
+    { id: "new", label: "Neu", color: "blue", icon: SparklesIcon, hint: "Neue Anfragen — schnell reagieren!" },
+    { id: "contacted", label: "Kontaktiert", color: "yellow", icon: PhoneIcon, hint: "Erstkontakt hergestellt" },
+    { id: "qualified", label: "Qualifiziert", color: "purple", icon: CheckCircleIcon, hint: "Bedarf bestätigt" },
+    { id: "proposal", label: "Angebot", color: "orange", icon: DocumentTextIcon, hint: "Angebot versendet" },
+    { id: "won", label: "Gewonnen", color: "green", icon: StarIcon, hint: "Deal abgeschlossen!" },
   ];
-  const iconMap: Record<string, any> = { SparklesIcon, PhoneIcon, CheckCircleIcon, DocumentTextIcon, StarIcon, ChartBarIcon, EyeIcon, BoltIcon, GlobeAltIcon };
   const colorCycle = ["blue", "yellow", "purple", "orange", "green", "teal"];
   const stages = customStages && customStages.length > 0
-    ? customStages.map((s: any, i: number) => ({ id: s.id, label: s.label, color: colorCycle[i % colorCycle.length], icon: defaultStages[i]?.icon || CheckCircleIcon }))
+    ? customStages.map((s: any, i: number) => ({ id: s.id, label: s.label, color: colorCycle[i % colorCycle.length], icon: defaultStages[i]?.icon || CheckCircleIcon, hint: defaultStages[i]?.hint || "" }))
     : defaultStages;
 
   const updateStatus = async (id: number, status: string) => {
+    const lead = leads.find(l => l.id === id);
+    const stageName = stages.find(s => s.id === status)?.label || status;
     await fetch(`/api/leads/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
       credentials: "include",
     });
-    setLeads(leads.map((l) => (l.id === id ? { ...l, status } : l)));
+    setLeads(leads.map((l) => (l.id === id ? { ...l, status, updatedAt: new Date().toISOString() } : l)));
+    showToast("success", `${lead?.name || "Lead"} → ${stageName}`);
   };
 
   if (loading) return <LoadingState />;
 
+  const stageColors: Record<string, string> = {
+    blue: "border-blue-500/20",
+    yellow: "border-yellow-500/20",
+    purple: "border-purple-500/20",
+    orange: "border-[#FC682C]/20",
+    green: "border-green-500/20",
+    teal: "border-teal-500/20",
+  };
+  const headerColors: Record<string, string> = {
+    blue: "text-blue-400",
+    yellow: "text-yellow-400",
+    purple: "text-purple-400",
+    orange: "text-[#FC682C]",
+    green: "text-green-400",
+    teal: "text-teal-400",
+  };
+  const headerBgColors: Record<string, string> = {
+    blue: "bg-blue-500/8",
+    yellow: "bg-yellow-500/8",
+    purple: "bg-purple-500/8",
+    orange: "bg-[#FC682C]/8",
+    green: "bg-green-500/8",
+    teal: "bg-teal-500/8",
+  };
+  const dotColors: Record<string, string> = {
+    blue: "bg-blue-500",
+    yellow: "bg-yellow-500",
+    purple: "bg-purple-500",
+    orange: "bg-[#FC682C]",
+    green: "bg-green-500",
+    teal: "bg-teal-500",
+  };
+
   return (
     <>
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 p-1 bg-white/[0.04] rounded-xl">
-          <button
-            onClick={() => setView("kanban")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === "kanban" ? "bg-white/10 text-white" : "text-white/50"}`}
-          >
-            <Squares2X2Icon className="w-4 h-4" /> Kanban
-          </button>
-          <button
-            onClick={() => setView("list")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === "list" ? "bg-white/10 text-white" : "text-white/50"}`}
-          >
-            <ListBulletIcon className="w-4 h-4" /> Liste
-          </button>
-        </div>
+      {/* Add Lead Button */}
+      <div className="flex items-center justify-end">
         <button
           onClick={() => setShowNewLeadModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FC682C] to-[#e55a20] text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-[#FC682C]/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           <PlusIcon className="w-4 h-4" /> Neuer Lead
         </button>
       </div>
 
-      {/* Pipeline Stats */}
-      <div className="grid grid-cols-5 gap-2">
-        {stages.map((stage) => {
-          const sl = leads.filter(l => l.status === stage.id);
-          const value = sl.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
-          const headerColors: Record<string, string> = { blue: "text-blue-400", yellow: "text-yellow-400", purple: "text-purple-400", orange: "text-[#FC682C]", green: "text-green-400", teal: "text-teal-400" };
-          return (
-            <div key={stage.id} className="p-2.5 bg-white/[0.02] rounded-xl border border-white/[0.04] text-center">
-              <div className={`text-lg font-bold ${headerColors[stage.color] || "text-white"}`}>{sl.length}</div>
-              <div className="text-[10px] text-white/30">{stage.label}</div>
-              {value > 0 && <div className="text-[10px] text-white/50 mt-0.5">€{value.toLocaleString("de-DE")}</div>}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Kanban Board — Drag & Drop */}
-      <div className="grid grid-cols-5 gap-4 overflow-x-auto pb-4">
-        {stages.map((stage) => {
+      {/* Kanban Board */}
+      <div className="grid grid-cols-5 gap-3 overflow-x-auto pb-4">
+        {stages.map((stage, stageIdx) => {
           const stageLeads = leads.filter((l) => l.status === stage.id);
+          const stageValue = stageLeads.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
           const Icon = stage.icon;
-          const stageColors: Record<string, string> = {
-            blue: "border-blue-500/30 bg-blue-500/5",
-            yellow: "border-yellow-500/30 bg-yellow-500/5",
-            purple: "border-purple-500/30 bg-purple-500/5",
-            orange: "border-[#FC682C]/30 bg-[#FC682C]/5",
-            green: "border-green-500/30 bg-green-500/5",
-            teal: "border-teal-500/30 bg-teal-500/5",
-          };
-          const headerColors: Record<string, string> = {
-            blue: "text-blue-400",
-            yellow: "text-yellow-400",
-            purple: "text-purple-400",
-            orange: "text-[#FC682C]",
-            green: "text-green-400",
-            teal: "text-teal-400",
-          };
+          const isDragOver = dragOverStage === stage.id;
+          const idleCount = stageLeads.filter(l => {
+            const days = Math.floor((Date.now() - new Date(l.updatedAt || l.createdAt).getTime()) / 86400000);
+            return days >= 3;
+          }).length;
 
           return (
             <div
               key={stage.id}
-              className={`min-w-[280px] rounded-2xl border ${stageColors[stage.color] || stageColors.blue} p-4 transition-all`}
-              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("ring-2", "ring-[#FC682C]/50"); }}
-              onDragLeave={(e) => { e.currentTarget.classList.remove("ring-2", "ring-[#FC682C]/50"); }}
+              className={`min-w-[260px] rounded-2xl border transition-all duration-200 ${isDragOver ? `${stageColors[stage.color] || stageColors.blue} ring-2 ring-[#FC682C]/40 bg-[#FC682C]/5 scale-[1.01]` : `${stageColors[stage.color] || stageColors.blue} bg-white/[0.015]`}`}
+              onDragOver={(e) => { e.preventDefault(); setDragOverStage(stage.id); }}
+              onDragLeave={() => setDragOverStage(null)}
               onDrop={(e) => {
                 e.preventDefault();
-                e.currentTarget.classList.remove("ring-2", "ring-[#FC682C]/50");
+                setDragOverStage(null);
                 const leadId = parseInt(e.dataTransfer.getData("leadId"));
                 if (leadId) updateStatus(leadId, stage.id);
               }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Icon className={`w-4 h-4 ${headerColors[stage.color] || headerColors.blue}`} />
-                  <h3 className={`text-sm font-semibold ${headerColors[stage.color] || headerColors.blue}`}>
-                    {stage.label}
-                  </h3>
+              {/* Stage Header */}
+              <div className={`p-3 rounded-t-2xl ${headerBgColors[stage.color] || ""}`}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${headerBgColors[stage.color] || ""}`}>
+                      <Icon className={`w-3.5 h-3.5 ${headerColors[stage.color] || headerColors.blue}`} />
+                    </div>
+                    <h3 className={`text-xs font-bold uppercase tracking-wider ${headerColors[stage.color] || headerColors.blue}`}>
+                      {stage.label}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {idleCount > 0 && (
+                      <span className="w-5 h-5 flex items-center justify-center bg-yellow-500/20 rounded-md text-[9px] font-bold text-yellow-400" title={`${idleCount} inaktiv`}>!</span>
+                    )}
+                    <span className={`min-w-[22px] h-5 flex items-center justify-center rounded-md text-[10px] font-bold px-1.5 ${stageLeads.length > 0 ? `${headerBgColors[stage.color]} ${headerColors[stage.color]}` : "bg-white/5 text-white/30"}`}>
+                      {stageLeads.length}
+                    </span>
+                  </div>
                 </div>
-                <span className="px-2 py-0.5 bg-white/10 rounded-full text-xs text-white/60">
-                  {stageLeads.length}
-                </span>
+                {stageValue > 0 && (
+                  <div className="text-[10px] text-white/40 ml-8">€{stageValue.toLocaleString("de-DE")}</div>
+                )}
               </div>
-              <div className="space-y-3">
+
+              {/* Cards */}
+              <div className="p-2 space-y-2 min-h-[100px]">
                 {stageLeads.map((lead) => (
-                  <div key={lead.id} draggable onDragStart={(e) => { e.dataTransfer.setData("leadId", String(lead.id)); e.currentTarget.style.opacity = "0.5"; }}
-                    onDragEnd={(e) => { e.currentTarget.style.opacity = "1"; }}>
-                    <KanbanCard lead={lead} onMove={updateStatus} onClick={() => setSelectedLead(lead)} />
+                  <div key={lead.id} draggable onDragStart={(e) => { e.dataTransfer.setData("leadId", String(lead.id)); e.currentTarget.style.opacity = "0.4"; e.currentTarget.style.transform = "rotate(2deg)"; }}
+                    onDragEnd={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "none"; }}>
+                    <KanbanCard lead={lead} onMove={updateStatus} onClick={() => setSelectedLead(lead)} stages={stages} />
                   </div>
                 ))}
                 {stageLeads.length === 0 && (
-                  <div className="py-8 text-center text-white/20 text-sm border-2 border-dashed border-white/10 rounded-xl">
-                    Keine Leads
-                  </div>
+                  <button
+                    onClick={() => setShowNewLeadModal(true)}
+                    className="w-full py-6 text-center border-2 border-dashed border-white/[0.06] rounded-xl hover:border-[#FC682C]/30 hover:bg-[#FC682C]/5 transition-all group"
+                  >
+                    <PlusIcon className="w-5 h-5 mx-auto text-white/15 group-hover:text-[#FC682C]/50 transition-colors mb-1" />
+                    <span className="text-[10px] text-white/20 group-hover:text-[#FC682C]/50 transition-colors">Lead hinzufügen</span>
+                  </button>
                 )}
               </div>
+
+              {/* Stage Footer — Conversion Arrow */}
+              {stageIdx < stages.length - 1 && stageLeads.length > 0 && (
+                <div className="px-3 pb-2">
+                  <div className="flex items-center justify-center gap-1 text-[9px] text-white/20">
+                    <ChevronRightIcon className="w-3 h-3" />
+                    <span>{stages[stageIdx + 1]?.label}</span>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -2107,22 +2246,16 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
       <NewLeadModal
         onClose={() => setShowNewLeadModal(false)}
         onCreated={() => {
-          fetch("/api/leads", { credentials: "include" })
-            .then((r) => r.json())
-            .then((data) => setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []));
+          refreshLeads();
           setShowNewLeadModal(false);
         }}
       />
     )}
     {selectedLead && (
-      <LeadModal 
-        lead={selectedLead} 
-        onClose={() => setSelectedLead(null)} 
-        onRefresh={() => {
-          fetch("/api/leads", { credentials: "include" })
-            .then((r) => r.json())
-            .then((data) => setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []));
-        }}
+      <LeadModal
+        lead={selectedLead}
+        onClose={() => setSelectedLead(null)}
+        onRefresh={refreshLeads}
       />
     )}
     </>
@@ -2133,97 +2266,145 @@ function KanbanCard({
   lead,
   onMove,
   onClick,
+  stages,
 }: {
   lead: Lead;
   onMove: (id: number, status: string) => void;
   onClick?: () => void;
+  stages?: { id: string; label: string; color: string }[];
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const daysSinceCreation = Math.floor((Date.now() - new Date(lead.createdAt).getTime()) / 86400000);
   const daysSinceUpdate = Math.floor((Date.now() - new Date(lead.updatedAt || lead.createdAt).getTime()) / 86400000);
-  const isIdle = daysSinceUpdate >= 3 && lead.status !== "won" && lead.status !== "lost" && lead.status !== "converted";
-  const isRotting = daysSinceUpdate >= 7 && lead.status !== "won" && lead.status !== "lost" && lead.status !== "converted";
+  const isActive = !["won", "lost", "converted"].includes(lead.status);
+  const isIdle = daysSinceUpdate >= 3 && isActive;
+  const isRotting = daysSinceUpdate >= 7 && isActive;
+  const isNew = daysSinceCreation <= 1 && lead.status === "new";
+
+  // Lead Score — einfache Berechnung basierend auf verfügbaren Daten
+  const leadScore = Math.min(100,
+    (lead.email ? 20 : 0) +
+    (lead.phone ? 15 : 0) +
+    (lead.company ? 10 : 0) +
+    (lead.budget && Number(lead.budget) > 0 ? 25 : 0) +
+    (lead.packageInterest ? 15 : 0) +
+    (lead.priority === "high" ? 15 : lead.priority === "medium" ? 10 : 5)
+  );
+  const scoreColor = leadScore >= 70 ? "text-green-400 bg-green-500/15" : leadScore >= 40 ? "text-yellow-400 bg-yellow-500/15" : "text-white/40 bg-white/5";
+
+  // Nächste empfohlene Aktion
+  const nextAction = isRotting
+    ? { text: `${daysSinceUpdate}d überfällig!`, color: "text-red-400 bg-red-500/10", icon: ExclamationCircleIcon }
+    : isIdle
+    ? { text: `${daysSinceUpdate}d inaktiv`, color: "text-yellow-400 bg-yellow-500/10", icon: ClockIcon }
+    : lead.status === "new"
+    ? { text: "Erstkontakt", color: "text-blue-400 bg-blue-500/8", icon: PhoneIcon }
+    : lead.status === "contacted"
+    ? { text: "Qualifizieren", color: "text-purple-400 bg-purple-500/8", icon: CheckCircleIcon }
+    : lead.status === "qualified"
+    ? { text: "Angebot senden", color: "text-[#FC682C] bg-[#FC682C]/8", icon: DocumentTextIcon }
+    : lead.status === "proposal"
+    ? { text: "Nachfassen", color: "text-orange-400 bg-orange-500/8", icon: PaperAirplaneIcon }
+    : null;
 
   return (
     <div
       onClick={(e) => { if (!showMenu) onClick?.(); }}
-      className={`relative p-4 bg-[#111827] border rounded-xl hover:border-white/[0.15] hover:bg-white/[0.02] transition-all cursor-pointer group ${isRotting ? 'border-red-500/40 ring-1 ring-red-500/20' : isIdle ? 'border-yellow-500/30' : 'border-white/[0.06]'} ${lead.priority === 'high' ? 'ring-2 ring-red-500/20' : ''}`}
+      className={`relative p-3 bg-[#0d1117] border rounded-xl hover:border-white/[0.15] hover:shadow-lg hover:shadow-black/20 transition-all duration-200 cursor-pointer group ${isRotting ? 'border-red-500/30 bg-red-500/[0.02]' : isIdle ? 'border-yellow-500/20' : isNew ? 'border-blue-500/30 bg-blue-500/[0.02]' : 'border-white/[0.06]'} ${lead.priority === 'high' ? 'ring-1 ring-red-500/20' : ''}`}
     >
-      {/* Deal Rotting Indicator */}
-      {isIdle && (
-        <div className={`absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-medium ${isRotting ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/15 text-yellow-400'}`}>
+      {/* Top Bar — Score + Priority + Rotting */}
+      <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center gap-1.5">
+          {/* Lead Score */}
+          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${scoreColor}`}>
+            {leadScore}
+          </span>
+          {lead.priority === "high" && (
+            <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-red-500/15 rounded text-[9px] font-semibold text-red-400">
+              <FireSolid className="w-2.5 h-2.5" /> HOT
+            </span>
+          )}
+          {isNew && (
+            <span className="px-1.5 py-0.5 bg-blue-500/15 rounded text-[9px] font-semibold text-blue-400 animate-pulse">NEU</span>
+          )}
+        </div>
+        <div className="flex items-center gap-1">
           {isRotting && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
-          {daysSinceUpdate}d
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-lg transition-all"
+          >
+            <EllipsisVerticalIcon className="w-3.5 h-3.5 text-white/40" />
+          </button>
         </div>
-      )}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FC682C]/40 to-[#9D65C9]/40 flex items-center justify-center text-white text-sm font-semibold shadow-lg">
-            {lead.name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <p className="text-sm font-medium text-white">{lead.name}</p>
-              {lead.email && <CheckBadgeIcon className="w-3.5 h-3.5 text-blue-400" />}
-            </div>
-            <p className="text-[11px] text-white/40 truncate max-w-[140px]">
-              {lead.company || lead.email}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-          className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/10 rounded-lg transition-all"
-        >
-          <EllipsisVerticalIcon className="w-4 h-4 text-white/50" />
-        </button>
       </div>
 
-      {/* Package & Budget */}
-      <div className="flex items-center gap-2 mb-3 flex-wrap">
+      {/* Name & Company */}
+      <div className="flex items-center gap-2.5 mb-2.5">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FC682C]/30 to-[#9D65C9]/30 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          {lead.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1">
+            <p className="text-[13px] font-semibold text-white truncate">{lead.name}</p>
+            {lead.email && lead.phone && <CheckBadgeIcon className="w-3 h-3 text-blue-400 flex-shrink-0" />}
+          </div>
+          {lead.company && (
+            <p className="text-[10px] text-white/35 truncate">{lead.company}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Tags: Package, Budget, Source */}
+      <div className="flex items-center gap-1 mb-2.5 flex-wrap">
         {lead.packageInterest && (
-          <span className="px-2.5 py-1 bg-[#FC682C]/20 text-[#FC682C] rounded-lg text-xs font-medium">
+          <span className="px-1.5 py-0.5 bg-gradient-to-r from-[#FC682C]/15 to-[#FC682C]/10 text-[#FC682C] rounded text-[9px] font-bold border border-[#FC682C]/10">
             {lead.packageInterest}
           </span>
         )}
         {lead.budget && Number(lead.budget) > 0 && (
-          <span className="flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-400 rounded-lg text-xs">
-            <CurrencyEuroIcon className="w-3 h-3" />
-            {Number(lead.budget).toLocaleString('de-DE')}
+          <span className="px-1.5 py-0.5 bg-green-500/10 text-green-400 rounded text-[9px] font-bold border border-green-500/10">
+            €{Number(lead.budget).toLocaleString('de-DE')}
           </span>
+        )}
+        {lead.source && (
+          <span className="px-1.5 py-0.5 bg-white/[0.04] text-white/30 rounded text-[9px] border border-white/[0.04]">{lead.source}</span>
         )}
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-white/30">
-        <span>{formatDate(lead.createdAt)}</span>
-        <div className="flex items-center gap-2">
-          {lead.priority === "high" && <FireSolid className="w-4 h-4 text-red-400" />}
-          {lead.source && <span className="px-1.5 py-0.5 bg-white/5 rounded text-[10px]">{lead.source}</span>}
+      {/* Next Action Suggestion */}
+      {nextAction && isActive && (
+        <div className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[10px] font-medium mb-2.5 ${nextAction.color}`}>
+          <nextAction.icon className="w-3 h-3 flex-shrink-0" />
+          <span>{nextAction.text}</span>
+          {lead.nextFollowUp && (
+            <span className="ml-auto text-[9px] opacity-60">{formatDate(lead.nextFollowUp)}</span>
+          )}
         </div>
-      </div>
+      )}
 
-      {/* Quick Actions on Hover — One-Click */}
-      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="flex items-center gap-1">
+      {/* Bottom Row — Date + Quick Contact */}
+      <div className="flex items-center justify-between">
+        <span className="text-[9px] text-white/20">{formatDate(lead.createdAt)}</span>
+        <div className="flex items-center gap-0.5">
           {lead.phone && (
-            <a href={`tel:${lead.phone}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors" title="Anrufen">
-              <PhoneIcon className="w-3 h-3 text-green-400" />
+            <a href={`tel:${lead.phone}`} onClick={(e) => e.stopPropagation()} className="p-1 hover:bg-green-500/20 rounded-md transition-colors" title="Anrufen">
+              <PhoneIcon className="w-3 h-3 text-green-400/60 hover:text-green-400" />
             </a>
           )}
           {lead.email && (
-            <a href={`mailto:${lead.email}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors" title="E-Mail">
-              <EnvelopeIcon className="w-3 h-3 text-blue-400" />
+            <a href={`mailto:${lead.email}`} onClick={(e) => e.stopPropagation()} className="p-1 hover:bg-blue-500/20 rounded-md transition-colors" title="E-Mail">
+              <EnvelopeIcon className="w-3 h-3 text-blue-400/60 hover:text-blue-400" />
             </a>
           )}
           {lead.phone && (
-            <a href={`https://wa.me/${lead.phone.replace(/[^0-9+]/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="p-1.5 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-colors" title="WhatsApp">
-              <ChatBubbleLeftRightIcon className="w-3 h-3 text-green-300" />
+            <a href={`https://wa.me/${lead.phone.replace(/[^0-9+]/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="p-1 hover:bg-green-500/20 rounded-md transition-colors" title="WhatsApp">
+              <ChatBubbleLeftRightIcon className="w-3 h-3 text-green-300/50 hover:text-green-300" />
             </a>
           )}
-        </div>
-        <div className="flex items-center gap-1">
-          {lead.status !== "won" && (
-            <button onClick={(e) => { e.stopPropagation(); const nextStatus: Record<string, string> = { new: "contacted", contacted: "qualified", qualified: "proposal", proposal: "won" }; onMove(lead.id, nextStatus[lead.status] || "contacted"); }} className="px-2 py-1 bg-[#FC682C]/20 hover:bg-[#FC682C]/30 rounded-lg text-[9px] text-[#FC682C] font-medium transition-colors" title="Nächster Status">
-              <ChevronRightIcon className="w-3 h-3 inline" /> Weiter
+          {lead.status !== "won" && lead.status !== "lost" && (
+            <button onClick={(e) => { e.stopPropagation(); const nextStatus: Record<string, string> = { new: "contacted", contacted: "qualified", qualified: "proposal", proposal: "won" }; onMove(lead.id, nextStatus[lead.status] || "contacted"); }} className="ml-0.5 p-1 hover:bg-[#FC682C]/20 rounded-md transition-colors group/next" title="Nächster Status">
+              <ChevronRightIcon className="w-3 h-3 text-[#FC682C]/50 group-hover/next:text-[#FC682C]" />
             </button>
           )}
         </div>
@@ -2231,25 +2412,35 @@ function KanbanCard({
 
       {/* Quick Move Menu */}
       {showMenu && (
-        <div className="absolute right-0 top-10 z-20 w-44 py-2 bg-[#1a2235] border border-white/10 rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
-          <div className="px-3 py-1.5 text-[10px] uppercase text-white/30 font-medium">Status ändern</div>
-          {[
-            { id: "new", label: "Neu", color: "text-blue-400" },
-            { id: "contacted", label: "Kontaktiert", color: "text-yellow-400" },
-            { id: "qualified", label: "Qualifiziert", color: "text-purple-400" },
-            { id: "proposal", label: "Angebot", color: "text-[#FC682C]" },
-            { id: "won", label: "Gewonnen", color: "text-green-400" },
-          ].map((status) => (
-            <button
-              key={status.id}
-              onClick={() => { onMove(lead.id, status.id); setShowMenu(false); }}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-white/5 transition-colors ${lead.status === status.id ? 'bg-white/5 text-white' : 'text-white/70'}`}
-            >
-              <span className={`w-2 h-2 rounded-full ${status.color.replace('text-', 'bg-')}`} />
-              {status.label}
-              {lead.status === status.id && <CheckIcon className="w-3 h-3 ml-auto text-green-400" />}
-            </button>
-          ))}
+        <div className="absolute right-0 top-8 z-20 w-40 py-1.5 bg-[#1a2235] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="px-3 py-1 text-[9px] uppercase text-white/25 font-semibold tracking-wider">Verschieben</div>
+          {(stages || [
+            { id: "new", label: "Neu", color: "blue" },
+            { id: "contacted", label: "Kontaktiert", color: "yellow" },
+            { id: "qualified", label: "Qualifiziert", color: "purple" },
+            { id: "proposal", label: "Angebot", color: "orange" },
+            { id: "won", label: "Gewonnen", color: "green" },
+          ]).map((status: any) => {
+            const dotColor: Record<string, string> = { blue: "bg-blue-500", yellow: "bg-yellow-500", purple: "bg-purple-500", orange: "bg-[#FC682C]", green: "bg-green-500", teal: "bg-teal-500" };
+            return (
+              <button
+                key={status.id}
+                onClick={() => { onMove(lead.id, status.id); setShowMenu(false); }}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-white/5 transition-colors ${lead.status === status.id ? 'bg-white/5 text-white' : 'text-white/60'}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${dotColor[status.color] || "bg-white/30"}`} />
+                {status.label}
+                {lead.status === status.id && <CheckIcon className="w-3 h-3 ml-auto text-green-400" />}
+              </button>
+            );
+          })}
+          <div className="mx-2 my-1 border-t border-white/[0.06]" />
+          <button
+            onClick={() => { onMove(lead.id, "lost"); setShowMenu(false); }}
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-xs text-red-400/70 hover:bg-red-500/10 transition-colors"
+          >
+            <XMarkIcon className="w-3 h-3" /> Verloren
+          </button>
         </div>
       )}
     </div>
@@ -2594,6 +2785,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => void; onRefresh?: () => void }) {
+  const { showToast } = useToast();
   const [status, setStatus] = useState(lead.status);
   const [notes, setNotes] = useState(lead.notes || "");
   const [activeTab, setActiveTab] = useState<"details" | "scripts" | "activity">("details");
@@ -2777,59 +2969,71 @@ kontakt@agentflowm.de | +49 179 949 8247`}</p>
                   </div>
                 </div>
               )}
-              {/* Follow-Up Cadence */}
-              <div className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-                <div className="text-[10px] text-white/40 font-bold uppercase mb-2">Follow-Up Cadence</div>
+              {/* Follow-Up Cadence — Klickbare Aktionen */}
+              <div className="p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                <div className="text-xs text-white/50 font-bold uppercase tracking-wider mb-3">Follow-Up Cadence</div>
                 <div className="space-y-1.5">
                   {[
-                    { day: "Tag 0", action: "Sofort-Antwort (< 5 Min!)", channel: "E-Mail" },
-                    { day: "Tag 0", action: "Anruf innerhalb 1 Stunde", channel: "Telefon" },
-                    { day: "Tag 2", action: "Follow-Up + Mehrwert", channel: "E-Mail" },
-                    { day: "Tag 5", action: "Connection + Nachricht", channel: "LinkedIn" },
-                    { day: "Tag 7", action: "Erneuter Anruf", channel: "Telefon" },
-                    { day: "Tag 9", action: "Case Study senden", channel: "E-Mail" },
-                    { day: "Tag 14", action: "Breakup-Mail", channel: "E-Mail" },
+                    { day: "Tag 0", action: "Sofort-Antwort senden", channel: "E-Mail", urgent: true, onClick: () => lead.email && window.open(`mailto:${lead.email}?subject=${encodeURIComponent(`Ihre Anfrage bei AgentFlowMarketing`)}&body=${encodeURIComponent(`Hallo ${lead.name.split(" ")[0]},\n\nvielen Dank für Ihre Anfrage! Ich freue mich über Ihr Interesse.\n\nIch würde gerne in einem kurzen Gespräch (15 Min) besprechen:\n• Ihre Ziele und Herausforderungen\n• Welches Ergebnis Sie sich wünschen\n\nWann passt es Ihnen?\n\nBeste Grüße\nMo Sul\nAgentFlowMarketing`)}`, "_self") },
+                    { day: "Tag 0", action: "Anruf (innerhalb 1h)", channel: "Telefon", urgent: true, onClick: () => lead.phone && window.open(`tel:${lead.phone}`) },
+                    { day: "Tag 2", action: "Follow-Up + Mehrwert", channel: "E-Mail", onClick: () => lead.email && window.open(`mailto:${lead.email}?subject=${encodeURIComponent(`Kurze Frage, ${lead.name.split(" ")[0]}`)}&body=${encodeURIComponent(`Hallo ${lead.name.split(" ")[0]},\n\nich wollte kurz nachfassen — haben Sie meine letzte Nachricht gesehen?\n\nIch habe mir Ihre aktuelle Online-Präsenz angeschaut und sehe konkretes Potenzial für mehr Anfragen.\n\nBeste Grüße\nMo Sul`)}`, "_self") },
+                    { day: "Tag 5", action: "LinkedIn Connection", channel: "LinkedIn", onClick: () => window.open("https://www.linkedin.com/search/results/all/?keywords=" + encodeURIComponent(lead.name), "_blank") },
+                    { day: "Tag 7", action: "Erneuter Anruf", channel: "Telefon", onClick: () => lead.phone && window.open(`tel:${lead.phone}`) },
+                    { day: "Tag 9", action: "Case Study senden", channel: "E-Mail", onClick: () => lead.email && window.open(`mailto:${lead.email}?subject=${encodeURIComponent(`Case Study für ${lead.company || "Ihre Branche"}`)}&body=${encodeURIComponent(`Hallo ${lead.name.split(" ")[0]},\n\nich habe eine Case Study gefunden, die für ${lead.company || "Ihr Unternehmen"} relevant sein könnte.\n\n[CASE STUDY LINK HIER EINFÜGEN]\n\nBeste Grüße\nMo Sul`)}`, "_self") },
+                    { day: "Tag 14", action: "Breakup-Mail", channel: "E-Mail", onClick: () => lead.email && window.open(`mailto:${lead.email}?subject=${encodeURIComponent(`Soll ich den Vorgang schließen?`)}&body=${encodeURIComponent(`Hallo ${lead.name.split(" ")[0]},\n\nich möchte Sie nicht nerven. Scheint als wäre der Zeitpunkt gerade nicht ideal.\n\nIch schließe den Vorgang erstmal. Falls sich Ihre Situation ändert — melden Sie sich gerne jederzeit.\n\nBeste Grüße\nMo Sul\nAgentFlowMarketing`)}`, "_self") },
                   ].map((step, i) => (
-                    <div key={i} className="flex items-center gap-3 text-[11px]">
-                      <span className="text-white/30 w-12 shrink-0">{step.day}</span>
-                      <span className="text-white/60 flex-1">{step.action}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] ${step.channel === "E-Mail" ? "bg-blue-500/15 text-blue-400" : step.channel === "Telefon" ? "bg-green-500/15 text-green-400" : "bg-purple-500/15 text-purple-400"}`}>{step.channel}</span>
-                    </div>
+                    <button key={i} onClick={step.onClick} className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-all ${step.urgent ? 'bg-[#FC682C]/5 hover:bg-[#FC682C]/10 border border-[#FC682C]/15' : 'hover:bg-white/[0.04]'}`}>
+                      <span className={`text-[11px] w-12 shrink-0 font-mono ${step.urgent ? 'text-[#FC682C] font-bold' : 'text-white/30'}`}>{step.day}</span>
+                      <span className="text-xs text-white/70 flex-1">{step.action}</span>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${step.channel === "E-Mail" ? "bg-blue-500/15 text-blue-400" : step.channel === "Telefon" ? "bg-green-500/15 text-green-400" : "bg-purple-500/15 text-purple-400"}`}>{step.channel}</span>
+                    </button>
                   ))}
                 </div>
               </div>
-              {/* CHAMP Qualifikation */}
-              <div className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-                <div className="text-[10px] text-white/40 font-bold uppercase mb-2">CHAMP Qualifikation</div>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+              {/* CHAMP Qualifikation — Interaktiv */}
+              <div className="p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                <div className="text-xs text-white/50 font-bold uppercase tracking-wider mb-3">CHAMP Qualifikation</div>
+                <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Challenges", q: "Größte Herausforderung online?", color: "text-red-400" },
-                    { label: "Authority", q: "Wer entscheidet?", color: "text-purple-400" },
-                    { label: "Money", q: "Budget eingeplant?", color: "text-green-400" },
-                    { label: "Priority", q: "Wann soll es live gehen?", color: "text-yellow-400" },
+                    { label: "C — Challenges", q: "Was ist Ihre größte Herausforderung online?", hint: "Schmerz aufdecken", color: "from-red-500/10 to-red-500/5 border-red-500/20", textColor: "text-red-400" },
+                    { label: "H — Authority", q: "Wer trifft die Entscheidung?", hint: "Entscheider identifizieren", color: "from-purple-500/10 to-purple-500/5 border-purple-500/20", textColor: "text-purple-400" },
+                    { label: "A — Money", q: "Haben Sie Budget eingeplant?", hint: "Rahmen klären", color: "from-green-500/10 to-green-500/5 border-green-500/20", textColor: "text-green-400" },
+                    { label: "M — Priority", q: "Wann soll es live gehen?", hint: "Dringlichkeit erkennen", color: "from-yellow-500/10 to-yellow-500/5 border-yellow-500/20", textColor: "text-yellow-400" },
                   ].map(c => (
-                    <div key={c.label} className="p-2 bg-white/[0.02] rounded-lg">
-                      <div className={`font-bold ${c.color}`}>{c.label}</div>
-                      <div className="text-white/40 mt-0.5">{c.q}</div>
+                    <div key={c.label} className={`p-3 bg-gradient-to-br ${c.color} border rounded-xl cursor-pointer hover:scale-[1.02] transition-all`}
+                      onClick={() => { navigator.clipboard.writeText(c.q); showToast("info", `"${c.q}" kopiert`); }}>
+                      <div className={`text-sm font-bold ${c.textColor} mb-1`}>{c.label}</div>
+                      <div className="text-xs text-white/60 leading-relaxed">{c.q}</div>
+                      <div className="text-[10px] text-white/25 mt-1.5 italic">{c.hint}</div>
                     </div>
                   ))}
                 </div>
+                <p className="text-[10px] text-white/20 mt-2 text-center">Klick auf eine Frage um sie zu kopieren</p>
               </div>
-              {/* Einwandbehandlung */}
-              <div className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-                <div className="text-[10px] text-white/40 font-bold uppercase mb-2">Einwandbehandlung</div>
-                <div className="space-y-1.5 text-[11px]">
+
+              {/* Einwandbehandlung — Klickbar */}
+              <div className="p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                <div className="text-xs text-white/50 font-bold uppercase tracking-wider mb-3">Einwandbehandlung</div>
+                <div className="space-y-2">
                   {[
-                    { objection: "Zu teuer", response: "Was kostet es Sie, KEINE Lösung zu haben? ROI in 3-6 Monaten." },
-                    { objection: "Kein Budget", response: "Neues Quartal steht an — wir können in Raten arbeiten." },
-                    { objection: "Haben schon jemanden", response: "Was fehlt Ihnen bei der aktuellen Lösung?" },
-                    { objection: "Muss ich besprechen", response: "Gerne! Sollen wir einen gemeinsamen Termin machen?" },
-                    { objection: "Brauchen wir nicht", response: "Wie gewinnen Sie aktuell neue Kunden online?" },
+                    { objection: "Zu teuer", response: `Was kostet es Sie gerade, KEINE professionelle Lösung zu haben? Unsere Kunden wie ${lead.company || "vergleichbare Firmen"} berichten von einem ROI innerhalb von 3-6 Monaten.`, icon: "💰" },
+                    { objection: "Kein Budget", response: "Neues Quartal steht an — wir können in Raten arbeiten. Außerdem: Was kostet es Sie monatlich, wenn potenzielle Kunden Ihre Website sehen und weitergehen?", icon: "📊" },
+                    { objection: "Haben schon jemanden", response: "Verstehe ich. Nur eine Frage: Was fehlt Ihnen bei der aktuellen Lösung? Wir hören oft, dass gerade bei Performance und SEO Potenzial verschenkt wird.", icon: "🔄" },
+                    { objection: "Muss ich besprechen", response: "Gerne! Sollen wir einen gemeinsamen Termin mit allen Beteiligten machen? Dann kann ich auch die technischen Fragen direkt beantworten.", icon: "👥" },
+                    { objection: "Kein Interesse", response: `Verstehe. Letzte Frage: Wenn ${lead.company || "Ihr Unternehmen"} in den nächsten 12 Monaten 30-40% mehr Anfragen über die Website generieren könnte — wäre das relevant?`, icon: "🎯" },
+                    { objection: "Brauchen wir nicht", response: "Wie gewinnen Sie aktuell neue Kunden online? Wir sehen bei vielen Unternehmen, dass bis zu 60% der potenziellen Kunden auf der Website abspringen.", icon: "📉" },
                   ].map(e => (
-                    <div key={e.objection} className="flex gap-2">
-                      <span className="text-red-400/70 shrink-0 w-28">"{e.objection}"</span>
-                      <span className="text-white/50">→ {e.response}</span>
-                    </div>
+                    <button key={e.objection} onClick={() => { navigator.clipboard.writeText(e.response); showToast("success", `Antwort für "${e.objection}" kopiert`); }}
+                      className="w-full p-3 bg-white/[0.02] hover:bg-[#FC682C]/5 border border-white/[0.04] hover:border-[#FC682C]/20 rounded-xl text-left transition-all group">
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-lg">{e.icon}</span>
+                        <div className="flex-1">
+                          <div className="text-xs font-bold text-red-400/80 mb-0.5">"{e.objection}"</div>
+                          <div className="text-xs text-white/50 leading-relaxed group-hover:text-white/70 transition-colors">{e.response}</div>
+                        </div>
+                        <span className="text-[9px] text-white/20 group-hover:text-[#FC682C] shrink-0 transition-colors">Kopieren</span>
+                      </div>
+                    </button>
                   ))}
                 </div>
               </div>
