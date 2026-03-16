@@ -59,10 +59,10 @@ export const PATCH = createHandler({
 }, async (data: UpdateInvoiceInput, _ctx, request) => {
   const id = request.nextUrl.pathname.split('/')[3];
 
-  // Check if invoice exists
+  // Check if invoice exists with full data
   const { data: existing } = await db
     .from('invoices')
-    .select('id, status')
+    .select('id, status, client_id, total, invoice_number, referrer_id, commission_id')
     .eq('id', id)
     .single();
 
@@ -79,14 +79,13 @@ export const PATCH = createHandler({
     updateData.items = data.items;
     const amount = data.items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
     updateData.amount = amount;
-    
+
     const taxRate = data.tax_rate ?? 19;
     updateData.tax_rate = taxRate;
     updateData.tax_amount = Math.round(amount * taxRate) / 100;
     updateData.total = amount + (updateData.tax_amount as number);
   } else if (data.tax_rate !== undefined) {
     updateData.tax_rate = data.tax_rate;
-    // Would need to fetch current amount to recalculate
   }
 
   if (data.status !== undefined) updateData.status = data.status;
@@ -101,6 +100,95 @@ export const PATCH = createHandler({
     .single();
 
   if (error) throw new DatabaseError(error.message);
+
+  // ═══════════════════════════════════════════════════════════
+  // AUTO-PROVISION: Wenn Rechnung auf "paid" → Provision erstellen
+  // ═══════════════════════════════════════════════════════════
+  if (data.status === 'paid' && existing.status !== 'paid' && !existing.commission_id) {
+    try {
+      let referrerId: number | null = existing.referrer_id || null;
+
+      // Falls kein referrer_id auf der Rechnung, prüfe den Client
+      if (!referrerId && existing.client_id) {
+        const { data: client } = await db
+          .from('portal_clients')
+          .select('referrer_id, lead_id')
+          .eq('id', existing.client_id)
+          .single();
+
+        if (client?.referrer_id) {
+          referrerId = client.referrer_id;
+        } else if (client?.lead_id) {
+          // Fallback: Prüfe den Original-Lead
+          const { data: lead } = await db
+            .from('leads')
+            .select('referrer_id')
+            .eq('id', client.lead_id)
+            .single();
+          if (lead?.referrer_id) referrerId = lead.referrer_id;
+        }
+      }
+
+      if (referrerId) {
+        // Referrer-Daten holen
+        const { data: referrer } = await db
+          .from('referrers')
+          .select('id, name, commission_rate, total_commission')
+          .eq('id', referrerId)
+          .single();
+
+        if (referrer) {
+          const dealValue = parseFloat(String(existing.total || 0));
+          const rate = parseFloat(String(referrer.commission_rate)) || 10;
+          const commissionAmount = Math.round(dealValue * rate) / 100;
+          const now = new Date();
+          const payoutMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+          // Provision erstellen
+          const { data: commission } = await db
+            .from('referral_commissions')
+            .insert({
+              referrer_id: referrerId,
+              deal_value: dealValue,
+              commission_rate: rate,
+              commission_amount: commissionAmount,
+              notes: `Rechnung ${existing.invoice_number || '#' + id} bezahlt`,
+              status: 'pending',
+              payout_month: payoutMonth,
+            })
+            .select()
+            .single();
+
+          if (commission) {
+            // Verknüpfung auf der Rechnung speichern
+            await db.from('invoices').update({
+              referrer_id: referrerId,
+              commission_id: commission.id,
+            }).eq('id', id);
+
+            // Referrer total_commission aktualisieren
+            const newTotal = (parseFloat(String(referrer.total_commission)) || 0) + commissionAmount;
+            await db.from('referrers').update({
+              total_commission: newTotal,
+              total_referrals: (referrer as any).total_referrals ? (referrer as any).total_referrals + 1 : 1,
+              updated_at: now.toISOString(),
+            }).eq('id', referrerId);
+
+            // Notification
+            await db.from('notifications').insert({
+              title: 'Provision automatisch erstellt',
+              message: `${commissionAmount.toLocaleString('de-DE')}€ Provision für ${referrer.name} (Rechnung ${existing.invoice_number || '#' + id})`,
+              type: 'info',
+              is_read: false,
+            });
+          }
+        }
+      }
+    } catch (commErr) {
+      console.error('Auto-commission creation error:', commErr);
+      // Fehler bei Provision soll Rechnungs-Update nicht blockieren
+    }
+  }
 
   return { invoice };
 });

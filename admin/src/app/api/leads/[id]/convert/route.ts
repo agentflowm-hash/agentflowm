@@ -62,7 +62,7 @@ export async function POST(
       attempts++;
     }
 
-    // Portal-Client erstellen
+    // Portal-Client erstellen (mit referrer_id falls vorhanden)
     const { data: newClient, error: clientError } = await db
       .from("portal_clients")
       .insert({
@@ -72,6 +72,7 @@ export async function POST(
         phone: lead.phone,
         access_code: accessCode,
         lead_id: lead.id,
+        referrer_id: lead.referrer_id || null,
         status: "active",
       })
       .select()

@@ -2528,7 +2528,11 @@ function KanbanCard({
           </span>
         )}
         {lead.source && (
-          <span className="px-1.5 py-0.5 bg-white/[0.04] text-white/30 rounded text-[9px] border border-white/[0.04]">{lead.source}</span>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] border ${
+            lead.source === "Empfehlung"
+              ? "bg-purple-500/15 text-purple-400 border-purple-500/30"
+              : "bg-white/[0.04] text-white/30 border-white/[0.04]"
+          }`}>{lead.source === "Empfehlung" ? "Empfehlung" : lead.source}</span>
         )}
       </div>
 
