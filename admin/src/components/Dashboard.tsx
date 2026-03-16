@@ -4387,9 +4387,13 @@ interface Commission {
   commission_amount: number;
   status: string;
   paid_at: string | null;
+  approved_at: string | null;
+  accounting_entry_id: number | null;
+  payout_month: string | null;
   notes: string | null;
   created_at: string;
   referrer_name?: string;
+  referrer_email?: string;
   lead_name?: string;
 }
 
@@ -4426,6 +4430,11 @@ function ReferralsTab() {
   const [newReferrer, setNewReferrer] = useState({ name: "", email: "", phone: "", company: "" });
   const [newCommission, setNewCommission] = useState({ referrer_id: "", deal_value: "", notes: "" });
   const [saving, setSaving] = useState(false);
+  const [statementMonth, setStatementMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [statementReferrer, setStatementReferrer] = useState("all");
 
   const loadData = useCallback(() => {
     setLoading(true);
@@ -4520,6 +4529,56 @@ function ReferralsTab() {
         showToast("error", "Fehler beim Erfassen");
       }
     } catch { showToast("error", "Fehler beim Erfassen"); }
+    finally { setSaving(false); }
+  };
+
+  const handleCommissionStatusChange = async (commissionId: number, newStatus: string) => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/referrers/commissions", {
+        credentials: "include",
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: commissionId, status: newStatus }),
+      });
+      if (res.ok) {
+        const statusLabel = newStatus === "approved" ? "genehmigt" : "ausgezahlt";
+        showToast("success", `Provision ${statusLabel}! ${newStatus === "approved" ? "Buchung in Buchhaltung erstellt." : "E-Mail an Empfehlungsgeber gesendet."}`);
+        loadData();
+      } else {
+        showToast("error", "Status konnte nicht geändert werden");
+      }
+    } catch { showToast("error", "Fehler bei Status-Änderung"); }
+    finally { setSaving(false); }
+  };
+
+  const handleGenerateStatement = async () => {
+    setSaving(true);
+    try {
+      const referrerIds = statementReferrer === "all"
+        ? allReferrers.map((r) => r.id)
+        : [parseInt(statementReferrer)];
+
+      let successCount = 0;
+      for (const rid of referrerIds) {
+        const res = await fetch("/api/referrers/monthly-statement", {
+          credentials: "include",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referrer_id: rid, month: statementMonth, send_email: true }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const unwrapped = unwrapApiResponse<{ commissions_count: number }>(data);
+          if (unwrapped.commissions_count > 0) successCount++;
+        }
+      }
+      if (successCount > 0) {
+        showToast("success", `${successCount} Abrechnung(en) versendet!`);
+      } else {
+        showToast("info", "Keine genehmigten Provisionen für diesen Zeitraum gefunden");
+      }
+    } catch { showToast("error", "Fehler beim Generieren der Abrechnungen"); }
     finally { setSaving(false); }
   };
 
@@ -4899,6 +4958,52 @@ function ReferralsTab() {
             </div>
           )}
 
+          {/* Monthly Statement Generator */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 to-[#FC682C]/10 border border-purple-500/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-purple-500/20">
+                  <DocumentTextIcon className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-white">Monatliche Abrechnung</h4>
+                  <p className="text-xs text-white/40">Provisionsabrechnung generieren & per E-Mail versenden</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={statementMonth}
+                  onChange={(e) => setStatementMonth(e.target.value)}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white focus:border-purple-500/50 outline-none cursor-pointer"
+                >
+                  {Array.from({ length: 6 }, (_, i) => {
+                    const d = new Date();
+                    d.setMonth(d.getMonth() - i);
+                    const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    const label = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+                    return <option key={val} value={val}>{label}</option>;
+                  })}
+                </select>
+                <select
+                  value={statementReferrer}
+                  onChange={(e) => setStatementReferrer(e.target.value)}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-white focus:border-purple-500/50 outline-none cursor-pointer"
+                >
+                  <option value="all">Alle Empfehlungsgeber</option>
+                  {allReferrers.map((r) => <option key={r.id} value={String(r.id)}>{r.name}</option>)}
+                </select>
+                <button
+                  onClick={handleGenerateStatement}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl text-sm font-medium hover:bg-purple-500/30 disabled:opacity-50 transition-colors"
+                >
+                  {saving ? <div className="w-4 h-4 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" /> : <PaperAirplaneIcon className="w-4 h-4" />}
+                  Abrechnung senden
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Commissions List */}
           <div className="space-y-3">
             {commissions.filter((c) => filter === "all" || c.status === filter).length === 0 ? (
@@ -4916,26 +5021,37 @@ function ReferralsTab() {
                     <div key={commission.id} className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FC682C]/20 to-[#FC682C]/5 border border-[#FC682C]/20 flex items-center justify-center">
-                            <BanknotesIcon className="w-6 h-6 text-[#FC682C]" />
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            commission.status === "paid"
+                              ? "bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20"
+                              : commission.status === "approved"
+                                ? "bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20"
+                                : "bg-gradient-to-br from-[#FC682C]/20 to-[#FC682C]/5 border border-[#FC682C]/20"
+                          }`}>
+                            {commission.status === "paid"
+                              ? <CheckCircleIcon className="w-6 h-6 text-green-400" />
+                              : <BanknotesIcon className="w-6 h-6 text-[#FC682C]" />
+                            }
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-medium text-white">{referrer?.name || "Unbekannt"}</span>
+                              <span className="text-sm font-medium text-white">{commission.referrer_name || referrer?.name || "Unbekannt"}</span>
                               {commission.notes && <span className="text-xs text-white/30">• {commission.notes}</span>}
                             </div>
                             <p className="text-xs text-white/40">
                               Deal: {parseFloat(String(commission.deal_value)).toLocaleString("de-DE")}€ × {commission.commission_rate}%
+                              {commission.accounting_entry_id && <span className="ml-2 text-green-400/60">• In Buchhaltung</span>}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                           <div className="text-right">
                             <p className="text-lg font-bold text-[#FC682C]">
                               {parseFloat(String(commission.commission_amount)).toLocaleString("de-DE", { minimumFractionDigits: 2 })}€
                             </p>
                             <p className="text-[10px] text-white/30">{new Date(commission.created_at).toLocaleDateString("de-DE")}</p>
                           </div>
+                          {/* Status Badge */}
                           <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${
                             commission.status === "pending" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
                             : commission.status === "approved" ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
@@ -4943,6 +5059,23 @@ function ReferralsTab() {
                           }`}>
                             {commission.status === "pending" ? "Offen" : commission.status === "approved" ? "Genehmigt" : "Ausgezahlt"}
                           </span>
+                          {/* Workflow Buttons */}
+                          {commission.status === "pending" && (
+                            <button
+                              onClick={() => handleCommissionStatusChange(commission.id, "approved")}
+                              className="px-3 py-1.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-medium hover:bg-blue-500/30 transition-colors"
+                            >
+                              Genehmigen
+                            </button>
+                          )}
+                          {commission.status === "approved" && (
+                            <button
+                              onClick={() => handleCommissionStatusChange(commission.id, "paid")}
+                              className="px-3 py-1.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg text-xs font-medium hover:bg-green-500/30 transition-colors"
+                            >
+                              Auszahlen
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

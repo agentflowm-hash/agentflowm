@@ -53,6 +53,7 @@ const CATEGORIES = {
     "Sonstiges",
   ],
   expense: [
+    "Empfehlungsprovision",
     "Software & Tools",
     "Hosting & Server",
     "Marketing",
