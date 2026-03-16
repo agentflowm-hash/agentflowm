@@ -189,6 +189,7 @@ export const CreateLeadSchema = z.object({
   message: z.string().max(5000).optional(),
   source: z.string().max(50).optional(),
   package_interest: z.string().optional(),
+  referrer_id: z.number().int().positive().optional().nullable(),
 });
 
 export const UpdateLeadSchema = CreateLeadSchema.partial().extend({

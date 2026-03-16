@@ -4365,7 +4365,7 @@ function CheckDetailModal({
   );
 }
 
-interface Referral {
+interface ReferralItem {
   id: number;
   referrerName: string;
   referrerEmail: string;
@@ -4378,25 +4378,75 @@ interface Referral {
   createdAt: string;
 }
 
+interface Commission {
+  id: number;
+  referrer_id: number;
+  lead_id: number | null;
+  deal_value: number;
+  commission_rate: number;
+  commission_amount: number;
+  status: string;
+  paid_at: string | null;
+  notes: string | null;
+  created_at: string;
+  referrer_name?: string;
+  lead_name?: string;
+}
+
+function normalizeReferral(r: any): ReferralItem {
+  return {
+    id: r.id,
+    referrerName: r.referrerName || r.referrer_name || 'Unbekannt',
+    referrerEmail: r.referrerEmail || r.referrer_email || '',
+    referredName: r.referredName || r.referred_name || '',
+    referredEmail: r.referredEmail || r.referred_email || '',
+    referredPhone: r.referredPhone || r.referred_phone || null,
+    message: r.message || null,
+    status: r.status || 'pending',
+    notes: r.notes || null,
+    createdAt: r.createdAt || r.created_at || '',
+  };
+}
+
+type RefView = "empfehlungen" | "empfehlungsgeber" | "provisionen" | "ranking";
+
 function ReferralsTab() {
-  const [referrals, setReferrals] = useState<Referral[]>([]);
+  const { showToast } = useToast();
+  const [referrals, setReferrals] = useState<ReferralItem[]>([]);
+  const [allReferrers, setAllReferrers] = useState<Referrer[]>([]);
+  const [commissions, setCommissions] = useState<Commission[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedReferral, setSelectedReferral] = useState<Referral | null>(
-    null,
-  );
+  const [selectedReferral, setSelectedReferral] = useState<ReferralItem | null>(null);
+  const [selectedReferrer, setSelectedReferrer] = useState<Referrer | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [activeView, setActiveView] = useState<RefView>("empfehlungen");
+  const [showAddReferrer, setShowAddReferrer] = useState(false);
+  const [showAddCommission, setShowAddCommission] = useState(false);
+  const [newReferrer, setNewReferrer] = useState({ name: "", email: "", phone: "", company: "" });
+  const [newCommission, setNewCommission] = useState({ referrer_id: "", deal_value: "", notes: "" });
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/referrals", { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => {
-        const unwrapped = unwrapApiResponse<{referrals: Referral[]}>(data);
-        setReferrals(unwrapped.referrals || []);
+  const loadData = useCallback(() => {
+    setLoading(true);
+    Promise.all([
+      fetch("/api/referrals", { credentials: "include" }).then((r) => r.json()),
+      fetch("/api/referrers", { credentials: "include" }).then((r) => r.json()),
+      fetch("/api/referrers/commissions", { credentials: "include" }).then((r) => r.json()).catch(() => ({ data: { commissions: [] } })),
+    ])
+      .then(([refData, referrerData, commData]) => {
+        const unwrappedRef = unwrapApiResponse<{ referrals: any[] }>(refData);
+        setReferrals((unwrappedRef.referrals || []).map(normalizeReferral));
+        const unwrappedReferrers = unwrapApiResponse<{ referrers: Referrer[] }>(referrerData);
+        setAllReferrers(unwrappedReferrers.referrers || []);
+        const unwrappedComm = unwrapApiResponse<{ commissions: Commission[] }>(commData);
+        setCommissions(unwrappedComm.commissions || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const filtered = referrals.filter((r) => {
     const matchSearch =
@@ -4407,8 +4457,15 @@ function ReferralsTab() {
     return matchSearch && matchFilter;
   });
 
+  const filteredReferrers = allReferrers.filter((r) =>
+    r.name.toLowerCase().includes(search.toLowerCase()) ||
+    r.email.toLowerCase().includes(search.toLowerCase()) ||
+    (r.company || "").toLowerCase().includes(search.toLowerCase()),
+  );
+
   const updateStatus = async (id: number, status: string) => {
-    await fetch(`/api/referrals/${id}`, { credentials: "include",
+    await fetch(`/api/referrals/${id}`, {
+      credentials: "include",
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -4417,156 +4474,592 @@ function ReferralsTab() {
     setSelectedReferral(null);
   };
 
-  const stats = {
+  const handleAddReferrer = async () => {
+    if (!newReferrer.name || !newReferrer.email) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/referrers", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newReferrer),
+      });
+      if (res.ok) {
+        showToast("success", "Empfehlungsgeber angelegt!");
+        setNewReferrer({ name: "", email: "", phone: "", company: "" });
+        setShowAddReferrer(false);
+        loadData();
+      } else {
+        const err = await res.json();
+        showToast("error", err?.error?.message || "Fehler beim Anlegen");
+      }
+    } catch { showToast("error", "Fehler beim Anlegen"); }
+    finally { setSaving(false); }
+  };
+
+  const handleAddCommission = async () => {
+    if (!newCommission.referrer_id || !newCommission.deal_value) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/referrers/commissions", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          referrer_id: parseInt(newCommission.referrer_id),
+          deal_value: parseFloat(newCommission.deal_value),
+          notes: newCommission.notes || null,
+        }),
+      });
+      if (res.ok) {
+        showToast("success", "Provision erfasst!");
+        setNewCommission({ referrer_id: "", deal_value: "", notes: "" });
+        setShowAddCommission(false);
+        loadData();
+      } else {
+        showToast("error", "Fehler beim Erfassen");
+      }
+    } catch { showToast("error", "Fehler beim Erfassen"); }
+    finally { setSaving(false); }
+  };
+
+  const refStats = {
     total: referrals.length,
     pending: referrals.filter((r) => r.status === "pending").length,
     contacted: referrals.filter((r) => r.status === "contacted").length,
     converted: referrals.filter((r) => r.status === "converted").length,
   };
 
+  const totalCommission = allReferrers.reduce(
+    (sum, r) => sum + (parseFloat(String(r.total_commission)) || 0), 0,
+  );
+  const totalPendingCommission = commissions
+    .filter((c) => c.status === "pending")
+    .reduce((sum, c) => sum + (parseFloat(String(c.commission_amount)) || 0), 0);
+
   if (loading) return <LoadingState />;
+
+  const views: { key: RefView; label: string; icon: React.ReactNode; count?: number }[] = [
+    { key: "empfehlungen", label: "Empfehlungen", icon: <ChevronRightIcon className="w-4 h-4" />, count: refStats.total },
+    { key: "empfehlungsgeber", label: "Empfehlungsgeber", icon: <UserGroupIcon className="w-4 h-4" />, count: allReferrers.length },
+    { key: "provisionen", label: "Provisionen", icon: <BanknotesIcon className="w-4 h-4" />, count: commissions.length },
+    { key: "ranking", label: "Ranking", icon: <StarIcon className="w-4 h-4" /> },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20">
           <div className="flex items-center gap-3 mb-2">
             <UserGroupIcon className="w-5 h-5 text-purple-400" />
-            <span className="text-sm text-white/50">Gesamt</span>
+            <span className="text-sm text-white/50">Empfehlungen</span>
           </div>
-          <p className="text-3xl font-bold text-white">{stats.total}</p>
+          <p className="text-3xl font-bold text-white">{refStats.total}</p>
         </div>
         <div className="p-5 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 border border-yellow-500/20">
           <div className="flex items-center gap-3 mb-2">
             <ClockIcon className="w-5 h-5 text-yellow-400" />
             <span className="text-sm text-white/50">Ausstehend</span>
           </div>
-          <p className="text-3xl font-bold text-white">{stats.pending}</p>
-        </div>
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20">
-          <div className="flex items-center gap-3 mb-2">
-            <PhoneIcon className="w-5 h-5 text-blue-400" />
-            <span className="text-sm text-white/50">Kontaktiert</span>
-          </div>
-          <p className="text-3xl font-bold text-white">{stats.contacted}</p>
+          <p className="text-3xl font-bold text-white">{refStats.pending}</p>
         </div>
         <div className="p-5 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircleIcon className="w-5 h-5 text-green-400" />
             <span className="text-sm text-white/50">Konvertiert</span>
           </div>
-          <p className="text-3xl font-bold text-white">{stats.converted}</p>
+          <p className="text-3xl font-bold text-white">{refStats.converted}</p>
         </div>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-          <input
-            type="text"
-            placeholder="Suche nach Empfehler oder Empfohlenen..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none"
-          />
-        </div>
-        <div className="flex gap-2">
-          {["all", "pending", "contacted", "converted"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                filter === f
-                  ? "bg-[#FC682C] text-white"
-                  : "bg-white/[0.04] text-white/50 hover:bg-white/[0.08] hover:text-white"
-              }`}
-            >
-              {f === "all"
-                ? "Alle"
-                : f === "pending"
-                  ? "Ausstehend"
-                  : f === "contacted"
-                    ? "Kontaktiert"
-                    : "Konvertiert"}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Referrals List */}
-      <div className="space-y-3">
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <UserGroupIcon className="w-16 h-16 text-white/10 mb-4" />
-            <h3 className="text-lg font-medium text-white/50">
-              Keine Empfehlungen gefunden
-            </h3>
-            <p className="text-sm text-white/30">
-              Teile deinen Empfehlungslink um neue Empfehlungen zu erhalten
-            </p>
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#FC682C]/20 to-[#FC682C]/5 border border-[#FC682C]/20">
+          <div className="flex items-center gap-3 mb-2">
+            <BanknotesIcon className="w-5 h-5 text-[#FC682C]" />
+            <span className="text-sm text-white/50">Provision ges.</span>
           </div>
-        ) : (
-          filtered.map((referral) => (
-            <div
-              key={referral.id}
-              className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all cursor-pointer"
-              onClick={() => setSelectedReferral(referral)}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  {/* Avatar Stack */}
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-[#9D65C9]/30 flex items-center justify-center text-white font-medium text-lg">
-                      {referral.referrerName.charAt(0)}
+          <p className="text-3xl font-bold text-white">
+            {totalCommission.toLocaleString("de-DE", { minimumFractionDigits: 0 })}€
+          </p>
+        </div>
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20">
+          <div className="flex items-center gap-3 mb-2">
+            <ReceiptPercentIcon className="w-5 h-5 text-blue-400" />
+            <span className="text-sm text-white/50">Offen</span>
+          </div>
+          <p className="text-3xl font-bold text-white">
+            {totalPendingCommission.toLocaleString("de-DE", { minimumFractionDigits: 0 })}€
+          </p>
+        </div>
+      </div>
+
+      {/* Sub-Navigation */}
+      <div className="flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.06] rounded-xl w-fit">
+        {views.map((v) => (
+          <button
+            key={v.key}
+            onClick={() => { setActiveView(v.key); setSearch(""); setFilter("all"); }}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+              activeView === v.key
+                ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20"
+                : "text-white/50 hover:text-white hover:bg-white/[0.06]"
+            }`}
+          >
+            {v.icon}
+            {v.label}
+            {v.count !== undefined && (
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                activeView === v.key ? "bg-white/20" : "bg-white/[0.06]"
+              }`}>
+                {v.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* ═══════════════ EMPFEHLUNGEN VIEW ═══════════════ */}
+      {activeView === "empfehlungen" && (
+        <>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+              <input
+                type="text"
+                placeholder="Suche nach Empfehler oder Empfohlenen..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none"
+              />
+            </div>
+            <div className="flex gap-2">
+              {["all", "pending", "contacted", "converted"].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    filter === f
+                      ? "bg-[#FC682C] text-white"
+                      : "bg-white/[0.04] text-white/50 hover:bg-white/[0.08] hover:text-white"
+                  }`}
+                >
+                  {f === "all" ? "Alle" : f === "pending" ? "Ausstehend" : f === "contacted" ? "Kontaktiert" : "Konvertiert"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-3">
+            {filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <UserGroupIcon className="w-16 h-16 text-white/10 mb-4" />
+                <h3 className="text-lg font-medium text-white/50">Keine Empfehlungen gefunden</h3>
+                <p className="text-sm text-white/30">Erstelle einen Lead mit Quelle &quot;Empfehlung&quot; um hier Einträge zu sehen</p>
+              </div>
+            ) : (
+              filtered.map((referral) => (
+                <div
+                  key={referral.id}
+                  className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all cursor-pointer"
+                  onClick={() => setSelectedReferral(referral)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-[#9D65C9]/30 flex items-center justify-center text-white font-medium text-lg">
+                          {referral.referrerName.charAt(0)}
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-gradient-to-br from-[#FC682C]/50 to-[#FC682C]/30 flex items-center justify-center text-white font-medium text-xs border-2 border-[#09090b]">
+                          {referral.referredName.charAt(0)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-white">{referral.referrerName}</span>
+                          <ChevronRightIcon className="w-4 h-4 text-[#FC682C]" />
+                          <span className="text-sm font-medium text-white">{referral.referredName}</span>
+                        </div>
+                        <p className="text-xs text-white/40">
+                          {referral.referredEmail} {referral.referredPhone && `• ${referral.referredPhone}`}
+                        </p>
+                      </div>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-gradient-to-br from-[#FC682C]/50 to-[#FC682C]/30 flex items-center justify-center text-white font-medium text-xs border-2 border-[#09090b]">
-                      {referral.referredName.charAt(0)}
+                    <div className="flex items-center gap-3">
+                      <ReferralStatusBadge status={referral.status} />
+                      <span className="text-xs text-white/30">{new Date(referral.createdAt).toLocaleDateString("de-DE")}</span>
                     </div>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-white">
-                        {referral.referrerName}
-                      </span>
-                      <ChevronRightIcon className="w-4 h-4 text-[#FC682C]" />
-                      <span className="text-sm font-medium text-white">
-                        {referral.referredName}
-                      </span>
+                  {referral.message && (
+                    <div className="mt-4 p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+                      <p className="text-sm text-white/60 line-clamp-2">{referral.message}</p>
                     </div>
-                    <p className="text-xs text-white/40">
-                      {referral.referredEmail}{" "}
-                      {referral.referredPhone && `• ${referral.referredPhone}`}
-                    </p>
-                  </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-3">
-                  <ReferralStatusBadge status={referral.status} />
-                  <span className="text-xs text-white/30">
-                    {new Date(referral.createdAt).toLocaleDateString("de-DE")}
-                  </span>
+              ))
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ═══════════════ EMPFEHLUNGSGEBER VIEW ═══════════════ */}
+      {activeView === "empfehlungsgeber" && (
+        <>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+              <input
+                type="text"
+                placeholder="Empfehlungsgeber suchen..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none"
+              />
+            </div>
+            <button
+              onClick={() => setShowAddReferrer(true)}
+              className="flex items-center gap-2 px-5 py-3 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 transition-colors"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Neuer Empfehlungsgeber
+            </button>
+          </div>
+
+          {/* Add Referrer Form */}
+          {showAddReferrer && (
+            <div className="p-5 rounded-2xl bg-purple-500/10 border border-purple-500/20 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-purple-400 flex items-center gap-2">
+                  <PlusIcon className="w-4 h-4" /> Neuen Empfehlungsgeber anlegen
+                </h4>
+                <button onClick={() => setShowAddReferrer(false)} className="p-1.5 hover:bg-white/10 rounded-lg">
+                  <XMarkIcon className="w-4 h-4 text-white/40" />
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Name *</label>
+                  <input type="text" value={newReferrer.name} onChange={(e) => setNewReferrer({ ...newReferrer, name: e.target.value })}
+                    placeholder="Max Mustermann" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">E-Mail *</label>
+                  <input type="email" value={newReferrer.email} onChange={(e) => setNewReferrer({ ...newReferrer, email: e.target.value })}
+                    placeholder="email@example.com" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Telefon</label>
+                  <input type="tel" value={newReferrer.phone} onChange={(e) => setNewReferrer({ ...newReferrer, phone: e.target.value })}
+                    placeholder="+49 123 456789" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Firma</label>
+                  <input type="text" value={newReferrer.company} onChange={(e) => setNewReferrer({ ...newReferrer, company: e.target.value })}
+                    placeholder="Firma GmbH" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none" />
                 </div>
               </div>
-              {referral.message && (
-                <div className="mt-4 p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
-                  <p className="text-sm text-white/60 line-clamp-2">
-                    {referral.message}
+              <button onClick={handleAddReferrer} disabled={saving || !newReferrer.name || !newReferrer.email}
+                className="w-full py-2.5 bg-purple-500/20 text-purple-400 rounded-xl text-sm font-medium hover:bg-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors">
+                {saving ? <><div className="w-4 h-4 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" /> Wird angelegt...</> : <><PlusIcon className="w-4 h-4" /> Anlegen</>}
+              </button>
+            </div>
+          )}
+
+          {/* Referrer List */}
+          <div className="space-y-3">
+            {filteredReferrers.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <UserGroupIcon className="w-16 h-16 text-white/10 mb-4" />
+                <h3 className="text-lg font-medium text-white/50">Noch keine Empfehlungsgeber</h3>
+                <p className="text-sm text-white/30">Erstelle den ersten Empfehlungsgeber mit dem Button oben</p>
+              </div>
+            ) : (
+              filteredReferrers.map((referrer) => (
+                <div
+                  key={referrer.id}
+                  className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all cursor-pointer"
+                  onClick={() => setSelectedReferrer(referrer)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-[#9D65C9]/30 flex items-center justify-center text-white font-medium text-lg flex-shrink-0">
+                      {referrer.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-white">{referrer.name}</span>
+                        {referrer.company && <span className="text-xs text-white/30">• {referrer.company}</span>}
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${
+                          referrer.status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                        }`}>
+                          {referrer.status === "active" ? "Aktiv" : "Inaktiv"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-white/40">{referrer.email} {referrer.phone && `• ${referrer.phone}`}</p>
+                    </div>
+                    <div className="flex items-center gap-5 flex-shrink-0">
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-purple-400">{referrer.total_referrals}</p>
+                        <p className="text-[10px] text-white/30">Empfehlungen</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-green-400">{referrer.converted_referrals}</p>
+                        <p className="text-[10px] text-white/30">Konvertiert</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-[#FC682C]">
+                          {parseFloat(String(referrer.total_commission || 0)).toLocaleString("de-DE")}€
+                        </p>
+                        <p className="text-[10px] text-white/30">Provision</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ═══════════════ PROVISIONEN VIEW ═══════════════ */}
+      {activeView === "provisionen" && (
+        <>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+              <input
+                type="text"
+                placeholder="Provisionen durchsuchen..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none"
+              />
+            </div>
+            <div className="flex gap-2">
+              {["all", "pending", "approved", "paid"].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    filter === f ? "bg-[#FC682C] text-white" : "bg-white/[0.04] text-white/50 hover:bg-white/[0.08] hover:text-white"
+                  }`}
+                >
+                  {f === "all" ? "Alle" : f === "pending" ? "Offen" : f === "approved" ? "Genehmigt" : "Ausgezahlt"}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowAddCommission(true)}
+              className="flex items-center gap-2 px-5 py-3 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 transition-colors"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Provision erfassen
+            </button>
+          </div>
+
+          {/* Add Commission Form */}
+          {showAddCommission && (
+            <div className="p-5 rounded-2xl bg-[#FC682C]/10 border border-[#FC682C]/20 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-[#FC682C] flex items-center gap-2">
+                  <BanknotesIcon className="w-4 h-4" /> Neue Provision erfassen
+                </h4>
+                <button onClick={() => setShowAddCommission(false)} className="p-1.5 hover:bg-white/10 rounded-lg">
+                  <XMarkIcon className="w-4 h-4 text-white/40" />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Empfehlungsgeber *</label>
+                  <select value={newCommission.referrer_id} onChange={(e) => setNewCommission({ ...newCommission, referrer_id: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:border-[#FC682C]/50 outline-none cursor-pointer">
+                    <option value="">Auswählen...</option>
+                    {allReferrers.map((r) => <option key={r.id} value={r.id}>{r.name} ({r.commission_rate}%)</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Deal-Wert (€) *</label>
+                  <input type="number" value={newCommission.deal_value} onChange={(e) => setNewCommission({ ...newCommission, deal_value: e.target.value })}
+                    placeholder="z.B. 8390" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Notiz</label>
+                  <input type="text" value={newCommission.notes} onChange={(e) => setNewCommission({ ...newCommission, notes: e.target.value })}
+                    placeholder="z.B. Business Website" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none" />
+                </div>
+              </div>
+              {newCommission.referrer_id && newCommission.deal_value && (
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+                  <p className="text-xs text-white/40">Berechnete Provision:</p>
+                  <p className="text-lg font-bold text-[#FC682C]">
+                    {(parseFloat(newCommission.deal_value) * (allReferrers.find((r) => r.id === parseInt(newCommission.referrer_id))?.commission_rate || 10) / 100).toLocaleString("de-DE", { minimumFractionDigits: 2 })}€
+                    <span className="text-xs text-white/30 ml-2">({allReferrers.find((r) => r.id === parseInt(newCommission.referrer_id))?.commission_rate || 10}% von {parseFloat(newCommission.deal_value).toLocaleString("de-DE")}€)</span>
                   </p>
                 </div>
               )}
+              <button onClick={handleAddCommission} disabled={saving || !newCommission.referrer_id || !newCommission.deal_value}
+                className="w-full py-2.5 bg-[#FC682C]/20 text-[#FC682C] rounded-xl text-sm font-medium hover:bg-[#FC682C]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors">
+                {saving ? <><div className="w-4 h-4 border-2 border-[#FC682C]/30 border-t-[#FC682C] rounded-full animate-spin" /> Wird erfasst...</> : <><BanknotesIcon className="w-4 h-4" /> Provision erfassen</>}
+              </button>
             </div>
-          ))
-        )}
-      </div>
+          )}
 
-      {/* Referral Modal */}
+          {/* Commissions List */}
+          <div className="space-y-3">
+            {commissions.filter((c) => filter === "all" || c.status === filter).length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <BanknotesIcon className="w-16 h-16 text-white/10 mb-4" />
+                <h3 className="text-lg font-medium text-white/50">Keine Provisionen vorhanden</h3>
+                <p className="text-sm text-white/30">Erfasse die erste Provision mit dem Button oben</p>
+              </div>
+            ) : (
+              commissions
+                .filter((c) => filter === "all" || c.status === filter)
+                .map((commission) => {
+                  const referrer = allReferrers.find((r) => r.id === commission.referrer_id);
+                  return (
+                    <div key={commission.id} className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FC682C]/20 to-[#FC682C]/5 border border-[#FC682C]/20 flex items-center justify-center">
+                            <BanknotesIcon className="w-6 h-6 text-[#FC682C]" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium text-white">{referrer?.name || "Unbekannt"}</span>
+                              {commission.notes && <span className="text-xs text-white/30">• {commission.notes}</span>}
+                            </div>
+                            <p className="text-xs text-white/40">
+                              Deal: {parseFloat(String(commission.deal_value)).toLocaleString("de-DE")}€ × {commission.commission_rate}%
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-[#FC682C]">
+                              {parseFloat(String(commission.commission_amount)).toLocaleString("de-DE", { minimumFractionDigits: 2 })}€
+                            </p>
+                            <p className="text-[10px] text-white/30">{new Date(commission.created_at).toLocaleDateString("de-DE")}</p>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${
+                            commission.status === "pending" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+                            : commission.status === "approved" ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                            : "bg-green-500/20 text-green-400 border-green-500/30"
+                          }`}>
+                            {commission.status === "pending" ? "Offen" : commission.status === "approved" ? "Genehmigt" : "Ausgezahlt"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ═══════════════ RANKING VIEW ═══════════════ */}
+      {activeView === "ranking" && (
+        <div className="space-y-4">
+          {/* Podium für Top 3 */}
+          {allReferrers.length >= 3 && (
+            <div className="flex items-end justify-center gap-4 py-6">
+              {/* Platz 2 */}
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-400/30 to-gray-500/10 border-2 border-gray-400/40 flex items-center justify-center text-white font-bold text-2xl mb-2">
+                  {allReferrers[1]?.name.charAt(0)}
+                </div>
+                <p className="text-sm font-medium text-white mb-1">{allReferrers[1]?.name}</p>
+                <p className="text-xs text-white/40">{allReferrers[1]?.total_referrals} Empf.</p>
+                <div className="w-24 h-20 mt-3 rounded-t-xl bg-gradient-to-t from-gray-500/20 to-gray-400/10 border border-gray-400/20 flex items-center justify-center">
+                  <span className="text-3xl font-black text-gray-400/60">2</span>
+                </div>
+              </div>
+              {/* Platz 1 */}
+              <div className="flex flex-col items-center">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-500/40 to-yellow-600/20 border-2 border-yellow-500/50 flex items-center justify-center text-white font-bold text-3xl mb-2 shadow-lg shadow-yellow-500/20">
+                  {allReferrers[0]?.name.charAt(0)}
+                </div>
+                <p className="text-sm font-semibold text-white mb-1">{allReferrers[0]?.name}</p>
+                <p className="text-xs text-yellow-400">{allReferrers[0]?.total_referrals} Empf. • {parseFloat(String(allReferrers[0]?.total_commission || 0)).toLocaleString("de-DE")}€</p>
+                <div className="w-28 h-28 mt-3 rounded-t-xl bg-gradient-to-t from-yellow-500/20 to-yellow-400/10 border border-yellow-500/30 flex items-center justify-center">
+                  <span className="text-4xl font-black text-yellow-400/60">1</span>
+                </div>
+              </div>
+              {/* Platz 3 */}
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-700/30 to-orange-800/10 border-2 border-orange-700/40 flex items-center justify-center text-white font-bold text-2xl mb-2">
+                  {allReferrers[2]?.name.charAt(0)}
+                </div>
+                <p className="text-sm font-medium text-white mb-1">{allReferrers[2]?.name}</p>
+                <p className="text-xs text-white/40">{allReferrers[2]?.total_referrals} Empf.</p>
+                <div className="w-24 h-14 mt-3 rounded-t-xl bg-gradient-to-t from-orange-700/20 to-orange-600/10 border border-orange-700/20 flex items-center justify-center">
+                  <span className="text-3xl font-black text-orange-500/60">3</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Full Ranking List */}
+          {allReferrers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <StarIcon className="w-16 h-16 text-white/10 mb-4" />
+              <h3 className="text-lg font-medium text-white/50">Noch keine Empfehlungsgeber</h3>
+              <p className="text-sm text-white/30">Das Ranking erscheint sobald Empfehlungsgeber angelegt werden</p>
+            </div>
+          ) : (
+            allReferrers.map((referrer, index) => (
+              <div
+                key={referrer.id}
+                className={`p-5 rounded-2xl border transition-all ${
+                  index < 3
+                    ? "bg-gradient-to-r from-white/[0.04] to-transparent border-white/[0.1]"
+                    : "bg-white/[0.02] border-white/[0.06]"
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold flex-shrink-0 ${
+                    index === 0 ? "bg-gradient-to-br from-yellow-500/30 to-yellow-600/10 text-yellow-400 border border-yellow-500/30"
+                    : index === 1 ? "bg-gradient-to-br from-gray-400/30 to-gray-500/10 text-gray-300 border border-gray-400/30"
+                    : index === 2 ? "bg-gradient-to-br from-orange-700/30 to-orange-800/10 text-orange-400 border border-orange-700/30"
+                    : "bg-white/[0.04] text-white/40 border border-white/[0.06]"
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-[#9D65C9]/30 flex items-center justify-center text-white font-medium text-lg flex-shrink-0">
+                    {referrer.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-white">{referrer.name}</span>
+                      {referrer.company && <span className="text-xs text-white/30">• {referrer.company}</span>}
+                    </div>
+                    <p className="text-xs text-white/40">{referrer.email}</p>
+                  </div>
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-purple-400">{referrer.total_referrals}</p>
+                      <p className="text-[10px] text-white/30">Empfehlungen</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-green-400">{referrer.converted_referrals}</p>
+                      <p className="text-[10px] text-white/30">Konvertiert</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-[#FC682C]">
+                        {parseFloat(String(referrer.total_commission || 0)).toLocaleString("de-DE")}€
+                      </p>
+                      <p className="text-[10px] text-white/30">Provision ({referrer.commission_rate}%)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Modals */}
       {selectedReferral && (
-        <ReferralModal
-          referral={selectedReferral}
-          onClose={() => setSelectedReferral(null)}
-          onUpdateStatus={updateStatus}
-        />
+        <ReferralModal referral={selectedReferral} onClose={() => setSelectedReferral(null)} onUpdateStatus={updateStatus} />
+      )}
+      {selectedReferrer && (
+        <ReferrerDetailModal referrer={selectedReferrer} commissions={commissions.filter((c) => c.referrer_id === selectedReferrer.id)} onClose={() => setSelectedReferrer(null)} />
       )}
     </div>
   );
@@ -4586,11 +5079,104 @@ function ReferralStatusBadge({ status }: { status: string }) {
     rejected: "Abgelehnt",
   };
   return (
-    <span
-      className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${styles[status] || styles.pending}`}
-    >
+    <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${styles[status] || styles.pending}`}>
       {labels[status] || status}
     </span>
+  );
+}
+
+function ReferrerDetailModal({
+  referrer,
+  commissions,
+  onClose,
+}: {
+  referrer: Referrer;
+  commissions: Commission[];
+  onClose: () => void;
+}) {
+  const conversionRate = referrer.total_referrals > 0
+    ? Math.round((referrer.converted_referrals / referrer.total_referrals) * 100) : 0;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-lg bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] bg-gradient-to-r from-purple-500/10 to-transparent">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/30 to-[#9D65C9]/30 flex items-center justify-center text-white font-medium text-lg">
+              {referrer.name.charAt(0)}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">{referrer.name}</h3>
+              <p className="text-xs text-white/40">{referrer.email} {referrer.company && `• ${referrer.company}`}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl">
+            <XMarkIcon className="w-5 h-5 text-white/60" />
+          </button>
+        </div>
+        <div className="p-6 space-y-5">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-4 bg-white/[0.03] border border-white/[0.04] rounded-xl text-center">
+              <p className="text-2xl font-bold text-purple-400">{referrer.total_referrals}</p>
+              <p className="text-[10px] text-white/40 mt-1">Empfehlungen</p>
+            </div>
+            <div className="p-4 bg-white/[0.03] border border-white/[0.04] rounded-xl text-center">
+              <p className="text-2xl font-bold text-green-400">{conversionRate}%</p>
+              <p className="text-[10px] text-white/40 mt-1">Konversion</p>
+            </div>
+            <div className="p-4 bg-white/[0.03] border border-white/[0.04] rounded-xl text-center">
+              <p className="text-2xl font-bold text-[#FC682C]">
+                {parseFloat(String(referrer.total_commission || 0)).toLocaleString("de-DE")}€
+              </p>
+              <p className="text-[10px] text-white/40 mt-1">Provision ({referrer.commission_rate}%)</p>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div className="flex gap-2">
+            <a href={`mailto:${referrer.email}`}
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 transition-colors">
+              <EnvelopeOpenIcon className="w-4 h-4" /> E-Mail
+            </a>
+            {referrer.phone && (
+              <a href={`tel:${referrer.phone}`}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors">
+                <PhoneIcon className="w-4 h-4" /> Anrufen
+              </a>
+            )}
+          </div>
+
+          {/* Commission History */}
+          {commissions.length > 0 && (
+            <div>
+              <label className="block text-xs text-white/40 mb-2">Provisions-Historie</label>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {commissions.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/[0.04] rounded-xl">
+                    <div>
+                      <p className="text-sm text-white">{c.notes || "Provision"}</p>
+                      <p className="text-xs text-white/30">Deal: {parseFloat(String(c.deal_value)).toLocaleString("de-DE")}€</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-[#FC682C]">{parseFloat(String(c.commission_amount)).toLocaleString("de-DE")}€</p>
+                      <span className={`text-[10px] ${
+                        c.status === "paid" ? "text-green-400" : c.status === "approved" ? "text-blue-400" : "text-yellow-400"
+                      }`}>
+                        {c.status === "paid" ? "Ausgezahlt" : c.status === "approved" ? "Genehmigt" : "Offen"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex justify-end px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
+          <button onClick={onClose} className="px-6 py-2 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20">Schließen</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -4599,7 +5185,7 @@ function ReferralModal({
   onClose,
   onUpdateStatus,
 }: {
-  referral: Referral;
+  referral: ReferralItem;
   onClose: () => void;
   onUpdateStatus: (id: number, status: string) => void;
 }) {
@@ -4614,149 +5200,74 @@ function ReferralModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-lg bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] bg-gradient-to-r from-purple-500/10 to-transparent">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-purple-500/20">
               <UserGroupIcon className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">
-                Empfehlung Details
-              </h3>
-              <p className="text-xs text-white/40">
-                Erstellt am{" "}
-                {new Date(referral.createdAt).toLocaleDateString("de-DE")}
-              </p>
+              <h3 className="text-lg font-semibold text-white">Empfehlung Details</h3>
+              <p className="text-xs text-white/40">Erstellt am {new Date(referral.createdAt).toLocaleDateString("de-DE")}</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-xl"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl">
             <XMarkIcon className="w-5 h-5 text-white/60" />
           </button>
         </div>
-
-        {/* Content */}
         <div className="p-6 space-y-5">
-          {/* People */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 bg-white/[0.03] border border-white/[0.04] rounded-xl">
-              <p className="text-[10px] text-white/40 uppercase mb-2">
-                Empfohlen von
-              </p>
-              <p className="text-sm font-medium text-white">
-                {referral.referrerName}
-              </p>
+              <p className="text-[10px] text-white/40 uppercase mb-2">Empfohlen von</p>
+              <p className="text-sm font-medium text-white">{referral.referrerName}</p>
               <p className="text-xs text-white/50">{referral.referrerEmail}</p>
             </div>
             <div className="p-4 bg-white/[0.03] border border-white/[0.04] rounded-xl">
-              <p className="text-[10px] text-white/40 uppercase mb-2">
-                Empfohlene Person
-              </p>
-              <p className="text-sm font-medium text-white">
-                {referral.referredName}
-              </p>
+              <p className="text-[10px] text-white/40 uppercase mb-2">Empfohlene Person</p>
+              <p className="text-sm font-medium text-white">{referral.referredName}</p>
               <p className="text-xs text-white/50">{referral.referredEmail}</p>
-              {referral.referredPhone && (
-                <p className="text-xs text-white/50">
-                  {referral.referredPhone}
-                </p>
-              )}
+              {referral.referredPhone && <p className="text-xs text-white/50">{referral.referredPhone}</p>}
             </div>
           </div>
-
-          {/* Message */}
           {referral.message && (
             <div>
-              <label className="block text-xs text-white/40 mb-2">
-                Nachricht
-              </label>
-              <div className="p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white/70">
-                {referral.message}
-              </div>
+              <label className="block text-xs text-white/40 mb-2">Nachricht</label>
+              <div className="p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white/70">{referral.message}</div>
             </div>
           )}
-
-          {/* Quick Actions */}
           <div className="flex gap-2">
-            <a
-              href={`mailto:${referral.referredEmail}`}
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 transition-colors"
-            >
+            <a href={`mailto:${referral.referredEmail}`} className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 transition-colors">
               <EnvelopeOpenIcon className="w-4 h-4" /> E-Mail senden
             </a>
             {referral.referredPhone && (
-              <a
-                href={`tel:${referral.referredPhone}`}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
-              >
+              <a href={`tel:${referral.referredPhone}`} className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors">
                 <PhoneIcon className="w-4 h-4" /> Anrufen
               </a>
             )}
           </div>
-
-          {/* Status Actions */}
           <div>
-            <label className="block text-xs text-white/40 mb-2">
-              Status ändern
-            </label>
+            <label className="block text-xs text-white/40 mb-2">Status ändern</label>
             <div className="flex gap-2">
-              {["pending", "contacted", "converted", "rejected"].map(
-                (status) => (
-                  <button
-                    key={status}
-                    onClick={() => onUpdateStatus(referral.id, status)}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                      referral.status === status
-                        ? "bg-[#FC682C] text-white"
-                        : "bg-white/[0.04] text-white/50 hover:bg-white/[0.08]"
-                    }`}
-                  >
-                    {status === "pending"
-                      ? "Ausstehend"
-                      : status === "contacted"
-                        ? "Kontaktiert"
-                        : status === "converted"
-                          ? "Konvertiert"
-                          : "Abgelehnt"}
-                  </button>
-                ),
-              )}
+              {["pending", "contacted", "converted", "rejected"].map((status) => (
+                <button key={status} onClick={() => onUpdateStatus(referral.id, status)}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    referral.status === status ? "bg-[#FC682C] text-white" : "bg-white/[0.04] text-white/50 hover:bg-white/[0.08]"
+                  }`}>
+                  {status === "pending" ? "Ausstehend" : status === "contacted" ? "Kontaktiert" : status === "converted" ? "Konvertiert" : "Abgelehnt"}
+                </button>
+              ))}
             </div>
           </div>
-
-          {/* Notes */}
           <div>
             <label className="block text-xs text-white/40 mb-2">Notizen</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              onBlur={saveNotes}
-              placeholder="Notizen hinzufügen..."
-              rows={3}
-              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none resize-none"
-            />
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} onBlur={saveNotes}
+              placeholder="Notizen hinzufügen..." rows={3}
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none resize-none" />
           </div>
         </div>
-
-        {/* Footer */}
         <div className="flex justify-end px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20"
-          >
-            Schließen
-          </button>
+          <button onClick={onClose} className="px-6 py-2 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20">Schließen</button>
         </div>
       </div>
     </div>
@@ -9478,6 +9989,20 @@ function SettingToggle({
   );
 }
 
+interface Referrer {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  total_referrals: number;
+  converted_referrals: number;
+  total_commission: number;
+  commission_rate: number;
+  status: string;
+  rank?: number;
+}
+
 function NewLeadModal({
   onClose,
   onCreated,
@@ -9485,6 +10010,7 @@ function NewLeadModal({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -9496,22 +10022,90 @@ function NewLeadModal({
     source: "Manuell",
     message: "",
     priority: "medium",
+    referrer_id: null as number | null,
   });
+
+  // Empfehlungsgeber State
+  const [referrers, setReferrers] = useState<Referrer[]>([]);
+  const [referrerSearch, setReferrerSearch] = useState("");
+  const [showNewReferrer, setShowNewReferrer] = useState(false);
+  const [newReferrer, setNewReferrer] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+  });
+  const [creatingReferrer, setCreatingReferrer] = useState(false);
+
+  // Referrers laden wenn Quelle = Empfehlung
+  useEffect(() => {
+    if (form.source === "Empfehlung") {
+      fetch("/api/referrers", { credentials: "include" })
+        .then((r) => r.json())
+        .then((data) => {
+          const unwrapped = unwrapApiResponse<{ referrers: Referrer[] }>(data);
+          setReferrers(unwrapped.referrers || []);
+        })
+        .catch(() => {});
+    }
+  }, [form.source]);
+
+  const filteredReferrers = referrers.filter(
+    (r) =>
+      r.name.toLowerCase().includes(referrerSearch.toLowerCase()) ||
+      r.email.toLowerCase().includes(referrerSearch.toLowerCase()) ||
+      (r.company || "").toLowerCase().includes(referrerSearch.toLowerCase()),
+  );
+
+  const selectedReferrer = referrers.find((r) => r.id === form.referrer_id);
+
+  const handleCreateReferrer = async () => {
+    if (!newReferrer.name || !newReferrer.email) return;
+    setCreatingReferrer(true);
+    try {
+      const res = await fetch("/api/referrers", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newReferrer),
+      });
+      const data = await res.json();
+      const unwrapped = unwrapApiResponse<{ referrer: Referrer }>(data);
+      if (unwrapped.referrer) {
+        setReferrers([...referrers, unwrapped.referrer]);
+        setForm({ ...form, referrer_id: unwrapped.referrer.id });
+        setShowNewReferrer(false);
+        setNewReferrer({ name: "", email: "", phone: "", company: "" });
+        showToast("success", "Empfehlungsgeber angelegt!");
+      }
+    } catch {
+      showToast("error", "Empfehlungsgeber konnte nicht angelegt werden");
+    } finally {
+      setCreatingReferrer(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await fetch("/api/leads", { credentials: "include",
+      const payload: Record<string, unknown> = { ...form, status: "new" };
+      if (form.source !== "Empfehlung") {
+        delete payload.referrer_id;
+      }
+      await fetch("/api/leads", {
+        credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, status: "new" }),
+        body: JSON.stringify(payload),
       });
+      showToast("success", "Lead erfolgreich angelegt!");
       onCreated();
       onClose();
     } catch (error) {
       console.error("Failed to create lead:", error);
+      showToast("error", "Lead konnte nicht angelegt werden");
     } finally {
       setLoading(false);
     }
@@ -9660,7 +10254,10 @@ function NewLeadModal({
               <label className="block text-xs text-white/40 mb-2">Quelle</label>
               <select
                 value={form.source}
-                onChange={(e) => setForm({ ...form, source: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, source: e.target.value, referrer_id: null });
+                  setShowNewReferrer(false);
+                }}
                 className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white focus:border-[#FC682C]/50 outline-none cursor-pointer"
               >
                 {sources.map((s) => (
@@ -9685,6 +10282,162 @@ function NewLeadModal({
               </select>
             </div>
           </div>
+
+          {/* Empfehlungsgeber-Auswahl — nur sichtbar wenn Quelle = Empfehlung */}
+          {form.source === "Empfehlung" && (
+            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm font-medium text-purple-400">
+                  <UserGroupIcon className="w-4 h-4" />
+                  Empfehlungsgeber
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowNewReferrer(!showNewReferrer)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#FC682C] bg-[#FC682C]/10 border border-[#FC682C]/20 rounded-lg hover:bg-[#FC682C]/20 transition-colors"
+                >
+                  <PlusIcon className="w-3.5 h-3.5" />
+                  {showNewReferrer ? "Abbrechen" : "Neuen anlegen"}
+                </button>
+              </div>
+
+              {/* Bestehenden Empfehlungsgeber auswählen */}
+              {!showNewReferrer && (
+                <>
+                  {selectedReferrer ? (
+                    <div className="flex items-center justify-between p-3 bg-white/[0.04] border border-purple-500/30 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/30 to-[#9D65C9]/30 flex items-center justify-center text-white font-medium">
+                          {selectedReferrer.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white">{selectedReferrer.name}</p>
+                          <p className="text-xs text-white/40">{selectedReferrer.email} {selectedReferrer.company && `• ${selectedReferrer.company}`}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, referrer_id: null })}
+                        className="p-1.5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white"
+                      >
+                        <XMarkIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                        <input
+                          type="text"
+                          placeholder="Empfehlungsgeber suchen..."
+                          value={referrerSearch}
+                          onChange={(e) => setReferrerSearch(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none"
+                        />
+                      </div>
+                      {filteredReferrers.length > 0 ? (
+                        <div className="max-h-40 overflow-y-auto space-y-1.5">
+                          {filteredReferrers.map((r) => (
+                            <button
+                              key={r.id}
+                              type="button"
+                              onClick={() => {
+                                setForm({ ...form, referrer_id: r.id });
+                                setReferrerSearch("");
+                              }}
+                              className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.06] transition-colors text-left"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/30 to-[#9D65C9]/30 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                                {r.name.charAt(0)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate">{r.name}</p>
+                                <p className="text-xs text-white/40 truncate">{r.email} {r.company && `• ${r.company}`}</p>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-xs text-purple-400">{r.total_referrals} Empf.</p>
+                                <p className="text-[10px] text-white/30">{r.converted_referrals} konvertiert</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-white/30 text-center py-3">
+                          {referrerSearch ? "Kein Empfehlungsgeber gefunden" : "Noch keine Empfehlungsgeber vorhanden"}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* Neuen Empfehlungsgeber anlegen */}
+              {showNewReferrer && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] text-white/40 mb-1">Name *</label>
+                      <input
+                        type="text"
+                        value={newReferrer.name}
+                        onChange={(e) => setNewReferrer({ ...newReferrer, name: e.target.value })}
+                        placeholder="Name des Empfehlungsgebers"
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-white/40 mb-1">E-Mail *</label>
+                      <input
+                        type="email"
+                        value={newReferrer.email}
+                        onChange={(e) => setNewReferrer({ ...newReferrer, email: e.target.value })}
+                        placeholder="email@example.com"
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-white/40 mb-1">Telefon</label>
+                      <input
+                        type="tel"
+                        value={newReferrer.phone}
+                        onChange={(e) => setNewReferrer({ ...newReferrer, phone: e.target.value })}
+                        placeholder="+49 123 456789"
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-white/40 mb-1">Firma</label>
+                      <input
+                        type="text"
+                        value={newReferrer.company}
+                        onChange={(e) => setNewReferrer({ ...newReferrer, company: e.target.value })}
+                        placeholder="Firma GmbH"
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-purple-500/50 outline-none"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCreateReferrer}
+                    disabled={creatingReferrer || !newReferrer.name || !newReferrer.email}
+                    className="w-full py-2.5 bg-purple-500/20 text-purple-400 rounded-xl text-sm font-medium hover:bg-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {creatingReferrer ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" />
+                        Wird angelegt...
+                      </>
+                    ) : (
+                      <>
+                        <PlusIcon className="w-4 h-4" />
+                        Empfehlungsgeber anlegen & auswählen
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-xs text-white/40 mb-2">
