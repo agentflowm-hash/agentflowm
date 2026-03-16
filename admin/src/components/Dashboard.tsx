@@ -6632,14 +6632,14 @@ function ClientDetailModal({
                     <label className="text-[10px] text-white/40 block mb-1">Schnell-Vorlage</label>
                     <div className="flex flex-wrap gap-1">
                       {[
-                        { label: "Growth Website", price: 2000 },
-                        { label: "Business Website", price: 3500 },
-                        { label: "One-Page Website", price: 500 },
-                        { label: "Website-Check", price: 0 },
-                        { label: "SEO-Optimierung", price: 800 },
-                        { label: "Logo & Branding", price: 600 },
-                        { label: "Wartung/Monat", price: 150 },
-                        { label: "Hosting/Jahr", price: 200 },
+                        { label: "START Website", price: 3790 },
+                        { label: "BUSINESS Website", price: 8390 },
+                        { label: "ONE PAGE", price: 1390 },
+                        { label: "Web App", price: 18990 },
+                        { label: "Mobile App", price: 35990 },
+                        { label: "AI-Agenten", price: 4990 },
+                        { label: "Logo & Branding", price: 990 },
+                        { label: "Wartung/Monat", price: 299 },
                       ].map((tpl) => (
                         <button
                           key={tpl.label}
@@ -6794,14 +6794,14 @@ function ClientDetailModal({
                     <label className="text-[10px] text-white/40 block mb-1">Schnell-Vorlage</label>
                     <div className="flex flex-wrap gap-1">
                       {[
-                        { label: "Growth Website", price: 2000 },
-                        { label: "Business Website", price: 3500 },
-                        { label: "One-Page Website", price: 500 },
-                        { label: "Website-Check", price: 0 },
-                        { label: "SEO-Optimierung", price: 800 },
-                        { label: "Logo & Branding", price: 600 },
-                        { label: "Wartung/Monat", price: 150 },
-                        { label: "Hosting/Jahr", price: 200 },
+                        { label: "START Website", price: 3790 },
+                        { label: "BUSINESS Website", price: 8390 },
+                        { label: "ONE PAGE", price: 1390 },
+                        { label: "Web App", price: 18990 },
+                        { label: "Mobile App", price: 35990 },
+                        { label: "AI-Agenten", price: 4990 },
+                        { label: "Logo & Branding", price: 990 },
+                        { label: "Wartung/Monat", price: 299 },
                       ].map((tpl) => (
                         <button key={tpl.label} onClick={() => setOfferForm({ ...offerForm, items: [{ description: tpl.label, quantity: 1, unit_price: tpl.price, total: tpl.price }] })}
                           className="px-2 py-1 bg-white/[0.04] hover:bg-blue-500/10 border border-white/[0.06] hover:border-blue-500/30 rounded-lg text-[10px] text-white/60 hover:text-blue-400 transition-all">
@@ -7012,14 +7012,16 @@ function ClientDetailModal({
                   {/* Paket-Vorlagen — Ein Klick füllt alles aus */}
                   <div>
                     <label className="text-[10px] text-white/40 block mb-1.5">Paket-Vorlage wählen</label>
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
                       {[
-                        { title: "Growth Website", amount: 2000, duration: "3-4 Wochen", payment: "50% Start, 50% Go-Live", desc: `Entwicklung einer professionellen, modernen Website für ${client.company || client.name}. Inklusive responsivem Design, SEO-Grundoptimierung, CMS-Integration und vollständiger Einrichtung. Die Website wird auf die individuellen Anforderungen und das Corporate Design des Kunden zugeschnitten.`, services: ["Konzept & Wireframes", "Responsive Webdesign (Desktop, Tablet, Mobile)", "SEO-Grundoptimierung (Meta-Tags, Sitemap, robots.txt)", "CMS-Integration (WordPress oder Next.js)", "SSL-Zertifikat & Hosting-Setup", "Kontaktformular mit E-Mail-Benachrichtigung", "Google Analytics & Search Console", "Cookie-Banner (DSGVO)", "30 Tage Support nach Go-Live"] },
-                        { title: "Business Website", amount: 3500, duration: "4-6 Wochen", payment: "40% Start, 30% Design-Freigabe, 30% Go-Live", desc: `Premium Business-Webpräsenz für ${client.company || client.name} mit erweitertem Funktionsumfang. Individuelles UI/UX Design, integrierter Blog, erweiterte SEO-Optimierung und Performance-Tuning. Inklusive umfassender Schulung und 60 Tagen Premium-Support.`, services: ["Individuelles UI/UX Design (3 Entwürfe)", "Responsive Entwicklung (alle Endgeräte)", "Blog & Content-Management-System", "Erweiterte SEO-Optimierung", "DSGVO-konforme Datenschutzlösung", "Performance-Optimierung (PageSpeed 90+)", "Analytics, Tracking & Conversion-Setup", "E-Mail-Integration & Newsletter-Anbindung", "Social Media Integration", "Schulung (2h) & Dokumentation", "60 Tage Premium-Support nach Go-Live"] },
-                        { title: "One-Page Website", amount: 500, duration: "1 Woche", payment: "100% bei Vertragsstart", desc: `Kompakte, moderne One-Page Website für ${client.company || client.name}. Perfekt für Startups, Freelancer und kleine Unternehmen die eine professionelle Online-Präsenz benötigen.`, services: ["One-Page Responsive Design", "Mobile-First Entwicklung", "Kontaktformular mit E-Mail", "SSL-Zertifikat", "Basic SEO (Meta-Tags)", "Cookie-Banner (DSGVO)"] },
-                        { title: "SEO-Paket", amount: 800, duration: "Laufend (monatlich)", payment: "Monatliche Abrechnung", desc: `Umfassende SEO-Betreuung für ${client.company || client.name}. Ziel: Bessere Sichtbarkeit in Google, mehr organischer Traffic und höhere Conversion-Rates. Monatliches Reporting mit transparenten KPIs.`, services: ["Initiales SEO-Audit & Wettbewerbsanalyse", "Keyword-Recherche & Content-Strategie", "On-Page Optimierung (Titel, Meta, Struktur)", "Technisches SEO (Core Web Vitals, Schema)", "Content-Empfehlungen & Briefings", "Backlink-Aufbau (White-Hat)", "Monatliches Performance-Reporting", "Google Search Console Monitoring"] },
-                        { title: "Logo & Branding", amount: 600, duration: "1-2 Wochen", payment: "100% bei Vertragsstart", desc: `Professionelles Logo-Design und Branding-Paket für ${client.company || client.name}. Entwicklung einer einzigartigen visuellen Identität die Ihre Marke repräsentiert.`, services: ["3 individuelle Logo-Entwürfe", "Farbpalette & Typografie-System", "Visitenkarten-Design (Print-Ready)", "Social Media Profilbilder & Banner", "Brand Guidelines PDF", "Alle Dateiformate (SVG, PNG, PDF, AI)"] },
-                        { title: "AI-Agenten Paket", amount: 1500, duration: "2-3 Wochen", payment: "50% Start, 50% Fertigstellung", desc: `Individuelle KI-Agenten für ${client.company || client.name}. Automatisierte Kundenbetreuung, E-Mail-Marketing und Vertriebs-Workflows. Integration in bestehende Systeme mit n8n-Automatisierung.`, services: ["E-Mail Automation Agent (Willkommen, Follow-up, Newsletter)", "KI-Chat-Bot für Website (24/7 Kundenbetreuung)", "Lead-Qualifizierung & Scoring Agent", "CRM-Integration & Datensynchronisation", "n8n Workflow-Automatisierung (bis zu 5 Workflows)", "Vertriebs-Agent (Angebote, Nachfass)", "Schulung & Dokumentation (3h)", "30 Tage Support & Optimierung"] },
+                        { title: "START Website", amount: 3790, duration: "1-2 Wochen", payment: "50% bei Vertragsstart, 50% bei Go-Live", desc: `Professionelle Webpräsenz für ${client.company || client.name}. Landingpage mit 2 Unterseiten, hochwertige SEO-Optimierung, Kontakt- & Buchungsflow und Live-Ready Setup. Inklusive Basic Admin-Portal.`, services: ["Landingpage + 2 Unterseiten", "Hochwertiges SEO (On-Page & Technik)", "Kontakt- & Buchungsflow", "Live-Ready Setup", "Basic Admin-Portal", "Responsive Design (alle Endgeräte)", "SSL-Zertifikat & DSGVO", "Performance-Optimierung", "Cookie-Banner", "24h Antwortgarantie"] },
+                        { title: "BUSINESS Website", amount: 8390, duration: "3-4 Wochen", payment: "40% Start, 30% Design-Freigabe, 30% Go-Live", desc: `Premium Business-Webpräsenz für ${client.company || client.name} mit bis zu 9 Seiten. Erweitertes SEO & Performance, Kunden-Portal, Mitarbeiter-Portal und vollständiger operativer Einrichtung.`, services: ["Bis zu 9 Seiten", "Erweitertes SEO & Performance-Optimierung", "Erweitertes Admin-Portal", "Kunden-Portal (Dokumentenverwaltung, Aufgaben)", "Mitarbeiter-Portal (Rollenbasierter Zugang)", "Vollständige operative Einrichtung", "Agent-Workflows (Lead-Erfassung, Follow-up)", "Responsive Design (alle Endgeräte)", "SSL, DSGVO & Cookie-Compliance", "Schulung & Dokumentation", "24h Antwortgarantie"] },
+                        { title: "ONE PAGE Website", amount: 1390, duration: "1-2 Wochen", payment: "100% bei Vertragsstart", desc: `Optimierte One-Page Website für ${client.company || client.name}. Perfekt für Startups und kleine Unternehmen — eine Seite, maximaler Impact.`, services: ["Optimierte Single-Page", "Kontakt-Integrationen", "Basic SEO", "Responsive Design", "SSL-Zertifikat", "DSGVO-Konformität", "Performance-Optimierung"] },
+                        { title: "Web App", amount: 18990, duration: "6-10 Wochen", payment: "30% Start, 30% Entwicklung, 40% Launch", desc: `Individuelle Web-Applikation für ${client.company || client.name}. Konzept & Strukturplanung, modernes UI/UX Design, Feature-Entwicklung, Testing & QA, Go-Live Vorbereitung.`, services: ["Konzept & Strukturplanung", "Modernes UI/UX Design", "Feature-Entwicklung (Frontend & Backend)", "Testing & Qualitätssicherung", "Go-Live Vorbereitung", "Code-Übergabe Option", "Performance-Optimierung", "SSL & Sicherheit", "Dokumentation"] },
+                        { title: "Mobile App", amount: 35990, duration: "10-16 Wochen", payment: "30% Start, 30% Design, 20% Entwicklung, 20% Launch", desc: `Native Mobile App (iOS & Android) für ${client.company || client.name}. User-Flow & Screen-Design, Mobile-First UI/UX, Native Feature-Entwicklung und App Store Vorbereitung.`, services: ["User-Flow & Screen-Design", "Mobile-First UI/UX Design", "Native Feature-Entwicklung (iOS & Android)", "Multi-Device Testing", "App Store Vorbereitung (Apple & Google)", "Push-Notifications", "Code-Übergabe Option", "Performance & Sicherheit", "60 Tage Support nach Launch"] },
+                        { title: "AI-Agenten Paket", amount: 4990, duration: "2-4 Wochen", payment: "50% Start, 50% Fertigstellung", desc: `KI-gestützte Agent-Workflows für ${client.company || client.name}. Lead-Erfassung & Sortierung, Publishing-Automation, Follow-up-Automation und erweiterbare Add-Ons.`, services: ["Lead-Erfassung & Sortierung Agent", "Publishing-Automation", "Follow-up Automation Agent", "E-Mail Automation (Willkommen, Newsletter)", "KI-Chat-Bot für Website (24/7)", "CRM-Integration & Datensynchronisation", "n8n Workflow-Automatisierung", "Erweiterbare Add-Ons", "Schulung & Dokumentation (3h)", "30 Tage Support & Optimierung"] },
+                        { title: "Logo & Branding", amount: 990, duration: "1-2 Wochen", payment: "100% bei Vertragsstart", desc: `Professionelles Logo-Design und Branding-Paket für ${client.company || client.name}. Einzigartige visuelle Identität für Ihren Markenauftritt.`, services: ["3 individuelle Logo-Entwürfe", "Farbpalette & Typografie-System", "Visitenkarten-Design (Print-Ready)", "Social Media Profilbilder & Banner", "Brand Guidelines PDF", "Alle Dateiformate (SVG, PNG, PDF, AI)"] },
+                        { title: "Konfigurator (Enterprise)", amount: 0, duration: "Nach Absprache", payment: "Individuell", desc: `Maßgeschneiderte Enterprise-Lösung für ${client.company || client.name}. Unbegrenzte Seiten, dedizierter Support, individuelle Module & Integrationen.`, services: ["Unbegrenzte Seiten", "Enterprise-Features", "Dedizierter Support", "Custom Module & Integrationen", "Skalierbare Infrastruktur", "Team-Integration", "Langfristiger Support", "Vierteljährliche Reviews", "NDA verfügbar"] },
                       ].map(tpl => (
                         <button key={tpl.title} onClick={() => setAgreementForm({
                           ...agreementForm, project_title: `${tpl.title} — ${client.company || client.name}`, amount: tpl.amount,
@@ -7029,7 +7031,7 @@ function ClientDetailModal({
                           className={`p-2.5 rounded-xl text-left transition-all ${agreementForm.project_title === tpl.title ? "bg-purple-500/15 border border-purple-500/40" : "bg-white/[0.03] border border-white/[0.06] hover:border-purple-500/30"}`}>
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-white">{tpl.title}</span>
-                            <span className="text-[10px] font-bold text-purple-400">€{tpl.amount.toLocaleString("de-DE")}</span>
+                            <span className="text-[10px] font-bold text-purple-400">{tpl.amount > 0 ? `€${tpl.amount.toLocaleString("de-DE")}` : "Auf Anfrage"}</span>
                           </div>
                           <div className="text-[9px] text-white/30 mt-0.5">{tpl.duration} · {tpl.services.length} Leistungen</div>
                         </button>
@@ -8456,7 +8458,7 @@ function CreateClientModal({
           <div>
             <label className="block text-xs text-white/40 mb-2">Paket</label>
             <div className="flex flex-wrap gap-1.5 mb-2">
-              {["Starter", "Business", "Premium", "Growth Website", "One-Page Website", "SEO-Paket", "Logo & Branding", "Wartung", "Enterprise"].map((pkg) => (
+              {["START Website", "BUSINESS Website", "ONE PAGE", "Web App", "Mobile App", "AI-Agenten", "Logo & Branding", "Wartung", "Enterprise"].map((pkg) => (
                 <button
                   key={pkg}
                   type="button"
