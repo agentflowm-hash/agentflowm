@@ -20,6 +20,8 @@ export function middleware(request: NextRequest) {
     pathname === "/login" ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next/") ||
+    pathname.startsWith("/refer/") ||
+    pathname.startsWith("/referrer/") ||
     pathname.includes(".")
   ) {
     // Set locale cookie for client-side use

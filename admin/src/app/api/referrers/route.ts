@@ -85,6 +85,11 @@ export const POST = createHandler({
     throw new ConflictError('Ein Empfehlungsgeber mit dieser E-Mail existiert bereits');
   }
 
+  // Unique referral code generieren
+  const prefix = name.split(' ')[0].toUpperCase().slice(0, 4);
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const referralCode = `${prefix}-${random}`;
+
   const { data: referrer, error } = await db
     .from('referrers')
     .insert({
@@ -94,6 +99,7 @@ export const POST = createHandler({
       company: company || null,
       commission_rate: commission_rate || 10,
       notes: notes || null,
+      referral_code: referralCode,
     })
     .select()
     .single();

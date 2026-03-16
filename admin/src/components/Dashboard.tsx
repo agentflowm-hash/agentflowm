@@ -4853,7 +4853,23 @@ function ReferralsTab() {
                           {referrer.status === "active" ? "Aktiv" : "Inaktiv"}
                         </span>
                       </div>
-                      <p className="text-xs text-white/40">{referrer.email} {referrer.phone && `• ${referrer.phone}`}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-white/40">{referrer.email} {referrer.phone && `• ${referrer.phone}`}</p>
+                        {referrer.referral_code && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const url = `${window.location.origin}/refer/${referrer.referral_code}`;
+                              navigator.clipboard.writeText(url);
+                              showToast("success", "Empfehlungslink kopiert!");
+                            }}
+                            className="flex items-center gap-1 px-2 py-0.5 bg-[#FC682C]/10 text-[#FC682C] border border-[#FC682C]/20 rounded-md text-[10px] font-medium hover:bg-[#FC682C]/20 transition-colors"
+                          >
+                            <LinkIcon className="w-3 h-3" />
+                            Link kopieren
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-5 flex-shrink-0">
                       <div className="text-center">
@@ -5269,6 +5285,27 @@ function ReferrerDetailModal({
               <p className="text-[10px] text-white/40 mt-1">Provision ({referrer.commission_rate}%)</p>
             </div>
           </div>
+
+          {/* Referral Links */}
+          {referrer.referral_code && (
+            <div className="space-y-2">
+              <label className="block text-xs text-white/40">Empfehlungslinks</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/refer/${referrer.referral_code}`); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl text-sm font-medium hover:bg-purple-500/20 transition-colors"
+                >
+                  <LinkIcon className="w-4 h-4" /> Empfehlungslink kopieren
+                </button>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/referrer/${referrer.referral_code}`); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/[0.04] text-white/60 border border-white/[0.06] rounded-xl text-sm font-medium hover:bg-white/[0.08] transition-colors"
+                >
+                  <EyeIcon className="w-4 h-4" /> Status-Seite kopieren
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Contact */}
           <div className="flex gap-2">
@@ -10137,6 +10174,7 @@ interface Referrer {
   total_commission: number;
   commission_rate: number;
   status: string;
+  referral_code: string | null;
   rank?: number;
 }
 
