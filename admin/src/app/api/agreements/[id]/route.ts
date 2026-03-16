@@ -47,6 +47,7 @@ const UpdateAgreementSchema = z.object({
   portal_code: z.string().optional(),
   status: z.enum(['draft', 'sent', 'signed', 'cancelled']).optional(),
   notes: z.string().optional(),
+  signature_data: z.string().optional(),
 });
 
 export async function PATCH(
@@ -99,6 +100,9 @@ export async function PATCH(
     throw e;
   }
 }
+
+// PUT also supported (alias for PATCH)
+export { PATCH as PUT };
 
 // ─────────────────────────────────────────────────────────────────
 // DELETE /api/agreements/[id] - Delete agreement

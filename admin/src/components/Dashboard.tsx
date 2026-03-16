@@ -7607,6 +7607,11 @@ function ClientDetailModal({
                                       const sigData = canvas.toDataURL("image/png");
                                       signBtn.textContent = "Speichere..."; signBtn.style.opacity = "0.5";
                                       await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "signed", signature_data: sigData }) });
+                                      // Benachrichtigung an Admin senden
+                                      fetch("/api/emails", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
+                                        body: JSON.stringify({ to: "kontakt@agentflowm.de", subject: `Vereinbarung unterschrieben: ${agr.project_title || "Projekt"} — ${client.name}`,
+                                          html: `<div style="font-family:system-ui;max-width:500px;margin:0 auto;padding:30px;color:#333"><h2 style="color:#10B981">Vereinbarung unterschrieben!</h2><p><strong>${client.name}</strong> hat die Vereinbarung "<strong>${agr.project_title}</strong>" digital unterschrieben.</p><p>Betrag: <strong>\u20AC${agr.total_amount?.toFixed(2)}</strong></p><p style="color:#999;font-size:12px">AgentFlowMarketing Admin</p></div>` })
+                                      }).catch(() => {});
                                       overlay.remove();
                                       fetchClientDocs();
                                       showToast("success", "Vereinbarung digital unterschrieben!");
@@ -7635,10 +7640,36 @@ function ClientDetailModal({
                             {(agr.status === "draft" || agr.status === "sent") && client.email && (
                               <div className="flex items-center gap-1 pt-2 border-t border-white/[0.04] mt-2">
                                 <span className="text-[9px] text-white/25 mr-1">Senden via:</span>
-                                <button onClick={() => {
-                                  const subject = encodeURIComponent(`Vereinbarung: ${agr.project_title || "Projekt"} — AgentFlowMarketing`);
-                                  const body = encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nhier ist Ihre Vereinbarung für "${agr.project_title}".\n\nBitte prüfen und unterschreiben Sie diese.\n\nMit freundlichen Grüßen,\nAgentFlowMarketing`);
-                                  window.open(`mailto:${client.email}?subject=${subject}&body=${body}`, "_self");
+                                <button onClick={async (e) => {
+                                  const btn = e.currentTarget;
+                                  btn.textContent = "..."; btn.disabled = true;
+                                  const pdfUrl = `${window.location.origin}/api/agreements/${agr.id}/pdf`;
+                                  try {
+                                    const res = await fetch("/api/emails", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
+                                      body: JSON.stringify({ to: client.email, subject: `Vereinbarung: ${agr.project_title || "Projekt"} — AgentFlowMarketing`, client_id: client.id,
+                                        html: `<div style="font-family:system-ui;max-width:600px;margin:0 auto;padding:40px 20px;color:#333">
+                                          <div style="text-align:center;margin-bottom:24px"><div style="font-size:22px;font-weight:800;color:#FF6A00">Agent<span style="color:#333">FlowMarketing</span></div></div>
+                                          <p>Hallo ${client.name.split(" ")[0]},</p>
+                                          <p>anbei finden Sie unsere Vereinbarung f\u00FCr <strong>${agr.project_title}</strong>.</p>
+                                          <div style="background:#f3f0ff;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #6366F1">
+                                            <div style="font-size:20px;font-weight:700">${agr.project_title}</div>
+                                            <div style="font-size:28px;font-weight:800;margin:8px 0">\u20AC${agr.total_amount?.toFixed(2)}</div>
+                                          </div>
+                                          <p>Bitte pr\u00FCfen Sie die Vereinbarung und senden Sie uns eine unterschriebene Kopie zur\u00FCck.</p>
+                                          <p style="text-align:center;margin:28px 0"><a href="${pdfUrl}" style="display:inline-block;background:#6366F1;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700">Vereinbarung als PDF ansehen</a></p>
+                                          <p>Mit freundlichen Gr\u00FC\u00DFen,<br><strong>Mo Sul</strong><br>AgentFlowMarketing</p>
+                                          <div style="text-align:center;color:#999;font-size:12px;margin-top:40px;border-top:1px solid #eee;padding-top:20px">kontakt@agentflowm.de | +49 179 949 8247</div></div>` })
+                                    });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                      showToast("success", `Vereinbarung per E-Mail an ${client.name.split(" ")[0]} gesendet`);
+                                      if (agr.status === "draft") { await fetch(`/api/agreements/${agr.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "sent" }) }); fetchClientDocs(); }
+                                    } else { throw new Error(data.error); }
+                                  } catch {
+                                    showToast("info", "Mail-Client wird ge\u00F6ffnet");
+                                    window.open(`mailto:${client.email}?subject=${encodeURIComponent(`Vereinbarung: ${agr.project_title} — AgentFlowMarketing`)}&body=${encodeURIComponent(`Hallo ${client.name.split(" ")[0]},\n\nanbei Ihre Vereinbarung für "${agr.project_title}" über €${agr.total_amount?.toFixed(2)}.\n\nPDF: ${pdfUrl}\n\nMit freundlichen Grüßen,\nMo Sul\nAgentFlowMarketing`)}`, "_self");
+                                  }
+                                  btn.innerHTML = '<svg class="w-2.5 h-2.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> E-Mail'; btn.disabled = false;
                                 }} className="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/15 rounded-md text-[9px] text-blue-400 transition-all flex items-center gap-1">
                                   <EnvelopeIcon className="w-2.5 h-2.5" />E-Mail
                                 </button>

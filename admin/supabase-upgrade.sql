@@ -119,3 +119,7 @@ ON CONFLICT (key) DO NOTHING;
 INSERT INTO team_members (name, email, role) VALUES
   ('Mo Sul', 'kontakt@agentflowm.de', 'admin')
 ON CONFLICT (email) DO NOTHING;
+
+-- Add signature_data column to agreements table
+ALTER TABLE agreements ADD COLUMN IF NOT EXISTS signature_data text;
+
