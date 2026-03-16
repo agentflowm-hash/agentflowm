@@ -2460,7 +2460,7 @@ function StatusBadge({ status }: { status: string }) {
 function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => void; onRefresh?: () => void }) {
   const [status, setStatus] = useState(lead.status);
   const [notes, setNotes] = useState(lead.notes || "");
-  const [activeTab, setActiveTab] = useState<"details" | "activity">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "scripts" | "activity">("details");
   const [converting, setConverting] = useState(false);
   const [convertResult, setConvertResult] = useState<string | null>(null);
 
@@ -2554,6 +2554,12 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
             Details
           </button>
           <button
+            onClick={() => setActiveTab("scripts")}
+            className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === "scripts" ? "text-[#FC682C] border-b-2 border-[#FC682C]" : "text-white/50 hover:text-white"}`}
+          >
+            Leitfaden
+          </button>
+          <button
             onClick={() => setActiveTab("activity")}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === "activity" ? "text-[#FC682C] border-b-2 border-[#FC682C]" : "text-white/50 hover:text-white"}`}
           >
@@ -2563,6 +2569,136 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
 
         {/* Content */}
         <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+          {activeTab === "scripts" && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-white/70">Verkaufsleitfaden — {lead.source || "Standard"}</h4>
+              {/* Quelle-spezifischer Leitfaden */}
+              {(lead.source === "Empfehlung" || lead.source === "referral") ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-green-500/5 border border-green-500/20 rounded-xl">
+                    <div className="text-[10px] text-green-400 font-bold uppercase mb-1">Empfehlungs-Skript</div>
+                    <p className="text-xs text-white/60 whitespace-pre-line">{`Hallo ${lead.name.split(" ")[0]},
+
+[Empfehler-Name] hat mir empfohlen, mich bei Ihnen zu melden. Er/Sie meinte, dass Sie Interesse an einer professionellen Webpräsenz haben.
+
+Wir haben für [Empfehler-Firma] [konkretes Ergebnis] erzielt und dachten, ein ähnlicher Ansatz könnte auch für ${lead.company || "Ihr Unternehmen"} spannend sein.
+
+Hätten Sie diese Woche 15 Minuten für ein kurzes Gespräch?
+
+Beste Grüße
+Mo Sul, AgentFlowMarketing`}</p>
+                  </div>
+                </div>
+              ) : (lead.source?.includes("Kalt") || lead.source === "cold_call") ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                    <div className="text-[10px] text-blue-400 font-bold uppercase mb-1">Kaltakquise-Skript</div>
+                    <p className="text-xs text-white/60 whitespace-pre-line">{`"Hallo ${lead.name.split(" ")[0]}, hier ist Mo Sul von AgentFlowMarketing. Haben Sie gerade 60 Sekunden?"
+
+HOOK: "Wir haben gerade für ein Unternehmen aus Ihrer Branche eine Website entwickelt, die 40% mehr Anfragen generiert. Ich habe mir Ihre Seite angeschaut und sehe Potenzial."
+
+FRAGE: "Wie zufrieden sind Sie mit Ihrer Online-Präsenz auf einer Skala von 1-10?"
+
+ÜBERLEITUNG: "Ich würde Ihnen gerne in 15 Minuten zeigen, wie das bei ${lead.company || "Ihnen"} aussehen könnte. Passt Ihnen [Tag] um [Uhrzeit]?"
+
+EINWAND "Zu teuer": "Was kostet es Sie, KEINE professionelle Lösung zu haben? ROI innerhalb 3-6 Monaten."
+EINWAND "Kein Interesse": "Wenn Sie ${lead.packageInterest ? lead.packageInterest.split(" ")[0] : "30"}% mehr Kunden gewinnen könnten — wäre das relevant?"`}</p>
+                  </div>
+                </div>
+              ) : (lead.source?.includes("Social") || lead.source?.includes("LinkedIn") || lead.source?.includes("Meta")) ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-purple-500/5 border border-purple-500/20 rounded-xl">
+                    <div className="text-[10px] text-purple-400 font-bold uppercase mb-1">Social Media Response</div>
+                    <p className="text-xs text-white/60 whitespace-pre-line">{`"Hallo ${lead.name.split(" ")[0]}, danke für Ihr Interesse!
+
+Ich habe gesehen, dass ${lead.company ? `Sie bei ${lead.company} tätig sind` : "Sie sich für unsere Services interessieren"} — spannend!
+
+Wir helfen Unternehmen wie Ihrem, über digitale Kanäle mehr qualifizierte Anfragen zu generieren.
+
+Hätten Sie Lust auf ein kurzes, unverbindliches Gespräch? Ich zeige Ihnen gerne, was wir konkret für Sie tun könnten.
+
+PS: Unser kostenloser Website-Check steht Ihnen zur Verfügung!"`}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="p-3 bg-[#FC682C]/5 border border-[#FC682C]/20 rounded-xl">
+                    <div className="text-[10px] text-[#FC682C] font-bold uppercase mb-1">Standard-Antwort (Website-Anfrage)</div>
+                    <p className="text-xs text-white/60 whitespace-pre-line">{`Hallo ${lead.name.split(" ")[0]},
+
+vielen Dank für Ihre Anfrage! Ich freue mich über Ihr Interesse${lead.packageInterest ? ` an unserem ${lead.packageInterest} Paket` : ""}.
+
+Ich habe mir ${lead.company ? `die aktuelle Website von ${lead.company}` : "Ihre Situation"} bereits kurz angeschaut und sehe spannende Möglichkeiten.
+
+Um ein passgenaues Angebot zu machen, würde ich gerne kurz (15-20 Min) besprechen:
+• Ihre aktuellen Ziele und Herausforderungen
+• Was Ihnen an der jetzigen Lösung fehlt
+• Welches Ergebnis Sie sich konkret wünschen
+
+Beste Grüße
+Mo Sul, AgentFlowMarketing
+kontakt@agentflowm.de | +49 179 949 8247`}</p>
+                  </div>
+                </div>
+              )}
+              {/* Follow-Up Cadence */}
+              <div className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                <div className="text-[10px] text-white/40 font-bold uppercase mb-2">Follow-Up Cadence</div>
+                <div className="space-y-1.5">
+                  {[
+                    { day: "Tag 0", action: "Sofort-Antwort (< 5 Min!)", channel: "E-Mail" },
+                    { day: "Tag 0", action: "Anruf innerhalb 1 Stunde", channel: "Telefon" },
+                    { day: "Tag 2", action: "Follow-Up + Mehrwert", channel: "E-Mail" },
+                    { day: "Tag 5", action: "Connection + Nachricht", channel: "LinkedIn" },
+                    { day: "Tag 7", action: "Erneuter Anruf", channel: "Telefon" },
+                    { day: "Tag 9", action: "Case Study senden", channel: "E-Mail" },
+                    { day: "Tag 14", action: "Breakup-Mail", channel: "E-Mail" },
+                  ].map((step, i) => (
+                    <div key={i} className="flex items-center gap-3 text-[11px]">
+                      <span className="text-white/30 w-12 shrink-0">{step.day}</span>
+                      <span className="text-white/60 flex-1">{step.action}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] ${step.channel === "E-Mail" ? "bg-blue-500/15 text-blue-400" : step.channel === "Telefon" ? "bg-green-500/15 text-green-400" : "bg-purple-500/15 text-purple-400"}`}>{step.channel}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* CHAMP Qualifikation */}
+              <div className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                <div className="text-[10px] text-white/40 font-bold uppercase mb-2">CHAMP Qualifikation</div>
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  {[
+                    { label: "Challenges", q: "Größte Herausforderung online?", color: "text-red-400" },
+                    { label: "Authority", q: "Wer entscheidet?", color: "text-purple-400" },
+                    { label: "Money", q: "Budget eingeplant?", color: "text-green-400" },
+                    { label: "Priority", q: "Wann soll es live gehen?", color: "text-yellow-400" },
+                  ].map(c => (
+                    <div key={c.label} className="p-2 bg-white/[0.02] rounded-lg">
+                      <div className={`font-bold ${c.color}`}>{c.label}</div>
+                      <div className="text-white/40 mt-0.5">{c.q}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Einwandbehandlung */}
+              <div className="p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                <div className="text-[10px] text-white/40 font-bold uppercase mb-2">Einwandbehandlung</div>
+                <div className="space-y-1.5 text-[11px]">
+                  {[
+                    { objection: "Zu teuer", response: "Was kostet es Sie, KEINE Lösung zu haben? ROI in 3-6 Monaten." },
+                    { objection: "Kein Budget", response: "Neues Quartal steht an — wir können in Raten arbeiten." },
+                    { objection: "Haben schon jemanden", response: "Was fehlt Ihnen bei der aktuellen Lösung?" },
+                    { objection: "Muss ich besprechen", response: "Gerne! Sollen wir einen gemeinsamen Termin machen?" },
+                    { objection: "Brauchen wir nicht", response: "Wie gewinnen Sie aktuell neue Kunden online?" },
+                  ].map(e => (
+                    <div key={e.objection} className="flex gap-2">
+                      <span className="text-red-400/70 shrink-0 w-28">"{e.objection}"</span>
+                      <span className="text-white/50">→ {e.response}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
           {activeTab === "details" ? (
             <>
               {/* Quick Actions - Telegram & Phone */}
@@ -8882,19 +9018,30 @@ function NewLeadModal({
   };
 
   const packages = [
-    "Growth Website",
-    "Business Website",
-    "One-Page Website",
-    "Website-Check",
+    "START Website (€3.790)",
+    "BUSINESS Website (€8.390)",
+    "ONE PAGE (€1.390)",
+    "Web App (€18.990)",
+    "Mobile App (€35.990)",
+    "AI-Agenten (€4.990)",
+    "Logo & Branding (€990)",
+    "Website-Check (kostenlos)",
     "Sonstiges",
   ];
   const sources = [
-    "Manuell",
-    "Website",
+    "Website-Formular",
+    "Website-Check Tool",
+    "Google Ads",
+    "Meta Ads (FB/IG)",
+    "LinkedIn",
+    "Social Media (Organisch)",
+    "Kaltakquise",
+    "Kalt-E-Mail",
     "Empfehlung",
-    "Social Media",
-    "Telefon",
-    "E-Mail",
+    "Partner/Kooperation",
+    "Event/Messe",
+    "Bestandskunde (Upsell)",
+    "Telegram Bot",
     "Sonstige",
   ];
 
