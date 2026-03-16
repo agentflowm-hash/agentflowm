@@ -12,11 +12,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const pool = new Pool({
-    connectionString: `postgresql://postgres:20A6nfELnDHBuUFxsMb50KfGwUHwFFl5@db.qzjqldjroqzaymxkhysd.supabase.co:5432/postgres`,
-    ssl: { rejectUnauthorized: false },
-    connectionTimeoutMillis: 15000,
-  });
+  // Try multiple connection methods
+  const poolerHosts = [
+    'aws-0-eu-central-1.pooler.supabase.com',
+    'aws-0-eu-central-2.pooler.supabase.com',
+    'aws-0-eu-west-1.pooler.supabase.com',
+    'db.qzjqldjroqzaymxkhysd.supabase.co',
+  ];
+
+  let pool: InstanceType<typeof Pool> | null = null;
+  let connectedHost = '';
+
+  for (const host of poolerHosts) {
+    const testPool = new Pool({
+      host,
+      port: host.includes('pooler') ? 6543 : 5432,
+      database: 'postgres',
+      user: host.includes('pooler') ? 'postgres.qzjqldjroqzaymxkhysd' : 'postgres',
+      password: '20A6nfELnDHBuUFxsMb50KfGwUHwFFl5',
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 8000,
+    });
+    try {
+      await testPool.query('SELECT 1');
+      pool = testPool;
+      connectedHost = host;
+      break;
+    } catch {
+      await testPool.end().catch(() => {});
+    }
+  }
+
+  if (!pool) {
+    return NextResponse.json({
+      error: 'Could not connect to database via any pooler host',
+      tried: poolerHosts,
+    }, { status: 500 });
+  }
 
   const results: string[] = [];
 
@@ -195,5 +227,5 @@ export async function POST(request: Request) {
 
   await pool.end();
 
-  return NextResponse.json({ success: true, results });
+  return NextResponse.json({ success: true, connectedHost, results });
 }
