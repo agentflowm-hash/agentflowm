@@ -1911,7 +1911,23 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
         </button>
       </div>
 
-      {/* Kanban Board */}
+      {/* Pipeline Stats */}
+      <div className="grid grid-cols-5 gap-2">
+        {stages.map((stage) => {
+          const sl = leads.filter(l => l.status === stage.id);
+          const value = sl.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
+          const headerColors: Record<string, string> = { blue: "text-blue-400", yellow: "text-yellow-400", purple: "text-purple-400", orange: "text-[#FC682C]", green: "text-green-400", teal: "text-teal-400" };
+          return (
+            <div key={stage.id} className="p-2.5 bg-white/[0.02] rounded-xl border border-white/[0.04] text-center">
+              <div className={`text-lg font-bold ${headerColors[stage.color] || "text-white"}`}>{sl.length}</div>
+              <div className="text-[10px] text-white/30">{stage.label}</div>
+              {value > 0 && <div className="text-[10px] text-white/50 mt-0.5">€{value.toLocaleString("de-DE")}</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Kanban Board — Drag & Drop */}
       <div className="grid grid-cols-5 gap-4 overflow-x-auto pb-4">
         {stages.map((stage) => {
           const stageLeads = leads.filter((l) => l.status === stage.id);
@@ -1922,6 +1938,7 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
             purple: "border-purple-500/30 bg-purple-500/5",
             orange: "border-[#FC682C]/30 bg-[#FC682C]/5",
             green: "border-green-500/30 bg-green-500/5",
+            teal: "border-teal-500/30 bg-teal-500/5",
           };
           const headerColors: Record<string, string> = {
             blue: "text-blue-400",
@@ -1929,19 +1946,26 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
             purple: "text-purple-400",
             orange: "text-[#FC682C]",
             green: "text-green-400",
+            teal: "text-teal-400",
           };
 
           return (
             <div
               key={stage.id}
-              className={`min-w-[280px] rounded-2xl border ${stageColors[stage.color]} p-4`}
+              className={`min-w-[280px] rounded-2xl border ${stageColors[stage.color] || stageColors.blue} p-4 transition-all`}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("ring-2", "ring-[#FC682C]/50"); }}
+              onDragLeave={(e) => { e.currentTarget.classList.remove("ring-2", "ring-[#FC682C]/50"); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove("ring-2", "ring-[#FC682C]/50");
+                const leadId = parseInt(e.dataTransfer.getData("leadId"));
+                if (leadId) updateStatus(leadId, stage.id);
+              }}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Icon className={`w-4 h-4 ${headerColors[stage.color]}`} />
-                  <h3
-                    className={`text-sm font-semibold ${headerColors[stage.color]}`}
-                  >
+                  <Icon className={`w-4 h-4 ${headerColors[stage.color] || headerColors.blue}`} />
+                  <h3 className={`text-sm font-semibold ${headerColors[stage.color] || headerColors.blue}`}>
                     {stage.label}
                   </h3>
                 </div>
@@ -1951,7 +1975,10 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
               </div>
               <div className="space-y-3">
                 {stageLeads.map((lead) => (
-                  <KanbanCard key={lead.id} lead={lead} onMove={updateStatus} onClick={() => setSelectedLead(lead)} />
+                  <div key={lead.id} draggable onDragStart={(e) => { e.dataTransfer.setData("leadId", String(lead.id)); e.currentTarget.style.opacity = "0.5"; }}
+                    onDragEnd={(e) => { e.currentTarget.style.opacity = "1"; }}>
+                    <KanbanCard lead={lead} onMove={updateStatus} onClick={() => setSelectedLead(lead)} />
+                  </div>
                 ))}
                 {stageLeads.length === 0 && (
                   <div className="py-8 text-center text-white/20 text-sm border-2 border-dashed border-white/10 rounded-xl">
