@@ -1564,6 +1564,66 @@ function DashboardTab({
           </div>
         </GlassCard>
       </div>
+
+      {/* Row 4: Empfehlungs-Widget */}
+      <TopReferrersWidget onNavigate={onNavigate} />
+    </div>
+  );
+}
+
+function TopReferrersWidget({ onNavigate }: { onNavigate?: (tab: Tab) => void }) {
+  const [topRef, setTopRef] = useState<any[]>([]);
+  const [refStats, setRefStats] = useState({ total: 0, totalCommission: 0, totalConverted: 0 });
+
+  useEffect(() => {
+    fetch("/api/referrers", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        const d = data.data || data;
+        setTopRef((d.referrers || []).slice(0, 5));
+        setRefStats(d.stats || { total: 0, totalCommission: 0, totalConverted: 0 });
+      })
+      .catch(() => {});
+  }, []);
+
+  if (topRef.length === 0) return null;
+
+  return (
+    <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-500/10 via-transparent to-[#FC682C]/10 border border-purple-500/15">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-purple-500/20">
+            <StarIcon className="w-5 h-5 text-purple-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white">Top Empfehlungsgeber</h3>
+            <p className="text-[10px] text-white/40">{refStats.total} Partner &bull; {refStats.totalConverted} Konversionen &bull; {(refStats.totalCommission || 0).toLocaleString("de-DE")}€ Provision</p>
+          </div>
+        </div>
+        <button
+          onClick={() => onNavigate?.("referrals")}
+          className="px-3 py-1.5 text-xs text-[#FC682C] bg-[#FC682C]/10 border border-[#FC682C]/20 rounded-lg hover:bg-[#FC682C]/20 transition-colors font-medium"
+        >
+          Alle anzeigen
+        </button>
+      </div>
+      <div className="grid grid-cols-5 gap-3">
+        {topRef.map((r: any, i: number) => (
+          <div key={r.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.04] text-center">
+            <div className={`w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center text-white font-bold text-lg ${
+              i === 0 ? "bg-gradient-to-br from-yellow-500/30 to-yellow-600/10 border border-yellow-500/30"
+              : i === 1 ? "bg-gradient-to-br from-gray-400/30 to-gray-500/10 border border-gray-400/30"
+              : i === 2 ? "bg-gradient-to-br from-orange-700/30 to-orange-800/10 border border-orange-700/30"
+              : "bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20"
+            }`}>
+              {r.name?.charAt(0) || "?"}
+            </div>
+            <p className="text-xs font-medium text-white truncate">{r.name}</p>
+            <p className="text-[10px] text-white/40">{r.total_referrals || 0} Empf.</p>
+            <p className="text-sm font-bold text-[#FC682C] mt-1">{parseFloat(String(r.total_commission || 0)).toLocaleString("de-DE")}€</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -4922,6 +4982,32 @@ function ReferralsTab() {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => {
+                const rows = [["Datum", "Empfehlungsgeber", "Deal-Wert", "Rate", "Provision", "Status"].join(";")];
+                commissions.forEach((c) => {
+                  const ref = allReferrers.find((r) => r.id === c.referrer_id);
+                  rows.push([
+                    new Date(c.created_at).toLocaleDateString("de-DE"),
+                    ref?.name || c.referrer_name || "Unbekannt",
+                    parseFloat(String(c.deal_value)).toFixed(2),
+                    `${c.commission_rate}%`,
+                    parseFloat(String(c.commission_amount)).toFixed(2),
+                    c.status === "pending" ? "Offen" : c.status === "approved" ? "Genehmigt" : "Ausgezahlt",
+                  ].join(";"));
+                });
+                const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = `provisionen-${new Date().toISOString().slice(0, 10)}.csv`;
+                a.click(); URL.revokeObjectURL(url);
+                showToast("success", "CSV exportiert!");
+              }}
+              className="flex items-center gap-2 px-4 py-3 bg-white/[0.04] text-white/60 rounded-xl font-medium hover:bg-white/[0.08] transition-colors border border-white/[0.06]"
+            >
+              <ArrowDownTrayIcon className="w-4 h-4" />
+              CSV
+            </button>
             <button
               onClick={() => setShowAddCommission(true)}
               className="flex items-center gap-2 px-5 py-3 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 transition-colors"
