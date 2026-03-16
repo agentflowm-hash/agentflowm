@@ -1083,30 +1083,142 @@ function DashboardTab({
   onNavigate?: (tab: Tab) => void;
 }) {
   const [topChecks, setTopChecks] = useState<{url: string; scoreOverall: number}[]>([]);
+  const [allLeads, setAllLeads] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch top website checks
     fetch('/api/checks')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.data?.checks) {
-          // Sort by score and take top 3
-          const sorted = data.data.checks
-            .filter((c: any) => c.scoreOverall > 0)
-            .sort((a: any, b: any) => b.scoreOverall - a.scoreOverall)
-            .slice(0, 3);
+          const sorted = data.data.checks.filter((c: any) => c.scoreOverall > 0).sort((a: any, b: any) => b.scoreOverall - a.scoreOverall).slice(0, 3);
           setTopChecks(sorted);
         }
-      })
-      .catch(err => console.error('Failed to fetch checks:', err));
+      }).catch(() => {});
+    fetch('/api/leads', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => { const d = data.data || data; setAllLeads(d.leads || []); })
+      .catch(() => {});
   }, []);
 
   if (!stats) {
     return <LoadingState />;
   }
 
+  // Tages-Cockpit Daten
+  const now = new Date();
+  const hotLeads = allLeads.filter(l => l.status !== "won" && l.status !== "lost" && l.status !== "converted").sort((a: any, b: any) => {
+    const budgetA = parseFloat(a.budget?.replace(/[^0-9.]/g, "") || "0") || 0;
+    const budgetB = parseFloat(b.budget?.replace(/[^0-9.]/g, "") || "0") || 0;
+    return budgetB - budgetA;
+  });
+  const idleLeads = allLeads.filter(l => {
+    if (l.status === "won" || l.status === "lost" || l.status === "converted") return false;
+    const updated = new Date(l.updatedAt || l.updated_at || l.createdAt || l.created_at);
+    const days = Math.floor((now.getTime() - updated.getTime()) / 86400000);
+    return days >= 3;
+  });
+  const newLeadsToday = allLeads.filter(l => {
+    const created = new Date(l.createdAt || l.created_at);
+    return created.toDateString() === now.toDateString();
+  });
+
   return (
     <div className="space-y-6">
+      {/* TAGES-COCKPIT — "Mein Tag" */}
+      {allLeads.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Überfällige Leads (Deal Rotting) */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-500/5 border border-red-500/20">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <h3 className="text-sm font-bold text-red-400">Überfällig</h3>
+              </div>
+              <span className="text-xs text-red-400/60">{idleLeads.length} Leads</span>
+            </div>
+            {idleLeads.length > 0 ? (
+              <div className="space-y-2">
+                {idleLeads.slice(0, 3).map((lead: any) => {
+                  const days = Math.floor((now.getTime() - new Date(lead.updatedAt || lead.updated_at || lead.createdAt || lead.created_at).getTime()) / 86400000);
+                  return (
+                    <div key={lead.id} onClick={() => onNavigate?.("vertrieb")} className="flex items-center justify-between p-2 bg-red-500/5 rounded-xl cursor-pointer hover:bg-red-500/10 transition-all">
+                      <div>
+                        <div className="text-xs text-white font-medium">{lead.name}</div>
+                        <div className="text-[10px] text-white/40">{lead.company || lead.email}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs text-red-400 font-bold">{days} Tage</div>
+                        <div className="text-[10px] text-white/30">{lead.status}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-green-400/60 text-center py-4">Alles aktuell — keine überfälligen Leads!</p>
+            )}
+          </div>
+
+          {/* Heißeste Leads */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <FireIcon className="w-4 h-4 text-[#FC682C]" />
+                <h3 className="text-sm font-bold text-[#FC682C]">Heißeste Leads</h3>
+              </div>
+              <span className="text-xs text-[#FC682C]/60">{hotLeads.length} offen</span>
+            </div>
+            <div className="space-y-2">
+              {hotLeads.slice(0, 3).map((lead: any) => {
+                const budget = parseFloat(lead.budget?.replace(/[^0-9.]/g, "") || "0") || 0;
+                return (
+                  <div key={lead.id} onClick={() => onNavigate?.("vertrieb")} className="flex items-center justify-between p-2 bg-[#FC682C]/5 rounded-xl cursor-pointer hover:bg-[#FC682C]/10 transition-all">
+                    <div>
+                      <div className="text-xs text-white font-medium">{lead.name}</div>
+                      <div className="text-[10px] text-white/40">{lead.packageInterest || lead.package_interest || "—"}</div>
+                    </div>
+                    <div className="text-right">
+                      {budget > 0 && <div className="text-xs text-[#FC682C] font-bold">€{budget.toLocaleString("de-DE")}</div>}
+                      <div className={`text-[10px] px-1.5 py-0.5 rounded ${lead.status === "proposal" ? "bg-yellow-500/15 text-yellow-400" : lead.status === "qualified" ? "bg-purple-500/15 text-purple-400" : "bg-blue-500/15 text-blue-400"}`}>{lead.status}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              {hotLeads.length === 0 && <p className="text-xs text-white/30 text-center py-4">Keine offenen Leads</p>}
+            </div>
+          </div>
+
+          {/* Heutige Aktionen */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <BoltIcon className="w-4 h-4 text-green-400" />
+                <h3 className="text-sm font-bold text-green-400">Heute</h3>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-green-500/5 rounded-xl">
+                <span className="text-xs text-white/60">Neue Leads heute</span>
+                <span className="text-sm font-bold text-green-400">{newLeadsToday.length}</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-green-500/5 rounded-xl">
+                <span className="text-xs text-white/60">Offene Pipeline</span>
+                <span className="text-sm font-bold text-white">{hotLeads.length}</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-green-500/5 rounded-xl">
+                <span className="text-xs text-white/60">Überfällig (Action!)</span>
+                <span className={`text-sm font-bold ${idleLeads.length > 0 ? "text-red-400" : "text-green-400"}`}>{idleLeads.length}</span>
+              </div>
+              {/* Quick Actions */}
+              <div className="flex gap-1.5 pt-2">
+                <button onClick={() => onNavigate?.("vertrieb")} className="flex-1 py-2 bg-[#FC682C]/10 hover:bg-[#FC682C]/20 border border-[#FC682C]/20 rounded-xl text-[10px] text-[#FC682C] font-medium transition-all">+ Neuer Lead</button>
+                <button onClick={() => onNavigate?.("calendar")} className="flex-1 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-xl text-[10px] text-white/50 font-medium transition-all">Kalender</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FC682C]/20 via-[#9D65C9]/10 to-[#FC682C]/5 border border-[#FC682C]/20 p-6">
         <div className="relative z-10">
@@ -2027,12 +2139,22 @@ function KanbanCard({
   onClick?: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const daysSinceUpdate = Math.floor((Date.now() - new Date(lead.updatedAt || lead.createdAt).getTime()) / 86400000);
+  const isIdle = daysSinceUpdate >= 3 && lead.status !== "won" && lead.status !== "lost" && lead.status !== "converted";
+  const isRotting = daysSinceUpdate >= 7 && lead.status !== "won" && lead.status !== "lost" && lead.status !== "converted";
 
   return (
-    <div 
+    <div
       onClick={(e) => { if (!showMenu) onClick?.(); }}
-      className={`relative p-4 bg-[#111827] border border-white/[0.06] rounded-xl hover:border-white/[0.15] hover:bg-white/[0.02] transition-all cursor-pointer group ${lead.priority === 'high' ? 'ring-2 ring-red-500/20' : ''}`}
+      className={`relative p-4 bg-[#111827] border rounded-xl hover:border-white/[0.15] hover:bg-white/[0.02] transition-all cursor-pointer group ${isRotting ? 'border-red-500/40 ring-1 ring-red-500/20' : isIdle ? 'border-yellow-500/30' : 'border-white/[0.06]'} ${lead.priority === 'high' ? 'ring-2 ring-red-500/20' : ''}`}
     >
+      {/* Deal Rotting Indicator */}
+      {isIdle && (
+        <div className={`absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-medium ${isRotting ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/15 text-yellow-400'}`}>
+          {isRotting && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+          {daysSinceUpdate}d
+        </div>
+      )}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FC682C]/40 to-[#9D65C9]/40 flex items-center justify-center text-white text-sm font-semibold shadow-lg">
@@ -2079,18 +2201,32 @@ function KanbanCard({
         </div>
       </div>
 
-      {/* Quick Actions on Hover */}
-      <div className="absolute bottom-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {lead.phone && (
-          <a href={`tel:${lead.phone}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors">
-            <PhoneIcon className="w-3 h-3 text-green-400" />
-          </a>
-        )}
-        {lead.email && (
-          <a href={`mailto:${lead.email}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors">
-            <EnvelopeIcon className="w-3 h-3 text-blue-400" />
-          </a>
-        )}
+      {/* Quick Actions on Hover — One-Click */}
+      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1">
+          {lead.phone && (
+            <a href={`tel:${lead.phone}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors" title="Anrufen">
+              <PhoneIcon className="w-3 h-3 text-green-400" />
+            </a>
+          )}
+          {lead.email && (
+            <a href={`mailto:${lead.email}`} onClick={(e) => e.stopPropagation()} className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors" title="E-Mail">
+              <EnvelopeIcon className="w-3 h-3 text-blue-400" />
+            </a>
+          )}
+          {lead.phone && (
+            <a href={`https://wa.me/${lead.phone.replace(/[^0-9+]/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="p-1.5 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-colors" title="WhatsApp">
+              <ChatBubbleLeftRightIcon className="w-3 h-3 text-green-300" />
+            </a>
+          )}
+        </div>
+        <div className="flex items-center gap-1">
+          {lead.status !== "won" && (
+            <button onClick={(e) => { e.stopPropagation(); const nextStatus: Record<string, string> = { new: "contacted", contacted: "qualified", qualified: "proposal", proposal: "won" }; onMove(lead.id, nextStatus[lead.status] || "contacted"); }} className="px-2 py-1 bg-[#FC682C]/20 hover:bg-[#FC682C]/30 rounded-lg text-[9px] text-[#FC682C] font-medium transition-colors" title="Nächster Status">
+              <ChevronRightIcon className="w-3 h-3 inline" /> Weiter
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Quick Move Menu */}
