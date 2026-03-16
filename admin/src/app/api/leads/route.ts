@@ -12,6 +12,7 @@ import {
   DatabaseError,
   type CreateLeadInput,
 } from '@/lib/api';
+import nodemailer from 'nodemailer';
 
 // ─────────────────────────────────────────────────────────────────
 // GET /api/leads - List all leads
@@ -127,20 +128,31 @@ export const POST = createHandler({
         })
         .eq('id', referrer_id);
 
-      // Dankes-E-Mail an Empfehlungsgeber senden
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL ? 'https://admin.agentflowm.de' : 'http://localhost:3000'}/api/referrers/thank-you`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            referrer_name: referrer.name,
-            referrer_email: referrer.email,
-            lead_name: name,
-            internal: true,
-          }),
-        });
-      } catch (emailErr) {
-        console.error('Dankes-E-Mail konnte nicht gesendet werden:', emailErr);
+      // Dankes-E-Mail direkt senden
+      if (process.env.SMTP_HOST) {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+          });
+          const firstName = referrer.name.split(' ')[0];
+          await transporter.sendMail({
+            from: `AgentFlowMarketing <${process.env.EMAIL_FROM || 'kontakt@agentflowm.de'}>`,
+            to: referrer.email,
+            subject: `Danke für deine Empfehlung, ${firstName}!`,
+            html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;background:#111827;color:#fff;border-radius:16px;">
+              <h2 style="color:#FC682C;margin:0 0 16px;">Danke für deine Empfehlung!</h2>
+              <p>Hallo ${firstName},</p>
+              <p style="color:rgba(255,255,255,0.7);">vielen Dank, dass du <strong>${name}</strong> an uns empfohlen hast! Wir setzen uns zeitnah mit ${name} in Verbindung.</p>
+              <p style="color:rgba(255,255,255,0.7);">Sobald ein Projekt zustande kommt, erhältst du deine <strong style="color:#FC682C;">10% Empfehlungsprovision</strong>.</p>
+              <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:24px;">Beste Grüße,<br>Das AgentFlowMarketing Team</p>
+            </div>`,
+          });
+        } catch (emailErr) {
+          console.error('Dankes-E-Mail Fehler:', emailErr);
+        }
       }
     }
   }

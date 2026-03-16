@@ -4492,7 +4492,7 @@ function ReferralsTab() {
   const [showAddReferrer, setShowAddReferrer] = useState(false);
   const [showAddCommission, setShowAddCommission] = useState(false);
   const [newReferrer, setNewReferrer] = useState({ name: "", email: "", phone: "", company: "" });
-  const [newCommission, setNewCommission] = useState({ referrer_id: "", deal_value: "", notes: "" });
+  const [newCommission, setNewCommission] = useState({ referrer_id: "", deal_value: "", notes: "", lead_name: "" });
   const [saving, setSaving] = useState(false);
   const [statementMonth, setStatementMonth] = useState(() => {
     const d = new Date();
@@ -4571,9 +4571,10 @@ function ReferralsTab() {
   };
 
   const handleAddCommission = async () => {
-    if (!newCommission.referrer_id || !newCommission.deal_value) return;
+    if (!newCommission.referrer_id || !newCommission.deal_value || !newCommission.lead_name) return;
     setSaving(true);
     try {
+      const notesText = [newCommission.lead_name, newCommission.notes].filter(Boolean).join(" — ");
       const res = await fetch("/api/referrers/commissions", {
         credentials: "include",
         method: "POST",
@@ -4581,12 +4582,12 @@ function ReferralsTab() {
         body: JSON.stringify({
           referrer_id: parseInt(newCommission.referrer_id),
           deal_value: parseFloat(newCommission.deal_value),
-          notes: newCommission.notes || null,
+          notes: notesText || null,
         }),
       });
       if (res.ok) {
         showToast("success", "Provision erfasst!");
-        setNewCommission({ referrer_id: "", deal_value: "", notes: "" });
+        setNewCommission({ referrer_id: "", deal_value: "", notes: "", lead_name: "" });
         setShowAddCommission(false);
         loadData();
       } else {
@@ -5028,14 +5029,19 @@ function ReferralsTab() {
                   <XMarkIcon className="w-4 h-4 text-white/40" />
                 </button>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] text-white/40 mb-1">Empfehlungsgeber *</label>
                   <select value={newCommission.referrer_id} onChange={(e) => setNewCommission({ ...newCommission, referrer_id: e.target.value })}
                     className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:border-[#FC682C]/50 outline-none cursor-pointer">
-                    <option value="">Auswählen...</option>
+                    <option value="">Empfehlungsgeber wählen...</option>
                     {allReferrers.map((r) => <option key={r.id} value={r.id}>{r.name} ({r.commission_rate}%)</option>)}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Kunde / Projekt *</label>
+                  <input type="text" value={newCommission.lead_name} onChange={(e) => setNewCommission({ ...newCommission, lead_name: e.target.value })}
+                    placeholder="z.B. Musterfirma GmbH — Business Website" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none" />
                 </div>
                 <div>
                   <label className="block text-[10px] text-white/40 mb-1">Deal-Wert (€) *</label>
@@ -5045,7 +5051,7 @@ function ReferralsTab() {
                 <div>
                   <label className="block text-[10px] text-white/40 mb-1">Notiz</label>
                   <input type="text" value={newCommission.notes} onChange={(e) => setNewCommission({ ...newCommission, notes: e.target.value })}
-                    placeholder="z.B. Business Website" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none" />
+                    placeholder="z.B. Rechnung #AFM-2026-0005" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none" />
                 </div>
               </div>
               {newCommission.referrer_id && newCommission.deal_value && (
@@ -5057,7 +5063,7 @@ function ReferralsTab() {
                   </p>
                 </div>
               )}
-              <button onClick={handleAddCommission} disabled={saving || !newCommission.referrer_id || !newCommission.deal_value}
+              <button onClick={handleAddCommission} disabled={saving || !newCommission.referrer_id || !newCommission.deal_value || !newCommission.lead_name}
                 className="w-full py-2.5 bg-[#FC682C]/20 text-[#FC682C] rounded-xl text-sm font-medium hover:bg-[#FC682C]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors">
                 {saving ? <><div className="w-4 h-4 border-2 border-[#FC682C]/30 border-t-[#FC682C] rounded-full animate-spin" /> Wird erfasst...</> : <><BanknotesIcon className="w-4 h-4" /> Provision erfassen</>}
               </button>
@@ -10351,9 +10357,19 @@ function NewLeadModal({
     setLoading(true);
 
     try {
-      const payload: Record<string, unknown> = { ...form, status: "new" };
-      if (form.source !== "Empfehlung") {
-        delete payload.referrer_id;
+      // Map camelCase to snake_case for API
+      const payload: Record<string, unknown> = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone || undefined,
+        company: form.company || undefined,
+        package_interest: form.packageInterest || undefined,
+        source: form.source,
+        message: form.message || undefined,
+        status: "new",
+      };
+      if (form.source === "Empfehlung" && form.referrer_id) {
+        payload.referrer_id = form.referrer_id;
       }
       await fetch("/api/leads", {
         credentials: "include",
@@ -10725,7 +10741,7 @@ function NewLeadModal({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={loading || !form.name || !form.email}
+            disabled={loading || !form.name || !form.email || (form.source === "Empfehlung" && !form.referrer_id)}
             className="px-6 py-2 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading ? (

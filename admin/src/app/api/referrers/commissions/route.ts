@@ -10,6 +10,7 @@ import {
   DatabaseError,
 } from '@/lib/api';
 import { z } from 'zod';
+import nodemailer from 'nodemailer';
 
 const CreateCommissionSchema = z.object({
   referrer_id: z.number().int().positive(),
@@ -250,22 +251,34 @@ export const PATCH = createHandler({
       }
     } catch { /* ignore */ }
 
-    // Auszahlungs-E-Mail an Empfehlungsgeber
-    if (referrer?.email) {
+    // Auszahlungs-E-Mail direkt senden
+    if (referrer?.email && process.env.SMTP_HOST) {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://admin.agentflowm.de';
-        await fetch(`${baseUrl}/api/referrers/payout-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            referrer_name: referrer.name,
-            referrer_email: referrer.email,
-            commission_amount: commission.commission_amount,
-            deal_value: commission.deal_value,
-            commission_rate: commission.commission_rate,
-            notes: commission.notes,
-            internal: true,
-          }),
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        });
+        const amt = parseFloat(String(commission.commission_amount)).toLocaleString('de-DE', { minimumFractionDigits: 2 });
+        const dealAmt = parseFloat(String(commission.deal_value)).toLocaleString('de-DE', { minimumFractionDigits: 2 });
+        const firstName = referrer.name.split(' ')[0];
+        await transporter.sendMail({
+          from: `AgentFlowMarketing <${process.env.EMAIL_FROM || 'kontakt@agentflowm.de'}>`,
+          to: referrer.email,
+          subject: `Deine Provision von ${amt}€ wurde ausgezahlt!`,
+          html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;background:#111827;color:#fff;border-radius:16px;">
+            <h2 style="color:#10B981;margin:0 0 16px;">Provision ausgezahlt!</h2>
+            <p>Hallo ${firstName},</p>
+            <p style="color:rgba(255,255,255,0.7);">Deine Empfehlungsprovision wurde soeben überwiesen:</p>
+            <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:16px;margin:16px 0;">
+              <p style="margin:0;color:rgba(255,255,255,0.5);font-size:13px;">Deal-Wert: <strong style="color:#fff;">${dealAmt}€</strong></p>
+              <p style="margin:8px 0 0;color:rgba(255,255,255,0.5);font-size:13px;">Rate: <strong style="color:#fff;">${commission.commission_rate}%</strong></p>
+              <p style="margin:12px 0 0;color:#10B981;font-size:20px;font-weight:bold;">Auszahlung: ${amt}€</p>
+            </div>
+            ${commission.notes ? `<p style="color:rgba(255,255,255,0.4);font-size:12px;">Notiz: ${commission.notes}</p>` : ''}
+            <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:24px;">Beste Grüße,<br>Das AgentFlowMarketing Team</p>
+          </div>`,
         });
       } catch (e) {
         console.error('Payout email failed:', e);
