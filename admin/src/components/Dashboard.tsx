@@ -1887,10 +1887,21 @@ function DokumenteTab() {
 // ═══════════════════════════════════════════════════════════════
 
 function VertriebTab() {
+  const { showToast } = useToast();
   const [vertriebView, setVertriebView] = useState<"kanban" | "tabelle">("kanban");
   const [pipelines, setPipelines] = useState<any[]>([]);
   const [activePipeline, setActivePipeline] = useState<string>("default");
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [showNewLeadModal, setShowNewLeadModal] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refreshLeads = useCallback(() => {
+    fetch("/api/leads", { credentials: "include" })
+      .then(r => r.json())
+      .then(data => { setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     fetch("/api/pipelines", { credentials: "include" })
@@ -1902,162 +1913,311 @@ function VertriebTab() {
         if (def) setActivePipeline(String(def.id));
       })
       .catch(() => {});
-    fetch("/api/leads", { credentials: "include" })
-      .then(r => r.json())
-      .then(data => setLeads(unwrapApiResponse<{leads: Lead[]}>(data).leads || []))
-      .catch(() => {});
-  }, []);
+    refreshLeads();
+  }, [refreshLeads]);
 
   const currentPipeline = pipelines.find(p => String(p.id) === activePipeline);
 
   // KPI Berechnungen
-  const totalValue = leads.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
+  const getBudget = (l: Lead) => parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0;
+  const totalValue = leads.reduce((s, l) => s + getBudget(l), 0);
   const wonLeads = leads.filter(l => l.status === "won");
-  const wonValue = wonLeads.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
+  const wonValue = wonLeads.reduce((s, l) => s + getBudget(l), 0);
   const activeLeads = leads.filter(l => !["won", "lost", "converted"].includes(l.status));
   const hotLeads = leads.filter(l => l.priority === "high" && !["won", "lost", "converted"].includes(l.status));
+  const newLeads = leads.filter(l => l.status === "new");
   const idleLeads = leads.filter(l => {
     const days = Math.floor((Date.now() - new Date(l.updatedAt || l.createdAt).getTime()) / 86400000);
     return days >= 3 && !["won", "lost", "converted"].includes(l.status);
   });
   const conversionRate = leads.length > 0 ? Math.round((wonLeads.length / leads.length) * 100) : 0;
+  const avgDealValue = wonLeads.length > 0 ? Math.round(wonValue / wonLeads.length) : 0;
+
+  // Tages-Motivation
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Guten Morgen" : hour < 18 ? "Guten Tag" : "Guten Abend";
+  const motivationQuotes = [
+    "Jeder Lead ist eine Chance. Jede Chance ist Umsatz.",
+    "Speed to Lead: Wer zuerst antwortet, gewinnt.",
+    "Follow-up ist kein Spam — es ist Professionalität.",
+    "Dein Pipeline-Wert = Dein zukünftiger Umsatz.",
+    "Heute ist ein guter Tag zum Abschließen.",
+    "Kein Lead bleibt zurück. Kein Deal wird vergessen.",
+  ];
+  const todayQuote = motivationQuotes[new Date().getDay() % motivationQuotes.length];
+
+  // Pipeline stages
+  const defaultStages = [
+    { id: "new", label: "Neu", color: "blue", icon: SparklesIcon },
+    { id: "contacted", label: "Kontaktiert", color: "yellow", icon: PhoneIcon },
+    { id: "qualified", label: "Qualifiziert", color: "purple", icon: CheckCircleIcon },
+    { id: "proposal", label: "Angebot", color: "orange", icon: DocumentTextIcon },
+    { id: "won", label: "Gewonnen", color: "green", icon: StarIcon },
+  ];
+  const colorCycle = ["blue", "yellow", "purple", "orange", "green", "teal"];
+  const stages = currentPipeline?.stages?.length > 0
+    ? currentPipeline.stages.map((s: any, i: number) => ({ id: s.id, label: s.label, color: colorCycle[i % colorCycle.length], icon: defaultStages[i]?.icon || CheckCircleIcon }))
+    : defaultStages;
+
+  const updateStatus = async (id: number, status: string) => {
+    const lead = leads.find(l => l.id === id);
+    const stageName = stages.find((s: any) => s.id === status)?.label || status;
+    await fetch(`/api/leads/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }), credentials: "include" });
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, status, updatedAt: new Date().toISOString() } : l));
+    showToast("success", `${lead?.name || "Lead"} → ${stageName}`);
+  };
+
+  if (loading) return <LoadingState />;
+
+  const stageColorMap: Record<string, { border: string; bg: string; text: string; dot: string; gradient: string }> = {
+    blue: { border: "border-blue-500/20", bg: "bg-blue-500/5", text: "text-blue-400", dot: "bg-blue-500", gradient: "from-blue-500/15 to-blue-500/5" },
+    yellow: { border: "border-yellow-500/20", bg: "bg-yellow-500/5", text: "text-yellow-400", dot: "bg-yellow-500", gradient: "from-yellow-500/15 to-yellow-500/5" },
+    purple: { border: "border-purple-500/20", bg: "bg-purple-500/5", text: "text-purple-400", dot: "bg-purple-500", gradient: "from-purple-500/15 to-purple-500/5" },
+    orange: { border: "border-[#FC682C]/20", bg: "bg-[#FC682C]/5", text: "text-[#FC682C]", dot: "bg-[#FC682C]", gradient: "from-[#FC682C]/15 to-[#FC682C]/5" },
+    green: { border: "border-green-500/20", bg: "bg-green-500/5", text: "text-green-400", dot: "bg-green-500", gradient: "from-green-500/15 to-green-500/5" },
+    teal: { border: "border-teal-500/20", bg: "bg-teal-500/5", text: "text-teal-400", dot: "bg-teal-500", gradient: "from-teal-500/15 to-teal-500/5" },
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Premium KPI Header */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {/* Pipeline-Wert */}
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-[#FC682C]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="text-[10px] uppercase tracking-wider text-[#FC682C]/70 font-semibold mb-1">Pipeline-Wert</div>
-          <div className="text-2xl font-bold text-white">{totalValue > 0 ? `€${totalValue.toLocaleString("de-DE")}` : "€0"}</div>
-          <div className="text-[10px] text-white/30 mt-1">{leads.length} Leads gesamt</div>
-        </div>
-        {/* Gewonnen */}
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="text-[10px] uppercase tracking-wider text-green-400/70 font-semibold mb-1">Gewonnen</div>
-          <div className="text-2xl font-bold text-white">{wonValue > 0 ? `€${wonValue.toLocaleString("de-DE")}` : "€0"}</div>
-          <div className="text-[10px] text-white/30 mt-1">{wonLeads.length} Deals abgeschlossen</div>
-        </div>
-        {/* Conversion Rate */}
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="text-[10px] uppercase tracking-wider text-purple-400/70 font-semibold mb-1">Conversion</div>
-          <div className="text-2xl font-bold text-white">{conversionRate}%</div>
-          <div className="flex items-center gap-1 mt-1">
-            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-purple-500 to-[#FC682C] rounded-full" style={{ width: `${conversionRate}%` }} />
+    <div className="space-y-5">
+      {/* ═══ HERO SECTION — Sales Command Center ═══ */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0d1117] via-[#111827] to-[#0d1117] border border-white/[0.06] p-6">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItSDJ2LTJoMzR6bTAtMzBWMkgydjJoMzR6TTIgMzR2LTJoMzR2Mkgyem0wLTMwVjJoMzR2MkgyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FC682C] to-[#9D65C9] flex items-center justify-center">
+                <RocketLaunchIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">{greeting}, Mo!</h2>
+                <p className="text-xs text-white/40 italic">&quot;{todayQuote}&quot;</p>
+              </div>
             </div>
           </div>
+          <button
+            onClick={() => setShowNewLeadModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FC682C] to-[#e55a20] text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-[#FC682C]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <PlusIcon className="w-4 h-4" /> Neuer Lead
+          </button>
         </div>
-        {/* Hot Leads */}
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-500/5 border border-red-500/20">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="text-[10px] uppercase tracking-wider text-red-400/70 font-semibold mb-1">Hot Leads</div>
-          <div className="text-2xl font-bold text-white">{hotLeads.length}</div>
-          <div className="text-[10px] text-white/30 mt-1">{hotLeads.length > 0 ? "Sofort kontaktieren!" : "Keine dringenden"}</div>
-        </div>
-        {/* Attention Needed */}
-        <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-500/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="text-[10px] uppercase tracking-wider text-yellow-400/70 font-semibold mb-1">Brauchen Aktion</div>
-          <div className="text-2xl font-bold text-white">{idleLeads.length}</div>
-          <div className="text-[10px] text-white/30 mt-1">{idleLeads.length > 0 ? "Follow-up überfällig" : "Alles im Griff"}</div>
+
+        {/* KPI Row */}
+        <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-1">
+              <CurrencyEuroIcon className="w-4 h-4 text-[#FC682C]" />
+              <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">Pipeline</span>
+            </div>
+            <div className="text-xl font-black text-white">€{totalValue.toLocaleString("de-DE")}</div>
+            <div className="text-[10px] text-white/25 mt-0.5">{activeLeads.length} aktive Deals</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-1">
+              <CheckCircleIcon className="w-4 h-4 text-green-400" />
+              <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">Gewonnen</span>
+            </div>
+            <div className="text-xl font-black text-white">€{wonValue.toLocaleString("de-DE")}</div>
+            <div className="text-[10px] text-white/25 mt-0.5">{wonLeads.length} Deals / {conversionRate}% Rate</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-1">
+              <BoltIcon className="w-4 h-4 text-yellow-400" />
+              <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">Heute zu tun</span>
+            </div>
+            <div className="text-xl font-black text-white">{newLeads.length + idleLeads.length}</div>
+            <div className="text-[10px] text-white/25 mt-0.5">{newLeads.length} neu, {idleLeads.length} Follow-up</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-1">
+              <ArrowTrendingUpIcon className="w-4 h-4 text-purple-400" />
+              <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">Avg. Deal</span>
+            </div>
+            <div className="text-xl font-black text-white">€{avgDealValue.toLocaleString("de-DE")}</div>
+            <div className="text-[10px] text-white/25 mt-0.5">pro gewonnener Deal</div>
+          </div>
         </div>
       </div>
 
-      {/* Conversion Funnel Mini-Bar */}
-      {leads.length > 0 && (
-        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden">
-            {[
-              { id: "new", color: "bg-blue-500", label: "Neu" },
-              { id: "contacted", color: "bg-yellow-500", label: "Kontaktiert" },
-              { id: "qualified", color: "bg-purple-500", label: "Qualifiziert" },
-              { id: "proposal", color: "bg-[#FC682C]", label: "Angebot" },
-              { id: "won", color: "bg-green-500", label: "Gewonnen" },
-            ].map(stage => {
-              const count = leads.filter(l => l.status === stage.id).length;
-              const pct = (count / leads.length) * 100;
-              return pct > 0 ? (
-                <div key={stage.id} className={`${stage.color} h-full rounded-sm relative group cursor-default`} style={{ width: `${pct}%`, minWidth: pct > 0 ? "8px" : 0 }}>
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block px-2 py-1 bg-[#1a2235] border border-white/10 rounded-lg text-[10px] text-white whitespace-nowrap z-10 shadow-xl">
-                    {stage.label}: {count} ({Math.round(pct)}%)
-                  </div>
+      {/* ═══ AKTIONS-CENTER — Was jetzt zu tun ist ═══ */}
+      {(newLeads.length > 0 || idleLeads.length > 0 || hotLeads.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          {/* Neue Leads — sofort reagieren */}
+          {newLeads.length > 0 && (
+            <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/8 to-transparent border border-blue-500/15">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                  <SparklesIcon className="w-4 h-4 text-blue-400" />
                 </div>
-              ) : null;
-            })}
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            {[
-              { id: "new", color: "bg-blue-500", label: "Neu" },
-              { id: "contacted", color: "bg-yellow-500", label: "Kontaktiert" },
-              { id: "qualified", color: "bg-purple-500", label: "Qualifiziert" },
-              { id: "proposal", color: "bg-[#FC682C]", label: "Angebot" },
-              { id: "won", color: "bg-green-500", label: "Gewonnen" },
-            ].map(stage => {
-              const count = leads.filter(l => l.status === stage.id).length;
-              return (
-                <div key={stage.id} className="flex items-center gap-1.5 text-[10px] text-white/40">
-                  <span className={`w-1.5 h-1.5 rounded-full ${stage.color}`} />
-                  {stage.label} ({count})
+                <div>
+                  <div className="text-xs font-bold text-blue-400">Neue Leads</div>
+                  <div className="text-[10px] text-white/30">Innerhalb 5 Min reagieren!</div>
                 </div>
-              );
-            })}
-          </div>
+                <span className="ml-auto px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-400 text-[10px] font-bold">{newLeads.length}</span>
+              </div>
+              <div className="space-y-1.5">
+                {newLeads.slice(0, 3).map(lead => (
+                  <button key={lead.id} onClick={() => setSelectedLead(lead)} className="w-full flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-all text-left">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FC682C]/30 to-[#9D65C9]/30 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                      {lead.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-medium text-white truncate">{lead.name}</div>
+                      <div className="text-[10px] text-white/30 truncate">{lead.company || lead.email}</div>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {lead.phone && <a href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className="p-1 rounded bg-green-500/15 hover:bg-green-500/25"><PhoneIcon className="w-3 h-3 text-green-400" /></a>}
+                      {lead.email && <a href={`mailto:${lead.email}`} onClick={e => e.stopPropagation()} className="p-1 rounded bg-blue-500/15 hover:bg-blue-500/25"><EnvelopeIcon className="w-3 h-3 text-blue-400" /></a>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Follow-Up überfällig */}
+          {idleLeads.length > 0 && (
+            <div className="p-4 rounded-xl bg-gradient-to-br from-yellow-500/8 to-transparent border border-yellow-500/15">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center">
+                  <ClockIcon className="w-4 h-4 text-yellow-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-yellow-400">Follow-Up nötig</div>
+                  <div className="text-[10px] text-white/30">Diese Leads warten auf dich</div>
+                </div>
+                <span className="ml-auto px-2 py-0.5 rounded-md bg-yellow-500/20 text-yellow-400 text-[10px] font-bold animate-pulse">{idleLeads.length}</span>
+              </div>
+              <div className="space-y-1.5">
+                {idleLeads.slice(0, 3).map(lead => {
+                  const days = Math.floor((Date.now() - new Date(lead.updatedAt || lead.createdAt).getTime()) / 86400000);
+                  return (
+                    <button key={lead.id} onClick={() => setSelectedLead(lead)} className="w-full flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-all text-left">
+                      <div className="w-7 h-7 rounded-lg bg-yellow-500/15 flex items-center justify-center text-yellow-400 text-[10px] font-bold flex-shrink-0">
+                        {days}d
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-medium text-white truncate">{lead.name}</div>
+                        <div className="text-[10px] text-white/30 truncate">{lead.company || lead.email}</div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {lead.phone && <a href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} className="p-1 rounded bg-green-500/15 hover:bg-green-500/25"><PhoneIcon className="w-3 h-3 text-green-400" /></a>}
+                        {lead.email && <a href={`mailto:${lead.email}`} onClick={e => e.stopPropagation()} className="p-1 rounded bg-blue-500/15 hover:bg-blue-500/25"><EnvelopeIcon className="w-3 h-3 text-blue-400" /></a>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Hot Leads */}
+          {hotLeads.length > 0 && (
+            <div className="p-4 rounded-xl bg-gradient-to-br from-red-500/8 to-transparent border border-red-500/15">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-lg bg-red-500/15 flex items-center justify-center">
+                  <FireIcon className="w-4 h-4 text-red-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-red-400">Hot Deals</div>
+                  <div className="text-[10px] text-white/30">Hohe Priorität — sofort handeln</div>
+                </div>
+                <span className="ml-auto px-2 py-0.5 rounded-md bg-red-500/20 text-red-400 text-[10px] font-bold">{hotLeads.length}</span>
+              </div>
+              <div className="space-y-1.5">
+                {hotLeads.slice(0, 3).map(lead => (
+                  <button key={lead.id} onClick={() => setSelectedLead(lead)} className="w-full flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-all text-left">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500/30 to-orange-500/30 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                      {lead.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-medium text-white truncate">{lead.name}</div>
+                      <div className="text-[10px] text-white/30 truncate">{lead.company || lead.email}</div>
+                    </div>
+                    {getBudget(lead) > 0 && <span className="text-[10px] font-bold text-green-400 flex-shrink-0">€{getBudget(lead).toLocaleString("de-DE")}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Wenn keine aktiven Aufgaben: Motivations-Card */}
+          {newLeads.length === 0 && idleLeads.length === 0 && hotLeads.length === 0 && (
+            <div className="lg:col-span-3 p-6 rounded-xl bg-gradient-to-r from-green-500/5 to-emerald-500/5 border border-green-500/15 text-center">
+              <CheckCircleIcon className="w-8 h-8 text-green-400 mx-auto mb-2" />
+              <div className="text-sm font-bold text-green-400 mb-1">Alles erledigt!</div>
+              <div className="text-xs text-white/40">Keine offenen Aufgaben. Zeit für neue Leads oder Akquise.</div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* View Toggle */}
-          <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06]">
-            <button
-              onClick={() => setVertriebView("kanban")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                vertriebView === "kanban"
-                  ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              <Squares2X2Icon className="w-3.5 h-3.5" /> Kanban
-            </button>
-            <button
-              onClick={() => setVertriebView("tabelle")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                vertriebView === "tabelle"
-                  ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              <ListBulletIcon className="w-3.5 h-3.5" /> Tabelle
-            </button>
+      {/* ═══ SALES FUNNEL — Visueller Fortschritt ═══ */}
+      <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="w-4 h-4 text-[#FC682C]" />
+            <span className="text-xs font-bold text-white/70 uppercase tracking-wider">Sales Funnel</span>
           </div>
           {/* Pipeline Selector */}
           {pipelines.length > 1 && (
-            <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06]">
+            <div className="flex items-center gap-1 bg-white/[0.04] rounded-lg p-0.5">
               {pipelines.map((p: any) => (
                 <button key={p.id} onClick={() => setActivePipeline(String(p.id))}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${String(p.id) === activePipeline ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60 hover:bg-white/5"}`}>
-                  <span className="w-2 h-2 rounded-full" style={{ background: p.color || "#FC682C" }} />
+                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all ${String(p.id) === activePipeline ? "bg-white/10 text-white" : "text-white/30 hover:text-white/50"}`}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: p.color || "#FC682C" }} />
                   {p.name}
                 </button>
               ))}
             </div>
           )}
         </div>
-        {/* Idle Alert */}
-        {idleLeads.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-[11px] text-yellow-400 font-medium animate-pulse">
-            <ExclamationCircleIcon className="w-4 h-4" />
-            {idleLeads.length} Lead{idleLeads.length > 1 ? "s" : ""} brauchen Follow-up
-          </div>
-        )}
+        {/* Funnel Steps */}
+        <div className="flex items-center gap-1">
+          {stages.map((stage: any, i: number) => {
+            const count = leads.filter(l => l.status === stage.id).length;
+            const value = leads.filter(l => l.status === stage.id).reduce((s, l) => s + getBudget(l), 0);
+            const sc = stageColorMap[stage.color] || stageColorMap.blue;
+            const pct = leads.length > 0 ? Math.max(8, (count / leads.length) * 100) : 20;
+            return (
+              <div key={stage.id} className="flex-1 group cursor-default">
+                <div className={`relative p-3 rounded-xl bg-gradient-to-b ${sc.gradient} border ${sc.border} text-center transition-all hover:scale-[1.02]`}>
+                  <div className={`text-2xl font-black ${sc.text}`}>{count}</div>
+                  <div className="text-[10px] text-white/40 font-medium mt-0.5">{stage.label}</div>
+                  {value > 0 && <div className="text-[10px] text-white/25 mt-0.5">€{value.toLocaleString("de-DE")}</div>}
+                </div>
+                {i < stages.length - 1 && (
+                  <div className="flex items-center justify-center py-0.5">
+                    <ChevronDownIcon className="w-3 h-3 text-white/10" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ═══ VIEW TOGGLE + BOARD ═══ */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06]">
+          <button onClick={() => setVertriebView("kanban")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${vertriebView === "kanban" ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20" : "text-white/40 hover:text-white hover:bg-white/5"}`}>
+            <Squares2X2Icon className="w-3.5 h-3.5" /> Kanban Board
+          </button>
+          <button onClick={() => setVertriebView("tabelle")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${vertriebView === "tabelle" ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20" : "text-white/40 hover:text-white hover:bg-white/5"}`}>
+            <ListBulletIcon className="w-3.5 h-3.5" /> Tabelle
+          </button>
+        </div>
+        <div className="text-[10px] text-white/20">{leads.length} Leads insgesamt</div>
       </div>
 
       {vertriebView === "kanban" ? <PipelineTab customStages={currentPipeline?.stages} /> : <LeadsTab />}
+
+      {/* Modals */}
+      {showNewLeadModal && <NewLeadModal onClose={() => setShowNewLeadModal(false)} onCreated={() => { refreshLeads(); setShowNewLeadModal(false); }} />}
+      {selectedLead && <LeadModal lead={selectedLead} onClose={() => setSelectedLead(null)} onRefresh={refreshLeads} />}
     </div>
   );
 }
