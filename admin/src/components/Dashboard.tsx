@@ -81,6 +81,7 @@ import CalendarTab from "@/components/CalendarTab";
 import EmailCenterTab from "@/components/EmailCenterTab";
 import NotificationsTab from "@/components/NotificationsTab";
 import AccountingTab from "@/components/AccountingTab";
+import VaultTab from "@/components/VaultTab";
 import PrivacyTab from "@/components/PrivacyTab";
 
 // ═══════════════════════════════════════════════════════════════
@@ -158,6 +159,7 @@ type Tab =
   | "emails"
   | "kommunikation"
   | "notifications"
+  | "vault"
   | "settings";
 type PipelineView = "kanban" | "list";
 
@@ -432,6 +434,7 @@ export function Dashboard() {
       items: [
         { id: "dokumente" as Tab, label: "Dokumente", icon: DocumentTextIcon, badge: null },
         { id: "accounting" as Tab, label: "Buchhaltung", icon: CalculatorIcon, badge: null },
+        { id: "vault" as Tab, label: "Datentresor", icon: LockClosedIcon, badge: null },
       ],
     },
     {
@@ -754,6 +757,7 @@ export function Dashboard() {
           {activeTab === "invoices" && <DokumenteTab />}
           {activeTab === "agreements" && <DokumenteTab />}
           {activeTab === "accounting" && <AccountingTab />}
+          {activeTab === "vault" && <VaultTab />}
           {activeTab === "privacy" && <PrivacyTab />}
           {activeTab === "checks" && <ChecksTab />}
           {activeTab === "referrals" && <ReferralsTab />}
