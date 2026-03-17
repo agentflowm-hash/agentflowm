@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   LockClosedIcon, PlusIcon, MagnifyingGlassIcon, XMarkIcon,
   EyeIcon, EyeSlashIcon, ClipboardDocumentIcon, StarIcon,
   GlobeAltIcon, KeyIcon, LinkIcon, ServerStackIcon,
   CreditCardIcon, DocumentTextIcon, FolderIcon, TrashIcon,
-  PencilIcon, CheckIcon, HashtagIcon, UserIcon,
+  PencilIcon, CheckIcon, HashtagIcon, UserIcon, CameraIcon,
   ArrowPathIcon, ShieldCheckIcon, ExclamationTriangleIcon,
   CodeBracketIcon, ClipboardDocumentListIcon, ChevronRightIcon,
   BoltIcon,
@@ -129,6 +129,10 @@ export default function VaultTab() {
   const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(new Set());
   const [editMode, setEditMode] = useState(false);
   const [showGenerator, setShowGenerator] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [clientMode, setClientMode] = useState<"select" | "custom">("select");
+  const [customClient, setCustomClient] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [genLength, setGenLength] = useState(16);
   const [genOpts, setGenOpts] = useState({ upper: true, lower: true, numbers: true, symbols: true });
 
@@ -183,6 +187,14 @@ export default function VaultTab() {
     if (!form.title) return;
     setSaving(true);
     try {
+      // Build tags — add custom client as tag if specified
+      const tags = form.tags ? form.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+      let notes = form.notes || "";
+      if (clientMode === "custom" && customClient) {
+        tags.unshift(customClient);
+        notes = notes ? `Kunde: ${customClient}\n${notes}` : `Kunde: ${customClient}`;
+      }
+
       const res = await fetch("/api/vault", {
         credentials: "include", method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -190,7 +202,8 @@ export default function VaultTab() {
           ...form,
           client_id: form.client_id ? parseInt(form.client_id) : null,
           folder_id: form.folder_id ? parseInt(form.folder_id) : null,
-          tags: form.tags ? form.tags.split(",").map(t => t.trim()).filter(Boolean) : [],
+          tags,
+          notes: notes || null,
           snippet_code: form.snippet_code || null,
           snippet_language: form.snippet_language || 'text',
         }),
@@ -198,6 +211,7 @@ export default function VaultTab() {
       if (res.ok) {
         showToast("success", "Eintrag gespeichert!");
         setForm({ title: "", category: "login", url: "", username: "", password: "", notes: "", client_id: "", folder_id: "", tags: "", is_favorite: false, snippet_code: "", snippet_language: "text" });
+        setCustomClient(""); setClientMode("select");
         setShowAdd(false);
         loadData();
       }
@@ -277,6 +291,51 @@ export default function VaultTab() {
     const pw = generatePassword(genLength, genOpts);
     setForm({ ...form, password: pw });
     setShowGenerator(false);
+  };
+
+  const handlePhotoScan = async (file: File) => {
+    setScanning(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        const res = await fetch("/api/vault/scan", {
+          credentials: "include", method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64 }),
+        });
+        const data = await res.json();
+        if (data.success && data.credentials?.length > 0) {
+          const cred = data.credentials[0];
+          setForm({
+            ...form,
+            title: cred.title || form.title,
+            category: cred.category || form.category,
+            url: cred.url || form.url,
+            username: cred.username || form.username,
+            password: cred.password || form.password,
+            notes: cred.notes || form.notes,
+            snippet_code: cred.snippet_code || form.snippet_code,
+            snippet_language: cred.snippet_language || form.snippet_language,
+          });
+          showToast("success", `${data.count} Zugang${data.count > 1 ? 'sdaten' : ''} erkannt!`);
+          if (data.count > 1) {
+            showToast("info", `${data.count - 1} weitere Einträge in den Notizen`);
+            const extra = data.credentials.slice(1).map((c: any) =>
+              [c.title, c.url, c.username, c.password].filter(Boolean).join(" | ")
+            ).join("\n");
+            setForm(prev => ({ ...prev, notes: (prev.notes ? prev.notes + "\n\n" : "") + "Weitere erkannte Zugänge:\n" + extra }));
+          }
+        } else {
+          showToast("error", data.error || "Keine Zugangsdaten im Bild erkannt");
+        }
+        setScanning(false);
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      showToast("error", "Fehler beim Scannen");
+      setScanning(false);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-3 border-[#FC682C]/30 border-t-[#FC682C] rounded-full animate-spin" /></div>;
@@ -382,7 +441,17 @@ export default function VaultTab() {
         <div className="p-5 rounded-2xl bg-blue-500/5 border border-blue-500/15 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2"><LockClosedIcon className="w-4 h-4" /> Neuer Eintrag</h4>
-            <button onClick={() => setShowAdd(false)} className="p-1.5 hover:bg-white/10 rounded-lg"><XMarkIcon className="w-4 h-4 text-white/40" /></button>
+            <div className="flex items-center gap-2">
+              {/* Foto-Scan Button */}
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                onChange={(e) => { if (e.target.files?.[0]) handlePhotoScan(e.target.files[0]); e.target.value = ''; }} />
+              <button onClick={() => fileInputRef.current?.click()} disabled={scanning}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FC682C]/15 text-[#FC682C] border border-[#FC682C]/20 rounded-lg text-xs font-medium hover:bg-[#FC682C]/25 disabled:opacity-50 transition-colors">
+                {scanning ? <div className="w-3.5 h-3.5 border-2 border-[#FC682C]/30 border-t-[#FC682C] rounded-full animate-spin" /> : <CameraIcon className="w-3.5 h-3.5" />}
+                {scanning ? "Scannt..." : "Foto scannen"}
+              </button>
+              <button onClick={() => setShowAdd(false)} className="p-1.5 hover:bg-white/10 rounded-lg"><XMarkIcon className="w-4 h-4 text-white/40" /></button>
+            </div>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="lg:col-span-2">
@@ -398,12 +467,22 @@ export default function VaultTab() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] text-white/40 mb-1">Kunde</label>
-              <select value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })}
-                className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
-                <option value="">Kein Kunde</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <label className="block text-[10px] text-white/40 mb-1">
+                Kunde
+                <button type="button" onClick={() => { setClientMode(clientMode === "select" ? "custom" : "select"); setCustomClient(""); setForm({ ...form, client_id: "" }); }}
+                  className="ml-2 text-[#FC682C] hover:underline">{clientMode === "select" ? "Manuell" : "Auswählen"}</button>
+              </label>
+              {clientMode === "select" ? (
+                <select value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
+                  <option value="">Kein Kunde</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              ) : (
+                <input type="text" value={customClient} onChange={(e) => setCustomClient(e.target.value)}
+                  placeholder="Kundenname eintippen..."
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" />
+              )}
             </div>
             {form.category !== 'snippet' && (
               <>
@@ -664,11 +743,22 @@ export default function VaultTab() {
                         <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
                           {CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
                         </select></div>
-                      <div><label className="block text-[10px] text-white/40 mb-1">Kunde</label>
-                        <select value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
-                          <option value="">Kein Kunde</option>
-                          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select></div>
+                      <div>
+                        <label className="block text-[10px] text-white/40 mb-1">
+                          Kunde
+                          <button type="button" onClick={() => setClientMode(clientMode === "select" ? "custom" : "select")}
+                            className="ml-2 text-[#FC682C] text-[10px] hover:underline">{clientMode === "select" ? "Manuell" : "Auswählen"}</button>
+                        </label>
+                        {clientMode === "select" ? (
+                          <select value={form.client_id} onChange={(e) => setForm({ ...form, client_id: e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
+                            <option value="">Kein Kunde</option>
+                            {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                          </select>
+                        ) : (
+                          <input type="text" value={customClient} onChange={(e) => setCustomClient(e.target.value)}
+                            placeholder="Kundenname..." className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" />
+                        )}
+                      </div>
                     </div>
                     {form.category !== 'snippet' && (
                       <>
