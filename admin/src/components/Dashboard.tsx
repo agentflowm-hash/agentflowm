@@ -9842,36 +9842,73 @@ function CreateClientModal({
 function SettingsTab() {
   const { showToast } = useToast();
   const [settingsTab, setSettingsTab] = useState<"company" | "team" | "templates" | "goals" | "notifications">("company");
-  const [company, setCompany] = useState({ name: "AgentFlowMarketing", address: "", email: "kontakt@agentflowm.de", phone: "+49 179 949 8247", taxId: "", iban: "DE89 3704 0044 0532 0130 00", bic: "COBADEFFXXX" });
-  const [goals, setGoals] = useState({ leads: 50, revenue: 15000, checks: 100 });
-  const [notifSettings, setNotifSettings] = useState({ emailOnNewLead: true, telegramAlerts: true, dailySummary: false });
+  const [company, setCompany] = useState({ name: "AgentFlowMarketing", address: "", email: "kontakt@agentflowm.de", phone: "+49 179 949 8247", taxId: "", ustId: "", iban: "DE89 3704 0044 0532 0130 00", bic: "COBADEFFXXX", website: "", invoiceFooter: "" });
+  const [goals, setGoals] = useState({ leads: 50, revenue: 15000, checks: 100, conversion: 30, referrals: 10 });
+  const [notifSettings, setNotifSettings] = useState({ emailOnNewLead: true, telegramAlerts: true, dailySummary: false, emailOnInvoicePaid: true, emailOnReferral: true, webhookUrl: "" });
   const [team, setTeam] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showAddTeam, setShowAddTeam] = useState(false);
+  const [editingMember, setEditingMember] = useState<any>(null);
   const [newMember, setNewMember] = useState({ name: "", email: "", role: "member", phone: "" });
   const [showAddTemplate, setShowAddTemplate] = useState(false);
-  const [newTemplate, setNewTemplate] = useState({ name: "", package: "", default_price: 0, milestones: "" as string, services: "" as string });
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [newTemplate, setNewTemplate] = useState({ name: "", package: "", default_price: 0, milestones: "" as string, services: "" as string, description: "" });
+  const [stats, setStats] = useState<any>(null);
+  const [testingEmail, setTestingEmail] = useState(false);
 
-  // Load settings from API
   useEffect(() => {
-    fetch("/api/settings", { credentials: "include" }).then(r => r.json()).then(d => {
-      if (d.settings?.company) setCompany(d.settings.company);
-      if (d.settings?.goals) setGoals(d.settings.goals);
-      if (d.settings?.notifications) setNotifSettings(d.settings.notifications);
-    }).catch(() => {});
-    fetch("/api/team", { credentials: "include" }).then(r => r.json()).then(d => setTeam(d.members || [])).catch(() => {});
-    fetch("/api/templates", { credentials: "include" }).then(r => r.json()).then(d => setTemplates(d.templates || [])).catch(() => {});
+    Promise.all([
+      fetch("/api/settings", { credentials: "include" }).then(r => r.json()),
+      fetch("/api/team", { credentials: "include" }).then(r => r.json()),
+      fetch("/api/templates", { credentials: "include" }).then(r => r.json()),
+      fetch("/api/stats", { credentials: "include" }).then(r => r.json()).catch(() => null),
+    ]).then(([settings, teamData, templateData, statsData]) => {
+      if (settings.settings?.company) setCompany(c => ({ ...c, ...settings.settings.company }));
+      if (settings.settings?.goals) setGoals(g => ({ ...g, ...settings.settings.goals }));
+      if (settings.settings?.notifications) setNotifSettings(n => ({ ...n, ...settings.settings.notifications }));
+      setTeam(teamData.members || []);
+      setTemplates(templateData.templates || []);
+      if (statsData) setStats(statsData.data || statsData);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   const saveSettings = async (key: string, value: any) => {
     setSaving(true);
     try {
       const res = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ key, value }) });
-      if (res.ok) showToast("success", "Einstellungen gespeichert");
+      if (res.ok) showToast("success", "Gespeichert!");
       else showToast("error", "Fehler beim Speichern");
     } catch { showToast("error", "Verbindungsfehler"); }
     setSaving(false);
+  };
+
+  const handleTestEmail = async () => {
+    setTestingEmail(true);
+    try {
+      const res = await fetch("/api/emails", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: company.email, subject: "Test — AgentFlow Benachrichtigung",
+          html: `<div style="font-family:sans-serif;padding:24px;background:#111827;color:#fff;border-radius:16px;max-width:400px;margin:0 auto;"><h2 style="color:#FC682C;">Test erfolgreich!</h2><p style="color:rgba(255,255,255,0.7);">E-Mail-Benachrichtigungen funktionieren korrekt.</p><p style="color:rgba(255,255,255,0.4);font-size:12px;">AgentFlowMarketing</p></div>`,
+        }),
+      });
+      if (res.ok) showToast("success", `Test-E-Mail an ${company.email} gesendet!`);
+      else showToast("error", "E-Mail konnte nicht gesendet werden");
+    } catch { showToast("error", "SMTP-Fehler"); }
+    setTestingEmail(false);
+  };
+
+  const updateMember = async (id: number, updates: any) => {
+    const res = await fetch(`/api/team/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(updates) });
+    if (res.ok) {
+      setTeam(team.map(m => m.id === id ? { ...m, ...updates } : m));
+      setEditingMember(null);
+      showToast("success", "Mitglied aktualisiert");
+    }
   };
 
   const tabs = [
@@ -9882,8 +9919,18 @@ function SettingsTab() {
     { id: "notifications" as const, label: "Benachrichtigungen", icon: BellIcon },
   ];
 
+  const SettingsField = ({ label, value, onChange, type = "text", span2 = false, placeholder = "" }: any) => (
+    <div className={span2 ? "col-span-2" : ""}>
+      <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">{label}</label>
+      <input type={type} value={value || ""} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+        className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none placeholder:text-white/20" />
+    </div>
+  );
+
+  if (loading) return <LoadingState />;
+
   return (
-    <div className="max-w-3xl space-y-4">
+    <div className="max-w-4xl space-y-4">
       {/* Settings Tabs */}
       <div className="flex gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.06]">
         {tabs.map(t => (
@@ -9894,212 +9941,351 @@ function SettingsTab() {
         ))}
       </div>
 
-      {/* Company Profile */}
+      {/* ═══ FIRMENPROFIL ═══ */}
       {settingsTab === "company" && (
-        <GlassCard title="Firmenprofil" icon={Cog6ToothIcon}>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: "Firmenname", key: "name", type: "text" },
-              { label: "E-Mail", key: "email", type: "email" },
-              { label: "Telefon", key: "phone", type: "tel" },
-              { label: "Adresse", key: "address", type: "text" },
-              { label: "Steuernummer", key: "taxId", type: "text" },
-              { label: "IBAN", key: "iban", type: "text" },
-              { label: "BIC", key: "bic", type: "text" },
-            ].map(f => (
-              <div key={f.key} className={f.key === "address" ? "col-span-2" : ""}>
-                <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">{f.label}</label>
-                <input type={f.type} value={(company as any)[f.key] || ""} onChange={e => setCompany({ ...company, [f.key]: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
-              </div>
-            ))}
-          </div>
+        <div className="space-y-4">
+          <GlassCard title="Unternehmensdaten" icon={Cog6ToothIcon}>
+            <div className="grid grid-cols-2 gap-4">
+              <SettingsField label="Firmenname" value={company.name} onChange={(v: string) => setCompany({ ...company, name: v })} />
+              <SettingsField label="E-Mail" value={company.email} onChange={(v: string) => setCompany({ ...company, email: v })} type="email" />
+              <SettingsField label="Telefon" value={company.phone} onChange={(v: string) => setCompany({ ...company, phone: v })} type="tel" />
+              <SettingsField label="Website" value={company.website} onChange={(v: string) => setCompany({ ...company, website: v })} placeholder="https://agentflowm.de" />
+              <SettingsField label="Adresse" value={company.address} onChange={(v: string) => setCompany({ ...company, address: v })} span2 placeholder="Straße Nr, PLZ Stadt" />
+            </div>
+          </GlassCard>
+
+          <GlassCard title="Steuern & Bankdaten" icon={BanknotesIcon}>
+            <div className="grid grid-cols-2 gap-4">
+              <SettingsField label="Steuernummer" value={company.taxId} onChange={(v: string) => setCompany({ ...company, taxId: v })} placeholder="z.B. 27/123/12345" />
+              <SettingsField label="USt-IdNr." value={company.ustId} onChange={(v: string) => setCompany({ ...company, ustId: v })} placeholder="z.B. DE123456789" />
+              <SettingsField label="IBAN" value={company.iban} onChange={(v: string) => setCompany({ ...company, iban: v })} />
+              <SettingsField label="BIC" value={company.bic} onChange={(v: string) => setCompany({ ...company, bic: v })} />
+            </div>
+          </GlassCard>
+
+          <GlassCard title="Rechnungs-Einstellungen" icon={DocumentTextIcon}>
+            <div>
+              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Rechnungs-Footer Text</label>
+              <textarea value={company.invoiceFooter || ""} onChange={e => setCompany({ ...company, invoiceFooter: e.target.value })}
+                placeholder="z.B. Zahlungsziel: 14 Tage. Gerichtsstand Berlin."
+                rows={3} className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none resize-none placeholder:text-white/20" />
+            </div>
+          </GlassCard>
+
           <button onClick={() => saveSettings("company", company)} disabled={saving}
-            className="mt-4 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50">
-            {saving ? "Speichere..." : "Firmenprofil speichern"}
+            className="px-6 py-3 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50 flex items-center gap-2">
+            {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckIcon className="w-4 h-4" />}
+            {saving ? "Speichere..." : "Alle Änderungen speichern"}
           </button>
-        </GlassCard>
+        </div>
       )}
 
-      {/* Team */}
+      {/* ═══ TEAM ═══ */}
       {settingsTab === "team" && (
-        <GlassCard title="Team-Mitglieder" icon={UserGroupIcon}>
+        <GlassCard title={`Team-Mitglieder (${team.length})`} icon={UserGroupIcon}>
           <div className="space-y-2">
             {team.map((m: any) => (
-              <div key={m.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.04]">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FC682C]/30 to-[#9D65C9]/30 flex items-center justify-center text-white text-sm font-bold">
-                    {m.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
+              <div key={m.id} className="p-3.5 bg-white/[0.02] rounded-xl border border-white/[0.06] hover:border-white/[0.1] transition-all">
+                {editingMember?.id === m.id ? (
+                  /* Edit Mode */
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <input value={editingMember.name} onChange={e => setEditingMember({ ...editingMember, name: e.target.value })}
+                        className="px-3 py-2 bg-white/[0.04] border border-[#FC682C]/30 rounded-lg text-white text-xs outline-none" />
+                      <input value={editingMember.email} onChange={e => setEditingMember({ ...editingMember, email: e.target.value })}
+                        className="px-3 py-2 bg-white/[0.04] border border-[#FC682C]/30 rounded-lg text-white text-xs outline-none" />
+                      <input value={editingMember.phone || ""} onChange={e => setEditingMember({ ...editingMember, phone: e.target.value })} placeholder="Telefon"
+                        className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                      <select value={editingMember.role} onChange={e => setEditingMember({ ...editingMember, role: e.target.value })}
+                        className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none cursor-pointer">
+                        <option value="member">Mitarbeiter</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => updateMember(m.id, { name: editingMember.name, email: editingMember.email, phone: editingMember.phone, role: editingMember.role })}
+                        className="px-3 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Speichern</button>
+                      <button onClick={() => setEditingMember(null)} className="px-3 py-1.5 text-xs text-white/50">Abbrechen</button>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm text-white font-medium">{m.name}</div>
-                    <div className="text-[11px] text-white/40">{m.email}</div>
+                ) : (
+                  /* View Mode */
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FC682C]/30 to-[#9D65C9]/30 flex items-center justify-center text-white text-sm font-bold">
+                        {m.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
+                      </div>
+                      <div>
+                        <div className="text-sm text-white font-medium">{m.name}</div>
+                        <div className="text-[11px] text-white/40">{m.email}{m.phone ? ` · ${m.phone}` : ''}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${m.role === "admin" ? "bg-[#FC682C]/15 text-[#FC682C]" : m.role === "manager" ? "bg-purple-500/15 text-purple-400" : "bg-white/10 text-white/50"}`}>
+                        {m.role === "admin" ? "Admin" : m.role === "manager" ? "Manager" : "Mitarbeiter"}
+                      </span>
+                      <button onClick={() => setEditingMember({ ...m })} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+                        <PencilIcon className="w-3.5 h-3.5 text-white/30 hover:text-white" />
+                      </button>
+                      {m.role !== "admin" && (
+                        <button onClick={async () => {
+                          if (!(await showConfirm(`"${m.name}" aus dem Team entfernen?`))) return;
+                          await fetch(`/api/team/${m.id}`, { method: "DELETE", credentials: "include" });
+                          setTeam(team.filter((t: any) => t.id !== m.id)); showToast("success", "Mitglied entfernt");
+                        }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
+                          <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${m.role === "admin" ? "bg-[#FC682C]/15 text-[#FC682C]" : m.role === "manager" ? "bg-purple-500/15 text-purple-400" : "bg-white/10 text-white/50"}`}>
-                    {m.role === "admin" ? "Admin" : m.role === "manager" ? "Manager" : "Mitarbeiter"}
-                  </span>
-                  {m.role !== "admin" && (
-                    <button onClick={async () => {
-                      if (!(await showConfirm(`"${m.name}" aus dem Team entfernen?`))) return;
-                      await fetch(`/api/team/${m.id}`, { method: "DELETE", credentials: "include" });
-                      setTeam(team.filter(t => t.id !== m.id)); showToast("success", "Mitglied entfernt");
-                    }} className="p-1 hover:bg-red-500/20 rounded-lg transition-colors">
-                      <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             ))}
             {team.length === 0 && <p className="text-sm text-white/30 text-center py-4">Noch keine Team-Mitglieder</p>}
           </div>
           {!showAddTeam ? (
-            <button onClick={() => setShowAddTeam(true)} className="mt-3 text-xs text-[#FC682C] hover:text-[#FF8F5C] flex items-center gap-1">
+            <button onClick={() => setShowAddTeam(true)} className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#FC682C]/10 text-[#FC682C] border border-[#FC682C]/20 rounded-xl text-xs font-medium hover:bg-[#FC682C]/20 transition-colors">
               <PlusIcon className="w-3.5 h-3.5" /> Mitglied hinzufügen
             </button>
           ) : (
-            <div className="mt-3 p-3 bg-white/[0.03] rounded-xl border border-[#FC682C]/20 space-y-2">
+            <div className="mt-3 p-4 bg-white/[0.03] rounded-xl border border-[#FC682C]/20 space-y-3">
+              <h4 className="text-xs font-semibold text-[#FC682C]">Neues Team-Mitglied</h4>
               <div className="grid grid-cols-2 gap-2">
-                <input placeholder="Name" value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })}
-                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
-                <input placeholder="E-Mail" value={newMember.email} onChange={e => setNewMember({ ...newMember, email: e.target.value })}
-                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                <input placeholder="Name *" value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })}
+                  className="px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
+                <input placeholder="E-Mail *" type="email" value={newMember.email} onChange={e => setNewMember({ ...newMember, email: e.target.value })}
+                  className="px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
                 <input placeholder="Telefon" value={newMember.phone} onChange={e => setNewMember({ ...newMember, phone: e.target.value })}
-                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                  className="px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
                 <select value={newMember.role} onChange={e => setNewMember({ ...newMember, role: e.target.value })}
-                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none">
+                  className="px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none cursor-pointer">
                   <option value="member">Mitarbeiter</option>
                   <option value="manager">Manager</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => setShowAddTeam(false)} className="px-3 py-1.5 text-xs text-white/50 hover:text-white">Abbrechen</button>
-                <button onClick={async () => {
-                  if (!newMember.name || !newMember.email) return;
+                <button onClick={() => setShowAddTeam(false)} className="px-3 py-2 text-xs text-white/50 hover:text-white">Abbrechen</button>
+                <button disabled={!newMember.name || !newMember.email} onClick={async () => {
                   const res = await fetch("/api/team", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(newMember) });
                   const data = await res.json();
-                  if (data.member) { setTeam([...team, data.member]); setNewMember({ name: "", email: "", role: "member", phone: "" }); setShowAddTeam(false); showToast("success", "Team-Mitglied hinzugefügt"); } else { showToast("error", data.error || "Fehler"); }
-                }} className="px-4 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Hinzufügen</button>
+                  if (data.member) { setTeam([...team, data.member]); setNewMember({ name: "", email: "", role: "member", phone: "" }); setShowAddTeam(false); showToast("success", "Hinzugefügt!"); }
+                  else showToast("error", data.error || "Fehler");
+                }} className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-xs font-medium disabled:opacity-50">Hinzufügen</button>
               </div>
             </div>
           )}
         </GlassCard>
       )}
 
-      {/* Templates */}
+      {/* ═══ VORLAGEN ═══ */}
       {settingsTab === "templates" && (
-        <GlassCard title="Projekt-Vorlagen" icon={DocumentDuplicateIcon}>
+        <GlassCard title={`Projekt-Vorlagen (${templates.length})`} icon={DocumentDuplicateIcon}>
           <div className="space-y-2">
             {templates.map((t: any) => (
-              <div key={t.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.04]">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-white font-medium">{t.name}</span>
-                    {t.is_default && <span className="px-1.5 py-0.5 bg-[#FC682C]/15 text-[#FC682C] rounded text-[9px] font-bold">DEFAULT</span>}
+              <div key={t.id} className="p-3.5 bg-white/[0.02] rounded-xl border border-white/[0.06] hover:border-white/[0.1] transition-all">
+                {editingTemplate?.id === t.id ? (
+                  /* Edit Mode */
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-2">
+                      <input value={editingTemplate.name} onChange={e => setEditingTemplate({ ...editingTemplate, name: e.target.value })}
+                        className="col-span-2 px-3 py-2 bg-white/[0.04] border border-[#FC682C]/30 rounded-lg text-white text-xs outline-none" />
+                      <input type="number" value={editingTemplate.default_price} onChange={e => setEditingTemplate({ ...editingTemplate, default_price: parseFloat(e.target.value) || 0 })}
+                        className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" placeholder="Preis €" />
+                    </div>
+                    <input value={editingTemplate.package || ""} onChange={e => setEditingTemplate({ ...editingTemplate, package: e.target.value })} placeholder="Paket"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                    <textarea value={editingTemplate.description || ""} onChange={e => setEditingTemplate({ ...editingTemplate, description: e.target.value })} placeholder="Beschreibung" rows={2}
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none resize-none" />
+                    <input value={(editingTemplate.milestones || []).join(", ")} onChange={e => setEditingTemplate({ ...editingTemplate, milestones: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) })} placeholder="Meilensteine"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                    <input value={(editingTemplate.services || []).join(", ")} onChange={e => setEditingTemplate({ ...editingTemplate, services: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) })} placeholder="Services"
+                      className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                    <div className="flex gap-2">
+                      <button onClick={async () => {
+                        await fetch(`/api/templates/${t.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include",
+                          body: JSON.stringify({ name: editingTemplate.name, package: editingTemplate.package, default_price: editingTemplate.default_price, description: editingTemplate.description, milestones: editingTemplate.milestones, services: editingTemplate.services }) });
+                        setTemplates(templates.map((x: any) => x.id === t.id ? { ...x, ...editingTemplate } : x));
+                        setEditingTemplate(null); showToast("success", "Vorlage aktualisiert");
+                      }} className="px-3 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Speichern</button>
+                      <button onClick={() => setEditingTemplate(null)} className="px-3 py-1.5 text-xs text-white/50">Abbrechen</button>
+                    </div>
                   </div>
-                  <div className="text-[11px] text-white/40 mt-0.5">
-                    {t.package} · €{Number(t.default_price).toLocaleString("de-DE")} · {(t.milestones || []).length} Meilensteine · {(t.services || []).length} Services
+                ) : (
+                  /* View Mode */
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-white font-medium">{t.name}</span>
+                        {t.is_default && <span className="px-1.5 py-0.5 bg-[#FC682C]/15 text-[#FC682C] rounded text-[9px] font-bold">DEFAULT</span>}
+                        {t.package && <span className="px-1.5 py-0.5 bg-white/[0.04] text-white/40 rounded text-[9px]">{t.package}</span>}
+                      </div>
+                      <div className="text-[11px] text-white/35 mt-0.5">
+                        €{Number(t.default_price || 0).toLocaleString("de-DE")} · {(t.milestones || []).length} Meilensteine · {(t.services || []).length} Services
+                        {t.description && <span className="ml-1">· {t.description.slice(0, 40)}{t.description.length > 40 ? '...' : ''}</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setEditingTemplate({ ...t })} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+                        <PencilIcon className="w-3.5 h-3.5 text-white/30 hover:text-white" />
+                      </button>
+                      <button onClick={async () => {
+                        if (!(await showConfirm(`Vorlage "${t.name}" löschen?`))) return;
+                        await fetch(`/api/templates/${t.id}`, { method: "DELETE", credentials: "include" });
+                        setTemplates(templates.filter((x: any) => x.id !== t.id)); showToast("success", "Vorlage gelöscht");
+                      }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
+                        <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <button onClick={async () => {
-                  if (!(await showConfirm(`Vorlage "${t.name}" löschen?`))) return;
-                  await fetch(`/api/templates/${t.id}`, { method: "DELETE", credentials: "include" });
-                  setTemplates(templates.filter(x => x.id !== t.id)); showToast("success", "Vorlage gelöscht");
-                }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
-                  <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
-                </button>
+                )}
               </div>
             ))}
             {templates.length === 0 && <p className="text-sm text-white/30 text-center py-4">Noch keine Vorlagen</p>}
           </div>
           {!showAddTemplate ? (
-            <button onClick={() => setShowAddTemplate(true)} className="mt-3 text-xs text-[#FC682C] hover:text-[#FF8F5C] flex items-center gap-1">
+            <button onClick={() => setShowAddTemplate(true)} className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#FC682C]/10 text-[#FC682C] border border-[#FC682C]/20 rounded-xl text-xs font-medium hover:bg-[#FC682C]/20 transition-colors">
               <PlusIcon className="w-3.5 h-3.5" /> Vorlage erstellen
             </button>
           ) : (
-            <div className="mt-3 p-3 bg-white/[0.03] rounded-xl border border-[#FC682C]/20 space-y-2">
+            <div className="mt-3 p-4 bg-white/[0.03] rounded-xl border border-[#FC682C]/20 space-y-3">
+              <h4 className="text-xs font-semibold text-[#FC682C]">Neue Projekt-Vorlage</h4>
               <div className="grid grid-cols-3 gap-2">
-                <input placeholder="Name (z.B. Growth Website)" value={newTemplate.name} onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                  className="col-span-2 px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                <input placeholder="Name *" value={newTemplate.name} onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                  className="col-span-2 px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
                 <input placeholder="Preis €" type="number" value={newTemplate.default_price || ""} onChange={e => setNewTemplate({ ...newTemplate, default_price: parseFloat(e.target.value) || 0 })}
-                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                  className="px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
               </div>
               <input placeholder="Paket-Typ (z.B. Growth, Business)" value={newTemplate.package} onChange={e => setNewTemplate({ ...newTemplate, package: e.target.value })}
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
+              <textarea placeholder="Beschreibung" value={newTemplate.description} onChange={e => setNewTemplate({ ...newTemplate, description: e.target.value })} rows={2}
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none resize-none placeholder:text-white/30" />
               <input placeholder="Meilensteine (kommagetrennt)" value={newTemplate.milestones} onChange={e => setNewTemplate({ ...newTemplate, milestones: e.target.value })}
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
               <input placeholder="Services (kommagetrennt)" value={newTemplate.services} onChange={e => setNewTemplate({ ...newTemplate, services: e.target.value })}
-                className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" />
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-xs outline-none placeholder:text-white/30" />
               <div className="flex gap-2">
-                <button onClick={() => setShowAddTemplate(false)} className="px-3 py-1.5 text-xs text-white/50 hover:text-white">Abbrechen</button>
-                <button onClick={async () => {
-                  if (!newTemplate.name) return;
-                  const payload = {
-                    name: newTemplate.name, package: newTemplate.package, default_price: newTemplate.default_price,
-                    milestones: newTemplate.milestones.split(",").map(s => s.trim()).filter(Boolean),
-                    services: newTemplate.services.split(",").map(s => s.trim()).filter(Boolean),
-                  };
+                <button onClick={() => setShowAddTemplate(false)} className="px-3 py-2 text-xs text-white/50">Abbrechen</button>
+                <button disabled={!newTemplate.name} onClick={async () => {
+                  const payload = { name: newTemplate.name, package: newTemplate.package, default_price: newTemplate.default_price, description: newTemplate.description,
+                    milestones: newTemplate.milestones.split(",").map(s => s.trim()).filter(Boolean), services: newTemplate.services.split(",").map(s => s.trim()).filter(Boolean) };
                   const res = await fetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) });
                   const data = await res.json();
-                  if (data.template) { setTemplates([...templates, data.template]); setNewTemplate({ name: "", package: "", default_price: 0, milestones: "", services: "" }); setShowAddTemplate(false); showToast("success", "Vorlage erstellt"); } else { showToast("error", data.error || "Fehler"); }
-                }} className="px-4 py-1.5 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Erstellen</button>
+                  if (data.template) { setTemplates([...templates, data.template]); setNewTemplate({ name: "", package: "", default_price: 0, milestones: "", services: "", description: "" }); setShowAddTemplate(false); showToast("success", "Vorlage erstellt"); }
+                  else showToast("error", data.error || "Fehler");
+                }} className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-xs font-medium disabled:opacity-50">Erstellen</button>
               </div>
             </div>
           )}
         </GlassCard>
       )}
 
-      {/* Goals */}
+      {/* ═══ ZIELE ═══ */}
       {settingsTab === "goals" && (
-        <GlassCard title="Monatsziele" icon={RocketLaunchIcon}>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Leads Ziel</label>
-              <input type="number" value={goals.leads} onChange={e => setGoals({ ...goals, leads: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
+        <div className="space-y-4">
+          <GlassCard title="Monatsziele" icon={RocketLaunchIcon}>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { label: "Leads Ziel", key: "leads", current: stats?.leads?.total || 0, color: "blue" },
+                { label: "Umsatz Ziel (€)", key: "revenue", current: stats?.revenue?.thisMonth || 0, color: "green", prefix: "€" },
+                { label: "Checks Ziel", key: "checks", current: stats?.checks?.total || 0, color: "purple" },
+                { label: "Conversion Ziel (%)", key: "conversion", current: stats?.leads?.conversionRate || 0, color: "orange" },
+                { label: "Empfehlungen Ziel", key: "referrals", current: stats?.referrals?.total || 0, color: "pink" },
+              ].map(g => {
+                const target = (goals as any)[g.key] || 0;
+                const pct = target > 0 ? Math.min(Math.round((g.current / target) * 100), 100) : 0;
+                return (
+                  <div key={g.key} className="space-y-2">
+                    <label className="block text-[10px] text-white/40 uppercase tracking-wider">{g.label}</label>
+                    <input type="number" value={(goals as any)[g.key] || 0} onChange={e => setGoals({ ...goals, [g.key]: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
+                    {/* Live Progress */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-white/30">Aktuell: {g.prefix || ''}{g.current.toLocaleString("de-DE")}</span>
+                        <span className={pct >= 100 ? "text-green-400" : pct >= 50 ? "text-yellow-400" : "text-white/40"}>{pct}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${pct >= 100 ? 'bg-green-500' : pct >= 50 ? 'bg-yellow-500' : 'bg-[#FC682C]'}`}
+                          style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div>
-              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Umsatz Ziel (€)</label>
-              <input type="number" value={goals.revenue} onChange={e => setGoals({ ...goals, revenue: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
-            </div>
-            <div>
-              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Checks Ziel</label>
-              <input type="number" value={goals.checks} onChange={e => setGoals({ ...goals, checks: parseInt(e.target.value) || 0 })}
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none" />
-            </div>
-          </div>
-          <button onClick={() => saveSettings("goals", goals)} disabled={saving}
-            className="mt-4 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50">
-            {saving ? "Speichere..." : "Ziele speichern"}
-          </button>
-        </GlassCard>
+            <button onClick={() => saveSettings("goals", goals)} disabled={saving}
+              className="mt-4 px-6 py-3 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50 flex items-center gap-2">
+              {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckIcon className="w-4 h-4" />}
+              {saving ? "Speichere..." : "Ziele speichern"}
+            </button>
+          </GlassCard>
+        </div>
       )}
 
-      {/* Notifications */}
+      {/* ═══ BENACHRICHTIGUNGEN ═══ */}
       {settingsTab === "notifications" && (
-        <GlassCard title="Benachrichtigungen" icon={BellIcon}>
-          <div className="space-y-4">
-            {[
-              { label: "E-Mail bei neuem Lead", key: "emailOnNewLead" },
-              { label: "Telegram-Benachrichtigungen", key: "telegramAlerts" },
-              { label: "Tägliche Zusammenfassung", key: "dailySummary" },
-            ].map(n => (
-              <div key={n.key} className="flex items-center justify-between">
-                <span className="text-sm text-white/70">{n.label}</span>
-                <button onClick={() => {
-                  const updated = { ...notifSettings, [n.key]: !(notifSettings as any)[n.key] };
-                  setNotifSettings(updated);
-                  saveSettings("notifications", updated);
-                }} className={`relative w-12 h-6 rounded-full transition-colors ${(notifSettings as any)[n.key] ? "bg-[#FC682C]" : "bg-white/20"}`}>
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${(notifSettings as any)[n.key] ? "left-7" : "left-1"}`} />
-                </button>
+        <div className="space-y-4">
+          <GlassCard title="E-Mail-Benachrichtigungen" icon={EnvelopeIcon}>
+            <div className="space-y-3">
+              {[
+                { label: "E-Mail bei neuem Lead", desc: "Sofort eine E-Mail erhalten wenn ein neuer Lead eingeht", key: "emailOnNewLead" },
+                { label: "E-Mail bei Rechnungszahlung", desc: "Benachrichtigung wenn eine Rechnung als bezahlt markiert wird", key: "emailOnInvoicePaid" },
+                { label: "E-Mail bei Empfehlung", desc: "Benachrichtigung wenn ein neuer Lead über eine Empfehlung kommt", key: "emailOnReferral" },
+                { label: "Tägliche Zusammenfassung", desc: "Einmal täglich eine Zusammenfassung aller Aktivitäten", key: "dailySummary" },
+              ].map(n => (
+                <div key={n.key} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+                  <div>
+                    <span className="text-sm text-white/80">{n.label}</span>
+                    <p className="text-[10px] text-white/30 mt-0.5">{n.desc}</p>
+                  </div>
+                  <button onClick={() => {
+                    const updated = { ...notifSettings, [n.key]: !(notifSettings as any)[n.key] };
+                    setNotifSettings(updated);
+                    saveSettings("notifications", updated);
+                  }} className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${(notifSettings as any)[n.key] ? "bg-[#FC682C]" : "bg-white/20"}`}>
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${(notifSettings as any)[n.key] ? "left-7" : "left-1"}`} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button onClick={handleTestEmail} disabled={testingEmail}
+              className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-medium hover:bg-blue-500/20 disabled:opacity-50 transition-colors">
+              {testingEmail ? <div className="w-3.5 h-3.5 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" /> : <EnvelopeOpenIcon className="w-3.5 h-3.5" />}
+              {testingEmail ? "Wird gesendet..." : "Test-E-Mail senden"}
+            </button>
+          </GlassCard>
+
+          <GlassCard title="Telegram" icon={ChatBubbleLeftRightIcon}>
+            <div className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
+              <div>
+                <span className="text-sm text-white/80">Telegram-Benachrichtigungen</span>
+                <p className="text-[10px] text-white/30 mt-0.5">Echtzeit-Alerts über Telegram Bot</p>
               </div>
-            ))}
-          </div>
-        </GlassCard>
+              <button onClick={() => {
+                const updated = { ...notifSettings, telegramAlerts: !notifSettings.telegramAlerts };
+                setNotifSettings(updated); saveSettings("notifications", updated);
+              }} className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${notifSettings.telegramAlerts ? "bg-[#FC682C]" : "bg-white/20"}`}>
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${notifSettings.telegramAlerts ? "left-7" : "left-1"}`} />
+              </button>
+            </div>
+          </GlassCard>
+
+          <GlassCard title="Webhook (Optional)" icon={LinkIcon}>
+            <div>
+              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Webhook URL</label>
+              <div className="flex gap-2">
+                <input type="url" value={notifSettings.webhookUrl || ""} onChange={e => setNotifSettings({ ...notifSettings, webhookUrl: e.target.value })}
+                  placeholder="https://hooks.slack.com/... oder eigene URL"
+                  className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none placeholder:text-white/20" />
+                <button onClick={() => saveSettings("notifications", notifSettings)} disabled={saving}
+                  className="px-4 py-2.5 bg-[#FC682C] text-white rounded-xl text-xs font-medium disabled:opacity-50">Speichern</button>
+              </div>
+              <p className="text-[10px] text-white/25 mt-1.5">JSON-POST an diese URL bei jedem Event (neuer Lead, Rechnungszahlung, etc.)</p>
+            </div>
+          </GlassCard>
+        </div>
       )}
     </div>
   );
