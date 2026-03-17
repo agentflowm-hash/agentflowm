@@ -497,66 +497,137 @@ export default function VaultTab() {
         </div>
       )}
 
-      {/* ═══ Entries List ═══ */}
-      <div className="space-y-2">
-        {entries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <LockClosedIcon className="w-16 h-16 text-white/10 mb-4" />
-            <h3 className="text-lg font-medium text-white/50">Datentresor ist leer</h3>
-            <p className="text-sm text-white/30">Erstelle deinen ersten sicheren Eintrag</p>
-          </div>
-        ) : entries.map((entry) => {
-          const cat = getCat(entry.category);
-          const CatIcon = cat.icon;
-          const isVis = visiblePasswords.has(entry.id);
-          const age = daysOld(entry.updated_at);
-          const pwStr = entry.password ? getPasswordStrength(entry.password) : null;
-          return (
-            <div key={entry.id} onClick={() => openDetail(entry)}
-              className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all cursor-pointer group">
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${cat.bg} ${cat.color}`}>
-                  <CatIcon className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    {entry.is_favorite && <StarSolid className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />}
-                    <span className="text-sm font-medium text-white">{entry.title}</span>
-                    {entry.client_name && <span className="px-1.5 py-0.5 bg-white/[0.04] text-white/40 rounded text-[9px] border border-white/[0.04]">{entry.client_name}</span>}
-                    {entry.tags?.map(t => <span key={t} className="px-1.5 py-0.5 bg-[#FC682C]/10 text-[#FC682C]/60 rounded text-[9px]">{t}</span>)}
-                    {pwStr && <div className={`w-2 h-2 rounded-full flex-shrink-0 ${pwStr.barColor}`} title={pwStr.label} />}
+      {/* ═══ Entries List — Grouped by Client ═══ */}
+      {entries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <LockClosedIcon className="w-16 h-16 text-white/10 mb-4" />
+          <h3 className="text-lg font-medium text-white/50">Datentresor ist leer</h3>
+          <p className="text-sm text-white/30">Erstelle deinen ersten sicheren Eintrag</p>
+        </div>
+      ) : (() => {
+        // Group entries by client
+        const groups: { name: string; entries: VaultEntry[] }[] = [];
+        const clientMap = new Map<string, VaultEntry[]>();
+        entries.forEach(e => {
+          const key = e.client_name || "__none__";
+          if (!clientMap.has(key)) clientMap.set(key, []);
+          clientMap.get(key)!.push(e);
+        });
+        // Clients first, then "Ohne Kunde"
+        clientMap.forEach((items, key) => {
+          if (key !== "__none__") groups.push({ name: key, entries: items });
+        });
+        if (clientMap.has("__none__")) groups.push({ name: "Allgemein", entries: clientMap.get("__none__")! });
+
+        return (
+          <div className="space-y-6">
+            {groups.map(group => (
+              <div key={group.name}>
+                {/* Group Header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FC682C]/20 to-purple-500/10 flex items-center justify-center text-white font-bold text-sm">
+                    {group.name.charAt(0)}
                   </div>
-                  <div className="flex items-center gap-3 text-[11px] text-white/35">
-                    {entry.url && <span className="truncate max-w-[180px]">{entry.url.replace(/https?:\/\//, '')}</span>}
-                    {entry.username && <span className="flex items-center gap-1"><UserIcon className="w-3 h-3" />{entry.username}</span>}
-                    {entry.category === 'snippet' && <span className="flex items-center gap-1"><CodeBracketIcon className="w-3 h-3" />{entry.snippet_language}</span>}
-                    <span>{timeAgo(entry.updated_at)}</span>
-                    {age > 90 && entry.password && <span className="text-yellow-400 flex items-center gap-0.5"><ExclamationTriangleIcon className="w-3 h-3" />{age}d</span>}
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">{group.name}</h3>
+                    <p className="text-[10px] text-white/30">{group.entries.length} {group.entries.length === 1 ? 'Eintrag' : 'Einträge'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                  {entry.password && (
-                    <>
-                      <button onClick={() => { const s = new Set(visiblePasswords); if (s.has(entry.id)) s.delete(entry.id); else s.add(entry.id); setVisiblePasswords(s); }}
-                        className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white" title="Anzeigen">{isVis ? <EyeSlashIcon className="w-3.5 h-3.5" /> : <EyeIcon className="w-3.5 h-3.5" />}</button>
-                      <button onClick={() => copy(entry.password!, "Passwort")} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white" title="Passwort kopieren"><ClipboardDocumentIcon className="w-3.5 h-3.5" /></button>
-                    </>
-                  )}
-                  {entry.snippet_code && <button onClick={() => copy(entry.snippet_code!, "Code")} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white"><CodeBracketIcon className="w-3.5 h-3.5" /></button>}
-                  <button onClick={() => copyAll(entry)} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white" title="Alles kopieren"><ClipboardDocumentListIcon className="w-3.5 h-3.5" /></button>
-                  {entry.url && <a href={entry.url} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white"><GlobeAltIcon className="w-3.5 h-3.5" /></a>}
+                {/* Entries */}
+                <div className="space-y-1.5 ml-10">
+                  {group.entries.map((entry) => {
+                    const cat = getCat(entry.category);
+                    const CatIcon = cat.icon;
+                    const isVis = visiblePasswords.has(entry.id);
+                    const age = daysOld(entry.updated_at);
+                    const pwStr = entry.password ? getPasswordStrength(entry.password) : null;
+                    return (
+                      <div key={entry.id}
+                        className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.03] transition-all cursor-pointer group"
+                        onClick={() => openDetail(entry)}>
+                        <div className="flex items-center gap-3">
+                          {/* Category Icon */}
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${cat.bg} ${cat.color}`}>
+                            <CatIcon className="w-4.5 h-4.5" />
+                          </div>
+
+                          {/* Main Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              {entry.is_favorite && <StarSolid className="w-3 h-3 text-yellow-400 flex-shrink-0" />}
+                              <span className="text-sm font-medium text-white">{entry.title}</span>
+                              <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${cat.bg} ${cat.color}`}>{getCat(entry.category).label}</span>
+                              {pwStr && <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${pwStr.barColor}`} title={pwStr.label} />}
+                              {age > 90 && entry.password && <ExclamationTriangleIcon className="w-3 h-3 text-yellow-400 flex-shrink-0" title={`${age} Tage alt`} />}
+                            </div>
+                            <div className="flex items-center gap-3 text-[11px] text-white/30">
+                              {entry.url && <span className="truncate max-w-[200px]">{entry.url.replace(/https?:\/\//, '')}</span>}
+                              {entry.username && <span className="flex items-center gap-1"><UserIcon className="w-3 h-3" />{entry.username}</span>}
+                              {entry.category === 'snippet' && <span className="flex items-center gap-1"><CodeBracketIcon className="w-3 h-3" />{entry.snippet_language}</span>}
+                              <span>{timeAgo(entry.updated_at)}</span>
+                            </div>
+                          </div>
+
+                          {/* Quick Actions — always visible */}
+                          <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            {entry.password && (
+                              <>
+                                <button onClick={() => { const s = new Set(visiblePasswords); if (s.has(entry.id)) s.delete(entry.id); else s.add(entry.id); setVisiblePasswords(s); }}
+                                  className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium flex items-center gap-1 transition-all ${isVis ? 'bg-green-500/15 text-green-400 border border-green-500/20' : 'bg-white/[0.04] text-white/40 border border-white/[0.06] hover:bg-white/[0.08]'}`}>
+                                  {isVis ? <EyeSlashIcon className="w-3 h-3" /> : <EyeIcon className="w-3 h-3" />}
+                                  {isVis ? 'Verbergen' : 'Anzeigen'}
+                                </button>
+                                <button onClick={() => copy(entry.password!, "Passwort")}
+                                  className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white transition-colors" title="Passwort kopieren">
+                                  <ClipboardDocumentIcon className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            )}
+                            {entry.snippet_code && (
+                              <button onClick={() => copy(entry.snippet_code!, "Code")}
+                                className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-white/[0.04] text-white/40 border border-white/[0.06] hover:bg-white/[0.08] flex items-center gap-1">
+                                <CodeBracketIcon className="w-3 h-3" /> Kopieren
+                              </button>
+                            )}
+                            <button onClick={() => copyAll(entry)}
+                              className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white transition-colors" title="Alles kopieren">
+                              <ClipboardDocumentListIcon className="w-3.5 h-3.5" />
+                            </button>
+                            {entry.url && (
+                              <a href={entry.url} target="_blank" rel="noopener noreferrer"
+                                className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white transition-colors" title="URL öffnen">
+                                <GlobeAltIcon className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+                          </div>
+
+                          {/* Password/Code Display */}
+                          {entry.password && (
+                            <div className="flex-shrink-0 w-36 text-right">
+                              <code className={`text-[11px] font-mono ${isVis ? 'text-green-400' : 'text-white/25'}`}>
+                                {isVis ? entry.password : "••••••••••••"}
+                              </code>
+                            </div>
+                          )}
+
+                          <ChevronRightIcon className="w-4 h-4 text-white/15 flex-shrink-0" />
+                        </div>
+
+                        {/* Snippet Preview (collapsed) */}
+                        {entry.snippet_code && isVis && (
+                          <div className="mt-2 ml-12 p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] max-h-24 overflow-hidden">
+                            <pre className="text-[11px] font-mono text-white/50 whitespace-pre-wrap">{entry.snippet_code.slice(0, 200)}{entry.snippet_code.length > 200 ? '...' : ''}</pre>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                {entry.password && (
-                  <div className="flex-shrink-0 w-28 text-right">
-                    <code className="text-[11px] font-mono text-white/40">{isVis ? entry.password : "••••••••••"}</code>
-                  </div>
-                )}
-                <ChevronRightIcon className="w-4 h-4 text-white/20 flex-shrink-0" />
               </div>
-            </div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* ═══ Detail Slide-Over Panel ═══ */}
       {detailEntry && (
