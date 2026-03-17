@@ -1122,421 +1122,298 @@ function DashboardTab({
     return created.toDateString() === now.toDateString();
   });
 
-  return (
-    <div className="space-y-6">
-      {/* TAGES-COCKPIT — "Mein Tag" */}
-      {allLeads.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Überfällige Leads (Deal Rotting) */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-500/5 border border-red-500/20">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <h3 className="text-sm font-bold text-red-400">Überfällig</h3>
-              </div>
-              <span className="text-xs text-red-400/60">{idleLeads.length} Leads</span>
-            </div>
-            {idleLeads.length > 0 ? (
-              <div className="space-y-2">
-                {idleLeads.slice(0, 3).map((lead: any) => {
-                  const days = Math.floor((now.getTime() - new Date(lead.updatedAt || lead.updated_at || lead.createdAt || lead.created_at).getTime()) / 86400000);
-                  return (
-                    <div key={lead.id} onClick={() => onNavigate?.("vertrieb")} className="flex items-center justify-between p-2 bg-red-500/5 rounded-xl cursor-pointer hover:bg-red-500/10 transition-all">
-                      <div>
-                        <div className="text-xs text-white font-medium">{lead.name}</div>
-                        <div className="text-[10px] text-white/40">{lead.company || lead.email}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-red-400 font-bold">{days} Tage</div>
-                        <div className="text-[10px] text-white/30">{lead.status}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-xs text-green-400/60 text-center py-4">Alles aktuell — keine überfälligen Leads!</p>
-            )}
-          </div>
+  // Berechnete Werte
+  const qualified = stats.leads.qualified || 0;
+  const proposal = (stats.leads as any).proposal || 0;
+  const avgDeal = stats.revenue.deals > 0 ? Math.round(stats.revenue.total / stats.revenue.deals) : 2000;
+  const forecast = Math.round((qualified * 0.3 + proposal * 0.6) * avgDeal);
+  const revenue = stats.revenue.thisMonth || 0;
+  const costs = Math.round(revenue * 0.35);
+  const profit = revenue - costs;
+  const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 
-          {/* Heißeste Leads */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <FireIcon className="w-4 h-4 text-[#FC682C]" />
-                <h3 className="text-sm font-bold text-[#FC682C]">Heißeste Leads</h3>
-              </div>
-              <span className="text-xs text-[#FC682C]/60">{hotLeads.length} offen</span>
+  return (
+    <div className="space-y-5">
+
+      {/* ═══ ROW 1: KPI-Leiste ═══ */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div onClick={() => onNavigate?.("leads")} className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/15 to-blue-600/5 border border-blue-500/15 cursor-pointer hover:border-blue-500/30 transition-all group">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-1.5 rounded-lg bg-blue-500/20"><UsersIcon className="w-4 h-4 text-blue-400" /></div>
+            {stats.leads.thisWeek > 0 && <span className="text-[10px] text-blue-400/80 font-medium">+{stats.leads.thisWeek} diese Woche</span>}
+          </div>
+          <p className="text-2xl font-bold text-white">{stats.leads.total}</p>
+          <p className="text-[11px] text-white/40">Leads</p>
+        </div>
+        <div onClick={() => onNavigate?.("checks")} className="p-4 rounded-2xl bg-gradient-to-br from-green-500/15 to-green-600/5 border border-green-500/15 cursor-pointer hover:border-green-500/30 transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-1.5 rounded-lg bg-green-500/20"><GlobeAltIcon className="w-4 h-4 text-green-400" /></div>
+            {stats.checks.today > 0 && <span className="text-[10px] text-green-400/80 font-medium">+{stats.checks.today} heute</span>}
+          </div>
+          <p className="text-2xl font-bold text-white">{stats.checks.total}</p>
+          <p className="text-[11px] text-white/40">Website-Checks</p>
+        </div>
+        <div onClick={() => onNavigate?.("invoices")} className="p-4 rounded-2xl bg-gradient-to-br from-[#FC682C]/15 to-[#FC682C]/5 border border-[#FC682C]/15 cursor-pointer hover:border-[#FC682C]/30 transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-1.5 rounded-lg bg-[#FC682C]/20"><CurrencyEuroIcon className="w-4 h-4 text-[#FC682C]" /></div>
+            {stats.revenue.deals > 0 && <span className="text-[10px] text-[#FC682C]/80 font-medium">{stats.revenue.deals} Deal{stats.revenue.deals > 1 ? 's' : ''}</span>}
+          </div>
+          <p className="text-2xl font-bold text-white">{revenue > 0 ? `€${(revenue / 1000).toFixed(1)}k` : '€0'}</p>
+          <p className="text-[11px] text-white/40">Umsatz</p>
+        </div>
+        <div onClick={() => onNavigate?.("vertrieb")} className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/15 to-purple-600/5 border border-purple-500/15 cursor-pointer hover:border-purple-500/30 transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-1.5 rounded-lg bg-purple-500/20"><ArrowTrendingUpIcon className="w-4 h-4 text-purple-400" /></div>
+            <span className="text-[10px] text-purple-400/80 font-medium">{stats.leads.won} von {stats.leads.total}</span>
+          </div>
+          <p className="text-2xl font-bold text-white">{stats.leads.conversionRate}%</p>
+          <p className="text-[11px] text-white/40">Conversion</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 border border-emerald-500/15">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-1.5 rounded-lg bg-emerald-500/20"><BanknotesIcon className="w-4 h-4 text-emerald-400" /></div>
+            <span className={`text-[10px] font-medium ${margin >= 50 ? 'text-emerald-400/80' : margin >= 30 ? 'text-yellow-400/80' : 'text-red-400/80'}`}>{margin}% Marge</span>
+          </div>
+          <p className="text-2xl font-bold text-white">€{forecast.toLocaleString("de-DE")}</p>
+          <p className="text-[11px] text-white/40">Forecast</p>
+        </div>
+      </div>
+
+      {/* ═══ ROW 2: Tages-Cockpit (3 Spalten) ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Überfällige Leads */}
+        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              {idleLeads.length > 0 && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
+              <h3 className="text-sm font-semibold text-white">Überfällig</h3>
             </div>
+            <span className={`text-xs font-medium ${idleLeads.length > 0 ? 'text-red-400' : 'text-green-400'}`}>{idleLeads.length}</span>
+          </div>
+          {idleLeads.length > 0 ? (
             <div className="space-y-2">
-              {hotLeads.slice(0, 3).map((lead: any) => {
-                const budget = parseFloat(lead.budget?.replace(/[^0-9.]/g, "") || "0") || 0;
+              {idleLeads.slice(0, 3).map((lead: any) => {
+                const days = Math.floor((now.getTime() - new Date(lead.updatedAt || lead.updated_at || lead.createdAt || lead.created_at).getTime()) / 86400000);
                 return (
-                  <div key={lead.id} onClick={() => onNavigate?.("vertrieb")} className="flex items-center justify-between p-2 bg-[#FC682C]/5 rounded-xl cursor-pointer hover:bg-[#FC682C]/10 transition-all">
+                  <div key={lead.id} onClick={() => onNavigate?.("vertrieb")} className="flex items-center justify-between p-2.5 bg-red-500/5 border border-red-500/10 rounded-xl cursor-pointer hover:bg-red-500/10 transition-all">
                     <div>
                       <div className="text-xs text-white font-medium">{lead.name}</div>
-                      <div className="text-[10px] text-white/40">{lead.packageInterest || lead.package_interest || "—"}</div>
+                      <div className="text-[10px] text-white/40">{lead.company || lead.email}</div>
                     </div>
-                    <div className="text-right">
-                      {budget > 0 && <div className="text-xs text-[#FC682C] font-bold">€{budget.toLocaleString("de-DE")}</div>}
-                      <div className={`text-[10px] px-1.5 py-0.5 rounded ${lead.status === "proposal" ? "bg-yellow-500/15 text-yellow-400" : lead.status === "qualified" ? "bg-purple-500/15 text-purple-400" : "bg-blue-500/15 text-blue-400"}`}>{lead.status}</div>
-                    </div>
+                    <span className="text-xs text-red-400 font-bold">{days}d</span>
                   </div>
                 );
               })}
-              {hotLeads.length === 0 && <p className="text-xs text-white/30 text-center py-4">Keine offenen Leads</p>}
             </div>
-          </div>
-
-          {/* Heutige Aktionen */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <BoltIcon className="w-4 h-4 text-green-400" />
-                <h3 className="text-sm font-bold text-green-400">Heute</h3>
-              </div>
+          ) : (
+            <div className="flex items-center gap-2 p-3 bg-green-500/5 border border-green-500/10 rounded-xl">
+              <CheckCircleIcon className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-green-400/70">Alles aktuell!</span>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 bg-green-500/5 rounded-xl">
-                <span className="text-xs text-white/60">Neue Leads heute</span>
-                <span className="text-sm font-bold text-green-400">{newLeadsToday.length}</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-green-500/5 rounded-xl">
-                <span className="text-xs text-white/60">Offene Pipeline</span>
-                <span className="text-sm font-bold text-white">{hotLeads.length}</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-green-500/5 rounded-xl">
-                <span className="text-xs text-white/60">Überfällig (Action!)</span>
-                <span className={`text-sm font-bold ${idleLeads.length > 0 ? "text-red-400" : "text-green-400"}`}>{idleLeads.length}</span>
-              </div>
-              {/* Quick Actions */}
-              <div className="flex gap-1.5 pt-2">
-                <button onClick={() => onNavigate?.("vertrieb")} className="flex-1 py-2 bg-[#FC682C]/10 hover:bg-[#FC682C]/20 border border-[#FC682C]/20 rounded-xl text-[10px] text-[#FC682C] font-medium transition-all">+ Neuer Lead</button>
-                <button onClick={() => onNavigate?.("calendar")} className="flex-1 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-xl text-[10px] text-white/50 font-medium transition-all">Kalender</button>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FC682C]/20 via-[#9D65C9]/10 to-[#FC682C]/5 border border-[#FC682C]/20 p-6">
-        <div className="relative z-10">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Willkommen zurück! 👋
-          </h2>
-          <p className="text-white/60 mb-4">
-            Du hast{" "}
-            <span className="text-[#FC682C] font-semibold">
-              {stats.leads.new} neue Leads
-            </span>{" "}
-            und{" "}
-            <span className="text-[#9D65C9] font-semibold">
-              {stats.checks.today} Website-Checks
-            </span>{" "}
-            heute.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => onNavigate?.("leads")}
-              className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors flex items-center gap-2"
-            >
-              <EyeIcon className="w-4 h-4" /> Leads ansehen
-            </button>
-            <button
-              onClick={() => onNavigate?.("vertrieb")}
-              className="px-4 py-2 bg-white/10 text-white rounded-xl text-sm font-medium hover:bg-white/20 transition-colors"
-            >
-              Pipeline öffnen
-            </button>
-          </div>
-        </div>
-        <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-[#FC682C]/20 to-transparent rounded-full blur-3xl" />
-        <div className="absolute right-20 bottom-0 w-40 h-40 bg-gradient-to-br from-[#9D65C9]/20 to-transparent rounded-full blur-2xl" />
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Leads"
-          value={stats.leads.total}
-          change={stats.leads.thisWeek}
-          changeLabel="diese Woche"
-          icon={UsersIcon}
-          color="blue"
-          sparkline={stats.trends?.leads?.length ? stats.trends.leads : [0, 0, 0, 0, 0, 0, stats.leads.total]}
-          onClick={() => onNavigate?.("leads")}
-        />
-        <StatCard
-          title="Website-Checks"
-          value={stats.checks.total}
-          change={stats.checks.today}
-          changeLabel="heute"
-          icon={GlobeAltIcon}
-          color="green"
-          sparkline={stats.trends?.checks?.length ? stats.trends.checks : [0, 0, 0, 0, 0, 0, stats.checks.total]}
-          onClick={() => onNavigate?.("checks")}
-        />
-        <StatCard
-          title="Umsatz"
-          value={`€${(stats.revenue.thisMonth / 1000).toFixed(1)}k`}
-          change={stats.revenue.deals}
-          changeLabel={`${stats.revenue.deals === 1 ? 'Deal' : 'Deals'} abgeschlossen`}
-          icon={CurrencyEuroIcon}
-          color="orange"
-          trend={stats.revenue.thisMonth > 0 ? "up" : undefined}
-          sparkline={stats.trends?.revenue?.length ? stats.trends.revenue : [0, 0, 0, 0, 0, 0, stats.revenue.thisMonth]}
-          onClick={() => onNavigate?.("invoices")}
-        />
-        <StatCard
-          title="Conversion"
-          value={`${stats.leads.conversionRate}%`}
-          change={stats.leads.won}
-          changeLabel={`von ${stats.leads.total} Leads`}
-          icon={ArrowTrendingUpIcon}
-          color="purple"
-          trend={stats.leads.conversionRate > 50 ? "up" : undefined}
-          sparkline={[0, 0, 0, 0, 0, stats.leads.total - stats.leads.won, stats.leads.won]}
-          onClick={() => onNavigate?.("vertrieb")}
-        />
-      </div>
-
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Pipeline Overview */}
-          <GlassCard title="Pipeline Übersicht" icon={FunnelIcon}>
-            <div className="grid grid-cols-5 gap-2">
-              <PipelineStage
-                label="Neu"
-                count={stats.leads.new}
-                color="blue"
-                percentage={stats.leads.total > 0 ? (stats.leads.new / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("vertrieb")}
-              />
-              <PipelineStage
-                label="Kontaktiert"
-                count={stats.leads.contacted}
-                color="yellow"
-                percentage={stats.leads.total > 0 ? (stats.leads.contacted / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("vertrieb")}
-              />
-              <PipelineStage
-                label="Qualifiziert"
-                count={stats.leads.qualified}
-                color="purple"
-                percentage={stats.leads.total > 0 ? (stats.leads.qualified / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("vertrieb")}
-              />
-              <PipelineStage
-                label="Angebot"
-                count={stats.leads.proposal || 0}
-                color="orange"
-                percentage={stats.leads.total > 0 ? ((stats.leads.proposal || 0) / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("vertrieb")}
-              />
-              <PipelineStage
-                label="Gewonnen"
-                count={stats.leads.won}
-                color="green"
-                percentage={stats.leads.total > 0 ? (stats.leads.won / stats.leads.total) * 100 : 0}
-                onClick={() => onNavigate?.("vertrieb")}
-              />
+        {/* Heißeste Leads */}
+        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FireIcon className="w-4 h-4 text-[#FC682C]" />
+              <h3 className="text-sm font-semibold text-white">Hot Leads</h3>
             </div>
-          </GlassCard>
-
-          {/* Recent Leads */}
-          <GlassCard
-            title="Neueste Leads"
-            icon={UsersIcon}
-            action={
-              <button className="text-xs text-[#FC682C]" onClick={() => onNavigate?.("leads")}>
-                Alle anzeigen →
-              </button>
-            }
-          >
-            <div className="space-y-3">
-              {stats.recentLeads && stats.recentLeads.length > 0 ? (
-                stats.recentLeads.map((lead) => (
-                  <LeadRow
-                    key={lead.id}
-                    name={lead.name}
-                    email={lead.email}
-                    package={lead.packageInterest || "—"}
-                    time={formatRelativeTime(lead.createdAt)}
-                    priority={lead.priority || "medium"}
-                    onClick={() => onNavigate?.("leads")}
-                  />
-                ))
-              ) : (
-                <div className="text-center py-8 text-white/40">
-                  <UsersIcon className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Noch keine Leads vorhanden</p>
+            <span className="text-xs text-[#FC682C] font-medium">{hotLeads.length} offen</span>
+          </div>
+          <div className="space-y-2">
+            {hotLeads.slice(0, 3).map((lead: any) => {
+              const budget = parseFloat(lead.budget?.replace(/[^0-9.]/g, "") || "0") || 0;
+              return (
+                <div key={lead.id} onClick={() => onNavigate?.("vertrieb")} className="flex items-center justify-between p-2.5 bg-[#FC682C]/5 border border-[#FC682C]/10 rounded-xl cursor-pointer hover:bg-[#FC682C]/10 transition-all">
+                  <div>
+                    <div className="text-xs text-white font-medium">{lead.name}</div>
+                    <div className="text-[10px] text-white/40">{lead.packageInterest || lead.package_interest || "—"}</div>
+                  </div>
+                  <div className="text-right">
+                    {budget > 0 && <div className="text-xs text-[#FC682C] font-bold">€{budget.toLocaleString("de-DE")}</div>}
+                    <div className={`text-[10px] px-1.5 py-0.5 rounded ${lead.status === "proposal" ? "bg-yellow-500/15 text-yellow-400" : lead.status === "qualified" ? "bg-purple-500/15 text-purple-400" : "bg-blue-500/15 text-blue-400"}`}>{lead.status}</div>
+                  </div>
                 </div>
-              )}
-            </div>
-          </GlassCard>
+              );
+            })}
+            {hotLeads.length === 0 && <p className="text-xs text-white/30 text-center py-4">Keine offenen Leads</p>}
+          </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <GlassCard title="Quick Actions" icon={BoltIcon}>
-            <div className="grid grid-cols-2 gap-2">
-              <QuickActionButton
-                icon={PlusIcon}
-                label="Lead anlegen"
-                color="blue"
-                onClick={() => onNavigate?.("leads")}
-              />
-              <QuickActionButton
-                icon={EnvelopeOpenIcon}
-                label="E-Mail senden"
-                color="green"
-                onClick={() => onNavigate?.("emails")}
-              />
-              <QuickActionButton
-                icon={PhoneIcon}
-                label="Anrufen"
-                color="purple"
-                onClick={() => onNavigate?.("leads")}
-              />
-              <QuickActionButton
-                icon={CalendarIcon}
-                label="Termin"
-                color="orange"
-                onClick={() => onNavigate?.("calendar")}
-              />
+        {/* Quick Actions + Heute */}
+        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-3">
+            <BoltIcon className="w-4 h-4 text-[#FC682C]" />
+            <h3 className="text-sm font-semibold text-white">Quick Actions</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <button onClick={() => onNavigate?.("leads")} className="flex items-center justify-center gap-1.5 py-2.5 bg-[#FC682C]/10 hover:bg-[#FC682C]/20 border border-[#FC682C]/20 rounded-xl text-[11px] text-[#FC682C] font-medium transition-all">
+              <PlusIcon className="w-3.5 h-3.5" /> Neuer Lead
+            </button>
+            <button onClick={() => onNavigate?.("emails")} className="flex items-center justify-center gap-1.5 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-xl text-[11px] text-blue-400 font-medium transition-all">
+              <EnvelopeOpenIcon className="w-3.5 h-3.5" /> E-Mail
+            </button>
+            <button onClick={() => onNavigate?.("calendar")} className="flex items-center justify-center gap-1.5 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-xl text-[11px] text-purple-400 font-medium transition-all">
+              <CalendarIcon className="w-3.5 h-3.5" /> Termin
+            </button>
+            <button onClick={() => onNavigate?.("invoices")} className="flex items-center justify-center gap-1.5 py-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 rounded-xl text-[11px] text-green-400 font-medium transition-all">
+              <DocumentTextIcon className="w-3.5 h-3.5" /> Rechnung
+            </button>
+          </div>
+          <div className="space-y-1.5 pt-3 border-t border-white/[0.04]">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-white/40">Neue Leads heute</span>
+              <span className="font-semibold text-white">{newLeadsToday.length}</span>
             </div>
-          </GlassCard>
-
-          {/* Top Scores */}
-          <GlassCard title="Beste Website-Checks" icon={StarIcon}>
-            <div className="space-y-1">
-              {topChecks.length > 0 ? (
-                topChecks.map((check, i) => (
-                  <ScoreRow 
-                    key={i} 
-                    url={check.url} 
-                    score={check.scoreOverall} 
-                    onClick={() => onNavigate?.("checks")}
-                  />
-                ))
-              ) : (
-                <p className="text-white/40 text-sm text-center py-4">
-                  Noch keine Website-Checks vorhanden
-                </p>
-              )}
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-white/40">Checks heute</span>
+              <span className="font-semibold text-white">{stats.checks.today}</span>
             </div>
-          </GlassCard>
-
-          {/* Goals */}
-          <GlassCard title="Monatsziele" icon={RocketLaunchIcon}>
-            <div className="space-y-4">
-              <GoalProgress
-                label="Leads"
-                current={stats.leads.total}
-                target={50}
-              />
-              <GoalProgress
-                label="Umsatz"
-                current={stats.revenue.thisMonth}
-                target={15000}
-                prefix="€"
-              />
-              <GoalProgress
-                label="Checks"
-                current={stats.checks.total}
-                target={100}
-              />
-            </div>
-          </GlassCard>
+          </div>
         </div>
       </div>
 
-      {/* Row 3: Premium Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Deal Forecast */}
-        <GlassCard title="Deal Forecast" icon={ArrowTrendingUpIcon}>
-          <div className="space-y-3">
-            {(() => {
-              const qualified = stats.leads.qualified || 0;
-              const proposal = (stats.leads as any).proposal || 0;
-              const avgDeal = stats.revenue.deals > 0 ? Math.round(stats.revenue.total / stats.revenue.deals) : 2000;
-              const forecast = Math.round((qualified * 0.3 + proposal * 0.6) * avgDeal);
-              const pipeline = Math.round((qualified + proposal) * avgDeal);
-              return (
-                <>
-                  <div className="text-center py-2">
-                    <div className="text-3xl font-bold text-[#FC682C]">€{forecast.toLocaleString("de-DE")}</div>
-                    <div className="text-xs text-white/40 mt-1">Erwarteter Umsatz (gewichtet)</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2 bg-white/[0.03] rounded-lg text-center">
-                      <div className="text-sm font-bold text-white">€{pipeline.toLocaleString("de-DE")}</div>
-                      <div className="text-[10px] text-white/40">Pipeline gesamt</div>
-                    </div>
-                    <div className="p-2 bg-white/[0.03] rounded-lg text-center">
-                      <div className="text-sm font-bold text-white">{qualified + proposal}</div>
-                      <div className="text-[10px] text-white/40">Offene Deals</div>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-white/50">Qualifiziert ({qualified})</span>
-                      <span className="text-yellow-400">30% Chance</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-white/50">Angebot ({proposal})</span>
-                      <span className="text-green-400">60% Chance</span>
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
+      {/* ═══ ROW 3: Pipeline Funnel (volle Breite) ═══ */}
+      <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="w-5 h-5 text-white/40" />
+            <h3 className="text-sm font-semibold text-white">Sales Pipeline</h3>
           </div>
-        </GlassCard>
-
-        {/* Profitabilität */}
-        <GlassCard title="Profitabilität" icon={BanknotesIcon}>
-          <div className="space-y-3">
-            {(() => {
-              const revenue = stats.revenue.thisMonth || 0;
-              const costs = Math.round(revenue * 0.35);
-              const profit = revenue - costs;
-              const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
-              return (
-                <>
-                  <div className="text-center py-2">
-                    <div className={`text-3xl font-bold ${margin >= 50 ? "text-green-400" : margin >= 30 ? "text-yellow-400" : "text-red-400"}`}>
-                      {margin}%
-                    </div>
-                    <div className="text-xs text-white/40 mt-1">Gewinnmarge diesen Monat</div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-white/50">Einnahmen</span>
-                      <span className="text-green-400 font-medium">€{revenue.toLocaleString("de-DE")}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-white/50">Geschätzte Kosten</span>
-                      <span className="text-red-400 font-medium">-€{costs.toLocaleString("de-DE")}</span>
-                    </div>
-                    <div className="h-px bg-white/[0.06]" />
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-white/60 font-medium">Gewinn</span>
-                      <span className="text-white font-bold">€{profit.toLocaleString("de-DE")}</span>
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
+          <button onClick={() => onNavigate?.("vertrieb")} className="text-xs text-[#FC682C] hover:text-[#FC682C]/80 font-medium">
+            Pipeline öffnen →
+          </button>
+        </div>
+        {/* Funnel Visualization */}
+        <div className="flex items-end gap-1 h-20">
+          {[
+            { label: "Neu", count: stats.leads.new, color: "bg-blue-500" },
+            { label: "Kontaktiert", count: stats.leads.contacted, color: "bg-yellow-500" },
+            { label: "Qualifiziert", count: qualified, color: "bg-purple-500" },
+            { label: "Angebot", count: proposal, color: "bg-[#FC682C]" },
+            { label: "Gewonnen", count: stats.leads.won, color: "bg-green-500" },
+          ].map((stage) => {
+            const maxCount = Math.max(stats.leads.new, stats.leads.contacted, qualified, proposal, stats.leads.won, 1);
+            const height = Math.max((stage.count / maxCount) * 100, 8);
+            return (
+              <div key={stage.label} className="flex-1 flex flex-col items-center gap-1.5 cursor-pointer group" onClick={() => onNavigate?.("vertrieb")}>
+                <span className="text-xs font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity">{stage.count}</span>
+                <div className={`w-full rounded-t-lg ${stage.color} opacity-60 group-hover:opacity-100 transition-all`} style={{ height: `${height}%` }} />
+                <span className="text-[10px] text-white/40 group-hover:text-white/70 transition-colors">{stage.label}</span>
+              </div>
+            );
+          })}
+        </div>
+        {/* Conversion Arrow */}
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.04]">
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="text-white/40">Gesamt: <strong className="text-white">{stats.leads.total}</strong></span>
+            <span className="text-white/20">→</span>
+            <span className="text-white/40">Offen: <strong className="text-white">{stats.leads.total - stats.leads.won - (stats.leads.lost || 0)}</strong></span>
+            <span className="text-white/20">→</span>
+            <span className="text-green-400/70">Gewonnen: <strong className="text-green-400">{stats.leads.won}</strong></span>
           </div>
-        </GlassCard>
+          <span className="text-xs text-white/30">Conversion: <strong className={stats.leads.conversionRate >= 50 ? 'text-green-400' : stats.leads.conversionRate >= 25 ? 'text-yellow-400' : 'text-white/60'}>{stats.leads.conversionRate}%</strong></span>
+        </div>
+      </div>
 
-        {/* AI Agenten Status */}
-        <GlassCard title="AI Agenten" icon={CpuChipIcon}>
+      {/* ═══ ROW 4: Finance + Goals (2 Spalten) ═══ */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        {/* Deal Forecast + Profitabilität */}
+        <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-4">
+            <ArrowTrendingUpIcon className="w-5 h-5 text-white/40" />
+            <h3 className="text-sm font-semibold text-white">Finanzen</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="p-3 rounded-xl bg-[#FC682C]/5 border border-[#FC682C]/10 text-center">
+              <p className="text-lg font-bold text-[#FC682C]">€{forecast.toLocaleString("de-DE")}</p>
+              <p className="text-[10px] text-white/40">Forecast</p>
+            </div>
+            <div className="p-3 rounded-xl bg-green-500/5 border border-green-500/10 text-center">
+              <p className="text-lg font-bold text-green-400">€{revenue.toLocaleString("de-DE")}</p>
+              <p className="text-[10px] text-white/40">Einnahmen</p>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-center">
+              <p className="text-lg font-bold text-emerald-400">€{profit.toLocaleString("de-DE")}</p>
+              <p className="text-[10px] text-white/40">Gewinn</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-[11px] p-2 bg-white/[0.02] rounded-lg">
+              <span className="text-white/50">Qualifiziert ({qualified})</span>
+              <span className="text-yellow-400">30% → €{Math.round(qualified * 0.3 * avgDeal).toLocaleString("de-DE")}</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px] p-2 bg-white/[0.02] rounded-lg">
+              <span className="text-white/50">Angebot ({proposal})</span>
+              <span className="text-green-400">60% → €{Math.round(proposal * 0.6 * avgDeal).toLocaleString("de-DE")}</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px] p-2 bg-white/[0.02] rounded-lg">
+              <span className="text-white/50">Kosten (geschätzt 35%)</span>
+              <span className="text-red-400">-€{costs.toLocaleString("de-DE")}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Monatsziele + Checks */}
+        <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-4">
+            <RocketLaunchIcon className="w-5 h-5 text-white/40" />
+            <h3 className="text-sm font-semibold text-white">Monatsziele</h3>
+          </div>
+          <div className="space-y-4 mb-5">
+            <GoalProgress label="Leads" current={stats.leads.total} target={50} />
+            <GoalProgress label="Umsatz" current={stats.revenue.thisMonth} target={15000} prefix="€" />
+            <GoalProgress label="Checks" current={stats.checks.total} target={100} />
+          </div>
+          {topChecks.length > 0 && (
+            <div className="pt-4 border-t border-white/[0.04]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-white/40">Top Website-Checks</span>
+                <button onClick={() => onNavigate?.("checks")} className="text-[10px] text-[#FC682C]">Alle →</button>
+              </div>
+              <div className="space-y-1">
+                {topChecks.map((check, i) => (
+                  <ScoreRow key={i} url={check.url} score={check.scoreOverall} onClick={() => onNavigate?.("checks")} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══ ROW 5: Neueste Leads ═══ */}
+      <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <UsersIcon className="w-5 h-5 text-white/40" />
+            <h3 className="text-sm font-semibold text-white">Neueste Leads</h3>
+          </div>
+          <button onClick={() => onNavigate?.("leads")} className="text-xs text-[#FC682C] hover:text-[#FC682C]/80 font-medium">Alle anzeigen →</button>
+        </div>
+        {stats.recentLeads && stats.recentLeads.length > 0 ? (
+          <div className="space-y-2">
+            {stats.recentLeads.map((lead) => (
+              <LeadRow key={lead.id} name={lead.name} email={lead.email} package={lead.packageInterest || "—"} time={formatRelativeTime(lead.createdAt)} priority={lead.priority || "medium"} onClick={() => onNavigate?.("leads")} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-white/40">
+            <UsersIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Noch keine Leads</p>
+          </div>
+        )}
+      </div>
+
+      {/* ═══ ROW 6: AI Agenten + Empfehlungen ═══ */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-3">
+            <CpuChipIcon className="w-5 h-5 text-white/40" />
+            <h3 className="text-sm font-semibold text-white">AI Agenten</h3>
+          </div>
           <div className="space-y-2">
             {[
               { name: "E-Mail Agent", status: "aktiv", tasks: 127, color: "bg-blue-500" },
@@ -1544,29 +1421,21 @@ function DashboardTab({
               { name: "Vertriebs Agent", status: "aktiv", tasks: 45, color: "bg-purple-500" },
               { name: "Analyse Agent", status: "pausiert", tasks: 12, color: "bg-yellow-500" },
             ].map((agent) => (
-              <div key={agent.name} className="flex items-center justify-between p-2 bg-white/[0.03] rounded-lg">
-                <div className="flex items-center gap-2">
+              <div key={agent.name} className="flex items-center justify-between p-2.5 bg-white/[0.02] rounded-xl">
+                <div className="flex items-center gap-2.5">
                   <div className={`w-2 h-2 rounded-full ${agent.status === "aktiv" ? agent.color : "bg-white/20"}`} />
                   <span className="text-xs text-white/70">{agent.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-white/40">{agent.tasks} Tasks</span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-md ${agent.status === "aktiv" ? "bg-green-500/15 text-green-400" : "bg-yellow-500/15 text-yellow-400"}`}>
-                    {agent.status}
-                  </span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-md ${agent.status === "aktiv" ? "bg-green-500/15 text-green-400" : "bg-yellow-500/15 text-yellow-400"}`}>{agent.status}</span>
                 </div>
               </div>
             ))}
-            <div className="pt-2 border-t border-white/[0.04] text-center">
-              <div className="text-lg font-bold text-white">273</div>
-              <div className="text-[10px] text-white/40">Tasks diesen Monat verarbeitet</div>
-            </div>
           </div>
-        </GlassCard>
+        </div>
+        <TopReferrersWidget onNavigate={onNavigate} />
       </div>
-
-      {/* Row 4: Empfehlungs-Widget */}
-      <TopReferrersWidget onNavigate={onNavigate} />
     </div>
   );
 }
