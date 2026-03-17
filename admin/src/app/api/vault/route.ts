@@ -36,13 +36,15 @@ const CreateEntrySchema = z.object({
   folder_id: z.number().int().optional().nullable(),
   client_id: z.number().int().optional().nullable(),
   title: z.string().min(1).max(200),
-  category: z.enum(['login', 'api_key', 'link', 'note', 'server', 'payment', 'other']).default('login'),
+  category: z.enum(['login', 'api_key', 'link', 'note', 'server', 'payment', 'snippet', 'other']).default('login'),
   url: z.string().max(500).optional().nullable(),
   username: z.string().max(200).optional().nullable(),
   password: z.string().max(500).optional().nullable(),
   notes: z.string().max(5000).optional().nullable(),
   tags: z.array(z.string()).optional().default([]),
   is_favorite: z.boolean().optional().default(false),
+  snippet_code: z.string().max(50000).optional().nullable(),
+  snippet_language: z.string().max(50).optional().default('text'),
 });
 
 type CreateEntryInput = z.infer<typeof CreateEntrySchema>;
