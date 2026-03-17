@@ -9940,7 +9940,7 @@ function SettingsTab() {
   if (loading) return <LoadingState />;
 
   return (
-    <div className="max-w-4xl space-y-4">
+    <div className="space-y-5">
       {/* Settings Tabs */}
       <div className="flex gap-1 p-1 bg-white/[0.03] rounded-xl border border-white/[0.06]">
         {tabs.map(t => (
@@ -9953,45 +9953,72 @@ function SettingsTab() {
 
       {/* ═══ FIRMENPROFIL ═══ */}
       {settingsTab === "company" && (
-        <div className="space-y-4">
-          <GlassCard title="Unternehmensdaten" icon={Cog6ToothIcon}>
-            <div className="grid grid-cols-2 gap-4">
-              <SettingsField label="Firmenname" value={company.name} onChange={(v: string) => setCompany({ ...company, name: v })} />
-              <SettingsField label="E-Mail" value={company.email} onChange={(v: string) => setCompany({ ...company, email: v })} type="email" />
-              <SettingsField label="Telefon" value={company.phone} onChange={(v: string) => setCompany({ ...company, phone: v })} type="tel" />
-              <SettingsField label="Website" value={company.website} onChange={(v: string) => setCompany({ ...company, website: v })} placeholder="https://agentflowm.de" />
-              <SettingsField label="Adresse" value={company.address} onChange={(v: string) => setCompany({ ...company, address: v })} span2 placeholder="Straße Nr, PLZ Stadt" />
+        <div className="grid lg:grid-cols-2 gap-5">
+          <div className="space-y-5">
+            <GlassCard title="Unternehmensdaten" icon={Cog6ToothIcon}>
+              <div className="space-y-4">
+                <SettingsField label="Firmenname" value={company.name} onChange={(v: string) => setCompany({ ...company, name: v })} />
+                <SettingsField label="E-Mail" value={company.email} onChange={(v: string) => setCompany({ ...company, email: v })} type="email" />
+                <div className="grid grid-cols-2 gap-3">
+                  <SettingsField label="Telefon" value={company.phone} onChange={(v: string) => setCompany({ ...company, phone: v })} type="tel" />
+                  <SettingsField label="Website" value={company.website} onChange={(v: string) => setCompany({ ...company, website: v })} placeholder="https://agentflowm.de" />
+                </div>
+                <SettingsField label="Adresse" value={company.address} onChange={(v: string) => setCompany({ ...company, address: v })} placeholder="Straße Nr, PLZ Stadt" />
+              </div>
+            </GlassCard>
+            <GlassCard title="Rechnungs-Einstellungen" icon={DocumentTextIcon}>
+              <div>
+                <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Rechnungs-Footer Text</label>
+                <textarea value={company.invoiceFooter || ""} onChange={e => setCompany({ ...company, invoiceFooter: e.target.value })}
+                  placeholder="z.B. Zahlungsziel: 14 Tage netto. Gerichtsstand Berlin. Es gelten unsere AGB."
+                  rows={3} className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none resize-none placeholder:text-white/20" />
+                <p className="text-[10px] text-white/20 mt-1.5">Dieser Text erscheint am Ende jeder Rechnung und Angebot.</p>
+              </div>
+            </GlassCard>
+          </div>
+          <div className="space-y-5">
+            <GlassCard title="Steuern & Bankdaten" icon={BanknotesIcon}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <SettingsField label="Steuernummer" value={company.taxId} onChange={(v: string) => setCompany({ ...company, taxId: v })} placeholder="27/123/12345" />
+                  <SettingsField label="USt-IdNr." value={company.ustId} onChange={(v: string) => setCompany({ ...company, ustId: v })} placeholder="DE123456789" />
+                </div>
+                <SettingsField label="IBAN" value={company.iban} onChange={(v: string) => setCompany({ ...company, iban: v })} />
+                <SettingsField label="BIC" value={company.bic} onChange={(v: string) => setCompany({ ...company, bic: v })} />
+              </div>
+            </GlassCard>
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
+              <p className="text-xs text-white/30 mb-3">Diese Daten werden verwendet für:</p>
+              <div className="space-y-2 text-[11px] text-white/50">
+                <div className="flex items-center gap-2"><DocumentTextIcon className="w-3.5 h-3.5 text-[#FC682C]" /> Rechnungen & Angebote (Absender, Bankdaten)</div>
+                <div className="flex items-center gap-2"><EnvelopeIcon className="w-3.5 h-3.5 text-blue-400" /> E-Mail-Versand (Absendername)</div>
+                <div className="flex items-center gap-2"><UserGroupIcon className="w-3.5 h-3.5 text-purple-400" /> Kundenportal (Firmenprofil)</div>
+                <div className="flex items-center gap-2"><GlobeAltIcon className="w-3.5 h-3.5 text-green-400" /> Website-Footer & Impressum</div>
+              </div>
             </div>
-          </GlassCard>
-
-          <GlassCard title="Steuern & Bankdaten" icon={BanknotesIcon}>
-            <div className="grid grid-cols-2 gap-4">
-              <SettingsField label="Steuernummer" value={company.taxId} onChange={(v: string) => setCompany({ ...company, taxId: v })} placeholder="z.B. 27/123/12345" />
-              <SettingsField label="USt-IdNr." value={company.ustId} onChange={(v: string) => setCompany({ ...company, ustId: v })} placeholder="z.B. DE123456789" />
-              <SettingsField label="IBAN" value={company.iban} onChange={(v: string) => setCompany({ ...company, iban: v })} />
-              <SettingsField label="BIC" value={company.bic} onChange={(v: string) => setCompany({ ...company, bic: v })} />
-            </div>
-          </GlassCard>
-
-          <GlassCard title="Rechnungs-Einstellungen" icon={DocumentTextIcon}>
-            <div>
-              <label className="block text-[10px] text-white/40 uppercase tracking-wider mb-1.5">Rechnungs-Footer Text</label>
-              <textarea value={company.invoiceFooter || ""} onChange={e => setCompany({ ...company, invoiceFooter: e.target.value })}
-                placeholder="z.B. Zahlungsziel: 14 Tage. Gerichtsstand Berlin."
-                rows={3} className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none resize-none placeholder:text-white/20" />
-            </div>
-          </GlassCard>
-
+          </div>
           <button onClick={() => saveSettings("company", company)} disabled={saving}
-            className="px-6 py-3 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50 flex items-center gap-2">
+            className="lg:col-span-2 px-6 py-3 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
             {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-            {saving ? "Speichere..." : "Alle Änderungen speichern"}
+            {saving ? "Speichere..." : "Firmenprofil speichern"}
           </button>
         </div>
       )}
 
       {/* ═══ TEAM ═══ */}
       {settingsTab === "team" && (
+        <div className="grid lg:grid-cols-3 gap-5">
+        {/* Info Box */}
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/15">
+          <h4 className="text-sm font-semibold text-white mb-3">Wofür ist das Team?</h4>
+          <div className="space-y-2.5 text-[11px] text-white/50">
+            <div className="flex items-start gap-2"><UsersIcon className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" /><span>Team-Mitglieder können als <strong className="text-white/70">Projektmanager</strong> in Kundenprojekten zugewiesen werden</span></div>
+            <div className="flex items-start gap-2"><EnvelopeIcon className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" /><span>Jedes Mitglied bekommt <strong className="text-white/70">eigene Benachrichtigungen</strong> für zugewiesene Leads</span></div>
+            <div className="flex items-start gap-2"><ShieldCheckIcon className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" /><span><strong className="text-white/70">Rollen</strong>: Admin (alles), Manager (Kunden+Projekte), Mitarbeiter (nur eigene)</span></div>
+            <div className="flex items-start gap-2"><CalendarIcon className="w-4 h-4 text-[#FC682C] mt-0.5 flex-shrink-0" /><span>Termine im <strong className="text-white/70">Kalender</strong> werden nach Mitglied gefiltert</span></div>
+          </div>
+        </div>
+        <div className="lg:col-span-2">
         <GlassCard title={`Team-Mitglieder (${team.length})`} icon={UserGroupIcon}>
           <div className="space-y-2">
             {team.map((m: any) => (
@@ -10087,10 +10114,26 @@ function SettingsTab() {
             </div>
           )}
         </GlassCard>
+        </div>
+        </div>
       )}
 
       {/* ═══ VORLAGEN ═══ */}
       {settingsTab === "templates" && (
+        <div className="grid lg:grid-cols-3 gap-5">
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#FC682C]/10 to-transparent border border-[#FC682C]/15">
+          <h4 className="text-sm font-semibold text-white mb-3">Wofür sind Vorlagen?</h4>
+          <div className="space-y-2.5 text-[11px] text-white/50">
+            <div className="flex items-start gap-2"><FunnelIcon className="w-4 h-4 text-[#FC682C] mt-0.5 flex-shrink-0" /><span>Wenn ein Lead zum <strong className="text-white/70">Kunden konvertiert</strong> wird, wird automatisch ein Projekt erstellt</span></div>
+            <div className="flex items-start gap-2"><ClipboardDocumentListIcon className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" /><span>Vorlagen definieren die <strong className="text-white/70">Meilensteine</strong> (z.B. Erstgespräch, Design, Entwicklung, Go-Live)</span></div>
+            <div className="flex items-start gap-2"><CurrencyEuroIcon className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" /><span>Jede Vorlage hat einen <strong className="text-white/70">Standardpreis</strong> der auf Rechnungen übernommen wird</span></div>
+            <div className="flex items-start gap-2"><CheckCircleIcon className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" /><span><strong className="text-white/70">Services</strong> definieren was im Paket enthalten ist (SEO, Hosting, etc.)</span></div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-white/[0.06]">
+            <p className="text-[10px] text-white/30">Tipp: Die "DEFAULT" Vorlage wird bei der Konvertierung automatisch vorgeschlagen.</p>
+          </div>
+        </div>
+        <div className="lg:col-span-2">
         <GlassCard title={`Projekt-Vorlagen (${templates.length})`} icon={DocumentDuplicateIcon}>
           <div className="space-y-2">
             {templates.map((t: any) => (
@@ -10189,6 +10232,8 @@ function SettingsTab() {
             </div>
           )}
         </GlassCard>
+        </div>
+        </div>
       )}
 
       {/* ═══ ZIELE ═══ */}
