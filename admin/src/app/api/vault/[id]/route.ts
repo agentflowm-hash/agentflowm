@@ -15,7 +15,7 @@ function encrypt(text: string): string {
 
 const UpdateEntrySchema = z.object({
   title: z.string().min(1).max(200).optional(),
-  category: z.enum(['login', 'api_key', 'link', 'note', 'server', 'payment', 'other']).optional(),
+  category: z.enum(['login', 'api_key', 'link', 'note', 'server', 'payment', 'snippet', 'other']).optional(),
   folder_id: z.number().int().optional().nullable(),
   client_id: z.number().int().optional().nullable(),
   url: z.string().max(500).optional().nullable(),
@@ -24,6 +24,8 @@ const UpdateEntrySchema = z.object({
   notes: z.string().max(5000).optional().nullable(),
   tags: z.array(z.string()).optional(),
   is_favorite: z.boolean().optional(),
+  snippet_code: z.string().max(50000).optional().nullable(),
+  snippet_language: z.string().max(50).optional().nullable(),
 });
 
 export const PATCH = createHandler({ auth: true, schema: UpdateEntrySchema }, async (data, _ctx, request) => {

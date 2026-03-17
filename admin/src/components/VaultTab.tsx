@@ -223,23 +223,29 @@ export default function VaultTab() {
     if (!detailEntry) return;
     setSaving(true);
     try {
+      const tags = form.tags ? form.tags.split(",").map(t => t.trim()).filter(Boolean) : [];
+      let notes = form.notes || "";
+      if (clientMode === "custom" && customClient) {
+        if (!tags.includes(customClient)) tags.unshift(customClient);
+        if (!notes.includes(`Kunde: ${customClient}`)) notes = notes ? `Kunde: ${customClient}\n${notes}` : `Kunde: ${customClient}`;
+      }
+
       await fetch(`/api/vault/${detailEntry.id}`, {
         credentials: "include", method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: form.title, category: form.category, url: form.url || null,
           username: form.username || null, password: form.password || null,
-          notes: form.notes || null, is_favorite: form.is_favorite,
+          notes: notes || null, is_favorite: form.is_favorite,
           client_id: form.client_id ? parseInt(form.client_id) : null,
           folder_id: form.folder_id ? parseInt(form.folder_id) : null,
-          tags: form.tags ? form.tags.split(",").map(t => t.trim()).filter(Boolean) : [],
+          tags,
           snippet_code: form.snippet_code || null,
           snippet_language: form.snippet_language || 'text',
         }),
       });
       showToast("success", "Gespeichert!");
-      setEditMode(false);
-      setDetailEntry(null);
+      setEditMode(false); setDetailEntry(null); setCustomClient(""); setClientMode("select");
       loadData();
     } catch { showToast("error", "Fehler"); }
     finally { setSaving(false); }
@@ -308,15 +314,18 @@ export default function VaultTab() {
         if (data.success && data.credentials?.length > 0) {
           const cred = data.credentials[0];
           setForm({
-            ...form,
-            title: cred.title || form.title,
-            category: cred.category || form.category,
-            url: cred.url || form.url,
-            username: cred.username || form.username,
-            password: cred.password || form.password,
-            notes: cred.notes || form.notes,
-            snippet_code: cred.snippet_code || form.snippet_code,
-            snippet_language: cred.snippet_language || form.snippet_language,
+            title: cred.title || "",
+            category: cred.category || "login",
+            url: cred.url || "",
+            username: cred.username || "",
+            password: cred.password || "",
+            notes: cred.notes || "",
+            snippet_code: cred.snippet_code || "",
+            snippet_language: cred.snippet_language || "text",
+            client_id: form.client_id,
+            folder_id: form.folder_id,
+            tags: form.tags,
+            is_favorite: form.is_favorite,
           });
           showToast("success", `${data.count} Zugang${data.count > 1 ? 'sdaten' : ''} erkannt!`);
           if (data.count > 1) {
@@ -367,20 +376,22 @@ export default function VaultTab() {
             </div>
           </div>
         </div>
-        {[
-          { label: "Gesamt", val: entries.length, icon: LockClosedIcon, c: "blue" },
-          { label: "Zugänge", val: entries.filter(e => e.category === 'login').length, icon: KeyIcon, c: "purple" },
-          { label: "Snippets", val: entries.filter(e => e.category === 'snippet').length, icon: CodeBracketIcon, c: "pink" },
-          { label: "Favoriten", val: entries.filter(e => e.is_favorite).length, icon: StarIcon, c: "yellow" },
-        ].map(s => (
-          <div key={s.label} className={`p-4 rounded-2xl bg-gradient-to-br from-${s.c}-500/15 to-${s.c}-600/5 border border-white/[0.06]`}>
-            <div className="flex items-center gap-2 mb-1">
-              <s.icon className={`w-4 h-4 text-${s.c}-400`} />
-              <span className="text-xs text-white/50">{s.label}</span>
-            </div>
-            <p className="text-2xl font-bold text-white">{s.val}</p>
-          </div>
-        ))}
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/15 to-blue-600/5 border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-1"><LockClosedIcon className="w-4 h-4 text-blue-400" /><span className="text-xs text-white/50">Gesamt</span></div>
+          <p className="text-2xl font-bold text-white">{entries.length}</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/15 to-purple-600/5 border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-1"><KeyIcon className="w-4 h-4 text-purple-400" /><span className="text-xs text-white/50">Zugänge</span></div>
+          <p className="text-2xl font-bold text-white">{entries.filter(e => e.category === 'login').length}</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-500/15 to-pink-600/5 border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-1"><CodeBracketIcon className="w-4 h-4 text-pink-400" /><span className="text-xs text-white/50">Snippets</span></div>
+          <p className="text-2xl font-bold text-white">{entries.filter(e => e.category === 'snippet').length}</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-500/15 to-yellow-600/5 border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-1"><StarIcon className="w-4 h-4 text-yellow-400" /><span className="text-xs text-white/50">Favoriten</span></div>
+          <p className="text-2xl font-bold text-white">{entries.filter(e => e.is_favorite).length}</p>
+        </div>
       </div>
 
       {/* ═══ Toolbar ═══ */}
@@ -568,7 +579,7 @@ export default function VaultTab() {
               </div>
             </div>
           )}
-          <button onClick={handleAdd} disabled={saving || !form.title}
+          <button onClick={handleAdd} disabled={saving || !form.title || (form.category === 'snippet' && !form.snippet_code)}
             className="w-full py-2.5 bg-blue-500/20 text-blue-400 rounded-xl text-sm font-medium hover:bg-blue-500/30 disabled:opacity-50 flex items-center justify-center gap-2">
             {saving ? <div className="w-4 h-4 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" /> : <LockClosedIcon className="w-4 h-4" />}
             {saving ? "Verschlüsselt..." : "Sicher speichern"}
@@ -710,7 +721,7 @@ export default function VaultTab() {
 
       {/* ═══ Detail Slide-Over Panel ═══ */}
       {detailEntry && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => { setDetailEntry(null); setEditMode(false); }}>
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => { setDetailEntry(null); setEditMode(false); setCustomClient(""); setClientMode("select"); setShowGenerator(false); }}>
           <div className="w-full max-w-lg bg-[#111827] border-l border-white/[0.08] h-full overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* Panel Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] bg-gradient-to-r from-blue-500/10 to-transparent sticky top-0 z-10 bg-[#111827]">
@@ -808,10 +819,10 @@ export default function VaultTab() {
                     </div>
                   )}
                   <div className="flex gap-2">
-                    <button onClick={handleUpdate} disabled={saving} className="flex-1 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium">
+                    <button onClick={handleUpdate} disabled={saving || !form.title} className="flex-1 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium disabled:opacity-50">
                       {saving ? "Speichert..." : "Speichern"}
                     </button>
-                    <button onClick={() => setEditMode(false)} className="px-4 py-2.5 bg-white/[0.04] text-white/50 rounded-xl text-sm">Abbrechen</button>
+                    <button onClick={() => { setEditMode(false); setCustomClient(""); setClientMode("select"); }} disabled={saving} className="px-4 py-2.5 bg-white/[0.04] text-white/50 rounded-xl text-sm disabled:opacity-50">Abbrechen</button>
                   </div>
                 </>
               ) : (
