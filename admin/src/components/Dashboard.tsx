@@ -9864,13 +9864,18 @@ function SettingsTab() {
       fetch("/api/team", { credentials: "include" }).then(r => r.json()),
       fetch("/api/templates", { credentials: "include" }).then(r => r.json()),
       fetch("/api/stats", { credentials: "include" }).then(r => r.json()).catch(() => null),
-    ]).then(([settings, teamData, templateData, statsData]) => {
-      if (settings.settings?.company) setCompany(c => ({ ...c, ...settings.settings.company }));
-      if (settings.settings?.goals) setGoals(g => ({ ...g, ...settings.settings.goals }));
-      if (settings.settings?.notifications) setNotifSettings(n => ({ ...n, ...settings.settings.notifications }));
-      setTeam(teamData.members || []);
-      setTemplates(templateData.templates || []);
-      if (statsData) setStats(statsData.data || statsData);
+    ]).then(([settingsRes, teamData, templateData, statsData]) => {
+      // Unwrap createHandler response: { success, data: { settings: {...} } }
+      const s = settingsRes?.data?.settings || settingsRes?.settings || {};
+      if (s.company) setCompany(c => ({ ...c, ...s.company }));
+      if (s.goals) setGoals(g => ({ ...g, ...s.goals }));
+      if (s.notifications) setNotifSettings(n => ({ ...n, ...s.notifications }));
+      // Team & Templates may also be wrapped
+      const td = teamData?.data || teamData;
+      setTeam(td?.members || []);
+      const tpl = templateData?.data || templateData;
+      setTemplates(tpl?.templates || []);
+      if (statsData) setStats(statsData?.data || statsData);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -9896,19 +9901,24 @@ function SettingsTab() {
           html: `<div style="font-family:sans-serif;padding:24px;background:#111827;color:#fff;border-radius:16px;max-width:400px;margin:0 auto;"><h2 style="color:#FC682C;">Test erfolgreich!</h2><p style="color:rgba(255,255,255,0.7);">E-Mail-Benachrichtigungen funktionieren korrekt.</p><p style="color:rgba(255,255,255,0.4);font-size:12px;">AgentFlowMarketing</p></div>`,
         }),
       });
-      if (res.ok) showToast("success", `Test-E-Mail an ${company.email} gesendet!`);
-      else showToast("error", "E-Mail konnte nicht gesendet werden");
+      const emailResult = await res.json();
+      if (res.ok && !emailResult.error) showToast("success", `Test-E-Mail an ${company.email} gesendet!`);
+      else showToast("error", emailResult.error || "E-Mail konnte nicht gesendet werden");
     } catch { showToast("error", "SMTP-Fehler"); }
     setTestingEmail(false);
   };
 
   const updateMember = async (id: number, updates: any) => {
-    const res = await fetch(`/api/team/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(updates) });
-    if (res.ok) {
-      setTeam(team.map(m => m.id === id ? { ...m, ...updates } : m));
-      setEditingMember(null);
-      showToast("success", "Mitglied aktualisiert");
-    }
+    try {
+      const res = await fetch(`/api/team/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(updates) });
+      if (res.ok) {
+        setTeam(team.map((m: any) => m.id === id ? { ...m, ...updates } : m));
+        setEditingMember(null);
+        showToast("success", "Mitglied aktualisiert");
+      } else {
+        showToast("error", "Fehler beim Aktualisieren");
+      }
+    } catch { showToast("error", "Verbindungsfehler"); }
   };
 
   const tabs = [
