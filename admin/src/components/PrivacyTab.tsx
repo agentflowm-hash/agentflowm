@@ -1,552 +1,321 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
-  ShieldCheckIcon,
-  DocumentTextIcon,
-  UserIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-  TrashIcon,
-  EyeIcon,
-  ArrowDownTrayIcon,
-  PlusIcon,
-  EnvelopeIcon,
-  LockClosedIcon,
-  KeyIcon,
-  ServerIcon,
-  GlobeAltIcon,
-  DocumentDuplicateIcon,
-  ClipboardDocumentCheckIcon,
-  BellAlertIcon,
-  FingerPrintIcon,
+  ShieldCheckIcon, DocumentTextIcon, UserIcon, ClockIcon,
+  ExclamationTriangleIcon, CheckCircleIcon, PlusIcon, XMarkIcon,
+  PencilIcon, TrashIcon, PaperAirplaneIcon, EyeIcon,
+  GlobeAltIcon, LockClosedIcon, DocumentDuplicateIcon,
+  ArrowDownTrayIcon, EnvelopeOpenIcon, FolderIcon,
+  MagnifyingGlassIcon, ChevronRightIcon,
 } from "@heroicons/react/24/outline";
+import { useToast } from "@/components";
 
-interface DataSubjectRequest {
-  id: number;
-  type: "access" | "deletion" | "rectification" | "portability" | "objection";
-  requester_name: string;
-  requester_email: string;
-  status: "pending" | "processing" | "completed" | "rejected";
-  submitted_at: string;
-  completed_at?: string;
-  notes?: string;
+interface PrivacyDoc {
+  id: number; title: string; description: string | null; category: string;
+  content: string; is_template: boolean; version: number; status: string;
+  sent_to: string[] | null; last_sent_at: string | null;
+  created_at: string; updated_at: string;
+}
+interface PrivacyRequest {
+  id: number; name: string; email: string; request_type: string;
+  description: string | null; status: string; deadline: string | null;
+  completed_at: string | null; notes: string | null; created_at: string;
+}
+interface Processing {
+  id: number; name: string; purpose: string; legal_basis: string;
+  data_categories: string | null; recipients: string | null;
+  retention: string | null; security_measures: string | null;
+  status: string; created_at: string;
 }
 
-interface ConsentRecord {
-  id: number;
-  user_email: string;
-  consent_type: string;
-  granted: boolean;
-  granted_at: string;
-  ip_address: string;
-  user_agent?: string;
+function unwrap<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as any).data;
+  return res as T;
 }
 
-interface DataProcessingActivity {
-  id: number;
-  name: string;
-  purpose: string;
-  legal_basis: string;
-  data_categories: string[];
-  recipients: string[];
-  retention_period: string;
-  security_measures: string[];
-  status: "active" | "inactive" | "review";
-}
-
-const REQUEST_TYPES = {
-  access: { label: "Auskunftsrecht (Art. 15)", color: "blue" },
-  deletion: { label: "Löschung (Art. 17)", color: "red" },
-  rectification: { label: "Berichtigung (Art. 16)", color: "yellow" },
-  portability: { label: "Datenübertragung (Art. 20)", color: "purple" },
-  objection: { label: "Widerspruch (Art. 21)", color: "orange" },
+const CAT_LABELS: Record<string, string> = {
+  datenschutz: 'Datenschutzerklärung', impressum: 'Impressum', avv: 'AVV',
+  loeschkonzept: 'Löschkonzept', tom: 'TOM', einwilligung: 'Einwilligung', other: 'Sonstige',
 };
+const CAT_ICONS: Record<string, any> = {
+  datenschutz: ShieldCheckIcon, impressum: GlobeAltIcon, avv: DocumentDuplicateIcon,
+  loeschkonzept: TrashIcon, tom: LockClosedIcon, einwilligung: CheckCircleIcon, other: DocumentTextIcon,
+};
+const REQ_LABELS: Record<string, string> = {
+  access: 'Auskunft (Art. 15)', deletion: 'Löschung (Art. 17)', rectification: 'Berichtigung (Art. 16)',
+  restriction: 'Einschränkung (Art. 18)', portability: 'Datenübertragung (Art. 20)', objection: 'Widerspruch (Art. 21)',
+};
+const STATUS_LABELS: Record<string, string> = { pending: 'Offen', in_progress: 'In Bearbeitung', completed: 'Erledigt', rejected: 'Abgelehnt' };
 
 export default function PrivacyTab() {
-  const [activeView, setActiveView] = useState<"overview" | "requests" | "consents" | "processing" | "documents">("overview");
-  const [requests, setRequests] = useState<DataSubjectRequest[]>([]);
-  const [consents, setConsents] = useState<ConsentRecord[]>([]);
-  const [activities, setActivities] = useState<DataProcessingActivity[]>([]);
+  const { showToast } = useToast();
+  const [tab, setTab] = useState<"docs" | "requests" | "processing">("docs");
+  const [docs, setDocs] = useState<PrivacyDoc[]>([]);
+  const [requests, setRequests] = useState<PrivacyRequest[]>([]);
+  const [processing, setProcessing] = useState<Processing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showRequestModal, setShowRequestModal] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<DataSubjectRequest | null>(null);
+  const [stats, setStats] = useState({ documents: 0, activeDocuments: 0, pendingRequests: 0, processingActivities: 0 });
 
-  useEffect(() => {
-    // Mock data - in real implementation, fetch from API
-    setRequests([
-      {
-        id: 1,
-        type: "access",
-        requester_name: "Max Mustermann",
-        requester_email: "max@example.com",
-        status: "pending",
-        submitted_at: "2026-02-28T14:30:00Z",
-      },
-      {
-        id: 2,
-        type: "deletion",
-        requester_name: "Anna Schmidt",
-        requester_email: "anna@test.de",
-        status: "completed",
-        submitted_at: "2026-02-20T10:00:00Z",
-        completed_at: "2026-02-25T16:00:00Z",
-      },
-    ]);
+  // Modals
+  const [editDoc, setEditDoc] = useState<PrivacyDoc | null>(null);
+  const [viewDoc, setViewDoc] = useState<PrivacyDoc | null>(null);
+  const [sendDoc, setSendDoc] = useState<PrivacyDoc | null>(null);
+  const [sendForm, setSendForm] = useState({ to_email: "", to_name: "", message: "" });
+  const [showAddDoc, setShowAddDoc] = useState(false);
+  const [showAddReq, setShowAddReq] = useState(false);
+  const [showAddProc, setShowAddProc] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-    setConsents([
-      {
-        id: 1,
-        user_email: "kunde@example.com",
-        consent_type: "newsletter",
-        granted: true,
-        granted_at: "2026-02-28T10:00:00Z",
-        ip_address: "192.168.1.1",
-      },
-      {
-        id: 2,
-        user_email: "test@test.de",
-        consent_type: "marketing",
-        granted: false,
-        granted_at: "2026-02-27T15:30:00Z",
-        ip_address: "192.168.1.2",
-      },
-    ]);
+  const [newDoc, setNewDoc] = useState({ title: "", description: "", category: "datenschutz", content: "", is_template: false });
+  const [newReq, setNewReq] = useState({ name: "", email: "", request_type: "access", description: "" });
+  const [newProc, setNewProc] = useState({ name: "", purpose: "", legal_basis: "Vertragserfüllung (Art. 6 Abs. 1 lit. b)", data_categories: "", recipients: "", retention: "", security_measures: "" });
 
-    setActivities([
-      {
-        id: 1,
-        name: "Kundenverwaltung",
-        purpose: "Verwaltung von Kundenbeziehungen und Projekten",
-        legal_basis: "Vertragserfüllung (Art. 6 Abs. 1 lit. b)",
-        data_categories: ["Name", "E-Mail", "Telefon", "Firma", "Projektdaten"],
-        recipients: ["Interne Mitarbeiter", "Hosting-Provider"],
-        retention_period: "10 Jahre nach Vertragsende",
-        security_measures: ["SSL/TLS", "Verschlüsselung", "Zugangskontrolle"],
-        status: "active",
-      },
-      {
-        id: 2,
-        name: "Newsletter-Versand",
-        purpose: "Marketing und Information über neue Angebote",
-        legal_basis: "Einwilligung (Art. 6 Abs. 1 lit. a)",
-        data_categories: ["E-Mail", "Name"],
-        recipients: ["E-Mail-Service-Provider"],
-        retention_period: "Bis zum Widerruf",
-        security_measures: ["SSL/TLS", "Double-Opt-In"],
-        status: "active",
-      },
-      {
-        id: 3,
-        name: "Website-Analyse",
-        purpose: "Verbesserung der Website-Performance",
-        legal_basis: "Berechtigtes Interesse (Art. 6 Abs. 1 lit. f)",
-        data_categories: ["IP-Adresse (anonymisiert)", "Nutzungsdaten"],
-        recipients: ["Vercel Analytics"],
-        retention_period: "26 Monate",
-        security_measures: ["IP-Anonymisierung", "Keine Cookies"],
-        status: "active",
-      },
-    ]);
-
-    setLoading(false);
+  const loadData = useCallback(() => {
+    setLoading(true);
+    fetch("/api/privacy", { credentials: "include" }).then(r => r.json()).then(d => {
+      const data = unwrap<any>(d);
+      setDocs(data.documents || []);
+      setRequests(data.requests || []);
+      setProcessing(data.processing || []);
+      setStats(data.stats || stats);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
-  const stats = {
-    pendingRequests: requests.filter(r => r.status === "pending").length,
-    processingRequests: requests.filter(r => r.status === "processing").length,
-    totalConsents: consents.length,
-    activeProcessing: activities.filter(a => a.status === "active").length,
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleAddDoc = async () => {
+    if (!newDoc.title || !newDoc.content) return;
+    setSaving(true);
+    const res = await fetch("/api/privacy", { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newDoc, _type: "document", status: "active" }) });
+    if (res.ok) { showToast("success", "Dokument erstellt!"); setShowAddDoc(false); setNewDoc({ title: "", description: "", category: "datenschutz", content: "", is_template: false }); loadData(); }
+    else showToast("error", "Fehler");
+    setSaving(false);
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const handleUpdateDoc = async () => {
+    if (!editDoc) return;
+    setSaving(true);
+    await fetch(`/api/privacy/${editDoc.id}`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: editDoc.title, description: editDoc.description, content: editDoc.content, category: editDoc.category, status: editDoc.status, version: (editDoc.version || 1) + 1 }) });
+    showToast("success", "Dokument aktualisiert!"); setEditDoc(null); loadData(); setSaving(false);
   };
 
-  const updateRequestStatus = (id: number, status: DataSubjectRequest["status"]) => {
-    setRequests(requests.map(r => 
-      r.id === id 
-        ? { ...r, status, completed_at: status === "completed" ? new Date().toISOString() : r.completed_at }
-        : r
-    ));
+  const handleSendDoc = async () => {
+    if (!sendDoc || !sendForm.to_email) return;
+    setSaving(true);
+    const res = await fetch(`/api/privacy/${sendDoc.id}/send`, { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sendForm) });
+    if (res.ok) { showToast("success", `Dokument an ${sendForm.to_email} gesendet!`); setSendDoc(null); setSendForm({ to_email: "", to_name: "", message: "" }); loadData(); }
+    else showToast("error", "E-Mail konnte nicht gesendet werden");
+    setSaving(false);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-8 h-8 border-2 border-[#FC682C] border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  const handleAddReq = async () => {
+    if (!newReq.name || !newReq.email) return;
+    setSaving(true);
+    await fetch("/api/privacy", { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newReq, _type: "request" }) });
+    showToast("success", "Anfrage erfasst!"); setShowAddReq(false); setNewReq({ name: "", email: "", request_type: "access", description: "" }); loadData(); setSaving(false);
+  };
+
+  const handleAddProc = async () => {
+    if (!newProc.name || !newProc.purpose) return;
+    setSaving(true);
+    await fetch("/api/privacy", { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newProc, _type: "processing" }) });
+    showToast("success", "Verarbeitungstätigkeit angelegt!"); setShowAddProc(false); setNewProc({ name: "", purpose: "", legal_basis: "Vertragserfüllung (Art. 6 Abs. 1 lit. b)", data_categories: "", recipients: "", retention: "", security_measures: "" }); loadData(); setSaving(false);
+  };
+
+  const updateReqStatus = async (id: number, status: string) => {
+    await fetch(`/api/privacy/${id}`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ _type: "request", status }) });
+    showToast("success", `Status geändert: ${STATUS_LABELS[status]}`); loadData();
+  };
+
+  const deleteItem = async (id: number, type: string) => {
+    await fetch(`/api/privacy/${id}?type=${type}`, { credentials: "include", method: "DELETE" });
+    showToast("success", "Gelöscht"); loadData();
+  };
+
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-3 border-[#FC682C]/30 border-t-[#FC682C] rounded-full animate-spin" /></div>;
 
   return (
-    <div className="space-y-6">
-      {/* In Entwicklung Banner */}
-      <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-        <ExclamationTriangleIcon className="w-6 h-6 text-amber-400 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-semibold text-amber-400">In Entwicklung</p>
-          <p className="text-xs text-white/50 mt-0.5">
-            Dieses Modul befindet sich noch in der Entwicklung. Die angezeigten Daten sind Platzhalter und werden bald durch echte Funktionen ersetzt.
-          </p>
+    <div className="space-y-5">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500/15 to-green-600/5 border border-green-500/15">
+          <div className="flex items-center gap-2 mb-1"><ShieldCheckIcon className="w-4 h-4 text-green-400" /><span className="text-xs text-white/50">Aktive Dokumente</span></div>
+          <p className="text-2xl font-bold text-white">{stats.activeDocuments}</p>
         </div>
-      </div>
-      {/* Header Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-5 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 rounded-2xl border border-yellow-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-yellow-500/20 rounded-xl">
-              <ClockIcon className="w-5 h-5 text-yellow-400" />
-            </div>
-            <span className="text-sm text-white/50">Offene Anfragen</span>
-          </div>
-          <p className="text-2xl font-bold text-yellow-400">{stats.pendingRequests}</p>
-          <p className="text-xs text-white/30 mt-1">Frist: 30 Tage</p>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-500/15 to-yellow-600/5 border border-yellow-500/15">
+          <div className="flex items-center gap-2 mb-1"><ClockIcon className="w-4 h-4 text-yellow-400" /><span className="text-xs text-white/50">Offene Anfragen</span></div>
+          <p className="text-2xl font-bold text-white">{stats.pendingRequests}</p>
         </div>
-
-        <div className="p-5 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-2xl border border-blue-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-blue-500/20 rounded-xl">
-              <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-400" />
-            </div>
-            <span className="text-sm text-white/50">In Bearbeitung</span>
-          </div>
-          <p className="text-2xl font-bold text-blue-400">{stats.processingRequests}</p>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/15 to-blue-600/5 border border-blue-500/15">
+          <div className="flex items-center gap-2 mb-1"><FolderIcon className="w-4 h-4 text-blue-400" /><span className="text-xs text-white/50">Verarbeitungen</span></div>
+          <p className="text-2xl font-bold text-white">{stats.processingActivities}</p>
         </div>
-
-        <div className="p-5 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-2xl border border-green-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-green-500/20 rounded-xl">
-              <CheckCircleIcon className="w-5 h-5 text-green-400" />
-            </div>
-            <span className="text-sm text-white/50">Einwilligungen</span>
-          </div>
-          <p className="text-2xl font-bold text-green-400">{stats.totalConsents}</p>
-        </div>
-
-        <div className="p-5 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-2xl border border-purple-500/20">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-purple-500/20 rounded-xl">
-              <ServerIcon className="w-5 h-5 text-purple-400" />
-            </div>
-            <span className="text-sm text-white/50">Verarbeitungen</span>
-          </div>
-          <p className="text-2xl font-bold text-purple-400">{stats.activeProcessing}</p>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/15 to-purple-600/5 border border-purple-500/15">
+          <div className="flex items-center gap-2 mb-1"><DocumentTextIcon className="w-4 h-4 text-purple-400" /><span className="text-xs text-white/50">Gesamt Dokumente</span></div>
+          <p className="text-2xl font-bold text-white">{stats.documents}</p>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="flex gap-2 p-1 bg-white/[0.04] rounded-xl overflow-x-auto">
-          {[
-            { id: "overview", label: "Übersicht", icon: ShieldCheckIcon },
-            { id: "requests", label: "Anfragen", icon: UserIcon },
-            { id: "consents", label: "Einwilligungen", icon: CheckCircleIcon },
-            { id: "processing", label: "Verzeichnis", icon: DocumentTextIcon },
-            { id: "documents", label: "Dokumente", icon: DocumentDuplicateIcon },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveView(tab.id as typeof activeView)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${
-                activeView === tab.id ? "bg-white/10 text-white" : "text-white/50 hover:text-white"
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Tab Nav */}
+      <div className="flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.06] rounded-xl w-fit">
+        {[
+          { key: "docs" as const, label: "Dokumente", icon: DocumentTextIcon, count: docs.length },
+          { key: "requests" as const, label: "Anfragen", icon: UserIcon, count: requests.length },
+          { key: "processing" as const, label: "Verarbeitungsverzeichnis", icon: FolderIcon, count: processing.length },
+        ].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all ${tab === t.key ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20" : "text-white/50 hover:text-white hover:bg-white/[0.06]"}`}>
+            <t.icon className="w-4 h-4" />{t.label}
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${tab === t.key ? "bg-white/20" : "bg-white/[0.06]"}`}>{t.count}</span>
+          </button>
+        ))}
       </div>
 
-      {/* Overview */}
-      {activeView === "overview" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Compliance Status */}
-          <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <ShieldCheckIcon className="w-5 h-5 text-green-400" />
-              DSGVO-Compliance Status
-            </h3>
-            <div className="space-y-3">
-              {[
-                { label: "Datenschutzerklärung", status: "ok", note: "Aktualisiert am 01.01.2026" },
-                { label: "Verarbeitungsverzeichnis", status: "ok", note: "3 aktive Verarbeitungen" },
-                { label: "Auftragsverarbeitung", status: "ok", note: "AVV mit Vercel, Stripe" },
-                { label: "Technische Maßnahmen", status: "ok", note: "SSL, Verschlüsselung, Backup" },
-                { label: "Cookie-Banner", status: "warning", note: "Überprüfung empfohlen" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl">
-                  <div className="flex items-center gap-3">
-                    {item.status === "ok" ? (
-                      <CheckCircleIcon className="w-5 h-5 text-green-400" />
-                    ) : (
-                      <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400" />
-                    )}
-                    <div>
-                      <p className="text-sm text-white">{item.label}</p>
-                      <p className="text-xs text-white/40">{item.note}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Requests */}
-          <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <UserIcon className="w-5 h-5 text-blue-400" />
-              Aktuelle Betroffenenanfragen
-            </h3>
-            <div className="space-y-3">
-              {requests.slice(0, 4).map((req) => (
-                <div key={req.id} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-${REQUEST_TYPES[req.type].color}-500/20`}>
-                      <UserIcon className={`w-4 h-4 text-${REQUEST_TYPES[req.type].color}-400`} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-white">{req.requester_name}</p>
-                      <p className="text-xs text-white/40">{REQUEST_TYPES[req.type].label}</p>
-                    </div>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-lg text-xs ${
-                    req.status === "pending" ? "bg-yellow-500/20 text-yellow-400" :
-                    req.status === "processing" ? "bg-blue-500/20 text-blue-400" :
-                    req.status === "completed" ? "bg-green-500/20 text-green-400" :
-                    "bg-red-500/20 text-red-400"
-                  }`}>
-                    {req.status === "pending" ? "Offen" :
-                     req.status === "processing" ? "In Bearbeitung" :
-                     req.status === "completed" ? "Erledigt" : "Abgelehnt"}
-                  </span>
-                </div>
-              ))}
-              {requests.length === 0 && (
-                <p className="text-center text-white/40 py-4">Keine offenen Anfragen</p>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="lg:col-span-2 p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4">Schnellaktionen</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { label: "Neue Anfrage erfassen", icon: PlusIcon, color: "FC682C" },
-                { label: "Löschprotokoll", icon: TrashIcon, color: "red" },
-                { label: "Consent exportieren", icon: ArrowDownTrayIcon, color: "blue" },
-                { label: "Audit-Log", icon: ClipboardDocumentCheckIcon, color: "purple" },
-              ].map((action, i) => (
-                <button
-                  key={i}
-                  className="p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl text-left hover:bg-white/[0.04] transition-colors group"
-                >
-                  <action.icon className={`w-5 h-5 text-[#${action.color === "FC682C" ? action.color : action.color + "-400"}] mb-2`} />
-                  <p className="text-sm text-white">{action.label}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Requests View */}
-      {activeView === "requests" && (
+      {/* ═══ DOKUMENTE ═══ */}
+      {tab === "docs" && (
         <div className="space-y-4">
           <div className="flex justify-end">
-            <button
-              onClick={() => setShowRequestModal(true)}
-              className="px-4 py-2 bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-xl text-sm font-medium flex items-center gap-2"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Anfrage erfassen
+            <button onClick={() => setShowAddDoc(true)} className="flex items-center gap-2 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90">
+              <PlusIcon className="w-4 h-4" /> Neues Dokument
             </button>
           </div>
 
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Typ</th>
-                  <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Anfragender</th>
-                  <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Eingegangen</th>
-                  <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Frist</th>
-                  <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Status</th>
-                  <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Aktionen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((req) => {
-                  const deadline = new Date(req.submitted_at);
-                  deadline.setDate(deadline.getDate() + 30);
-                  const daysLeft = Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                  
-                  return (
-                    <tr key={req.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                      <td className="px-5 py-4">
-                        <span className={`px-2.5 py-1 rounded-lg text-xs bg-${REQUEST_TYPES[req.type].color}-500/20 text-${REQUEST_TYPES[req.type].color}-400`}>
-                          {REQUEST_TYPES[req.type].label}
+          {showAddDoc && (
+            <div className="p-5 rounded-2xl bg-green-500/5 border border-green-500/15 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-green-400 flex items-center gap-2"><DocumentTextIcon className="w-4 h-4" /> Neues Dokument</h4>
+                <button onClick={() => setShowAddDoc(false)}><XMarkIcon className="w-4 h-4 text-white/40" /></button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-[10px] text-white/40 mb-1">Titel *</label>
+                  <input type="text" value={newDoc.title} onChange={e => setNewDoc({ ...newDoc, title: e.target.value })} placeholder="z.B. Datenschutzerklärung Website"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Kategorie</label>
+                  <select value={newDoc.category} onChange={e => setNewDoc({ ...newDoc, category: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
+                    {Object.entries(CAT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select></div>
+              </div>
+              <div><label className="block text-[10px] text-white/40 mb-1">Beschreibung</label>
+                <input type="text" value={newDoc.description} onChange={e => setNewDoc({ ...newDoc, description: e.target.value })} placeholder="Kurze Beschreibung..."
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+              <div><label className="block text-[10px] text-white/40 mb-1">Inhalt *</label>
+                <textarea value={newDoc.content} onChange={e => setNewDoc({ ...newDoc, content: e.target.value })} rows={10} placeholder="Vollständiger Text des Dokuments..."
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none resize-none font-mono" /></div>
+              <button onClick={handleAddDoc} disabled={saving || !newDoc.title || !newDoc.content}
+                className="w-full py-2.5 bg-green-500/20 text-green-400 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2">
+                {saving ? "Speichert..." : <><PlusIcon className="w-4 h-4" /> Dokument erstellen</>}
+              </button>
+            </div>
+          )}
+
+          <div className="grid lg:grid-cols-2 gap-3">
+            {docs.length === 0 ? (
+              <div className="lg:col-span-2 flex flex-col items-center justify-center py-16 text-center">
+                <DocumentTextIcon className="w-16 h-16 text-white/10 mb-4" />
+                <h3 className="text-lg font-medium text-white/50">Keine Dokumente</h3>
+                <p className="text-sm text-white/30">Erstelle dein erstes Datenschutz-Dokument</p>
+              </div>
+            ) : docs.map(doc => {
+              const CatIcon = CAT_ICONS[doc.category] || DocumentTextIcon;
+              return (
+                <div key={doc.id} className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-all group">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 rounded-xl bg-[#FC682C]/15 flex-shrink-0">
+                      <CatIcon className="w-5 h-5 text-[#FC682C]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-sm font-medium text-white">{doc.title}</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${doc.status === 'active' ? 'bg-green-500/15 text-green-400' : doc.status === 'draft' ? 'bg-yellow-500/15 text-yellow-400' : 'bg-white/10 text-white/40'}`}>
+                          {doc.status === 'active' ? 'Aktiv' : doc.status === 'draft' ? 'Entwurf' : 'Archiviert'}
                         </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <p className="text-sm text-white">{req.requester_name}</p>
-                        <p className="text-xs text-white/40">{req.requester_email}</p>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-white/70">{formatDate(req.submitted_at)}</td>
-                      <td className="px-5 py-4">
-                        {req.status !== "completed" && req.status !== "rejected" ? (
-                          <span className={`text-sm ${daysLeft <= 7 ? "text-red-400" : daysLeft <= 14 ? "text-yellow-400" : "text-white/70"}`}>
-                            {daysLeft} Tage
-                          </span>
-                        ) : (
-                          <span className="text-sm text-white/40">-</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-4">
-                        <select
-                          value={req.status}
-                          onChange={(e) => updateRequestStatus(req.id, e.target.value as DataSubjectRequest["status"])}
-                          className={`px-2.5 py-1 rounded-lg text-xs bg-transparent border outline-none ${
-                            req.status === "pending" ? "border-yellow-500/30 text-yellow-400" :
-                            req.status === "processing" ? "border-blue-500/30 text-blue-400" :
-                            req.status === "completed" ? "border-green-500/30 text-green-400" :
-                            "border-red-500/30 text-red-400"
-                          }`}
-                        >
-                          <option value="pending">Offen</option>
-                          <option value="processing">In Bearbeitung</option>
-                          <option value="completed">Erledigt</option>
-                          <option value="rejected">Abgelehnt</option>
-                        </select>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex gap-2">
-                          <button className="p-2 hover:bg-white/10 rounded-lg" title="Details">
-                            <EyeIcon className="w-4 h-4 text-white/50" />
-                          </button>
-                          <button className="p-2 hover:bg-white/10 rounded-lg" title="E-Mail senden">
-                            <EnvelopeIcon className="w-4 h-4 text-white/50" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <span className="text-[9px] text-white/20">v{doc.version}</span>
+                      </div>
+                      <p className="text-[11px] text-white/35">{doc.description || CAT_LABELS[doc.category]} · {new Date(doc.updated_at).toLocaleDateString("de-DE")}</p>
+                      {doc.sent_to && doc.sent_to.length > 0 && (
+                        <p className="text-[10px] text-green-400/60 mt-1">Gesendet an: {doc.sent_to.join(", ")}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => setViewDoc(doc)} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white" title="Ansehen"><EyeIcon className="w-4 h-4" /></button>
+                      <button onClick={() => setEditDoc({ ...doc })} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white" title="Bearbeiten"><PencilIcon className="w-4 h-4" /></button>
+                      <button onClick={() => { setSendDoc(doc); setSendForm({ to_email: "", to_name: "", message: "" }); }} className="p-1.5 hover:bg-blue-500/20 rounded-lg text-white/30 hover:text-blue-400" title="Per E-Mail senden"><PaperAirplaneIcon className="w-4 h-4" /></button>
+                      <button onClick={() => deleteItem(doc.id, 'document')} className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/30 hover:text-red-400" title="Löschen"><TrashIcon className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Consents View */}
-      {activeView === "consents" && (
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/[0.06]">
-                <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">E-Mail</th>
-                <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Einwilligung</th>
-                <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Status</th>
-                <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">Zeitpunkt</th>
-                <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">IP-Adresse</th>
-              </tr>
-            </thead>
-            <tbody>
-              {consents.map((consent) => (
-                <tr key={consent.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                  <td className="px-5 py-4 text-sm text-white">{consent.user_email}</td>
-                  <td className="px-5 py-4 text-sm text-white/70 capitalize">{consent.consent_type}</td>
-                  <td className="px-5 py-4">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs ${
-                      consent.granted ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-                    }`}>
-                      {consent.granted ? "Erteilt" : "Widerrufen"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-white/50">{formatDate(consent.granted_at)}</td>
-                  <td className="px-5 py-4 text-sm text-white/30 font-mono">{consent.ip_address}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Processing Activities (Verarbeitungsverzeichnis) */}
-      {activeView === "processing" && (
+      {/* ═══ ANFRAGEN ═══ */}
+      {tab === "requests" && (
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <p className="text-white/50 text-sm">Verzeichnis von Verarbeitungstätigkeiten nach Art. 30 DSGVO</p>
-            <button className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2">
-              <ArrowDownTrayIcon className="w-4 h-4" />
-              Als PDF exportieren
+          <div className="flex justify-end">
+            <button onClick={() => setShowAddReq(true)} className="flex items-center gap-2 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90">
+              <PlusIcon className="w-4 h-4" /> Neue Anfrage
             </button>
           </div>
 
-          <div className="space-y-4">
-            {activities.map((activity) => (
-              <div key={activity.id} className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h4 className="text-lg font-semibold text-white">{activity.name}</h4>
-                    <p className="text-sm text-white/50">{activity.purpose}</p>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-lg text-xs ${
-                    activity.status === "active" ? "bg-green-500/20 text-green-400" :
-                    activity.status === "review" ? "bg-yellow-500/20 text-yellow-400" :
-                    "bg-white/10 text-white/40"
-                  }`}>
-                    {activity.status === "active" ? "Aktiv" : activity.status === "review" ? "Prüfung" : "Inaktiv"}
-                  </span>
-                </div>
+          {showAddReq && (
+            <div className="p-5 rounded-2xl bg-yellow-500/5 border border-yellow-500/15 space-y-3">
+              <h4 className="text-sm font-semibold text-yellow-400 flex items-center gap-2"><UserIcon className="w-4 h-4" /> Betroffenenanfrage erfassen</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-[10px] text-white/40 mb-1">Name *</label>
+                  <input value={newReq.name} onChange={e => setNewReq({ ...newReq, name: e.target.value })} placeholder="Name der betroffenen Person"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">E-Mail *</label>
+                  <input type="email" value={newReq.email} onChange={e => setNewReq({ ...newReq, email: e.target.value })} placeholder="email@example.com"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Art der Anfrage</label>
+                  <select value={newReq.request_type} onChange={e => setNewReq({ ...newReq, request_type: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
+                    {Object.entries(REQ_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Beschreibung</label>
+                  <input value={newReq.description} onChange={e => setNewReq({ ...newReq, description: e.target.value })} placeholder="Details..."
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+              </div>
+              <button onClick={handleAddReq} disabled={saving || !newReq.name || !newReq.email}
+                className="w-full py-2.5 bg-yellow-500/20 text-yellow-400 rounded-xl text-sm font-medium disabled:opacity-50">{saving ? "Speichert..." : "Anfrage erfassen"}</button>
+            </div>
+          )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-white/40 mb-1">Rechtsgrundlage</p>
-                    <p className="text-sm text-white">{activity.legal_basis}</p>
+          <div className="space-y-2">
+            {requests.length === 0 ? (
+              <div className="text-center py-16"><UserIcon className="w-16 h-16 text-white/10 mx-auto mb-4" /><h3 className="text-lg font-medium text-white/50">Keine Anfragen</h3></div>
+            ) : requests.map(req => (
+              <div key={req.id} className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${req.status === 'completed' ? 'bg-green-500/15' : req.status === 'in_progress' ? 'bg-blue-500/15' : 'bg-yellow-500/15'}`}>
+                    <UserIcon className={`w-5 h-5 ${req.status === 'completed' ? 'text-green-400' : req.status === 'in_progress' ? 'text-blue-400' : 'text-yellow-400'}`} />
                   </div>
                   <div>
-                    <p className="text-xs text-white/40 mb-1">Aufbewahrungsfrist</p>
-                    <p className="text-sm text-white">{activity.retention_period}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/40 mb-1">Datenkategorien</p>
-                    <div className="flex flex-wrap gap-1">
-                      {activity.data_categories.map((cat, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-white/5 rounded text-xs text-white/70">{cat}</span>
-                      ))}
+                    <div className="flex items-center gap-2"><span className="text-sm font-medium text-white">{req.name}</span><span className="text-[9px] text-white/30">{req.email}</span></div>
+                    <div className="flex items-center gap-2 text-[11px] text-white/35">
+                      <span>{REQ_LABELS[req.request_type] || req.request_type}</span>
+                      <span>· {new Date(req.created_at).toLocaleDateString("de-DE")}</span>
+                      {req.deadline && <span>· Frist: {new Date(req.deadline).toLocaleDateString("de-DE")}</span>}
                     </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-white/40 mb-1">Empfänger</p>
-                    <div className="flex flex-wrap gap-1">
-                      {activity.recipients.map((rec, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-white/5 rounded text-xs text-white/70">{rec}</span>
-                      ))}
-                    </div>
-                  </div>
                 </div>
-
-                <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                  <p className="text-xs text-white/40 mb-2">Technische & organisatorische Maßnahmen</p>
-                  <div className="flex flex-wrap gap-1">
-                    {activity.security_measures.map((measure, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-green-500/10 text-green-400 rounded text-xs flex items-center gap-1">
-                        <LockClosedIcon className="w-3 h-3" />
-                        {measure}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex items-center gap-2">
+                  <select value={req.status} onChange={e => updateReqStatus(req.id, e.target.value)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border outline-none cursor-pointer ${
+                      req.status === 'completed' ? 'bg-green-500/15 text-green-400 border-green-500/20' :
+                      req.status === 'in_progress' ? 'bg-blue-500/15 text-blue-400 border-blue-500/20' :
+                      req.status === 'rejected' ? 'bg-red-500/15 text-red-400 border-red-500/20' :
+                      'bg-yellow-500/15 text-yellow-400 border-yellow-500/20'
+                    }`}>
+                    {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                  <button onClick={() => deleteItem(req.id, 'request')} className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/20 hover:text-red-400"><TrashIcon className="w-4 h-4" /></button>
                 </div>
               </div>
             ))}
@@ -554,34 +323,165 @@ export default function PrivacyTab() {
         </div>
       )}
 
-      {/* Documents */}
-      {activeView === "documents" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { title: "Datenschutzerklärung", desc: "Für Website & Portal", updated: "01.01.2026", icon: DocumentTextIcon },
-            { title: "Impressum", desc: "Rechtliche Angaben", updated: "01.01.2026", icon: GlobeAltIcon },
-            { title: "AVV Template", desc: "Auftragsverarbeitung", updated: "15.12.2025", icon: DocumentDuplicateIcon },
-            { title: "Löschkonzept", desc: "Aufbewahrungsfristen", updated: "01.01.2026", icon: TrashIcon },
-            { title: "TOM-Dokumentation", desc: "Technische Maßnahmen", updated: "01.02.2026", icon: LockClosedIcon },
-            { title: "Einwilligungsformular", desc: "Consent Template", updated: "01.01.2026", icon: CheckCircleIcon },
-          ].map((doc, i) => (
-            <div
-              key={i}
-              className="p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl hover:bg-white/[0.04] hover:border-white/[0.1] transition-colors cursor-pointer group"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="p-2 bg-[#FC682C]/20 rounded-xl">
-                  <doc.icon className="w-5 h-5 text-[#FC682C]" />
-                </div>
-                <button className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/10 rounded-lg transition-opacity">
-                  <ArrowDownTrayIcon className="w-4 h-4 text-white/50" />
-                </button>
+      {/* ═══ VERARBEITUNGSVERZEICHNIS ═══ */}
+      {tab === "processing" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-white/30">Pflicht nach DSGVO Art. 30 — Verzeichnis aller Verarbeitungstätigkeiten</p>
+            <button onClick={() => setShowAddProc(true)} className="flex items-center gap-2 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90">
+              <PlusIcon className="w-4 h-4" /> Neue Verarbeitung
+            </button>
+          </div>
+
+          {showAddProc && (
+            <div className="p-5 rounded-2xl bg-blue-500/5 border border-blue-500/15 space-y-3">
+              <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2"><FolderIcon className="w-4 h-4" /> Verarbeitungstätigkeit anlegen</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-[10px] text-white/40 mb-1">Bezeichnung *</label>
+                  <input value={newProc.name} onChange={e => setNewProc({ ...newProc, name: e.target.value })} placeholder="z.B. Kundenverwaltung"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Rechtsgrundlage *</label>
+                  <select value={newProc.legal_basis} onChange={e => setNewProc({ ...newProc, legal_basis: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
+                    <option>Vertragserfüllung (Art. 6 Abs. 1 lit. b)</option>
+                    <option>Einwilligung (Art. 6 Abs. 1 lit. a)</option>
+                    <option>Berechtigtes Interesse (Art. 6 Abs. 1 lit. f)</option>
+                    <option>Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c)</option>
+                  </select></div>
+                <div className="col-span-2"><label className="block text-[10px] text-white/40 mb-1">Zweck *</label>
+                  <input value={newProc.purpose} onChange={e => setNewProc({ ...newProc, purpose: e.target.value })} placeholder="Zweck der Datenverarbeitung"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Datenkategorien</label>
+                  <input value={newProc.data_categories} onChange={e => setNewProc({ ...newProc, data_categories: e.target.value })} placeholder="Name, E-Mail, Telefon..."
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Empfänger</label>
+                  <input value={newProc.recipients} onChange={e => setNewProc({ ...newProc, recipients: e.target.value })} placeholder="z.B. Hosting-Provider, Intern"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Aufbewahrungsfrist</label>
+                  <input value={newProc.retention} onChange={e => setNewProc({ ...newProc, retention: e.target.value })} placeholder="z.B. 10 Jahre nach Vertragsende"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Sicherheitsmaßnahmen</label>
+                  <input value={newProc.security_measures} onChange={e => setNewProc({ ...newProc, security_measures: e.target.value })} placeholder="SSL, Verschlüsselung..."
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
               </div>
-              <h4 className="text-white font-medium mb-1">{doc.title}</h4>
-              <p className="text-sm text-white/40 mb-2">{doc.desc}</p>
-              <p className="text-xs text-white/30">Aktualisiert: {doc.updated}</p>
+              <button onClick={handleAddProc} disabled={saving || !newProc.name || !newProc.purpose}
+                className="w-full py-2.5 bg-blue-500/20 text-blue-400 rounded-xl text-sm font-medium disabled:opacity-50">{saving ? "Speichert..." : "Anlegen"}</button>
             </div>
-          ))}
+          )}
+
+          <div className="space-y-2">
+            {processing.length === 0 ? (
+              <div className="text-center py-16"><FolderIcon className="w-16 h-16 text-white/10 mx-auto mb-4" /><h3 className="text-lg font-medium text-white/50">Noch keine Verarbeitungstätigkeiten</h3></div>
+            ) : processing.map(proc => (
+              <div key={proc.id} className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-white">{proc.name}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${proc.status === 'active' ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'}`}>
+                      {proc.status === 'active' ? 'Aktiv' : 'Inaktiv'}
+                    </span>
+                  </div>
+                  <button onClick={() => deleteItem(proc.id, 'processing')} className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/20 hover:text-red-400"><TrashIcon className="w-4 h-4" /></button>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 text-[11px]">
+                  <div className="p-2 bg-white/[0.02] rounded-lg"><span className="text-white/30 block">Zweck</span><span className="text-white/60">{proc.purpose}</span></div>
+                  <div className="p-2 bg-white/[0.02] rounded-lg"><span className="text-white/30 block">Rechtsgrundlage</span><span className="text-white/60">{proc.legal_basis}</span></div>
+                  {proc.data_categories && <div className="p-2 bg-white/[0.02] rounded-lg"><span className="text-white/30 block">Daten</span><span className="text-white/60">{proc.data_categories}</span></div>}
+                  {proc.recipients && <div className="p-2 bg-white/[0.02] rounded-lg"><span className="text-white/30 block">Empfänger</span><span className="text-white/60">{proc.recipients}</span></div>}
+                  {proc.retention && <div className="p-2 bg-white/[0.02] rounded-lg"><span className="text-white/30 block">Frist</span><span className="text-white/60">{proc.retention}</span></div>}
+                  {proc.security_measures && <div className="p-2 bg-white/[0.02] rounded-lg"><span className="text-white/30 block">Sicherheit</span><span className="text-white/60">{proc.security_measures}</span></div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ═══ VIEW MODAL ═══ */}
+      {viewDoc && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => setViewDoc(null)}>
+          <div className="w-full max-w-2xl bg-[#111827] border-l border-white/[0.08] h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] bg-gradient-to-r from-green-500/10 to-transparent sticky top-0 bg-[#111827] z-10">
+              <div>
+                <h3 className="text-lg font-semibold text-white">{viewDoc.title}</h3>
+                <p className="text-xs text-white/40">{CAT_LABELS[viewDoc.category]} · v{viewDoc.version} · {new Date(viewDoc.updated_at).toLocaleDateString("de-DE")}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => { setEditDoc({ ...viewDoc }); setViewDoc(null); }} className="p-2 hover:bg-white/10 rounded-xl"><PencilIcon className="w-5 h-5 text-white/60" /></button>
+                <button onClick={() => { setSendDoc(viewDoc); setSendForm({ to_email: "", to_name: "", message: "" }); setViewDoc(null); }} className="p-2 hover:bg-blue-500/20 rounded-xl"><PaperAirplaneIcon className="w-5 h-5 text-blue-400" /></button>
+                <button onClick={() => setViewDoc(null)} className="p-2 hover:bg-white/10 rounded-xl"><XMarkIcon className="w-5 h-5 text-white/60" /></button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-white/70 leading-relaxed">{viewDoc.content}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ EDIT MODAL ═══ */}
+      {editDoc && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => setEditDoc(null)}>
+          <div className="w-full max-w-2xl bg-[#111827] border-l border-white/[0.08] h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] bg-gradient-to-r from-[#FC682C]/10 to-transparent sticky top-0 bg-[#111827] z-10">
+              <h3 className="text-lg font-semibold text-white">Dokument bearbeiten</h3>
+              <button onClick={() => setEditDoc(null)} className="p-2 hover:bg-white/10 rounded-xl"><XMarkIcon className="w-5 h-5 text-white/60" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-[10px] text-white/40 mb-1">Titel</label>
+                  <input value={editDoc.title} onChange={e => setEditDoc({ ...editDoc, title: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Kategorie</label>
+                  <select value={editDoc.category} onChange={e => setEditDoc({ ...editDoc, category: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
+                    {Object.entries(CAT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select></div>
+              </div>
+              <div><label className="block text-[10px] text-white/40 mb-1">Beschreibung</label>
+                <input value={editDoc.description || ""} onChange={e => setEditDoc({ ...editDoc, description: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none" /></div>
+              <div><label className="block text-[10px] text-white/40 mb-1">Inhalt</label>
+                <textarea value={editDoc.content} onChange={e => setEditDoc({ ...editDoc, content: e.target.value })} rows={20}
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none resize-none font-mono" /></div>
+              <div className="flex gap-2">
+                <button onClick={handleUpdateDoc} disabled={saving} className="flex-1 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                  {saving ? "Speichert..." : "Speichern (neue Version)"}
+                </button>
+                <button onClick={() => setEditDoc(null)} className="px-4 py-2.5 bg-white/[0.04] text-white/50 rounded-xl text-sm">Abbrechen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ SEND MODAL ═══ */}
+      {sendDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setSendDoc(null)}>
+          <div className="w-full max-w-md bg-[#111827] border border-white/[0.08] rounded-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-white/[0.06] bg-gradient-to-r from-blue-500/10 to-transparent">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2"><PaperAirplaneIcon className="w-5 h-5 text-blue-400" /> Dokument senden</h3>
+              <p className="text-xs text-white/40 mt-1">"{sendDoc.title}" per E-Mail versenden</p>
+            </div>
+            <div className="p-6 space-y-3">
+              <div><label className="block text-[10px] text-white/40 mb-1">Empfänger E-Mail *</label>
+                <input type="email" value={sendForm.to_email} onChange={e => setSendForm({ ...sendForm, to_email: e.target.value })} placeholder="kunde@example.com"
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+              <div><label className="block text-[10px] text-white/40 mb-1">Empfänger Name</label>
+                <input value={sendForm.to_name} onChange={e => setSendForm({ ...sendForm, to_name: e.target.value })} placeholder="Max Mustermann"
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+              <div><label className="block text-[10px] text-white/40 mb-1">Persönliche Nachricht (optional)</label>
+                <textarea value={sendForm.message} onChange={e => setSendForm({ ...sendForm, message: e.target.value })} rows={3} placeholder="z.B. Bitte prüfen und bestätigen Sie..."
+                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none resize-none" /></div>
+            </div>
+            <div className="flex justify-end gap-2 px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
+              <button onClick={() => setSendDoc(null)} className="px-4 py-2 text-white/50 text-sm">Abbrechen</button>
+              <button onClick={handleSendDoc} disabled={saving || !sendForm.to_email}
+                className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2">
+                {saving ? "Sendet..." : <><PaperAirplaneIcon className="w-4 h-4" /> Senden</>}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
