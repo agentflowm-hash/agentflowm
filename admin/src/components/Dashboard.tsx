@@ -7275,6 +7275,7 @@ function ClientDetailModal({
 
   // Dokumente State
   const [clientInvoices, setClientInvoices] = useState<any[]>([]);
+  const [clientOffers, setClientOffers] = useState<any[]>([]);
   const [clientAgreements, setClientAgreements] = useState<any[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [showCreateInvoice, setShowCreateInvoice] = useState(false);
@@ -7456,10 +7457,13 @@ function ClientDetailModal({
         const invData = await invRes.json();
         const invUnwrapped = invData.data || invData;
         const allInvoices = invUnwrapped.invoices || [];
-        setClientInvoices(allInvoices.filter((inv: any) =>
+        const clientDocs = allInvoices.filter((inv: any) =>
           inv.client_name?.toLowerCase() === client.name.toLowerCase() ||
           inv.client_email?.toLowerCase() === client.email.toLowerCase()
-        ));
+        );
+        // Separate invoices from offers
+        setClientInvoices(clientDocs.filter((d: any) => d.type !== 'offer'));
+        setClientOffers(clientDocs.filter((d: any) => d.type === 'offer'));
       }
       if (agrRes.ok) {
         const agrData = await agrRes.json();
@@ -8663,6 +8667,36 @@ function ClientDetailModal({
                 <div className="text-center py-4 text-white/40 text-sm">Dokumente werden geladen...</div>
               ) : (
                 <div className="space-y-3">
+                  {/* Offers */}
+                  {clientOffers.length > 0 && (
+                    <div>
+                      <h4 className="text-xs text-blue-400/60 uppercase tracking-wider mb-2">Angebote ({clientOffers.length})</h4>
+                      <div className="space-y-2">
+                        {clientOffers.map((offer: any) => (
+                          <div key={offer.id} className="p-3 bg-white/[0.02] rounded-xl border border-blue-500/10 hover:border-blue-500/20 transition-colors">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                  <DocumentTextIcon className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <div>
+                                  <div className="text-xs font-medium text-white">{offer.invoice_number}</div>
+                                  <div className="text-[10px] text-white/30">{new Date(offer.created_at).toLocaleDateString("de-DE")}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-blue-400">€{Number(offer.total).toLocaleString("de-DE", { minimumFractionDigits: 2 })}</span>
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-medium ${offer.status === "sent" ? "bg-blue-500/15 text-blue-400" : offer.status === "paid" ? "bg-green-500/15 text-green-400" : "bg-white/10 text-white/40"}`}>
+                                  {offer.status === "sent" ? "Gesendet" : offer.status === "paid" ? "Angenommen" : "Entwurf"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Invoices */}
                   {clientInvoices.length > 0 && (
                     <div>
