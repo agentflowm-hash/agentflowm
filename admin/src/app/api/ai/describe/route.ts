@@ -54,3 +54,4 @@ Antworte NUR mit der Leistungsbeschreibung, ohne Einleitung oder Erklärung.`;
     return NextResponse.json({ error: 'AI nicht erreichbar' }, { status: 500 });
   }
 }
+// Redeploy trigger 1773827616
