@@ -81,114 +81,121 @@ export function generateOfferHTML(data: OfferData): string {
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; color: #1a1a2e; background: #fff; }
+    body { font-family: 'Inter', sans-serif; color: #e0e0e0; background: #0a0a0f; }
     .page { max-width: 800px; margin: 0 auto; padding: 48px 56px; }
 
     /* Header */
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 3px solid #FC682C; }
-    .logo { font-size: 20px; font-weight: 800; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 48px; }
+    .logo { font-size: 20px; font-weight: 800; color: #fff; }
     .logo span { color: #FC682C; font-style: italic; }
-    .logo-sub { font-size: 11px; color: #999; margin-top: 2px; }
+    .logo-sub { font-size: 11px; color: #666; margin-top: 2px; }
     .offer-badge { text-align: right; }
-    .offer-badge .label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #FC682C; font-weight: 600; }
-    .offer-badge .number { font-size: 28px; font-weight: 900; color: #FC682C; }
+    .offer-badge .label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #888; font-weight: 600; }
+    .offer-badge .number { font-size: 24px; font-weight: 900; color: #fff; }
     .offer-badge .date { font-size: 12px; color: #666; }
 
     /* Package Title */
-    .package-header { margin-bottom: 32px; }
-    .package-name { font-size: 36px; font-weight: 900; line-height: 1.1; }
+    .package-header { margin-bottom: 36px; }
+    .package-name { font-size: 42px; font-weight: 900; line-height: 1.1; color: #fff; }
     .package-name em { color: #FC682C; font-style: normal; }
-    .package-subtitle { font-size: 16px; color: #666; margin-top: 8px; font-weight: 500; }
-    .package-desc { font-size: 14px; color: #888; margin-top: 8px; line-height: 1.6; }
+    .package-subtitle { font-size: 18px; color: #FC682C; margin-top: 8px; font-weight: 500; }
+    .package-desc { font-size: 14px; color: #888; margin-top: 12px; line-height: 1.7; }
 
     /* Client Info */
-    .client-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #eee; border-radius: 12px; overflow: hidden; margin: 28px 0; }
-    .client-field { background: #f9f9f9; padding: 16px 20px; }
-    .client-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #999; font-weight: 600; margin-bottom: 4px; }
-    .client-value { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+    .client-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #222; border-radius: 12px; overflow: hidden; margin: 32px 0; }
+    .client-field { background: #151520; padding: 18px 22px; }
+    .client-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #666; font-weight: 600; margin-bottom: 6px; }
+    .client-value { font-size: 14px; font-weight: 700; color: #fff; }
 
     /* Badges */
-    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0; }
-    .badge { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1.5px solid #FC682C; color: #FC682C; }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 36px; }
+    .badge { padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1.5px solid rgba(252,104,44,0.4); color: #FC682C; background: rgba(252,104,44,0.08); }
+
+    /* Divider */
+    .divider { height: 1px; background: #1a1a25; margin: 32px 0; }
 
     /* Section Headers */
     .section { margin: 36px 0 16px; }
-    .section-title { font-size: 18px; font-weight: 800; color: #1a1a2e; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+    .section-title { font-size: 18px; font-weight: 800; color: #fff; padding-bottom: 12px; border-bottom: 1px solid #1a1a25; }
 
-    /* Kurzüberblick */
-    .kurzueberblick { font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 24px; }
+    /* Kurzueberblick */
+    .kurzueberblick { font-size: 13px; color: #999; line-height: 1.8; margin-bottom: 24px; }
 
     /* Ausgangslage */
     .problems { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-    .problem-item { padding: 12px 16px; background: #fff5f5; border-radius: 8px; font-size: 12px; color: #666; line-height: 1.5; }
-    .problem-icon { color: #ef4444; font-weight: 700; margin-right: 6px; }
+    .problem-item { padding: 14px 18px; background: #151520; border-radius: 10px; font-size: 12px; color: #aaa; line-height: 1.6; border: 1px solid #1a1a25; }
+    .problem-icon { color: #ef4444; font-weight: 700; margin-right: 8px; }
 
     /* Quote */
-    .quote { padding: 16px 20px; border-left: 4px solid #FC682C; background: #f8f8f8; margin: 20px 0; font-size: 13px; font-weight: 700; font-style: italic; color: #333; }
+    .quote { padding: 18px 24px; border-left: 4px solid #FC682C; background: #151520; margin: 24px 0; font-size: 14px; font-weight: 700; font-style: italic; color: #fff; }
 
     /* Zielbild */
     .goals { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
-    .goal-item { padding: 10px 16px; background: #f0fdf4; border-radius: 8px; font-size: 12px; color: #333; }
-    .goal-check { color: #22c55e; font-weight: 700; margin-right: 8px; }
+    .goal-item { padding: 12px 18px; background: #151520; border-radius: 10px; font-size: 12px; color: #ccc; border: 1px solid #1a1a25; }
+    .goal-check { color: #FC682C; font-weight: 700; margin-right: 10px; }
 
     /* Services */
     .services-list { display: flex; flex-direction: column; gap: 4px; }
-    .service-item { display: flex; gap: 12px; padding: 12px 16px; background: #f9f9f9; border-radius: 8px; align-items: flex-start; }
+    .service-item { display: flex; gap: 14px; padding: 14px 18px; background: #151520; border-radius: 10px; align-items: flex-start; border: 1px solid #1a1a25; }
     .service-check { color: #FC682C; font-weight: 700; font-size: 14px; margin-top: 1px; flex-shrink: 0; }
-    .service-title { font-size: 13px; font-weight: 600; color: #1a1a2e; }
-    .service-desc { font-size: 11px; color: #888; margin-top: 2px; }
+    .service-title { font-size: 13px; font-weight: 700; color: #fff; }
+    .service-desc { font-size: 11px; color: #777; margin-top: 3px; }
 
     /* Steps */
     .steps { display: flex; gap: 8px; margin: 16px 0; }
-    .step { flex: 1; text-align: center; padding: 16px 8px; background: #f9f9f9; border-radius: 12px; }
-    .step-num { width: 28px; height: 28px; border-radius: 50%; background: #FC682C; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
-    .step-label { font-size: 11px; font-weight: 600; color: #333; }
-    .step-sub { font-size: 10px; color: #888; }
-    .timeline { text-align: center; font-size: 13px; color: #666; margin-top: 12px; }
+    .step { flex: 1; text-align: center; padding: 20px 8px; background: #151520; border-radius: 12px; border: 1px solid #1a1a25; }
+    .step-num { width: 30px; height: 30px; border-radius: 50%; background: #FC682C; color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+    .step-label { font-size: 11px; font-weight: 600; color: #fff; }
+    .step-sub { font-size: 10px; color: #666; }
+    .timeline { text-align: center; font-size: 13px; color: #888; margin-top: 16px; }
     .timeline strong { color: #FC682C; }
 
     /* Investment */
-    .investment-box { background: #1a1a2e; border-radius: 16px; padding: 32px; color: #fff; margin: 24px 0; }
-    .inv-label { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 8px; }
-    .inv-price { text-align: center; font-size: 48px; font-weight: 900; color: #fff; }
+    .investment-box { background: linear-gradient(135deg, #1a1a2e, #151520); border-radius: 16px; padding: 36px; color: #fff; margin: 28px 0; border: 1px solid #252535; }
+    .inv-label { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 12px; }
+    .inv-price { text-align: center; font-size: 52px; font-weight: 900; color: #fff; }
     .inv-price em { color: #FC682C; font-style: italic; font-size: 24px; font-weight: 600; }
-    .inv-gross { text-align: center; font-size: 13px; color: #888; margin-top: 4px; }
-    .inv-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; margin-top: 24px; }
-    .inv-split-item { background: rgba(255,255,255,0.05); padding: 20px; text-align: center; }
-    .inv-split-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #888; margin-bottom: 8px; }
-    .inv-split-value { font-size: 22px; font-weight: 800; color: #fff; }
-    .inv-split-sub { font-size: 10px; color: #666; margin-top: 4px; }
+    .inv-gross { text-align: center; font-size: 13px; color: #666; margin-top: 6px; }
+    .inv-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden; margin-top: 28px; }
+    .inv-split-item { background: rgba(255,255,255,0.03); padding: 22px; text-align: center; }
+    .inv-split-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #666; margin-bottom: 10px; }
+    .inv-split-value { font-size: 24px; font-weight: 800; color: #fff; }
+    .inv-split-sub { font-size: 10px; color: #555; margin-top: 6px; }
 
-    /* Code Übergabe */
-    .code-box { padding: 20px; background: #f9f9f9; border-radius: 12px; border: 1px solid #eee; margin: 16px 0; }
-    .code-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-    .code-desc { font-size: 12px; color: #666; line-height: 1.6; }
-    .code-points { margin-top: 8px; }
-    .code-points div { font-size: 11px; color: #888; padding: 2px 0; }
+    /* Code Uebergabe */
+    .code-box { padding: 22px; background: #151520; border-radius: 12px; border: 1px solid #1a1a25; margin: 20px 0; }
+    .code-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .code-desc { font-size: 12px; color: #888; line-height: 1.6; }
+    .code-points { margin-top: 10px; }
+    .code-points div { font-size: 11px; color: #777; padding: 3px 0; }
     .code-points div::before { content: "\\2192 "; color: #FC682C; }
 
     /* Rahmenbedingungen */
-    .conditions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    .condition-box { padding: 16px; border-radius: 12px; border: 1px solid #eee; }
-    .condition-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
-    .condition-list { font-size: 11px; color: #666; line-height: 1.8; }
+    .conditions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+    .condition-box { padding: 18px; border-radius: 12px; border: 1px solid #1a1a25; background: #151520; }
+    .condition-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .condition-list { font-size: 11px; color: #888; line-height: 2; }
     .condition-list div::before { content: "\\2022 "; color: #FC682C; }
 
-    /* Annahme */
-    .acceptance { border: 2px solid #eee; border-left: 4px solid #FC682C; border-radius: 12px; padding: 32px; margin: 32px 0; page-break-inside: avoid; }
-    .acceptance-title { font-size: 18px; font-weight: 800; color: #FC682C; margin-bottom: 4px; }
-    .acceptance-sub { font-size: 12px; color: #888; margin-bottom: 20px; }
-    .acceptance-text { font-size: 12px; color: #555; line-height: 1.6; padding: 12px 16px; background: #f9f9f9; border-radius: 8px; margin-bottom: 24px; }
+    /* Annahme - Light mode for print */
+    .acceptance { background: #fff; border-radius: 12px; border-left: 4px solid #FC682C; padding: 36px; margin: 36px 0; page-break-inside: avoid; }
+    .acceptance-title { font-size: 20px; font-weight: 800; color: #FC682C; margin-bottom: 4px; }
+    .acceptance-sub { font-size: 12px; color: #888; margin-bottom: 24px; }
+    .acceptance-text { font-size: 12px; color: #555; line-height: 1.7; padding: 14px 18px; background: #f5f5f5; border-radius: 8px; margin-bottom: 28px; }
     .acceptance-text strong { color: #1a1a2e; }
-    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
-    .field-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #999; font-weight: 600; margin-bottom: 8px; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+    .field-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #999; font-weight: 600; margin-bottom: 10px; }
     .field-line { border-bottom: 1px solid #ccc; height: 28px; }
-    .sig-area { border: 2px dashed #ddd; border-radius: 12px; padding: 24px; min-height: 100px; display: flex; align-items: flex-end; justify-content: space-between; margin-top: 8px; }
+    .sig-area { border: 2px dashed #ddd; border-radius: 12px; padding: 28px; min-height: 100px; display: flex; align-items: flex-end; justify-content: space-between; margin-top: 12px; }
     .sig-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #bbb; }
 
     /* Footer */
-    .footer { text-align: center; font-size: 11px; color: #999; padding-top: 20px; border-top: 1px solid #eee; margin-top: 32px; }
-    .footer-note { font-size: 10px; color: #FC682C; font-style: italic; margin-bottom: 8px; }
+    .footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #555; padding-top: 24px; border-top: 1px solid #1a1a25; margin-top: 40px; }
+    .footer-left { }
+    .footer-left strong { color: #fff; }
+    .footer-left span { color: #FC682C; }
+    .footer-right { text-align: right; color: #666; }
+    .footer-note { text-align: center; font-size: 10px; color: #FC682C; font-style: italic; margin-bottom: 12px; }
 
     @media print {
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -346,9 +353,17 @@ export function generateOfferHTML(data: OfferData): string {
     </div>
 
     <!-- Footer -->
+    <div class="footer-note">Dieses Dokument ist ein Angebot. Die finalen Details werden im Projektvertrag festgehalten. ${data.offer_number}</div>
     <div class="footer">
-      <div class="footer-note">Dieses Dokument ist ein Angebot. Die finalen Details werden im Projektvertrag festgehalten. ${data.offer_number}</div>
-      AgentFlowMarketing · Achillesstraße 69A, 13125 Berlin · kontakt@agentflowm.de · +49 179 949 8247
+      <div class="footer-left">
+        <strong>Agent<span>Flow</span>Marketing</strong><br>
+        Digitale Systeme für Wachstum
+      </div>
+      <div class="footer-right">
+        kontakt@agentflowm.de<br>
+        Achillesstraße 69A, 13125 Berlin<br>
+        www.agentflowm.de
+      </div>
     </div>
 
   </div>
