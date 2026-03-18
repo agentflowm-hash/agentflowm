@@ -81,6 +81,7 @@ export const CreateInvoiceSchema = z.object({
   discount_percent: z.number().min(0).max(100).default(0),
   due_date: z.string(),  // Accept any date string format
   notes: z.string().max(1000).optional(),
+  type: z.enum(['invoice', 'offer']).optional().default('invoice'),
 }).refine(
   data => data.client_id || (data.client_name && data.client_email),
   { message: 'Either client_id or client_name+email required' }

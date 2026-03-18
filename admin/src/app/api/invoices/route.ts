@@ -23,6 +23,7 @@ export const GET = createHandler({
   const searchParams = request.nextUrl.searchParams;
   const status = searchParams.get('status');
   const clientId = searchParams.get('clientId');
+  const type = searchParams.get('type');
 
   // Simple select without FK joins (avoid schema cache issues)
   let query = db
@@ -35,6 +36,9 @@ export const GET = createHandler({
   }
   if (clientId) {
     query = query.eq('client_id', clientId);
+  }
+  if (type) {
+    query = query.eq('type', type);
   }
 
   const { data: invoices, error } = await query;
@@ -92,9 +96,10 @@ export const POST = createHandler({
   auth: true,
   schema: CreateInvoiceSchema,
 }, async (data: CreateInvoiceInput) => {
-  const { 
+  const {
     client_id, client_name, client_email, client_company, client_address,
-    project_id, items, tax_rate, discount_percent = 0, due_date, notes 
+    project_id, items, tax_rate, discount_percent = 0, due_date, notes,
+    type = 'invoice',
   } = data;
 
   // Get client info - either from ID or use provided details
@@ -123,23 +128,24 @@ export const POST = createHandler({
   const tax_amount = Math.round(afterDiscount * tax_rate) / 100;
   const total = afterDiscount + tax_amount;
 
-  // Generate invoice number: AFM-YYYY-XXXX
+  // Generate number: AFM-YYYY-XXXX (invoice) or ANG-YYYY-XXXX (offer)
   const now = new Date();
-  const prefix = `AFM-${now.getFullYear()}`;
-  
+  const numPrefix = type === 'offer' ? `ANG-${now.getFullYear()}` : `AFM-${now.getFullYear()}`;
+
   const { count } = await db
     .from('invoices')
     .select('*', { count: 'exact', head: true })
-    .ilike('invoice_number', `${prefix}%`);
+    .ilike('invoice_number', `${numPrefix}%`);
 
-  const invoiceNumber = `${prefix}-${String((count || 0) + 1).padStart(4, '0')}`;
+  const invoiceNumber = `${numPrefix}-${String((count || 0) + 1).padStart(4, '0')}`;
 
-  // Create invoice
+  // Create invoice/offer
   const { data: invoice, error } = await db
     .from('invoices')
     .insert({
       client_id: client_id || null,
       invoice_number: invoiceNumber,
+      type,
       client_name: clientName,
       client_email: clientEmail,
       client_company: clientCompany,

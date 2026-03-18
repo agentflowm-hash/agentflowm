@@ -8107,43 +8107,67 @@ function ClientDetailModal({
                     <label className="text-[10px] text-white/40 block mb-1">Schnell-Vorlage</label>
                     <div className="flex flex-wrap gap-1">
                       {[
-                        { label: "START Website", price: 3790 },
-                        { label: "BUSINESS Website", price: 8390 },
-                        { label: "ONE PAGE", price: 1390 },
-                        { label: "Web App", price: 18990 },
-                        { label: "Mobile App", price: 35990 },
-                        { label: "AI-Agenten", price: 4990 },
-                        { label: "Logo & Branding", price: 990 },
-                        { label: "Wartung/Monat", price: 299 },
+                        { label: "START Website", price: 3790, desc: "Professionelle Website mit responsivem Design, SEO-Optimierung, CMS-Integration, Kontaktformular, SSL-Zertifikat und 30 Tage Support. Lieferzeit: 1-2 Wochen." },
+                        { label: "BUSINESS Website", price: 8390, desc: "Premium Business-Website mit individuellem UI/UX Design, Blog-System, SEO-Optimierung, CMS, Newsletter-Integration, Analytics, Performance-Optimierung, SSL und 60 Tage Support. Lieferzeit: 3-4 Wochen." },
+                        { label: "ONE PAGE", price: 1390, desc: "Moderne One-Page Website mit Scroll-Animationen, responsivem Design, Kontaktformular, SEO-Grundlagen und SSL-Zertifikat. Lieferzeit: 3-5 Werktage." },
+                        { label: "Web App", price: 18990, desc: "Maßgeschneiderte Web-Applikation mit Benutzer-Authentifizierung, Datenbank-Integration, Admin-Dashboard, REST-API, responsivem Frontend und Cloud-Hosting. Lieferzeit: 6-10 Wochen." },
+                        { label: "Mobile App", price: 35990, desc: "Native Mobile App für iOS und Android mit Push-Benachrichtigungen, Offline-Funktionalität, Backend-API, Admin-Panel, App Store Veröffentlichung und 90 Tage Support. Lieferzeit: 10-16 Wochen." },
+                        { label: "AI-Agenten", price: 4990, desc: "KI-gestützte Automatisierung mit individuellen AI-Agenten für E-Mail, Chat, Vertrieb oder Analyse. Inklusive Training, API-Integration, Dashboard und laufende Optimierung." },
+                        { label: "Logo & Branding", price: 990, desc: "Professionelles Logo-Design mit 3 Konzeptentwürfen, Farbpalette, Typografie-Set, Brand Guidelines und alle Dateiformate (SVG, PNG, PDF) für Print und Digital." },
+                        { label: "Wartung/Monat", price: 299, desc: "Monatliche Website-Wartung mit Sicherheitsupdates, Performance-Monitoring, Backup-Management, Content-Updates (bis 2h/Monat) und Priority-Support." },
                       ].map((tpl) => (
-                        <button key={tpl.label} onClick={() => setOfferForm({ ...offerForm, items: [{ description: tpl.label, quantity: 1, unit_price: tpl.price, total: tpl.price }] })}
+                        <button key={tpl.label} onClick={() => setOfferForm({ ...offerForm, items: [{ description: tpl.desc, quantity: 1, unit_price: tpl.price, total: tpl.price }] })}
                           className="px-2 py-1 bg-white/[0.04] hover:bg-blue-500/10 border border-white/[0.06] hover:border-blue-500/30 rounded-lg text-[10px] text-white/60 hover:text-blue-400 transition-all">
-                          {tpl.label} €{tpl.price}
+                          {tpl.label} €{tpl.price.toLocaleString("de-DE")}
                         </button>
                       ))}
                     </div>
                   </div>
                   {/* Positionen */}
                   {offerForm.items.map((item, idx) => (
-                    <div key={idx} className="grid grid-cols-[1fr_80px_100px] gap-2">
-                      <div>
-                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Beschreibung</label>}
-                        <input placeholder="Leistung..." value={item.description}
-                          onChange={(e) => { const items = [...offerForm.items]; items[idx].description = e.target.value; setOfferForm({ ...offerForm, items }); }}
-                          className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 placeholder:text-white/20 transition-all" />
+                    <div key={idx} className="space-y-1.5">
+                      <div className="grid grid-cols-[1fr_80px_100px] gap-2">
+                        <div>
+                          {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Beschreibung</label>}
+                          <textarea placeholder="Leistungsbeschreibung..." value={item.description} rows={item.description.length > 80 ? 3 : 1}
+                            onChange={(e) => { const items = [...offerForm.items]; items[idx].description = e.target.value; setOfferForm({ ...offerForm, items }); }}
+                            className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 placeholder:text-white/20 transition-all resize-none" />
+                        </div>
+                        <div>
+                          {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Menge</label>}
+                          <input type="number" value={item.quantity}
+                            onChange={(e) => { const items = [...offerForm.items]; items[idx].quantity = parseInt(e.target.value) || 1; setOfferForm({ ...offerForm, items }); }}
+                            className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                        </div>
+                        <div>
+                          {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Preis (€)</label>}
+                          <input type="number" value={item.unit_price}
+                            onChange={(e) => { const items = [...offerForm.items]; items[idx].unit_price = parseFloat(e.target.value) || 0; setOfferForm({ ...offerForm, items }); }}
+                            className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                        </div>
                       </div>
-                      <div>
-                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Menge</label>}
-                        <input type="number" value={item.quantity}
-                          onChange={(e) => { const items = [...offerForm.items]; items[idx].quantity = parseInt(e.target.value) || 1; setOfferForm({ ...offerForm, items }); }}
-                          className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
-                      </div>
-                      <div>
-                        {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Preis (€)</label>}
-                        <input type="number" value={item.unit_price}
-                          onChange={(e) => { const items = [...offerForm.items]; items[idx].unit_price = parseFloat(e.target.value) || 0; setOfferForm({ ...offerForm, items }); }}
-                          className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
-                      </div>
+                      {/* AI Beschreibung Button */}
+                      {idx === 0 && item.description && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch("/api/ai/describe", {
+                                credentials: "include", method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ package_name: item.description.split(".")[0], client_name: client.name, client_company: client.company }),
+                              });
+                              const data = await res.json();
+                              if (data.description) {
+                                const items = [...offerForm.items];
+                                items[0].description = data.description;
+                                setOfferForm({ ...offerForm, items });
+                              }
+                            } catch {}
+                          }}
+                          className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300 ml-1">
+                          <SparklesIcon className="w-3 h-3" /> AI-Beschreibung generieren
+                        </button>
+                      )}
                     </div>
                   ))}
                   <button onClick={() => setOfferForm({ ...offerForm, items: [...offerForm.items, { description: "", quantity: 1, unit_price: 0, total: 0 }] })}
