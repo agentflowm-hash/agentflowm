@@ -9,5 +9,10 @@ export default async function AdminPage() {
     redirect('/login');
   }
   
-  return <Dashboard />;
+  return (
+    <main>
+      <h1 className="sr-only">AgentFlowMarketing Admin Dashboard</h1>
+      <Dashboard />
+    </main>
+  );
 }

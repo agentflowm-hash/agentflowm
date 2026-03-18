@@ -3,7 +3,7 @@ import { createHandler, DatabaseError, NotFoundError } from '@/lib/api';
 import { z } from 'zod';
 import crypto from 'crypto';
 
-const VAULT_KEY = process.env.VAULT_ENCRYPTION_KEY || process.env.ADMIN_PASSWORD || 'agentflow-vault-key-2026';
+const VAULT_KEY = process.env.VAULT_ENCRYPTION_KEY || process.env.ADMIN_PASSWORD || '';
 
 function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);
