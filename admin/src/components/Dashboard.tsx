@@ -8696,7 +8696,7 @@ function ClientDetailModal({
                       <h4 className="text-xs text-blue-400/60 uppercase tracking-wider mb-2">Angebote ({clientOffers.length})</h4>
                       <div className="space-y-2">
                         {clientOffers.map((offer: any) => (
-                          <div key={offer.id} className="p-3 bg-white/[0.02] rounded-xl border border-blue-500/10 hover:border-blue-500/20 transition-colors">
+                          <div key={offer.id} className="p-3 bg-white/[0.02] rounded-xl border border-blue-500/10 hover:border-blue-500/20 transition-colors space-y-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
@@ -8713,6 +8713,34 @@ function ClientDetailModal({
                                   {offer.status === "sent" ? "Gesendet" : offer.status === "paid" ? "Angenommen" : "Entwurf"}
                                 </span>
                               </div>
+                            </div>
+                            {/* Actions */}
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => window.open(`/api/invoices/${offer.id}/pdf`, '_blank')}
+                                className="px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg text-[10px] text-white/50 hover:text-white flex items-center gap-1 transition-all">
+                                <EyeIcon className="w-3 h-3" /> Vorschau
+                              </button>
+                              <button onClick={() => {
+                                const a = document.createElement('a');
+                                a.href = `/api/invoices/${offer.id}/pdf?format=pdf`;
+                                a.download = `Angebot-${offer.invoice_number}.html`;
+                                a.click();
+                              }}
+                                className="px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg text-[10px] text-white/50 hover:text-white flex items-center gap-1 transition-all">
+                                <ArrowDownTrayIcon className="w-3 h-3" /> PDF
+                              </button>
+                              <button onClick={async () => {
+                                try {
+                                  await fetch("/api/invoices/" + offer.id + "/send", { credentials: "include", method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ to: client.email }) });
+                                  showToast("success", `Angebot an ${client.name} gesendet!`);
+                                  fetchClientDocs();
+                                } catch { showToast("error", "Fehler beim Senden"); }
+                              }}
+                                className="flex-1 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg text-[10px] text-blue-400 font-medium flex items-center justify-center gap-1 transition-all">
+                                <EnvelopeOpenIcon className="w-3 h-3" /> Per E-Mail an {client.name.split(' ')[0]}
+                              </button>
                             </div>
                           </div>
                         ))}
