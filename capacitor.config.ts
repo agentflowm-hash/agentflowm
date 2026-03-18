@@ -1,4 +1,5 @@
-import type { CapacitorConfig } from "@capacitor/cli";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CapacitorConfig = any;
 
 // ═══════════════════════════════════════════════════════════════
 //           📱 APP 1: AgentFlowM (Marketing)
@@ -57,8 +58,7 @@ const config: CapacitorConfig = {
     backgroundColor: "#030308",
     scheme: "agentflowm",
     limitsNavigationsToAppBoundDomains: true,
-    // @ts-ignore — Capacitor 6+ feature
-    allowedNavigationHostnames: ["agentflowm.de", "agentflowm.com"] as any,
+    allowedNavigationHostnames: ["agentflowm.de", "agentflowm.com"],
   },
   android: {
     allowMixedContent: false,
