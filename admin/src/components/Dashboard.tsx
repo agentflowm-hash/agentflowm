@@ -2253,7 +2253,7 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
       </div>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-5 gap-3 overflow-x-auto pb-4">
+      <div className="grid grid-cols-5 gap-3 overflow-x-auto pb-4 pr-4">
         {stages.map((stage, stageIdx) => {
           const stageLeads = leads.filter((l) => l.status === stage.id);
           const stageValue = stageLeads.reduce((s, l) => s + (parseFloat(l.budget?.replace(/[^0-9.]/g, "") || "0") || 0), 0);
@@ -2409,7 +2409,7 @@ function KanbanCard({
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5">
           {/* Lead Score */}
-          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${scoreColor}`}>
+          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${scoreColor}`} title={`Lead Score: ${leadScore}/100 — basierend auf Datenvollständigkeit`}>
             {leadScore}
           </span>
           {lead.priority === "high" && (
