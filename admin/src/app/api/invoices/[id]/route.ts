@@ -213,13 +213,13 @@ export const DELETE = createHandler({
     throw new NotFoundError('Invoice');
   }
 
-  // Soft delete by cancelling
+  // Delete invoice items first (FK constraint)
+  await db.from('invoice_items').delete().eq('invoice_id', id);
+
+  // Delete the invoice
   const { error } = await db
     .from('invoices')
-    .update({ 
-      status: 'cancelled',
-      updated_at: new Date().toISOString(),
-    })
+    .delete()
     .eq('id', id);
 
   if (error) throw new DatabaseError(error.message);
