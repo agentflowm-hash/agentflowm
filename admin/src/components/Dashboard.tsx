@@ -8741,6 +8741,15 @@ function ClientDetailModal({
                                 className="flex-1 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg text-[10px] text-blue-400 font-medium flex items-center justify-center gap-1 transition-all">
                                 <EnvelopeOpenIcon className="w-3 h-3" /> Per E-Mail an {client.name.split(' ')[0]}
                               </button>
+                              <button onClick={async () => {
+                                if (!(await showConfirm(`Angebot ${offer.invoice_number} löschen?`))) return;
+                                await fetch(`/api/invoices/${offer.id}`, { credentials: "include", method: "DELETE" });
+                                showToast("success", "Angebot gelöscht");
+                                fetchClientDocs();
+                              }}
+                                className="px-2.5 py-1.5 bg-white/[0.04] hover:bg-red-500/10 border border-white/[0.06] hover:border-red-500/20 rounded-lg text-[10px] text-white/30 hover:text-red-400 transition-all">
+                                <TrashIcon className="w-3 h-3" />
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -8875,6 +8884,15 @@ function ClientDetailModal({
                                   Abgeschlossen
                                 </span>
                               )}
+                              <button onClick={async () => {
+                                if (!(await showConfirm(`Rechnung ${inv.invoice_number} löschen?`))) return;
+                                await fetch(`/api/invoices/${inv.id}`, { credentials: "include", method: "DELETE" });
+                                showToast("success", "Rechnung gelöscht");
+                                fetchClientDocs();
+                              }}
+                                className="px-2 py-1.5 hover:bg-red-500/10 rounded-lg text-white/20 hover:text-red-400 transition-all">
+                                <TrashIcon className="w-3 h-3" />
+                              </button>
                             </div>
                           </div>
                         ))}
