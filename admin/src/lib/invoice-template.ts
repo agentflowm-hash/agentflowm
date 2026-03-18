@@ -31,6 +31,7 @@ interface InvoiceData {
   
   // Payment
   payment_due: string; // "sofort" | "14 Tage" | "30 Tage"
+  payment_terms?: string; // "50/50" | "70/30" | "100"
   notes?: string;
 }
 
@@ -413,6 +414,21 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       </div>
     </div>
     
+    ${isOffer ? `
+    <div class="payment-section">
+      <div class="payment-title">Zahlungsbedingungen</div>
+      <div class="payment-grid">
+        <div class="payment-item" style="grid-column: span 2;">
+          <label>Zahlungsmodell</label>
+          <value>${data.payment_terms === '50/50' ? '50% bei Auftragserteilung, 50% bei Projektabschluss'
+            : data.payment_terms === '70/30' ? '70% bei Auftragserteilung, 30% bei Abgabe'
+            : data.payment_terms === '100' ? '100% bei Auftragserteilung'
+            : '50% bei Auftragserteilung, 50% bei Projektabschluss'}</value>
+        </div>
+      </div>
+      <div class="due-badge">Angebot gültig ${data.payment_due}</div>
+    </div>
+    ` : `
     <div class="payment-section">
       <div class="payment-title">Zahlungsinformationen</div>
       <div class="payment-grid">
@@ -429,8 +445,9 @@ export function generateInvoiceHTML(data: InvoiceData): string {
           <value>DE93 1203 0000 1204 0856 49</value>
         </div>
       </div>
-      <div class="due-badge">${isOffer ? `Gültig ${data.payment_due}` : `Zahlbar ${data.payment_due}`}</div>
+      <div class="due-badge">Zahlbar ${data.payment_due}</div>
     </div>
+    `}
     
     <div class="footer">
       AgentFlowMarketing · Achillesstraße 69A, 13125 Berlin · <a href="mailto:info@agentflowm.de">info@agentflowm.de</a>

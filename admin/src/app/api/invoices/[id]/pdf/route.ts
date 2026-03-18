@@ -80,6 +80,7 @@ export async function GET(
       tax_amount: taxAmount,
       total,
       payment_due: paymentDue,
+      payment_terms: invoice.notes?.includes('50%') ? '50/50' : invoice.notes?.includes('70%') ? '70/30' : invoice.notes?.includes('100%') ? '100' : '50/50',
       notes: invoice.notes,
     });
 
