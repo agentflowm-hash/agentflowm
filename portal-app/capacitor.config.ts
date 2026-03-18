@@ -1,4 +1,5 @@
-import type { CapacitorConfig } from "@capacitor/cli";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CapacitorConfig = any;
 
 // ═══════════════════════════════════════════════════════════════
 //           📱 APP 2: AgentFlowM Portal (Kunden-Portal)
