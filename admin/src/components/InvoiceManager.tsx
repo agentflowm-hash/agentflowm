@@ -80,6 +80,7 @@ export default function InvoiceManager() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   // Form state
   const [formData, setFormData] = useState({
@@ -365,8 +366,38 @@ export default function InvoiceManager() {
       {/* Invoice List */}
       <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
         <table className="w-full">
+          {/* Massenaktionen-Leiste */}
+          {selectedIds.size > 0 && (
+            <div className="flex items-center justify-between p-3 mb-3 bg-[#FC682C]/10 border border-[#FC682C]/20 rounded-xl">
+              <span className="text-sm text-[#FC682C] font-medium">{selectedIds.size} ausgewählt</span>
+              <div className="flex items-center gap-2">
+                <button onClick={async () => {
+                  if (!confirm(`${selectedIds.size} Dokument(e) endgültig löschen?`)) return;
+                  const ids = Array.from(selectedIds);
+                  for (let i = 0; i < ids.length; i++) {
+                    await fetch(`/api/invoices/${ids[i]}`, { credentials: "include", method: "DELETE" });
+                  }
+                  setSelectedIds(new Set());
+                  fetchInvoices();
+                }} className="px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 rounded-lg text-xs font-medium hover:bg-red-500/25">
+                  <TrashIcon className="w-3.5 h-3.5 inline mr-1" />Löschen
+                </button>
+                <button onClick={() => setSelectedIds(new Set())} className="px-3 py-1.5 bg-white/[0.04] text-white/50 rounded-lg text-xs">
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          )}
           <thead className="bg-white/5">
             <tr>
+              <th className="p-4 w-10">
+                <input type="checkbox" className="w-4 h-4 rounded accent-[#FC682C] cursor-pointer"
+                  checked={filteredInvoices.length > 0 && selectedIds.size === filteredInvoices.length}
+                  onChange={(e) => {
+                    if (e.target.checked) setSelectedIds(new Set(filteredInvoices.map((i: any) => i.id)));
+                    else setSelectedIds(new Set());
+                  }} />
+              </th>
               <th className="text-left p-4 font-medium text-gray-400">Nummer</th>
               <th className="text-left p-4 font-medium text-gray-400">Kunde</th>
               <th className="text-left p-4 font-medium text-gray-400">Status</th>
@@ -378,13 +409,13 @@ export default function InvoiceManager() {
           <tbody className="divide-y divide-white/5">
             {loading ? (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-gray-500">
+                <td colSpan={7} className="p-8 text-center text-gray-500">
                   Laden...
                 </td>
               </tr>
             ) : filteredInvoices.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-gray-500">
+                <td colSpan={7} className="p-8 text-center text-gray-500">
                   Keine Rechnungen gefunden
                 </td>
               </tr>
@@ -395,7 +426,16 @@ export default function InvoiceManager() {
                 const isOverdue = new Date(invoice.due_date) < new Date() && invoice.status === "sent";
                 
                 return (
-                  <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={invoice.id} className={`hover:bg-white/5 transition-colors ${selectedIds.has(invoice.id) ? 'bg-[#FC682C]/5' : ''}`}>
+                    <td className="p-4 w-10">
+                      <input type="checkbox" className="w-4 h-4 rounded accent-[#FC682C] cursor-pointer"
+                        checked={selectedIds.has(invoice.id)}
+                        onChange={(e) => {
+                          const next = new Set(selectedIds);
+                          if (e.target.checked) next.add(invoice.id); else next.delete(invoice.id);
+                          setSelectedIds(next);
+                        }} />
+                    </td>
                     <td className="p-4">
                       <span className="font-mono text-sm">{invoice.invoice_number}</span>
                     </td>
