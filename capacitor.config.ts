@@ -57,7 +57,8 @@ const config: CapacitorConfig = {
     backgroundColor: "#030308",
     scheme: "agentflowm",
     limitsNavigationsToAppBoundDomains: true,
-    allowedNavigationHostnames: ["agentflowm.de", "agentflowm.com"],
+    // @ts-ignore — Capacitor 6+ feature
+    allowedNavigationHostnames: ["agentflowm.de", "agentflowm.com"] as any,
   },
   android: {
     allowMixedContent: false,
