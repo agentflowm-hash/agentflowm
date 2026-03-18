@@ -61,8 +61,10 @@ export async function GET(
     const total = parseFloat(invoice.total);
 
     // Generate HTML
+    const isOffer = invoice.type === 'offer' || invoice.invoice_number?.startsWith('ANG');
     const html = generateInvoiceHTML({
-      invoice_number: invoice.invoice_number.replace('AFM-', ''),
+      document_type: isOffer ? 'offer' : 'invoice',
+      invoice_number: invoice.invoice_number.replace('AFM-', '').replace('ANG-', ''),
       issue_date: invoice.issue_date,
       due_date: invoice.due_date,
       client_name: invoice.client_name,
@@ -94,7 +96,7 @@ export async function GET(
     return new NextResponse(html, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Content-Disposition": `inline; filename="Rechnung-${invoice.invoice_number}.html"`,
+        "Content-Disposition": `inline; filename="${isOffer ? 'Angebot' : 'Rechnung'}-${invoice.invoice_number}.html"`,
       },
     });
   } catch (error: any) {

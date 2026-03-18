@@ -2,6 +2,7 @@
 // Exact replica of Mo's design
 
 interface InvoiceData {
+  document_type?: 'invoice' | 'offer';
   invoice_number: string;
   issue_date: string;
   due_date: string;
@@ -34,9 +35,15 @@ interface InvoiceData {
 }
 
 export function generateInvoiceHTML(data: InvoiceData): string {
-  const formatCurrency = (amount: number) => 
+  const isOffer = data.document_type === 'offer';
+  const docLabel = isOffer ? 'Angebot' : 'Rechnung';
+  const senderLabel = isOffer ? 'Anbieter' : 'Rechnungssteller';
+  const recipientLabel = isOffer ? 'Angebotsempfänger' : 'Rechnungsempfänger';
+  const validLabel = isOffer ? 'Gültig bis' : 'Zahlungsziel';
+
+  const formatCurrency = (amount: number) =>
     amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-  
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -57,7 +64,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rechnung ${data.invoice_number} | AgentFlowMarketing</title>
+  <title>${docLabel} ${data.invoice_number} | AgentFlowMarketing</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
@@ -337,7 +344,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
         <p>KI-gestützte Marketing-Automatisierung</p>
       </div>
       <div class="invoice-badge">
-        <div class="label">Rechnung</div>
+        <div class="label">${docLabel}</div>
         <div class="number">#${data.invoice_number}</div>
         <div class="date">${formatDate(data.issue_date)}</div>
       </div>
@@ -345,7 +352,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
     
     <div class="parties">
       <div class="party">
-        <div class="party-label">Rechnungsempfänger</div>
+        <div class="party-label">${recipientLabel}</div>
         <div class="party-name">${data.client_name}</div>
         <div class="party-details">
           ${data.client_company ? data.client_company + '<br>' : ''}
@@ -353,7 +360,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
         </div>
       </div>
       <div class="party">
-        <div class="party-label">Rechnungssteller</div>
+        <div class="party-label">${senderLabel}</div>
         <div class="party-name">AgentFlowMarketing</div>
         <div class="party-details">
           Achillesstraße 69A<br>
@@ -422,7 +429,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
           <value>DE93 1203 0000 1204 0856 49</value>
         </div>
       </div>
-      <div class="due-badge">Zahlbar ${data.payment_due}</div>
+      <div class="due-badge">${isOffer ? `Gültig ${data.payment_due}` : `Zahlbar ${data.payment_due}`}</div>
     </div>
     
     <div class="footer">

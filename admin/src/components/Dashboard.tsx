@@ -8130,12 +8130,18 @@ function ClientDetailModal({
                   {/* Positionen */}
                   {offerForm.items.map((item, idx) => (
                     <div key={idx} className="space-y-1.5">
+                      {/* Titel + Preis */}
                       <div className="grid grid-cols-[1fr_80px_100px] gap-2">
                         <div>
-                          {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Beschreibung</label>}
-                          <textarea placeholder="Leistungsbeschreibung..." value={item.description} rows={item.description.length > 80 ? 3 : 1}
-                            onChange={(e) => { const items = [...offerForm.items]; items[idx].description = e.target.value; setOfferForm({ ...offerForm, items }); }}
-                            className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 placeholder:text-white/20 transition-all resize-none" />
+                          {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Leistung / Titel</label>}
+                          <input placeholder="z.B. Erstservice Unfallprofis App" value={item.description.split('\n')[0] || ''}
+                            onChange={(e) => {
+                              const items = [...offerForm.items];
+                              const restLines = items[idx].description.split('\n').slice(1).join('\n');
+                              items[idx].description = restLines ? e.target.value + '\n' + restLines : e.target.value;
+                              setOfferForm({ ...offerForm, items });
+                            }}
+                            className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] font-medium outline-none focus:border-blue-500/30 placeholder:text-white/20 transition-all" />
                         </div>
                         <div>
                           {idx === 0 && <label className="text-[10px] text-white/40 block mb-1">Menge</label>}
@@ -8150,28 +8156,45 @@ function ClientDetailModal({
                             className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
                         </div>
                       </div>
-                      {/* AI Beschreibung Button */}
-                      {idx === 0 && item.description && (
-                        <button
-                          onClick={async () => {
-                            try {
-                              const res = await fetch("/api/ai/describe", {
-                                credentials: "include", method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ package_name: item.description.split(".")[0], client_name: client.name, client_company: client.company }),
-                              });
-                              const data = await res.json();
-                              if (data.description) {
-                                const items = [...offerForm.items];
-                                items[0].description = data.description;
-                                setOfferForm({ ...offerForm, items });
-                              }
-                            } catch {}
+                      {/* Detaillierte Beschreibung */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[10px] text-white/30">Detailbeschreibung (erscheint im Angebot)</label>
+                          {item.description.split('\n')[0] && (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  const titleLine = item.description.split('\n')[0];
+                                  const res = await fetch("/api/ai/describe", {
+                                    credentials: "include", method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ package_name: titleLine, client_name: client.name, client_company: client.company }),
+                                  });
+                                  const data = await res.json();
+                                  if (data.description) {
+                                    const items = [...offerForm.items];
+                                    items[idx].description = titleLine + '\n' + data.description;
+                                    setOfferForm({ ...offerForm, items });
+                                  }
+                                } catch {}
+                              }}
+                              className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300">
+                              <SparklesIcon className="w-3 h-3" /> AI generieren
+                            </button>
+                          )}
+                        </div>
+                        <textarea
+                          placeholder="Klicke 'AI generieren' oder beschreibe die Leistung manuell..."
+                          value={item.description.split('\n').slice(1).join('\n') || ''}
+                          rows={3}
+                          onChange={(e) => {
+                            const items = [...offerForm.items];
+                            const titleLine = items[idx].description.split('\n')[0] || '';
+                            items[idx].description = e.target.value ? titleLine + '\n' + e.target.value : titleLine;
+                            setOfferForm({ ...offerForm, items });
                           }}
-                          className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300 ml-1">
-                          <SparklesIcon className="w-3 h-3" /> AI-Beschreibung generieren
-                        </button>
-                      )}
+                          className="w-full px-3 py-2 bg-white/[0.02] border border-white/[0.04] rounded-xl text-white/70 text-[11px] outline-none focus:border-blue-500/30 placeholder:text-white/15 transition-all resize-none" />
+                      </div>
                     </div>
                   ))}
                   <button onClick={() => setOfferForm({ ...offerForm, items: [...offerForm.items, { description: "", quantity: 1, unit_price: 0, total: 0 }] })}
