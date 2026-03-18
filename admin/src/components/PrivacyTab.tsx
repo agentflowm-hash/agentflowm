@@ -66,6 +66,7 @@ export default function PrivacyTab() {
   const [showAddReq, setShowAddReq] = useState(false);
   const [showAddProc, setShowAddProc] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState<{ id: number; name: string; email: string; company: string | null }[]>([]);
 
   const [newDoc, setNewDoc] = useState({ title: "", description: "", category: "datenschutz", content: "", is_template: false });
   const [newReq, setNewReq] = useState({ name: "", email: "", request_type: "access", description: "" });
@@ -73,17 +74,50 @@ export default function PrivacyTab() {
 
   const loadData = useCallback(() => {
     setLoading(true);
-    fetch("/api/privacy", { credentials: "include" }).then(r => r.json()).then(d => {
+    Promise.all([
+      fetch("/api/privacy", { credentials: "include" }).then(r => r.json()),
+      fetch("/api/clients", { credentials: "include" }).then(r => r.json()).catch(() => ({ data: { clients: [] } })),
+    ]).then(([d, cd]) => {
       const data = unwrap<any>(d);
       setDocs(data.documents || []);
       setRequests(data.requests || []);
       setProcessing(data.processing || []);
       setStats(data.stats || stats);
+      const cl = unwrap<any>(cd);
+      setClients((cl.clients || []).map((c: any) => ({ id: c.id, name: c.name, email: c.email, company: c.company })));
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  const replacePlaceholders = (text: string, clientName?: string, clientCompany?: string) => {
+    return text
+      .replace(/\{\{KUNDENNAME\}\}/g, clientName || '[Kundenname]')
+      .replace(/\{\{KUNDENFIRMA\}\}/g, clientCompany || '[Kundenfirma]')
+      .replace(/\{\{DATUM\}\}/g, new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+  };
+
+  const downloadAsText = (doc: PrivacyDoc, clientName?: string, clientCompany?: string) => {
+    const content = replacePlaceholders(doc.content, clientName, clientCompany);
+    const header = `${doc.title}\n${'='.repeat(doc.title.length)}\n\n`;
+    const footer = `\n\n---\nAgentFlowMarketing · Achillesstraße 69A, 13125 Berlin\nVersion ${doc.version} · Stand: ${new Date(doc.updated_at).toLocaleDateString('de-DE')}\n`;
+    const blob = new Blob([header + content + footer], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${doc.title.replace(/[^a-zA-Z0-9äöüÄÖÜß]/g, '_')}_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("success", "Dokument heruntergeladen!");
+  };
+
+  const handleSelectClientForSend = (clientId: string) => {
+    const client = clients.find(c => c.id === parseInt(clientId));
+    if (client) {
+      setSendForm({ ...sendForm, to_email: client.email, to_name: client.name });
+    }
+  };
 
   const handleAddDoc = async () => {
     if (!newDoc.title || !newDoc.content) return;
@@ -240,11 +274,12 @@ export default function PrivacyTab() {
                         <p className="text-[10px] text-green-400/60 mt-1">Gesendet an: {doc.sent_to.join(", ")}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1">
                       <button onClick={() => setViewDoc(doc)} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white" title="Ansehen"><EyeIcon className="w-4 h-4" /></button>
-                      <button onClick={() => setEditDoc({ ...doc })} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white" title="Bearbeiten"><PencilIcon className="w-4 h-4" /></button>
-                      <button onClick={() => { setSendDoc(doc); setSendForm({ to_email: "", to_name: "", message: "" }); }} className="p-1.5 hover:bg-blue-500/20 rounded-lg text-white/30 hover:text-blue-400" title="Per E-Mail senden"><PaperAirplaneIcon className="w-4 h-4" /></button>
-                      <button onClick={() => deleteItem(doc.id, 'document')} className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/30 hover:text-red-400" title="Löschen"><TrashIcon className="w-4 h-4" /></button>
+                      <button onClick={() => downloadAsText(doc)} className="p-1.5 hover:bg-green-500/20 rounded-lg text-white/30 hover:text-green-400" title="Herunterladen"><ArrowDownTrayIcon className="w-4 h-4" /></button>
+                      <button onClick={() => { setSendDoc(doc); setSendForm({ to_email: "", to_name: "", message: "" }); }} className="p-1.5 hover:bg-blue-500/20 rounded-lg text-white/30 hover:text-blue-400" title="An Kunde senden"><PaperAirplaneIcon className="w-4 h-4" /></button>
+                      <button onClick={() => setEditDoc({ ...doc })} className="p-1.5 hover:bg-white/10 rounded-lg text-white/30 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" title="Bearbeiten"><PencilIcon className="w-4 h-4" /></button>
+                      <button onClick={() => deleteItem(doc.id, 'document')} className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" title="Löschen"><TrashIcon className="w-4 h-4" /></button>
                     </div>
                   </div>
                 </div>
@@ -407,13 +442,14 @@ export default function PrivacyTab() {
                 <p className="text-xs text-white/40">{CAT_LABELS[viewDoc.category]} · v{viewDoc.version} · {new Date(viewDoc.updated_at).toLocaleDateString("de-DE")}</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => { setEditDoc({ ...viewDoc }); setViewDoc(null); }} className="p-2 hover:bg-white/10 rounded-xl"><PencilIcon className="w-5 h-5 text-white/60" /></button>
-                <button onClick={() => { setSendDoc(viewDoc); setSendForm({ to_email: "", to_name: "", message: "" }); setViewDoc(null); }} className="p-2 hover:bg-blue-500/20 rounded-xl"><PaperAirplaneIcon className="w-5 h-5 text-blue-400" /></button>
+                <button onClick={() => downloadAsText(viewDoc)} className="p-2 hover:bg-green-500/20 rounded-xl" title="Herunterladen"><ArrowDownTrayIcon className="w-5 h-5 text-green-400" /></button>
+                <button onClick={() => { setEditDoc({ ...viewDoc }); setViewDoc(null); }} className="p-2 hover:bg-white/10 rounded-xl" title="Bearbeiten"><PencilIcon className="w-5 h-5 text-white/60" /></button>
+                <button onClick={() => { setSendDoc(viewDoc); setSendForm({ to_email: "", to_name: "", message: "" }); setViewDoc(null); }} className="p-2 hover:bg-blue-500/20 rounded-xl" title="Per E-Mail senden"><PaperAirplaneIcon className="w-5 h-5 text-blue-400" /></button>
                 <button onClick={() => setViewDoc(null)} className="p-2 hover:bg-white/10 rounded-xl"><XMarkIcon className="w-5 h-5 text-white/60" /></button>
               </div>
             </div>
             <div className="p-6">
-              <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-white/70 leading-relaxed">{viewDoc.content}</div>
+              <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-white/70 leading-relaxed">{replacePlaceholders(viewDoc.content)}</div>
             </div>
           </div>
         </div>
@@ -464,22 +500,48 @@ export default function PrivacyTab() {
               <p className="text-xs text-white/40 mt-1">"{sendDoc.title}" per E-Mail versenden</p>
             </div>
             <div className="p-6 space-y-3">
-              <div><label className="block text-[10px] text-white/40 mb-1">Empfänger E-Mail *</label>
-                <input type="email" value={sendForm.to_email} onChange={e => setSendForm({ ...sendForm, to_email: e.target.value })} placeholder="kunde@example.com"
-                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
-              <div><label className="block text-[10px] text-white/40 mb-1">Empfänger Name</label>
-                <input value={sendForm.to_name} onChange={e => setSendForm({ ...sendForm, to_name: e.target.value })} placeholder="Max Mustermann"
-                  className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+              {/* Kunde auswählen */}
+              {clients.length > 0 && (
+                <div>
+                  <label className="block text-[10px] text-white/40 mb-1">Kunde auswählen</label>
+                  <select onChange={e => handleSelectClientForSend(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white outline-none cursor-pointer">
+                    <option value="">— Kunde wählen oder manuell eingeben —</option>
+                    {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email}){c.company ? ` · ${c.company}` : ''}</option>)}
+                  </select>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-[10px] text-white/40 mb-1">Empfänger E-Mail *</label>
+                  <input type="email" value={sendForm.to_email} onChange={e => setSendForm({ ...sendForm, to_email: e.target.value })} placeholder="kunde@example.com"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+                <div><label className="block text-[10px] text-white/40 mb-1">Empfänger Name</label>
+                  <input value={sendForm.to_name} onChange={e => setSendForm({ ...sendForm, to_name: e.target.value })} placeholder="Max Mustermann"
+                    className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" /></div>
+              </div>
               <div><label className="block text-[10px] text-white/40 mb-1">Persönliche Nachricht (optional)</label>
-                <textarea value={sendForm.message} onChange={e => setSendForm({ ...sendForm, message: e.target.value })} rows={3} placeholder="z.B. Bitte prüfen und bestätigen Sie..."
+                <textarea value={sendForm.message} onChange={e => setSendForm({ ...sendForm, message: e.target.value })} rows={3} placeholder="z.B. Bitte prüfen und bestätigen Sie das beigefügte Dokument..."
                   className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none resize-none" /></div>
+              {/* Platzhalter-Vorschau */}
+              {sendForm.to_name && sendDoc.content.includes('{{KUNDENNAME}}') && (
+                <div className="p-3 bg-green-500/5 border border-green-500/10 rounded-xl">
+                  <p className="text-[10px] text-green-400/60 mb-1">Platzhalter werden automatisch ersetzt:</p>
+                  <p className="text-xs text-white/50">{'{{KUNDENNAME}}'} → <strong className="text-white">{sendForm.to_name}</strong></p>
+                </div>
+              )}
             </div>
-            <div className="flex justify-end gap-2 px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
-              <button onClick={() => setSendDoc(null)} className="px-4 py-2 text-white/50 text-sm">Abbrechen</button>
-              <button onClick={handleSendDoc} disabled={saving || !sendForm.to_email}
-                className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2">
-                {saving ? "Sendet..." : <><PaperAirplaneIcon className="w-4 h-4" /> Senden</>}
+            <div className="flex justify-between px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
+              <button onClick={() => downloadAsText(sendDoc, sendForm.to_name)}
+                className="px-4 py-2 bg-white/[0.04] text-white/60 rounded-xl text-sm flex items-center gap-2 hover:bg-white/[0.08] border border-white/[0.06]">
+                <ArrowDownTrayIcon className="w-4 h-4" /> Download
               </button>
+              <div className="flex gap-2">
+                <button onClick={() => setSendDoc(null)} className="px-4 py-2 text-white/50 text-sm">Abbrechen</button>
+                <button onClick={handleSendDoc} disabled={saving || !sendForm.to_email}
+                  className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 flex items-center gap-2">
+                  {saving ? "Sendet..." : <><PaperAirplaneIcon className="w-4 h-4" /> Senden</>}
+                </button>
+              </div>
             </div>
           </div>
         </div>
