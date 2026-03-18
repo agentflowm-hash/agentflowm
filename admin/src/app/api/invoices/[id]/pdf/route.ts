@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { generateInvoiceHTML } from "@/lib/invoice-template";
+import { generateOfferHTML, PACKAGE_TEMPLATES } from "@/lib/offer-template";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -60,11 +61,61 @@ export async function GET(
     const taxAmount = parseFloat(invoice.tax_amount);
     const total = parseFloat(invoice.total);
 
-    // Generate HTML
+    // Check if this is an offer
     const isOffer = invoice.type === 'offer' || invoice.invoice_number?.startsWith('ANG');
+
+    if (isOffer) {
+      // Use the new offer template
+      const firstItem = items[0] || { title: '', description: '' };
+      const packageKey = Object.keys(PACKAGE_TEMPLATES).find(k =>
+        firstItem.title?.toLowerCase().includes(k.toLowerCase().split(' ')[0]) ||
+        invoice.notes?.toLowerCase().includes(k.toLowerCase())
+      );
+      const tpl = packageKey ? PACKAGE_TEMPLATES[packageKey] : {};
+
+      const offerHtml = generateOfferHTML({
+        offer_number: invoice.invoice_number,
+        issue_date: invoice.issue_date,
+        valid_until: invoice.due_date || new Date(Date.now() + 30 * 86400000).toISOString(),
+        client_name: invoice.client_name || '',
+        client_company: invoice.client_company || undefined,
+        client_email: invoice.client_email || undefined,
+        package_name: tpl.package_name || firstItem.title || 'Individuelles Angebot',
+        package_subtitle: tpl.package_subtitle || firstItem.description?.split('\n')[0] || '',
+        package_description: tpl.package_description || firstItem.description || '',
+        badges: tpl.badges || ['Professionelle Umsetzung', 'Saubere Übergabe'],
+        services: tpl.services || items.map((it: any) => ({ title: it.title, description: it.description })),
+        steps: tpl.steps || [
+          { title: 'Analyse', subtitle: '' },
+          { title: 'Konzept', subtitle: '' },
+          { title: 'Umsetzung', subtitle: '' },
+          { title: 'Übergabe', subtitle: '' },
+        ],
+        timeline: tpl.timeline || '2–4 Wochen',
+        price_net: total - taxAmount,
+        tax_rate: taxRate,
+        payment_terms: invoice.notes?.includes('70%') ? '70/30' : invoice.notes?.includes('100%') ? '100' : '50/50',
+        kurzueberblick: tpl.kurzueberblick,
+        ausgangslage: tpl.ausgangslage,
+        zielbild: tpl.zielbild,
+        notes: invoice.notes,
+      });
+
+      if (format === "html") {
+        return new NextResponse(offerHtml, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      }
+      return new NextResponse(offerHtml, {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Content-Disposition": `inline; filename="Angebot-${invoice.invoice_number}.html"`,
+        },
+      });
+    }
+
+    // Regular invoice template
     const html = generateInvoiceHTML({
-      document_type: isOffer ? 'offer' : 'invoice',
-      invoice_number: invoice.invoice_number.replace('AFM-', '').replace('ANG-', ''),
+      document_type: 'invoice',
+      invoice_number: invoice.invoice_number.replace('AFM-', ''),
       issue_date: invoice.issue_date,
       due_date: invoice.due_date,
       client_name: invoice.client_name,
