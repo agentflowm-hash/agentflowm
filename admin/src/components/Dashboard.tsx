@@ -9111,6 +9111,15 @@ function ClientDetailModal({
                                   Unterschrieben
                                 </span>
                               )}
+                              <button onClick={async () => {
+                                if (!(await showConfirm(`Vereinbarung "${agr.project_title || agr.agreement_number}" endgültig löschen?`))) return;
+                                await fetch(`/api/agreements/${agr.id}`, { credentials: "include", method: "DELETE" });
+                                showToast("success", "Vereinbarung gelöscht");
+                                fetchClientDocs();
+                              }}
+                                className="px-2 py-1.5 hover:bg-red-500/10 rounded-lg text-white/20 hover:text-red-400 transition-all">
+                                <TrashIcon className="w-3 h-3" />
+                              </button>
                             </div>
                             {/* Versand-Optionen */}
                             {(agr.status === "draft" || agr.status === "sent") && client.email && (
