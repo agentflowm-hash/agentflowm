@@ -8163,20 +8163,29 @@ function ClientDetailModal({
                           {item.description.split('\n')[0] && (
                             <button
                               onClick={async () => {
+                                const titleLine = item.description.split('\n')[0];
+                                const btn = document.activeElement as HTMLButtonElement;
+                                if (btn) btn.textContent = "Generiert...";
                                 try {
-                                  const titleLine = item.description.split('\n')[0];
                                   const res = await fetch("/api/ai/describe", {
                                     credentials: "include", method: "POST",
                                     headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({ package_name: titleLine, client_name: client.name, client_company: client.company }),
                                   });
-                                  const data = await res.json();
-                                  if (data.description) {
+                                  const raw = await res.json();
+                                  // Unwrap createHandler response
+                                  const desc = raw?.data?.description || raw?.description || '';
+                                  if (desc) {
                                     const items = [...offerForm.items];
-                                    items[idx].description = titleLine + '\n' + data.description;
+                                    items[idx].description = titleLine + '\n' + desc;
                                     setOfferForm({ ...offerForm, items });
+                                    showToast("success", "AI-Beschreibung generiert!");
+                                  } else {
+                                    showToast("error", raw?.data?.error || raw?.error || "Keine Beschreibung generiert");
                                   }
-                                } catch {}
+                                } catch (err) {
+                                  showToast("error", "AI-Fehler: " + String(err));
+                                }
                               }}
                               className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300">
                               <SparklesIcon className="w-3 h-3" /> AI generieren
@@ -8204,10 +8213,19 @@ function ClientDetailModal({
                   {/* Details */}
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <label className="text-[10px] text-white/40 block mb-1">Gültig bis</label>
-                      <input type="date" value={offerForm.valid_until}
-                        onChange={(e) => setOfferForm({ ...offerForm, valid_until: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 transition-all" />
+                      <label className="text-[10px] text-white/40 block mb-1">Gültigkeit</label>
+                      <select
+                        defaultValue="30"
+                        onChange={(e) => {
+                          const days = parseInt(e.target.value);
+                          const date = new Date(Date.now() + days * 86400000).toISOString().split("T")[0];
+                          setOfferForm({ ...offerForm, valid_until: date, notes: `Dieses Angebot ist ${days} Tage gültig.` });
+                        }}
+                        className="w-full px-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-[11px] outline-none focus:border-blue-500/30 cursor-pointer transition-all">
+                        <option value="7">7 Tage gültig</option>
+                        <option value="14">14 Tage gültig</option>
+                        <option value="30">30 Tage gültig</option>
+                      </select>
                     </div>
                     <div>
                       <label className="text-[10px] text-white/40 block mb-1">MwSt %</label>
