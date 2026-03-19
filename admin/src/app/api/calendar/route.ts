@@ -7,9 +7,7 @@
 import { db } from '@/lib/db';
 import {
   createHandler,
-  CreateEventSchema,
   DatabaseError,
-  type CreateEventInput,
 } from '@/lib/api';
 
 // ─────────────────────────────────────────────────────────────────
@@ -20,8 +18,8 @@ export const GET = createHandler({
   auth: true,
 }, async (_data, _ctx, request) => {
   const searchParams = request.nextUrl.searchParams;
-  const startDate = searchParams.get('startDate');
-  const endDate = searchParams.get('endDate');
+  const startDate = searchParams.get('startDate') || searchParams.get('start');
+  const endDate = searchParams.get('endDate') || searchParams.get('end');
   const clientId = searchParams.get('clientId');
   const eventType = searchParams.get('eventType');
 
@@ -84,28 +82,23 @@ export const GET = createHandler({
 
 export const POST = createHandler({
   auth: true,
-  schema: CreateEventSchema,
-}, async (data: CreateEventInput) => {
-  const {
-    title,
-    description,
-    start_time,
-    end_time,
-    client_id,
-    project_id,
-    event_type,
-  } = data;
+}, async (_data, _ctx, request) => {
+  const body = await request.json();
 
   const { data: event, error } = await db
     .from('calendar_events')
     .insert({
-      title,
-      description: description || null,
-      start_date: start_time,
-      end_date: end_time || null,
-      client_id: client_id || null,
-      project_id: project_id || null,
-      type: event_type || 'event',
+      title: body.title,
+      description: body.description || null,
+      start_date: body.start_time || body.start_date,
+      end_date: body.end_time || body.end_date || null,
+      client_id: body.client_id || null,
+      project_id: body.project_id || null,
+      type: body.event_type || body.type || 'meeting',
+      color: body.color || '#FC682C',
+      location: body.location || null,
+      client_name: body.client_name || null,
+      all_day: body.all_day || false,
     })
     .select()
     .single();
