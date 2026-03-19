@@ -559,6 +559,42 @@ export default function CalendarTab() {
             </div>
           </div>
 
+          {/* Quick Actions for Team */}
+          {teamMembers.length > 0 && (
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
+              <h4 className="text-xs font-medium text-white/40 mb-3">Schnellaktionen</h4>
+              <div className="space-y-2">
+                {teamMembers.map(m => (
+                  <div key={m.id} className="flex items-center justify-between">
+                    <span className="text-xs text-white/60">{m.name}</span>
+                    <div className="flex gap-1">
+                      <button onClick={() => {
+                        setEditingEvent(null);
+                        setPrefilledDate(toLocalDateStr(new Date()) + "T09:00");
+                        setShowCreateModal(true);
+                        setTimeout(() => {
+                          const el = document.querySelector('[data-quickaction]') as any;
+                          if (el) el.click();
+                        }, 100);
+                      }} className="px-1.5 py-0.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded text-[9px] text-rose-400 transition-all"
+                        title={`${m.name} krank melden`}>
+                        Krank
+                      </button>
+                      <button onClick={() => {
+                        setEditingEvent(null);
+                        setPrefilledDate(toLocalDateStr(new Date()) + "T09:00");
+                        setShowCreateModal(true);
+                      }} className="px-1.5 py-0.5 bg-neutral-500/10 hover:bg-neutral-500/20 border border-neutral-500/20 rounded text-[9px] text-neutral-400 transition-all"
+                        title={`${m.name} blocken`}>
+                        Block
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Google Calendar Card */}
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-3">
