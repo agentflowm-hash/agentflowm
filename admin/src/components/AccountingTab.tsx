@@ -136,21 +136,44 @@ export default function AccountingTab() {
 
     const monthlyIncome = monthlyTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
     const monthlyExpenses = monthlyTransactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
-    const monthlyTax = monthlyTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.tax_amount, 0);
+    const monthlyTaxCollected = monthlyTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.tax_amount, 0);
+    const monthlyTaxPaid = monthlyTransactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.tax_amount, 0);
 
     const yearIncome = yearTransactions.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
     const yearExpenses = yearTransactions.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+
+    // Kategorien-Übersicht
+    const categoryBreakdown: Record<string, { income: number; expense: number }> = {};
+    yearTransactions.forEach(t => {
+      if (!categoryBreakdown[t.category]) categoryBreakdown[t.category] = { income: 0, expense: 0 };
+      categoryBreakdown[t.category][t.type] += t.amount;
+    });
+
+    // Monatlicher Vergleich (12 Monate)
+    const monthlyComparison: { month: number; income: number; expense: number }[] = [];
+    for (let m = 0; m < 12; m++) {
+      const mTx = yearTransactions.filter(t => new Date(t.date).getMonth() === m);
+      monthlyComparison.push({
+        month: m,
+        income: mTx.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0),
+        expense: mTx.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0),
+      });
+    }
 
     return {
       totalIncome: monthlyIncome,
       totalExpenses: monthlyExpenses,
       netProfit: monthlyIncome - monthlyExpenses,
-      pendingTax: monthlyTax,
+      pendingTax: monthlyTaxCollected,
+      paidTax: monthlyTaxPaid,
+      taxLiability: monthlyTaxCollected - monthlyTaxPaid,
       yearToDate: {
         income: yearIncome,
         expenses: yearExpenses,
         profit: yearIncome - yearExpenses,
       },
+      categoryBreakdown,
+      monthlyComparison,
     };
   }, [transactions]);
 
@@ -201,7 +224,7 @@ export default function AccountingTab() {
     });
   }, [transactions]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const amount = parseFloat(formData.amount) || 0;
@@ -214,18 +237,27 @@ export default function AccountingTab() {
       account: formData.account, reference: formData.reference, notes: formData.notes,
     };
 
-    if (editMode && selectedTransaction) {
-      fetch(`/api/accounting/${selectedTransaction.id}`, {
-        credentials: "include", method: "PUT",
+    const url = editMode && selectedTransaction
+      ? `/api/accounting/${selectedTransaction.id}`
+      : "/api/accounting";
+    const method = editMode ? "PUT" : "POST";
+
+    try {
+      const res = await fetch(url, {
+        credentials: "include",
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }).then(() => fetchTransactions());
-    } else {
-      fetch("/api/accounting", {
-        credentials: "include", method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }).then(() => fetchTransactions());
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast("success", editMode ? "Buchung aktualisiert" : "Buchung erstellt");
+        fetchTransactions();
+      } else {
+        showToast("error", json.error?.message || "Fehler beim Speichern");
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler");
     }
 
     setShowModal(false);
@@ -275,10 +307,20 @@ export default function AccountingTab() {
     setShowDeleteConfirm(true);
   };
 
-  const deleteTransaction = () => {
+  const deleteTransaction = async () => {
     if (selectedTransaction) {
-      fetch(`/api/accounting/${selectedTransaction.id}`, { credentials: "include", method: "DELETE" })
-        .then(() => fetchTransactions());
+      try {
+        const res = await fetch(`/api/accounting/${selectedTransaction.id}`, { credentials: "include", method: "DELETE" });
+        const json = await res.json();
+        if (json.success) {
+          showToast("success", "Buchung gelöscht");
+          fetchTransactions();
+        } else {
+          showToast("error", "Fehler beim Löschen");
+        }
+      } catch {
+        showToast("error", "Verbindungsfehler");
+      }
       setShowDeleteConfirm(false);
       setShowDetailModal(false);
       setSelectedTransaction(null);
@@ -308,6 +350,30 @@ export default function AccountingTab() {
       showToast("error", "Verbindungsfehler");
     }
     setGeneratingInvoices(false);
+  };
+
+  const exportToPDF = async () => {
+    setExportStatus("PDF wird generiert...");
+    try {
+      const res = await fetch(`/api/accounting/export-pdf?month=${filter.month}&year=${filter.year}`, { credentials: "include" });
+      const json = await res.json();
+      if (json.success) {
+        const htmlContent = json.data.html;
+        const printWindow = window.open("", "_blank");
+        if (printWindow) {
+          printWindow.document.write(htmlContent);
+          printWindow.document.close();
+          printWindow.focus();
+          setTimeout(() => printWindow.print(), 500);
+        }
+        showToast("success", "PDF Export geöffnet");
+      } else {
+        showToast("error", "PDF Export fehlgeschlagen");
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler");
+    }
+    setExportStatus(null);
   };
 
   const exportToCSV = () => {
@@ -441,7 +507,14 @@ export default function AccountingTab() {
             className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2 transition-colors"
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
-            {exportStatus || "Export CSV"}
+            CSV
+          </button>
+          <button
+            onClick={exportToPDF}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2 transition-colors"
+          >
+            <DocumentArrowDownIcon className="w-4 h-4" />
+            {exportStatus || "PDF"}
           </button>
           <button
             onClick={() => { resetForm(); setShowModal(true); }}
@@ -544,11 +617,11 @@ export default function AccountingTab() {
               </div>
               <div className="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl">
                 <span className="text-white/60">Gezahlte Vorsteuer</span>
-                <span className="text-white font-medium">{formatCurrency(0)}</span>
+                <span className="text-white font-medium">{formatCurrency(stats.paidTax)}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
                 <span className="text-purple-400 font-medium">USt-Zahllast</span>
-                <span className="text-purple-400 font-bold">{formatCurrency(stats.pendingTax)}</span>
+                <span className="text-purple-400 font-bold">{formatCurrency(stats.taxLiability)}</span>
               </div>
               <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-2">
                 <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />

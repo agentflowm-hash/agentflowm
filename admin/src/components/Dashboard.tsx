@@ -1991,35 +1991,500 @@ function KommunikationTab() {
 // ═══════════════════════════════════════════════════════════════
 
 function DokumenteTab() {
-  const [docView, setDocView] = useState<"rechnungen" | "vereinbarungen">("rechnungen");
+  const { showToast } = useToast();
+  type DocTabId = "rechnungen" | "angebote" | "vereinbarungen" | "vertraege" | "vorlagen";
+  const [docView, setDocView] = useState<DocTabId>("rechnungen");
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [invoiceStats, setInvoiceStats] = useState({ total: 0, draft: 0, sent: 0, thisMonth: 0 });
+  const [contractStats, setContractStats] = useState({ total: 0, draft: 0, sent: 0 });
+  const [loadingContracts, setLoadingContracts] = useState(true);
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [editingContract, setEditingContract] = useState<any>(null);
+  const [showNewDocDropdown, setShowNewDocDropdown] = useState(false);
+  const [contractForm, setContractForm] = useState({
+    title: "", contract_type: "service", party_name: "", party_email: "",
+    party_company: "", content: "", valid_from: "", valid_until: "",
+    monthly_amount: "", notes: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const docTabs: { id: DocTabId; label: string }[] = [
+    { id: "rechnungen", label: "Rechnungen" },
+    { id: "angebote", label: "Angebote" },
+    { id: "vereinbarungen", label: "Vereinbarungen" },
+    { id: "vertraege", label: "Verträge" },
+    { id: "vorlagen", label: "Vorlagen" },
+  ];
+
+  const CONTRACT_TYPES: Record<string, string> = {
+    employment: "Arbeitsvertrag", freelance: "Freelancer", nda: "NDA",
+    service: "Dienstleistung", other: "Sonstiges",
+  };
+  const CONTRACT_STATUS: Record<string, { label: string; color: string }> = {
+    draft: { label: "Entwurf", color: "bg-white/10 text-white/60" },
+    sent: { label: "Gesendet", color: "bg-blue-500/20 text-blue-400" },
+    signed: { label: "Unterschrieben", color: "bg-emerald-500/20 text-emerald-400" },
+    expired: { label: "Abgelaufen", color: "bg-red-500/20 text-red-400" },
+    cancelled: { label: "Storniert", color: "bg-neutral-500/20 text-neutral-400" },
+  };
+
+  const fetchContracts = useCallback(async () => {
+    setLoadingContracts(true);
+    try {
+      const res = await fetch("/api/contracts", { credentials: "include" });
+      if (res.ok) {
+        const raw = await res.json();
+        const d = unwrapApiResponse<{ contracts: any[] }>(raw);
+        setContracts(d.contracts || []);
+        const c = d.contracts || [];
+        setContractStats({
+          total: c.length,
+          draft: c.filter((x: any) => x.status === "draft").length,
+          sent: c.filter((x: any) => x.status === "sent").length,
+        });
+      }
+    } catch { /* ignore */ }
+    setLoadingContracts(false);
+  }, []);
+
+  const fetchInvoiceStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/invoices", { credentials: "include" });
+      if (res.ok) {
+        const raw = await res.json();
+        const d = unwrapApiResponse<{ invoices: any[]; stats: any }>(raw);
+        const invoices = d.invoices || [];
+        const now = new Date();
+        const thisMonth = invoices.filter((i: any) => {
+          const cd = new Date(i.created_at);
+          return cd.getMonth() === now.getMonth() && cd.getFullYear() === now.getFullYear();
+        });
+        setInvoiceStats({
+          total: invoices.length,
+          draft: invoices.filter((i: any) => i.status === "draft").length,
+          sent: invoices.filter((i: any) => i.status === "sent").length,
+          thisMonth: thisMonth.length,
+        });
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const res = await fetch("/api/privacy", { credentials: "include" });
+      if (res.ok) {
+        const raw = await res.json();
+        const d = unwrapApiResponse<{ documents: any[] }>(raw);
+        setTemplates(d.documents || []);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    fetchContracts();
+    fetchInvoiceStats();
+    fetchTemplates();
+  }, [fetchContracts, fetchInvoiceStats, fetchTemplates]);
+
+  const totalDocs = invoiceStats.total + contractStats.total + templates.length;
+  const totalDrafts = invoiceStats.draft + contractStats.draft;
+  const totalSent = invoiceStats.sent + contractStats.sent;
+
+  const resetContractForm = () => {
+    setContractForm({
+      title: "", contract_type: "service", party_name: "", party_email: "",
+      party_company: "", content: "", valid_from: "", valid_until: "",
+      monthly_amount: "", notes: "",
+    });
+    setEditingContract(null);
+  };
+
+  const openEditContract = (c: any) => {
+    setEditingContract(c);
+    setContractForm({
+      title: c.title || "", contract_type: c.contract_type || "service",
+      party_name: c.party_name || "", party_email: c.party_email || "",
+      party_company: c.party_company || "", content: c.content || "",
+      valid_from: c.valid_from || "", valid_until: c.valid_until || "",
+      monthly_amount: c.monthly_amount ? String(c.monthly_amount) : "",
+      notes: c.notes || "",
+    });
+    setShowContractModal(true);
+  };
+
+  const saveContract = async () => {
+    if (!contractForm.title.trim() || !contractForm.party_name.trim()) return;
+    setSaving(true);
+    try {
+      const url = editingContract ? `/api/contracts/${editingContract.id}` : "/api/contracts";
+      const method = editingContract ? "PATCH" : "POST";
+      const payload = {
+        ...contractForm,
+        monthly_amount: contractForm.monthly_amount ? parseFloat(contractForm.monthly_amount) : null,
+        valid_from: contractForm.valid_from || null,
+        valid_until: contractForm.valid_until || null,
+      };
+      const res = await fetch(url, {
+        method, headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        showToast("success", editingContract ? "Vertrag aktualisiert" : "Vertrag erstellt");
+        setShowContractModal(false);
+        resetContractForm();
+        fetchContracts();
+      } else {
+        showToast("error", "Fehler beim Speichern");
+      }
+    } catch { showToast("error", "Verbindungsfehler"); }
+    setSaving(false);
+  };
+
+  const deleteContract = async (id: number) => {
+    try {
+      const res = await fetch(`/api/contracts/${id}`, { method: "DELETE", credentials: "include" });
+      if (res.ok) {
+        showToast("success", "Vertrag gelöscht");
+        fetchContracts();
+      }
+    } catch { showToast("error", "Fehler beim Löschen"); }
+  };
+
+  const sendContractByEmail = async (c: any) => {
+    if (!c.party_email) { showToast("error", "Keine E-Mail-Adresse hinterlegt"); return; }
+    try {
+      const res = await fetch("/api/emails", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          to: c.party_email,
+          subject: `Vertrag: ${c.title}`,
+          body: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#111827;color:#fff;border-radius:16px;">
+            <h2 style="color:#FC682C;margin:0 0 16px;">${c.title}</h2>
+            <p>Hallo ${c.party_name},</p>
+            <p style="color:rgba(255,255,255,0.7);">anbei finden Sie den Vertrag zur Durchsicht.</p>
+            <div style="margin:16px 0;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px;color:rgba(255,255,255,0.8);white-space:pre-wrap;">${c.content || 'Vertragsinhalte werden nachgereicht.'}</div>
+            <p style="color:rgba(255,255,255,0.4);font-size:12px;">AgentFlowMarketing</p>
+          </div>`,
+        }),
+      });
+      if (res.ok) {
+        await fetch(`/api/contracts/${c.id}`, {
+          method: "PATCH", headers: { "Content-Type": "application/json" },
+          credentials: "include", body: JSON.stringify({ status: "sent" }),
+        });
+        showToast("success", `Vertrag an ${c.party_email} gesendet`);
+        fetchContracts();
+      } else {
+        showToast("error", "Fehler beim Senden");
+      }
+    } catch { showToast("error", "Verbindungsfehler"); }
+  };
+
+  const createFromTemplate = (tmpl: any) => {
+    resetContractForm();
+    setContractForm(prev => ({
+      ...prev,
+      title: `${tmpl.title} — Kopie`,
+      content: tmpl.content || "",
+      contract_type: "service",
+    }));
+    setShowContractModal(true);
+    setDocView("vertraege");
+  };
+
+  const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString("de-DE") : "—";
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-white">Dokumente</h2>
-        <div className="flex items-center gap-1 bg-white/[0.06] rounded-lg p-1">
-          <button
-            onClick={() => setDocView("rechnungen")}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              docView === "rechnungen"
-                ? "bg-[#FC682C] text-white shadow-lg"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            Rechnungen
-          </button>
-          <button
-            onClick={() => setDocView("vereinbarungen")}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              docView === "vereinbarungen"
-                ? "bg-[#FC682C] text-white shadow-lg"
-                : "text-white/50 hover:text-white"
-            }`}
-          >
-            Vereinbarungen
-          </button>
+    <div className="space-y-6">
+      {/* ── Header Stats ───────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-[#FC682C]/10"><DocumentTextIcon className="w-4 h-4 text-[#FC682C]" /></div>
+            <span className="text-xs text-white/40">Gesamt</span>
+          </div>
+          <div className="text-2xl font-bold text-white">{totalDocs}</div>
+        </div>
+        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-yellow-500/10"><ClockIcon className="w-4 h-4 text-yellow-400" /></div>
+            <span className="text-xs text-white/40">Entwürfe</span>
+          </div>
+          <div className="text-2xl font-bold text-yellow-400">{totalDrafts}</div>
+        </div>
+        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-blue-500/10"><PaperAirplaneIcon className="w-4 h-4 text-blue-400" /></div>
+            <span className="text-xs text-white/40">Gesendet</span>
+          </div>
+          <div className="text-2xl font-bold text-blue-400">{totalSent}</div>
+        </div>
+        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-emerald-500/10"><CalendarIcon className="w-4 h-4 text-emerald-400" /></div>
+            <span className="text-xs text-white/40">Diesen Monat</span>
+          </div>
+          <div className="text-2xl font-bold text-emerald-400">{invoiceStats.thisMonth}</div>
         </div>
       </div>
-      {docView === "rechnungen" ? <InvoiceManager /> : <AgreementManager />}
+
+      {/* ── Toolbar ─────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1">
+          {docTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setDocView(tab.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                docView === tab.id
+                  ? "bg-[#FC682C] text-white shadow-lg"
+                  : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="relative">
+          <button
+            onClick={() => setShowNewDocDropdown(!showNewDocDropdown)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] hover:bg-[#e55d27] text-white rounded-xl text-sm font-medium transition-colors"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Neues Dokument
+            <ChevronDownIcon className="w-3 h-3" />
+          </button>
+          {showNewDocDropdown && (
+            <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#1a1a1f] border border-white/[0.08] shadow-2xl z-50 overflow-hidden">
+              {[
+                { label: "Rechnung", tab: "rechnungen" as DocTabId },
+                { label: "Angebot", tab: "angebote" as DocTabId },
+                { label: "Vereinbarung", tab: "vereinbarungen" as DocTabId },
+                { label: "Vertrag", tab: "vertraege" as DocTabId },
+              ].map((item) => (
+                <button
+                  key={item.tab}
+                  onClick={() => {
+                    setShowNewDocDropdown(false);
+                    if (item.tab === "vertraege") {
+                      resetContractForm();
+                      setShowContractModal(true);
+                    }
+                    setDocView(item.tab);
+                  }}
+                  className="w-full text-left px-4 py-2.5 text-sm text-white/70 hover:bg-white/[0.05] transition-colors"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Tab Content ─────────────────────────────────── */}
+      {docView === "rechnungen" && <InvoiceManager />}
+
+      {docView === "angebote" && <InvoiceManager />}
+
+      {docView === "vereinbarungen" && <AgreementManager />}
+
+      {docView === "vertraege" && (
+        <div className="space-y-4">
+          {loadingContracts ? (
+            <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-[#FC682C] border-t-transparent rounded-full animate-spin" /></div>
+          ) : contracts.length === 0 ? (
+            <div className="text-center py-16">
+              <DocumentTextIcon className="w-12 h-12 mx-auto mb-3 text-white/20" />
+              <p className="text-white/40 text-sm">Noch keine Verträge vorhanden</p>
+              <button onClick={() => { resetContractForm(); setShowContractModal(true); }} className="mt-3 px-4 py-2 bg-[#FC682C] hover:bg-[#e55d27] text-white rounded-xl text-sm font-medium transition-colors">
+                Ersten Vertrag erstellen
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.06]">
+                    <th className="text-left px-4 py-3 text-white/40 font-medium">Titel</th>
+                    <th className="text-left px-4 py-3 text-white/40 font-medium hidden md:table-cell">Typ</th>
+                    <th className="text-left px-4 py-3 text-white/40 font-medium hidden md:table-cell">Vertragspartner</th>
+                    <th className="text-left px-4 py-3 text-white/40 font-medium hidden lg:table-cell">Status</th>
+                    <th className="text-left px-4 py-3 text-white/40 font-medium hidden lg:table-cell">Gültig</th>
+                    <th className="text-right px-4 py-3 text-white/40 font-medium">Aktionen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contracts.map((c) => {
+                    const st = CONTRACT_STATUS[c.status] || CONTRACT_STATUS.draft;
+                    return (
+                      <tr key={c.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-white/90">{c.title}</div>
+                          {c.monthly_amount && <div className="text-xs text-white/30 mt-0.5">€{parseFloat(c.monthly_amount).toLocaleString("de-DE")}/Monat</div>}
+                        </td>
+                        <td className="px-4 py-3 hidden md:table-cell">
+                          <span className="text-xs text-white/50 bg-white/[0.04] px-2 py-0.5 rounded">{CONTRACT_TYPES[c.contract_type] || c.contract_type}</span>
+                        </td>
+                        <td className="px-4 py-3 hidden md:table-cell">
+                          <div className="text-white/70">{c.party_name}</div>
+                          {c.party_company && <div className="text-xs text-white/30">{c.party_company}</div>}
+                        </td>
+                        <td className="px-4 py-3 hidden lg:table-cell">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${st.color}`}>{st.label}</span>
+                        </td>
+                        <td className="px-4 py-3 text-white/40 text-xs hidden lg:table-cell">
+                          {c.valid_from ? `${fmtDate(c.valid_from)} — ${c.valid_until ? fmtDate(c.valid_until) : "unbefristet"}` : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => openEditContract(c)} className="p-1.5 rounded-md hover:bg-white/[0.05] text-white/40 hover:text-white/70 transition-colors" title="Bearbeiten">
+                              <PencilIcon className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => sendContractByEmail(c)} className="p-1.5 rounded-md hover:bg-blue-500/10 text-white/40 hover:text-blue-400 transition-colors" title="Per E-Mail senden">
+                              <EnvelopeIcon className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => deleteContract(c.id)} className="p-1.5 rounded-md hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-colors" title="Löschen">
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {docView === "vorlagen" && (
+        <div className="space-y-4">
+          {templates.length === 0 ? (
+            <div className="text-center py-16">
+              <DocumentTextIcon className="w-12 h-12 mx-auto mb-3 text-white/20" />
+              <p className="text-white/40 text-sm">Keine Vorlagen vorhanden</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {templates.map((tmpl) => (
+                <div key={tmpl.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] transition-colors">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="text-sm font-medium text-white/90">{tmpl.title}</h4>
+                      {tmpl.category && <span className="text-xs text-white/30 bg-white/[0.04] px-2 py-0.5 rounded mt-1 inline-block">{tmpl.category}</span>}
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${tmpl.status === "active" ? "bg-emerald-500/20 text-emerald-400" : "bg-white/10 text-white/50"}`}>
+                      {tmpl.status === "active" ? "Aktiv" : tmpl.status || "Entwurf"}
+                    </span>
+                  </div>
+                  {tmpl.description && <p className="text-xs text-white/40 mb-3 line-clamp-2">{tmpl.description}</p>}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-white/20">v{tmpl.version || 1} · {fmtDate(tmpl.created_at)}</span>
+                    <button
+                      onClick={() => createFromTemplate(tmpl)}
+                      className="px-3 py-1 bg-[#FC682C]/10 hover:bg-[#FC682C]/20 text-[#FC682C] rounded-lg text-xs font-medium transition-colors"
+                    >
+                      Aus Vorlage erstellen
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Contract Modal ──────────────────────────────── */}
+      {showContractModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-2xl mx-4 rounded-2xl bg-[#141418] border border-white/[0.08] shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] sticky top-0 bg-[#141418] z-10">
+              <h3 className="text-lg font-semibold text-white/90">
+                {editingContract ? "Vertrag bearbeiten" : "Neuer Vertrag"}
+              </h3>
+              <button onClick={() => { setShowContractModal(false); resetContractForm(); }} className="p-1 rounded-lg hover:bg-white/[0.05] text-white/40 hover:text-white/70 transition-colors">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">Titel *</label>
+                  <input type="text" value={contractForm.title} onChange={(e) => setContractForm({ ...contractForm, title: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" placeholder="z.B. Freelancer-Vertrag Max Mustermann" />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">Vertragstyp</label>
+                  <select value={contractForm.contract_type} onChange={(e) => setContractForm({ ...contractForm, contract_type: e.target.value } as any)}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none">
+                    {Object.entries(CONTRACT_TYPES).map(([k, v]) => (
+                      <option key={k} value={k} className="bg-[#1a1a1f]">{v}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">Vertragspartner *</label>
+                  <input type="text" value={contractForm.party_name} onChange={(e) => setContractForm({ ...contractForm, party_name: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" placeholder="Name" />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">E-Mail</label>
+                  <input type="email" value={contractForm.party_email} onChange={(e) => setContractForm({ ...contractForm, party_email: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" placeholder="email@beispiel.de" />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">Firma</label>
+                  <input type="text" value={contractForm.party_company} onChange={(e) => setContractForm({ ...contractForm, party_company: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" placeholder="Optional" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-white/40 mb-1.5">Vertragsinhalt</label>
+                <textarea value={contractForm.content} onChange={(e) => setContractForm({ ...contractForm, content: e.target.value })} rows={6}
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none resize-none" placeholder="Vertragsbedingungen eingeben..." />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">Gültig von</label>
+                  <input type="date" value={contractForm.valid_from} onChange={(e) => setContractForm({ ...contractForm, valid_from: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">Gültig bis</label>
+                  <input type="date" value={contractForm.valid_until} onChange={(e) => setContractForm({ ...contractForm, valid_until: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1.5">Monatl. Betrag (€)</label>
+                  <input type="number" value={contractForm.monthly_amount} onChange={(e) => setContractForm({ ...contractForm, monthly_amount: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none" placeholder="0.00" step="0.01" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-white/40 mb-1.5">Notizen</label>
+                <textarea value={contractForm.notes} onChange={(e) => setContractForm({ ...contractForm, notes: e.target.value })} rows={2}
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none resize-none" placeholder="Interne Notizen..." />
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onClick={() => { setShowContractModal(false); resetContractForm(); }}
+                  className="px-4 py-2 rounded-lg text-sm text-white/50 hover:text-white/70 hover:bg-white/[0.03] transition-colors">
+                  Abbrechen
+                </button>
+                <button onClick={saveContract} disabled={saving || !contractForm.title.trim() || !contractForm.party_name.trim()}
+                  className="px-5 py-2 rounded-lg text-sm font-medium bg-[#FC682C] hover:bg-[#e55d27] text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                  {saving ? "Speichert..." : editingContract ? "Speichern" : "Erstellen"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -3094,16 +3559,33 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
   const { showToast } = useToast();
   const [status, setStatus] = useState(lead.status);
   const [notes, setNotes] = useState(lead.notes || "");
+  const [editName, setEditName] = useState(lead.name);
+  const [editEmail, setEditEmail] = useState(lead.email);
+  const [editPhone, setEditPhone] = useState(lead.phone || "");
+  const [editCompany, setEditCompany] = useState(lead.company || "");
+  const [editBudget, setEditBudget] = useState(lead.budget || "");
+  const [editPackage, setEditPackage] = useState(lead.packageInterest || "");
+  const [editFollowUp, setEditFollowUp] = useState(lead.nextFollowUp || "");
   const [activeTab, setActiveTab] = useState<"details" | "scripts" | "activity">("details");
   const [converting, setConverting] = useState(false);
   const [convertResult, setConvertResult] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const save = async () => {
+    const payload: Record<string, unknown> = { status, notes };
+    if (isEditing) {
+      payload.name = editName;
+      payload.email = editEmail;
+      payload.phone = editPhone || null;
+      payload.company = editCompany || null;
+    }
     await fetch(`/api/leads/${lead.id}`, { credentials: "include",
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, notes }),
+      body: JSON.stringify(payload),
     });
+    if (isEditing) showToast("success", "Lead aktualisiert");
+    onRefresh?.();
     onClose();
   };
 
@@ -3391,15 +3873,35 @@ kontakt@agentflowm.de | +49 179 949 8247`}</p>
                 </a>
               </div>
 
-              {/* Info Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <InfoBox label="Firma" value={lead.company || "-"} />
-                <InfoBox label="Telefon" value={lead.phone || "-"} />
-                <InfoBox label="Paket" value={lead.packageInterest || "-"} />
-                <InfoBox label="Budget" value={lead.budget || "-"} />
-                <InfoBox label="Quelle" value={lead.source || "Website"} />
-                <InfoBox label="Erstellt" value={formatDate(lead.createdAt)} />
+              {/* Info Grid — editierbar */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-white/40">Kontaktdaten</span>
+                <button onClick={() => setIsEditing(!isEditing)} className="text-[10px] text-[#FC682C] hover:text-[#FC682C]/80">
+                  {isEditing ? "Abbrechen" : "Bearbeiten"}
+                </button>
               </div>
+              {isEditing ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div><label className="block text-[10px] text-white/30 mb-1">Name</label>
+                    <input value={editName} onChange={e => setEditName(e.target.value)} className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" /></div>
+                  <div><label className="block text-[10px] text-white/30 mb-1">E-Mail</label>
+                    <input value={editEmail} onChange={e => setEditEmail(e.target.value)} className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" /></div>
+                  <div><label className="block text-[10px] text-white/30 mb-1">Telefon</label>
+                    <input value={editPhone} onChange={e => setEditPhone(e.target.value)} className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" /></div>
+                  <div><label className="block text-[10px] text-white/30 mb-1">Firma</label>
+                    <input value={editCompany} onChange={e => setEditCompany(e.target.value)} className="w-full px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-white text-xs outline-none" /></div>
+                  <button onClick={save} className="col-span-2 py-2 bg-[#FC682C] text-white rounded-lg text-xs font-medium">Speichern</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoBox label="Firma" value={lead.company || "-"} />
+                  <InfoBox label="Telefon" value={lead.phone || "-"} />
+                  <InfoBox label="Paket" value={lead.packageInterest || "-"} />
+                  <InfoBox label="Budget" value={lead.budget || "-"} />
+                  <InfoBox label="Quelle" value={lead.source || "Website"} />
+                  <InfoBox label="Erstellt" value={formatDate(lead.createdAt)} />
+                </div>
+              )}
 
               {/* Message */}
               <div>
