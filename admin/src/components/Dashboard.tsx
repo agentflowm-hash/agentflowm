@@ -83,6 +83,7 @@ import NotificationsTab from "@/components/NotificationsTab";
 import AccountingTab from "@/components/AccountingTab";
 import VaultTab from "@/components/VaultTab";
 import TasksTab from "@/components/TasksTab";
+import HRTab from "@/components/HRTab";
 import PrivacyTab from "@/components/PrivacyTab";
 import ActivityTimeline from "@/components/ActivityTimeline";
 
@@ -163,6 +164,7 @@ type Tab =
   | "notifications"
   | "vault"
   | "tasks"
+  | "hr"
   | "settings";
 type PipelineView = "kanban" | "list";
 
@@ -439,6 +441,7 @@ export function Dashboard() {
         { id: "accounting" as Tab, label: "Buchhaltung", icon: CalculatorIcon, badge: null },
         { id: "vault" as Tab, label: "Datentresor", icon: LockClosedIcon, badge: null },
         { id: "tasks" as Tab, label: "Aufgaben", icon: ClipboardDocumentCheckIcon, badge: null },
+        { id: "hr" as Tab, label: "Personal", icon: UserGroupIcon, badge: null },
       ],
     },
     {
@@ -763,6 +766,7 @@ export function Dashboard() {
           {activeTab === "accounting" && <AccountingTab />}
           {activeTab === "vault" && <VaultTab />}
           {activeTab === "tasks" && <TasksTab />}
+          {activeTab === "hr" && <HRTab />}
           {activeTab === "privacy" && <PrivacyTab />}
           {activeTab === "checks" && <ChecksTab />}
           {activeTab === "referrals" && <ReferralsTab />}
