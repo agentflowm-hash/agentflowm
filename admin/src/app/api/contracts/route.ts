@@ -47,32 +47,30 @@ export const GET = createHandler({
 
 export const POST = createHandler({
   auth: true,
-}, async (_data, _ctx, request) => {
-  const body = await request.json();
-
+}, async (data: any) => {
   const { data: contract, error } = await db
     .from('contracts')
     .insert({
-      title: body.title,
-      contract_type: body.contract_type,
-      party_name: body.party_name,
-      party_email: body.party_email || null,
-      party_company: body.party_company || null,
-      content: body.content || '',
-      status: body.status || 'draft',
-      valid_from: body.valid_from || null,
-      valid_until: body.valid_until || null,
-      monthly_amount: body.monthly_amount || null,
-      notes: body.notes || null,
+      title: data.title,
+      contract_type: data.contract_type,
+      party_name: data.party_name,
+      party_email: data.party_email || null,
+      party_company: data.party_company || null,
+      content: data.content || '',
+      status: data.status || 'draft',
+      valid_from: data.valid_from || null,
+      valid_until: data.valid_until || null,
+      monthly_amount: data.monthly_amount || null,
+      notes: data.notes || null,
     })
     .select()
     .single();
 
   if (error) throw new DatabaseError(error.message);
 
-  await logActivity('contract_created', 'contract', contract.id, body.title, {
-    contract_type: body.contract_type,
-    party_name: body.party_name,
+  await logActivity('contract_created', 'contract', contract.id, data.title, {
+    contract_type: data.contract_type,
+    party_name: data.party_name,
   });
 
   return { contract };

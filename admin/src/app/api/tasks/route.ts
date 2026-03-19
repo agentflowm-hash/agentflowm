@@ -50,21 +50,19 @@ export const GET = createHandler({
 
 export const POST = createHandler({
   auth: true,
-}, async (_data, _ctx, request) => {
-  const body = await request.json();
-
+}, async (data: any) => {
   const { data: task, error } = await db
     .from('tasks')
     .insert({
-      title: body.title,
-      description: body.description || null,
-      assignee: body.assignee || null,
-      due_date: body.due_date || null,
-      status: body.status || 'open',
-      priority: body.priority || 'medium',
-      linked_entity: body.linked_entity || null,
-      linked_id: body.linked_id || null,
-      tags: body.tags || null,
+      title: data.title,
+      description: data.description || null,
+      assignee: data.assignee || null,
+      due_date: data.due_date || null,
+      status: data.status || 'open',
+      priority: data.priority || 'medium',
+      linked_entity: data.linked_entity || null,
+      linked_id: data.linked_id || null,
+      tags: data.tags || null,
     })
     .select()
     .single();

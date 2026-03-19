@@ -18,9 +18,8 @@ import { logActivity } from '@/lib/activity';
 
 export const PATCH = createHandler({
   auth: true,
-}, async (_data, _ctx, request) => {
+}, async (data: any, _ctx, request) => {
   const id = request.nextUrl.pathname.split('/').pop();
-  const body = await request.json();
 
   const { data: existing } = await db
     .from('contracts')
@@ -42,8 +41,8 @@ export const PATCH = createHandler({
   ] as const;
 
   for (const field of fields) {
-    if (body[field] !== undefined) {
-      updateData[field] = body[field];
+    if (data[field] !== undefined) {
+      updateData[field] = data[field];
     }
   }
 

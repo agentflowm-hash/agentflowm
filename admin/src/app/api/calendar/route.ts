@@ -82,23 +82,21 @@ export const GET = createHandler({
 
 export const POST = createHandler({
   auth: true,
-}, async (_data, _ctx, request) => {
-  const body = await request.json();
-
+}, async (data: any) => {
   const { data: event, error } = await db
     .from('calendar_events')
     .insert({
-      title: body.title,
-      description: body.description || null,
-      start_date: body.start_time || body.start_date,
-      end_date: body.end_time || body.end_date || null,
-      client_id: body.client_id || null,
-      project_id: body.project_id || null,
-      type: body.event_type || body.type || 'meeting',
-      color: body.color || '#FC682C',
-      location: body.location || null,
-      client_name: body.client_name || null,
-      all_day: body.all_day || false,
+      title: data.title,
+      description: data.description || null,
+      start_date: data.start_time || data.start_date,
+      end_date: data.end_time || data.end_date || null,
+      client_id: data.client_id || null,
+      project_id: data.project_id || null,
+      type: data.event_type || data.type || 'meeting',
+      color: data.color || '#FC682C',
+      location: data.location || null,
+      client_name: data.client_name || null,
+      all_day: data.all_day || false,
     })
     .select()
     .single();
