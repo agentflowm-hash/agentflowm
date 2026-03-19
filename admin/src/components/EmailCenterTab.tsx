@@ -331,7 +331,10 @@ export default function EmailCenterTab() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Email Templates</h3>
-              <button className="px-3 py-1.5 bg-[#FC682C] text-white rounded-lg text-sm flex items-center gap-1.5">
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("navigateTab", { detail: "kommunikation" }))}
+                className="px-3 py-1.5 bg-[#FC682C] text-white rounded-lg text-sm flex items-center gap-1.5"
+              >
                 <PlusIcon className="w-4 h-4" />
                 Neu
               </button>

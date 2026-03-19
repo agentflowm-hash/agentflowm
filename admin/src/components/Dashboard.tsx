@@ -428,15 +428,16 @@ export function Dashboard() {
     return () => window.removeEventListener("navigateTab", handleNavigateTab);
   }, []);
 
-  // Keyboard shortcut für Command Palette
+  // Keyboard shortcut für Command Palette (Cmd+K öffnet GlobalSearch, ESC schließt)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setCommandPaletteOpen(true);
+        setGlobalSearchOpen(true);
       }
       if (e.key === "Escape") {
         setCommandPaletteOpen(false);
+        setGlobalSearchOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -2560,7 +2561,8 @@ function VertriebTab() {
     fetch("/api/pipelines", { credentials: "include" })
       .then(r => r.json())
       .then(d => {
-        const pips = d.pipelines || [];
+        const u = d.data || d;
+        const pips = u.pipelines || [];
         setPipelines(pips);
         const def = pips.find((p: any) => p.is_default);
         if (def) setActivePipeline(String(def.id));
