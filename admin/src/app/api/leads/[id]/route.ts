@@ -62,7 +62,7 @@ export const PATCH = createHandler({
 
   const fields = [
     'name', 'email', 'company', 'phone', 'message',
-    'source', 'package_interest', 'status', 'notes'
+    'source', 'package_interest', 'status', 'notes', 'next_follow_up'
   ] as const;
 
   for (const field of fields) {

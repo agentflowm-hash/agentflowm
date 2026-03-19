@@ -196,6 +196,7 @@ export const CreateLeadSchema = z.object({
 export const UpdateLeadSchema = CreateLeadSchema.partial().extend({
   status: z.enum(['new', 'contacted', 'qualified', 'converted', 'lost']).optional(),
   notes: z.string().max(5000).optional(),
+  next_follow_up: z.string().nullable().optional(),
 });
 
 export type CreateLeadInput = z.infer<typeof CreateLeadSchema>;
