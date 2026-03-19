@@ -2361,6 +2361,9 @@ function DokumenteTab() {
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => window.open(`/api/contracts/${c.id}/pdf`, '_blank')} className="p-1.5 rounded-md hover:bg-[#FC682C]/10 text-white/40 hover:text-[#FC682C] transition-colors" title="PDF Vorschau">
+                              <EyeIcon className="w-4 h-4" />
+                            </button>
                             <button onClick={() => openEditContract(c)} className="p-1.5 rounded-md hover:bg-white/[0.05] text-white/40 hover:text-white/70 transition-colors" title="Bearbeiten">
                               <PencilIcon className="w-4 h-4" />
                             </button>
@@ -2405,12 +2408,20 @@ function DokumenteTab() {
                   {tmpl.description && <p className="text-xs text-white/40 mb-3 line-clamp-2">{tmpl.description}</p>}
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-white/20">v{tmpl.version || 1} · {fmtDate(tmpl.created_at)}</span>
-                    <button
-                      onClick={() => createFromTemplate(tmpl)}
-                      className="px-3 py-1 bg-[#FC682C]/10 hover:bg-[#FC682C]/20 text-[#FC682C] rounded-lg text-xs font-medium transition-colors"
-                    >
-                      Aus Vorlage erstellen
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => window.open(`/api/privacy/${tmpl.id}/pdf`, '_blank')}
+                        className="px-3 py-1 bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white/80 rounded-lg text-xs font-medium transition-colors"
+                      >
+                        PDF
+                      </button>
+                      <button
+                        onClick={() => createFromTemplate(tmpl)}
+                        className="px-3 py-1 bg-[#FC682C]/10 hover:bg-[#FC682C]/20 text-[#FC682C] rounded-lg text-xs font-medium transition-colors"
+                      >
+                        Aus Vorlage erstellen
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

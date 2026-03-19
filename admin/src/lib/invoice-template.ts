@@ -332,11 +332,38 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       color: #f97316;
       text-decoration: none;
     }
+    .toolbar {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+    .toolbar button {
+      background: #f97316;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .toolbar button:hover { background: #ea580c; }
+    .toolbar button.secondary { background: #0f172a; }
+    .toolbar button.secondary:hover { background: #1e293b; }
+    @media print { .no-print { display: none !important; } }
   </style>
 </head>
 <body>
+  <div class="toolbar no-print">
+    <button onclick="window.print()">Als PDF speichern</button>
+    <button class="secondary" onclick="window.close()">Schließen</button>
+  </div>
   <div class="page">
-    
+
     <div class="header-accent"></div>
     
     <div class="header">
