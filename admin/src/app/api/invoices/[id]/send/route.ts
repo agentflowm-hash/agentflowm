@@ -1,10 +1,27 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// SMTP Transporter (same as other email routes)
+function getTransporter() {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    return null;
+  }
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
 
 // POST: Send invoice via email
 export async function POST(
@@ -29,15 +46,40 @@ export async function POST(
 
     const recipientEmail = email_override || invoice.client_email;
 
+    if (!recipientEmail) {
+      return NextResponse.json({ error: "Keine E-Mail-Adresse vorhanden" }, { status: 400 });
+    }
+
+    // Load company settings from DB for dynamic bank info / contact
+    const { data: settingsRows } = await supabase
+      .from("admin_settings")
+      .select("key, value")
+      .in("key", ["company", "bankInfo"]);
+
+    const settings: Record<string, any> = {};
+    (settingsRows || []).forEach((row: any) => {
+      try { settings[row.key] = typeof row.value === "string" ? JSON.parse(row.value) : row.value; } catch { settings[row.key] = row.value; }
+    });
+
+    const company = settings.company || {};
+    const bank = settings.bankInfo || {};
+    const companyName = company.name || "AgentFlowMarketing";
+    const companyEmail = company.email || process.env.SMTP_USER || "kontakt@agentflowm.de";
+    const companyPhone = company.phone || "";
+    const companyAddress = company.address || "";
+    const bankName = bank.bankName || companyName;
+    const iban = bank.iban || "";
+    const bic = bank.bic || "";
+
     // Format items for email
-    const itemsHtml = invoice.invoice_items
+    const itemsHtml = (invoice.invoice_items || [])
       .map(
         (item: any) => `
         <tr>
           <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.description}</td>
           <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${item.quantity}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">€${item.unit_price.toFixed(2)}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">€${item.total.toFixed(2)}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${Number(item.unit_price).toFixed(2)} EUR</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${Number(item.total).toFixed(2)} EUR</td>
         </tr>
       `
       )
@@ -63,7 +105,6 @@ export async function POST(
           .totals { background: #fafafa; }
           .totals td { padding: 8px 12px; }
           .grand-total { font-size: 18px; font-weight: bold; }
-          .cta-button { display: inline-block; background: #FF6B35; color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 20px 0; }
           .footer { text-align: center; color: #999; font-size: 12px; margin-top: 40px; }
           .bank-info { background: #f0f7ff; padding: 20px; border-radius: 8px; margin: 20px 0; }
         </style>
@@ -71,19 +112,19 @@ export async function POST(
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">AgentFlowMarketing</div>
+            <div class="logo">${companyName}</div>
           </div>
-          
+
           <p>Hallo ${invoice.client_name},</p>
-          
-          ${message ? `<p>${message}</p>` : `<p>anbei finden Sie Ihre Rechnung für unsere Zusammenarbeit.</p>`}
-          
+
+          ${message ? `<p>${message}</p>` : `<p>anbei finden Sie Ihre ${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} fuer unsere Zusammenarbeit.</p>`}
+
           <div class="invoice-box">
-            <div class="invoice-number">Rechnung ${invoice.invoice_number}</div>
-            <div class="amount">€${invoice.total.toFixed(2)}</div>
-            <div class="due-date">Fällig bis: ${new Date(invoice.due_date).toLocaleDateString("de-DE")}</div>
+            <div class="invoice-number">${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} ${invoice.invoice_number}</div>
+            <div class="amount">${Number(invoice.total).toFixed(2)} EUR</div>
+            <div class="due-date">Faellig bis: ${new Date(invoice.due_date).toLocaleDateString("de-DE")}</div>
           </div>
-          
+
           <table>
             <thead>
               <tr>
@@ -99,59 +140,71 @@ export async function POST(
             <tfoot class="totals">
               <tr>
                 <td colspan="3">Zwischensumme</td>
-                <td style="text-align: right;">€${invoice.subtotal.toFixed(2)}</td>
+                <td style="text-align: right;">${Number(invoice.subtotal).toFixed(2)} EUR</td>
               </tr>
               ${invoice.discount_amount > 0 ? `
               <tr>
                 <td colspan="3">Rabatt (${invoice.discount_percent}%)</td>
-                <td style="text-align: right;">-€${invoice.discount_amount.toFixed(2)}</td>
+                <td style="text-align: right;">-${Number(invoice.discount_amount).toFixed(2)} EUR</td>
               </tr>
               ` : ''}
               <tr>
                 <td colspan="3">MwSt. (${invoice.tax_rate}%)</td>
-                <td style="text-align: right;">€${invoice.tax_amount.toFixed(2)}</td>
+                <td style="text-align: right;">${Number(invoice.tax_amount).toFixed(2)} EUR</td>
               </tr>
               <tr class="grand-total">
                 <td colspan="3"><strong>Gesamtbetrag</strong></td>
-                <td style="text-align: right;"><strong>€${invoice.total.toFixed(2)}</strong></td>
+                <td style="text-align: right;"><strong>${Number(invoice.total).toFixed(2)} EUR</strong></td>
               </tr>
             </tfoot>
           </table>
-          
+
+          ${iban ? `
           <div class="bank-info">
             <strong>Bankverbindung:</strong><br>
-            AgentFlowMarketing<br>
-            IBAN: DE89 3704 0044 0532 0130 00<br>
-            BIC: COBADEFFXXX<br>
+            ${bankName}<br>
+            IBAN: ${iban}<br>
+            ${bic ? `BIC: ${bic}<br>` : ''}
             Verwendungszweck: ${invoice.invoice_number}
           </div>
-          
+          ` : ''}
+
           ${invoice.notes ? `<p><strong>Hinweise:</strong> ${invoice.notes}</p>` : ''}
-          
-          <p>Bei Fragen stehe ich Ihnen gerne zur Verfügung.</p>
-          
-          <p>Mit freundlichen Grüßen,<br>
-          <strong>Mo Sul</strong><br>
-          AgentFlowMarketing</p>
-          
+
+          <p>Bei Fragen stehe ich Ihnen gerne zur Verfuegung.</p>
+
+          <p>Mit freundlichen Gruessen,<br>
+          <strong>${companyName}</strong></p>
+
           <div class="footer">
-            <p>AgentFlowMarketing | Achillesstraße 69A, 13125 Berlin<br>
-            kontakt@agentflowm.com | +49 179 949 8247</p>
+            <p>${companyName}${companyAddress ? ` | ${companyAddress}` : ''}<br>
+            ${companyEmail}${companyPhone ? ` | ${companyPhone}` : ''}</p>
           </div>
         </div>
       </body>
       </html>
     `;
 
-    // TODO: Send actual email via Resend/SendGrid/etc
-    // For now, we'll just update the status
-    console.log(`Would send invoice ${invoice.invoice_number} to ${recipientEmail}`);
+    // Actually send the email via SMTP
+    const transporter = getTransporter();
+
+    if (!transporter) {
+      return NextResponse.json({ error: "SMTP nicht konfiguriert. Bitte SMTP_HOST, SMTP_USER, SMTP_PASS in .env.local setzen." }, { status: 500 });
+    }
+
+    await transporter.sendMail({
+      from: `"${companyName}" <${process.env.SMTP_USER || companyEmail}>`,
+      to: recipientEmail,
+      subject: `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} ${invoice.invoice_number} - ${companyName}`,
+      html: emailHtml,
+    });
 
     // Update invoice status to sent
     const { data: updatedInvoice, error: updateError } = await supabase
       .from("invoices")
       .update({
         status: "sent",
+        sent_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", invoiceId)
@@ -162,12 +215,10 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: `Invoice sent to ${recipientEmail}`,
+      message: `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} per E-Mail an ${recipientEmail} gesendet`,
       invoice: updatedInvoice,
-      // email_html: emailHtml, // Uncomment for debugging
     });
   } catch (error: any) {
-    console.error("Error sending invoice:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: `E-Mail-Versand fehlgeschlagen: ${error.message}` }, { status: 500 });
   }
 }

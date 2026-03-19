@@ -43,7 +43,7 @@ export const POST = createHandler({ auth: true }, async (data) => {
     throw new DatabaseError('Pflichtfelder: description, type, amount');
   }
 
-  const rate = tax_rate || 19;
+  const rate = tax_rate ?? 19;
   const taxAmount = Math.round((amount * rate) / (100 + rate) * 100) / 100;
   const netAmount = Math.round((amount - taxAmount) * 100) / 100;
 

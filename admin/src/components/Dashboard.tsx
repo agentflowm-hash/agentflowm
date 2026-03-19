@@ -6982,64 +6982,44 @@ function SourceBar({
 }
 
 function AutomationsTab() {
-  const [automations, setAutomations] = useState([
-    { id: 1, name: "Willkommens-E-Mail", trigger: "Neuer Lead", active: true },
-    { id: 2, name: "Follow-up Reminder", trigger: "Nach 3 Tagen", active: true },
-    { id: 3, name: "Score < 50 Alert", trigger: "Website-Check", active: false },
-    { id: 4, name: "Referral Danke", trigger: "Neue Empfehlung", active: true },
-  ]);
-
-  const toggleAutomation = (id: number) => {
-    setAutomations((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, active: !a.active } : a))
-    );
-  };
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <p className="text-white/50">Automatisiere wiederkehrende Aufgaben</p>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-white/30">Konfiguration über n8n</span>
-          <a
-            href="http://localhost:5678"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors"
-          >
-            <PlusIcon className="w-4 h-4" /> Neue Automation
-          </a>
-        </div>
+        <p className="text-white/50">Automatisiere wiederkehrende Aufgaben mit n8n</p>
       </div>
 
-      <div className="grid gap-4">
-        {automations.map((auto) => (
-          <div
-            key={auto.id}
-            className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06]"
+      <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+        <div className="w-16 h-16 rounded-2xl bg-[#FC682C]/10 flex items-center justify-center mx-auto mb-4">
+          <BoltIcon className="w-8 h-8 text-[#FC682C]" />
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-2">Automationen konfigurieren</h3>
+        <p className="text-sm text-white/40 max-w-md mx-auto mb-6">
+          Verbinde dein n8n-Dashboard um Workflows zu erstellen: Willkommens-E-Mails, Follow-up Reminder, Lead-Scoring und mehr.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href={process.env.NEXT_PUBLIC_N8N_URL || "https://n8n.agentflowm.de"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors"
           >
-            <div className="flex items-center gap-4">
-              <div
-                className={`w-10 h-10 rounded-xl ${auto.active ? "bg-green-500/20" : "bg-white/10"} flex items-center justify-center`}
-              >
-                <BoltIcon
-                  className={`w-5 h-5 ${auto.active ? "text-green-400" : "text-white/40"}`}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">{auto.name}</p>
-                <p className="text-xs text-white/40">Trigger: {auto.trigger}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => toggleAutomation(auto.id)}
-              title={auto.active ? "Deaktivieren" : "Aktivieren"}
-              className={`relative w-12 h-6 rounded-full transition-colors ${auto.active ? "bg-green-500" : "bg-white/20"}`}
-            >
-              <div
-                className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${auto.active ? "left-7" : "left-1"}`}
-              />
-            </button>
+            <BoltIcon className="w-4 h-4" /> n8n Dashboard oeffnen
+          </a>
+        </div>
+        <p className="text-[10px] text-white/20 mt-4">n8n Workflows werden extern verwaltet. Diese Seite dient als Schnellzugang.</p>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { name: "Willkommens-E-Mail", desc: "Bei neuem Lead automatisch senden", icon: EnvelopeIcon },
+          { name: "Follow-up Reminder", desc: "Nach 3 Tagen ohne Kontakt", icon: ClockIcon },
+          { name: "Score Alert", desc: "Bei Website-Check Score < 50", icon: ExclamationCircleIcon },
+          { name: "Empfehlungs-Danke", desc: "Bei neuer Empfehlung", icon: StarIcon },
+        ].map((tmpl) => (
+          <div key={tmpl.name} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+            <tmpl.icon className="w-5 h-5 text-[#FC682C] mb-2" />
+            <p className="text-sm font-medium text-white">{tmpl.name}</p>
+            <p className="text-[11px] text-white/30 mt-0.5">{tmpl.desc}</p>
           </div>
         ))}
       </div>

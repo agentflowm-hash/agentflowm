@@ -152,6 +152,16 @@ export const PATCH = createHandler({
       }
 
       if (referrerId) {
+        // Duplikat-Pruefung: Gibt es schon eine Provision fuer diese Rechnung?
+        const { data: existingCommission } = await db
+          .from('referral_commissions')
+          .select('id')
+          .eq('notes', `Rechnung ${existing.invoice_number || '#' + id} bezahlt`)
+          .maybeSingle();
+
+        if (existingCommission) {
+          // Provision existiert bereits, ueberspringe
+        } else {
         // Referrer-Daten holen
         const { data: referrer } = await db
           .from('referrers')
@@ -205,9 +215,9 @@ export const PATCH = createHandler({
             });
           }
         }
+        } // end else (no existing commission)
       }
-    } catch (commErr) {
-      console.error('Auto-commission creation error:', commErr);
+    } catch {
       // Fehler bei Provision soll Rechnungs-Update nicht blockieren
     }
   }

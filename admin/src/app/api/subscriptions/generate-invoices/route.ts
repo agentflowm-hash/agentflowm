@@ -82,7 +82,6 @@ export const POST = createHandler({
       .single();
 
     if (invError) {
-      console.error(`Failed to create invoice for subscription ${sub.id}:`, invError.message);
       continue;
     }
 
@@ -95,6 +94,20 @@ export const POST = createHandler({
       total: amount,
       sort_order: 0,
     });
+
+    // Auto-send the generated invoice if client has email
+    if (sub.client_email && invoice.id) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://admin.agentflowm.de';
+        await fetch(`${baseUrl}/api/invoices/${invoice.id}/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email_override: sub.client_email }),
+        });
+      } catch {
+        // E-Mail-Versand soll Abo-Erzeugung nicht blockieren
+      }
+    }
 
     // Calculate next billing date
     const nextBilling = new Date(sub.next_billing);

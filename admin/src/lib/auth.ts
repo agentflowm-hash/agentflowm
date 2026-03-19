@@ -56,7 +56,8 @@ export async function destroySession(): Promise<void> {
 export async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(COOKIE_NAME);
-  return !!sessionCookie?.value && sessionCookie.value.length === 64;
+  // Validate: must be exactly 64 hex characters (32 bytes)
+  return !!sessionCookie?.value && sessionCookie.value.length === 64 && /^[0-9a-f]{64}$/.test(sessionCookie.value);
 }
 
 export async function requireAuth(): Promise<{ authenticated: boolean }> {

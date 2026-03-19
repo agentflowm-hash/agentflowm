@@ -3,7 +3,7 @@ import { createHandler, DatabaseError, NotFoundError } from '@/lib/api';
 import { z } from 'zod';
 import crypto from 'crypto';
 
-const VAULT_KEY = process.env.VAULT_ENCRYPTION_KEY || process.env.ADMIN_PASSWORD || '';
+const VAULT_KEY = process.env.VAULT_ENCRYPTION_KEY || process.env.ADMIN_PASSWORD || 'FALLBACK_CHANGE_ME';
 
 function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);
