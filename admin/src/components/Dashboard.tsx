@@ -1753,7 +1753,68 @@ function LoadingState() {
 // ═══════════════════════════════════════════════════════════════
 
 function KommunikationTab() {
-  const [komView, setKomView] = useState<"emails" | "empfaenger">("emails");
+  const [komView, setKomView] = useState<"emails" | "empfaenger" | "vorlagen">("emails");
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [showNewTemplate, setShowNewTemplate] = useState(false);
+  const [previewId, setPreviewId] = useState<number | null>(null);
+  const [tplForm, setTplForm] = useState({ name: '', subject: '', category: 'welcome', body: '' });
+  const [tplSaving, setTplSaving] = useState(false);
+  const { showToast } = useToast();
+
+  const fetchTemplates = useCallback(async () => {
+    setTemplatesLoading(true);
+    try {
+      const res = await fetch('/api/email-templates');
+      const json = await res.json();
+      if (json.success) setTemplates(json.data.templates || []);
+    } catch (e) {
+      console.error('[KommunikationTab] templates fetch error:', e);
+    } finally {
+      setTemplatesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (komView === 'vorlagen') fetchTemplates();
+  }, [komView, fetchTemplates]);
+
+  const handleSaveTemplate = async () => {
+    if (!tplForm.name.trim() || !tplForm.subject.trim() || !tplForm.body.trim()) {
+      showToast('error', 'Bitte alle Felder ausfüllen');
+      return;
+    }
+    setTplSaving(true);
+    try {
+      const res = await fetch('/api/email-templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...tplForm, variables: [] }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast('success', 'Vorlage erstellt');
+        setShowNewTemplate(false);
+        setTplForm({ name: '', subject: '', category: 'welcome', body: '' });
+        fetchTemplates();
+      } else {
+        showToast('error', json.error?.message || 'Fehler beim Speichern');
+      }
+    } catch (e) {
+      showToast('error', 'Fehler beim Speichern');
+    } finally {
+      setTplSaving(false);
+    }
+  };
+
+  const categoryLabels: Record<string, string> = {
+    welcome: 'Willkommen',
+    invoice: 'Rechnung',
+    reminder: 'Erinnerung',
+    marketing: 'Marketing',
+    other: 'Sonstige',
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -1775,9 +1836,152 @@ function KommunikationTab() {
           >
             Empfänger
           </button>
+          <button
+            onClick={() => setKomView("vorlagen")}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+              komView === "vorlagen" ? "bg-[#FC682C] text-white shadow-lg" : "text-white/50 hover:text-white"
+            }`}
+          >
+            Vorlagen
+          </button>
         </div>
       </div>
-      {komView === "emails" ? <EmailCenterTab /> : <SubscribersTab />}
+
+      {komView === "emails" && <EmailCenterTab />}
+      {komView === "empfaenger" && <SubscribersTab />}
+      {komView === "vorlagen" && (
+        <div className="space-y-4">
+          {/* Header + New Button */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-white/50">{templates.length} Vorlagen</p>
+            <button
+              onClick={() => setShowNewTemplate(!showNewTemplate)}
+              className="px-4 py-2 rounded-xl bg-[#FC682C] text-white text-sm font-medium hover:bg-[#FC682C]/80 transition-colors"
+            >
+              {showNewTemplate ? 'Abbrechen' : '+ Neue Vorlage'}
+            </button>
+          </div>
+
+          {/* New Template Form */}
+          {showNewTemplate && (
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-4">
+              <h3 className="text-sm font-semibold text-white">Neue Vorlage erstellen</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-white/40 mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={tplForm.name}
+                    onChange={(e) => setTplForm({ ...tplForm, name: e.target.value })}
+                    placeholder="z.B. Willkommens-Email"
+                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#FC682C]/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/40 mb-1">Kategorie</label>
+                  <select
+                    value={tplForm.category}
+                    onChange={(e) => setTplForm({ ...tplForm, category: e.target.value as any })}
+                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#FC682C]/50"
+                  >
+                    <option value="welcome">Willkommen</option>
+                    <option value="invoice">Rechnung</option>
+                    <option value="reminder">Erinnerung</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="other">Sonstige</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-white/40 mb-1">Betreff</label>
+                <input
+                  type="text"
+                  value={tplForm.subject}
+                  onChange={(e) => setTplForm({ ...tplForm, subject: e.target.value })}
+                  placeholder="Betreff der E-Mail"
+                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#FC682C]/50"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-white/40 mb-1">Body</label>
+                <textarea
+                  value={tplForm.body}
+                  onChange={(e) => setTplForm({ ...tplForm, body: e.target.value })}
+                  rows={10}
+                  placeholder="E-Mail Inhalt..."
+                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white text-sm font-mono placeholder-white/20 focus:outline-none focus:border-[#FC682C]/50 resize-y"
+                />
+                <p className="text-[11px] text-white/25 mt-1">
+                  Verfügbare Variablen: {'{{name}}'}, {'{{email}}'}, {'{{company}}'}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSaveTemplate}
+                  disabled={tplSaving}
+                  className="px-6 py-2 rounded-xl bg-[#FC682C] text-white text-sm font-medium hover:bg-[#FC682C]/80 transition-colors disabled:opacity-50"
+                >
+                  {tplSaving ? 'Speichert...' : 'Vorlage speichern'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Templates List */}
+          {templatesLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-6 h-6 border-2 border-[#FC682C] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : templates.length === 0 ? (
+            <div className="text-center py-12 text-white/30">
+              <p className="text-sm">Noch keine Vorlagen erstellt</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {templates.map((tpl: any) => (
+                <div
+                  key={tpl.id}
+                  className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-medium text-white truncate">{tpl.name}</h4>
+                        <span className="px-2 py-0.5 rounded-md bg-white/[0.06] text-[10px] text-white/40 uppercase">
+                          {categoryLabels[tpl.category] || tpl.category}
+                        </span>
+                      </div>
+                      <p className="text-xs text-white/40 mt-1 truncate">Betreff: {tpl.subject}</p>
+                    </div>
+                    <button
+                      onClick={() => setPreviewId(previewId === tpl.id ? null : tpl.id)}
+                      className="px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      {previewId === tpl.id ? 'Schließen' : 'Vorschau'}
+                    </button>
+                  </div>
+                  {previewId === tpl.id && (
+                    <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                      <pre className="text-xs text-white/50 font-mono whitespace-pre-wrap bg-white/[0.02] p-3 rounded-lg max-h-60 overflow-y-auto">
+                        {tpl.body}
+                      </pre>
+                      {tpl.variables && tpl.variables.length > 0 && (
+                        <div className="mt-2 flex gap-1 flex-wrap">
+                          {tpl.variables.map((v: string) => (
+                            <span key={v} className="px-2 py-0.5 rounded bg-[#FC682C]/10 text-[10px] text-[#FC682C]">
+                              {`{{${v}}}`}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
