@@ -265,8 +265,9 @@ export default function VaultTab() {
   };
 
   const delEntry = async (id: number) => {
+    if (!confirm("Eintrag wirklich loeschen? Dies kann nicht rueckgaengig gemacht werden.")) return;
     await fetch(`/api/vault/${id}`, { credentials: "include", method: "DELETE" });
-    showToast("success", "Gelöscht"); setDetailEntry(null); loadData();
+    showToast("success", "Geloescht"); setDetailEntry(null); loadData();
   };
 
   const copy = (text: string, label: string) => { navigator.clipboard.writeText(text); showToast("success", `${label} kopiert!`); };

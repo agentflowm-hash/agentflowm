@@ -29,10 +29,10 @@ export const GET = createHandler({ auth: true }, async (_data, _ctx, request) =>
     .or(`invoice_number.ilike.${pattern},client_name.ilike.${pattern}`).limit(5);
   (invoices || []).forEach(i => results.push({ type: 'invoice', id: i.id, title: i.invoice_number, subtitle: `${i.client_name || ''} · €${i.total} · ${i.status}` }));
 
-  // Vault (nur Titel + URL, KEINE Passwörter)
-  const { data: vault } = await db.from('vault_entries').select('id, title, url, category')
-    .or(`title.ilike.${pattern},url.ilike.${pattern}`).limit(5);
-  (vault || []).forEach(v => results.push({ type: 'vault', id: v.id, title: v.title, subtitle: [v.url, v.category].filter(Boolean).join(' · ') }));
+  // Vault (nur Titel + Kategorie, KEINE URLs oder Passwoerter)
+  const { data: vault } = await db.from('vault_entries').select('id, title, category')
+    .ilike('title', pattern).limit(5);
+  (vault || []).forEach(v => results.push({ type: 'vault', id: v.id, title: v.title, subtitle: v.category || 'Tresor' }));
 
   return { results: results.slice(0, 20), total: results.length };
 });

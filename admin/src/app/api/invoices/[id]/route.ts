@@ -89,7 +89,21 @@ export const PATCH = createHandler({
     updateData.tax_rate = data.tax_rate;
   }
 
-  if (data.status !== undefined) updateData.status = data.status;
+  if (data.status !== undefined) {
+    const validStatuses = ['draft', 'sent', 'paid', 'overdue', 'cancelled'];
+    if (!validStatuses.includes(data.status)) {
+      throw new DatabaseError(`Ungueltiger Status: ${data.status}`);
+    }
+    // Verhindere unsinnige Uebergaenge
+    const blocked: Record<string, string[]> = {
+      paid: ['draft'], // Bezahlt kann nicht zurueck zu Entwurf
+      cancelled: ['paid'], // Storniert kann nicht zu Bezahlt
+    };
+    if (blocked[existing.status]?.includes(data.status)) {
+      throw new DatabaseError(`Status kann nicht von "${existing.status}" zu "${data.status}" geaendert werden`);
+    }
+    updateData.status = data.status;
+  }
   if (data.due_date !== undefined) updateData.due_date = data.due_date;
   if (data.notes !== undefined) updateData.notes = data.notes;
 

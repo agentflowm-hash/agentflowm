@@ -94,7 +94,16 @@ export default function EmailCenterTab() {
 
   const handleSend = async () => {
     if (!compose.to || !compose.subject || !compose.body) {
-      setSendResult({ success: false, message: "Bitte alle Felder ausfüllen" });
+      setSendResult({ success: false, message: "Bitte alle Felder ausfuellen" });
+      return;
+    }
+
+    // E-Mail-Format validieren
+    const emails = compose.to.split(",").map(e => e.trim()).filter(Boolean);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const invalid = emails.filter(e => !emailRegex.test(e));
+    if (invalid.length > 0) {
+      setSendResult({ success: false, message: `Ungueltige E-Mail-Adresse: ${invalid.join(", ")}` });
       return;
     }
 

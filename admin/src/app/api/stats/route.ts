@@ -9,151 +9,105 @@ export async function GET() {
   }
 
   try {
-    const today = new Date().toISOString().split("T")[0];
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-    // Leads stats - multiple queries
-    const { count: leadsTotal } = await db.from('leads').select('*', { count: 'exact', head: true });
-    const { count: leadsNew } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'new');
-    const { count: leadsContacted } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'contacted');
-    const { count: leadsQualified } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'qualified');
-    const { count: leadsProposal } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'proposal');
-    const { count: leadsWon } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'won');
-    const { count: leadsLost } = await db.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'lost');
-    const { count: leadsThisWeek } = await db.from('leads').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo);
+    // Batch: Alle Daten in wenigen Queries holen
+    const [leadsRes, checksRes, referralsRes, subscribersRes, invoicesRes] = await Promise.all([
+      db.from('leads').select('id, name, email, company, package_interest, status, priority, created_at').order('created_at', { ascending: false }),
+      db.from('website_checks').select('id, url, score_overall, created_at').order('created_at', { ascending: false }),
+      db.from('referrals').select('id, status'),
+      db.from('subscribers').select('id, status, created_at'),
+      db.from('invoices').select('total, status, paid_at, created_at'),
+    ]);
 
-    // Website checks stats
-    const { count: checksTotal } = await db.from('website_checks').select('*', { count: 'exact', head: true });
-    const { count: checksToday } = await db.from('website_checks').select('*', { count: 'exact', head: true }).gte('created_at', today);
-    const { count: checksThisWeek } = await db.from('website_checks').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo);
+    const leads = leadsRes.data || [];
+    const checks = checksRes.data || [];
+    const referrals = referralsRes.data || [];
+    const subscribers = subscribersRes.data || [];
+    const invoices = invoicesRes.data || [];
 
-    // Average score
-    const { data: scoreData } = await db.from('website_checks').select('score_overall');
-    const avgScore = scoreData && scoreData.length > 0
-      ? Math.round(scoreData.reduce((sum, r) => sum + (r.score_overall || 0), 0) / scoreData.length)
+    // Leads stats -- alles in JS berechnen
+    const leadsTotal = leads.length;
+    const leadsNew = leads.filter(l => l.status === 'new').length;
+    const leadsContacted = leads.filter(l => l.status === 'contacted').length;
+    const leadsQualified = leads.filter(l => l.status === 'qualified').length;
+    const leadsProposal = leads.filter(l => l.status === 'proposal').length;
+    const leadsWon = leads.filter(l => l.status === 'won').length;
+    const leadsLost = leads.filter(l => l.status === 'lost').length;
+    const leadsThisWeek = leads.filter(l => l.created_at >= weekAgo).length;
+    const conversionRate = leadsTotal > 0 ? Math.round((leadsWon / leadsTotal) * 100) : 0;
+
+    // Checks stats
+    const checksTotal = checks.length;
+    const checksToday = checks.filter(c => c.created_at >= today).length;
+    const checksThisWeek = checks.filter(c => c.created_at >= weekAgo).length;
+    const avgScore = checksTotal > 0
+      ? Math.round(checks.reduce((s, c) => s + (c.score_overall || 0), 0) / checksTotal)
       : 0;
-    const topScore = scoreData && scoreData.length > 0
-      ? Math.max(...scoreData.map(r => r.score_overall || 0))
+    const topScore = checksTotal > 0
+      ? Math.max(...checks.map(c => c.score_overall || 0))
       : 0;
 
     // Referrals stats
-    const { count: referralsTotal } = await db.from('referrals').select('*', { count: 'exact', head: true });
-    const { count: referralsPending } = await db.from('referrals').select('*', { count: 'exact', head: true }).eq('status', 'pending');
-    const { count: referralsConverted } = await db.from('referrals').select('*', { count: 'exact', head: true }).eq('status', 'converted');
+    const referralsTotal = referrals.length;
+    const referralsPending = referrals.filter(r => r.status === 'pending').length;
+    const referralsConverted = referrals.filter(r => r.status === 'converted').length;
 
     // Subscribers stats
-    const { count: subscribersTotal } = await db.from('subscribers').select('*', { count: 'exact', head: true });
-    const { count: subscribersConfirmed } = await db.from('subscribers').select('*', { count: 'exact', head: true }).eq('status', 'confirmed');
-    const { count: subscribersThisWeek } = await db.from('subscribers').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo);
+    const subscribersTotal = subscribers.length;
+    const subscribersConfirmed = subscribers.filter(s => s.status === 'confirmed').length;
+    const subscribersThisWeek = subscribers.filter(s => s.created_at >= weekAgo).length;
 
-    // Revenue from invoices (paid invoices)
-    const thisMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-    const { data: invoicesAll } = await db.from('invoices').select('total, status, paid_at, created_at');
-    const paidInvoices = (invoicesAll || []).filter(i => i.status === 'paid');
-    const revenueTotal = paidInvoices.reduce((sum, i) => sum + (parseFloat(i.total) || 0), 0);
+    // Revenue
+    const paidInvoices = invoices.filter(i => i.status === 'paid');
+    const revenueTotal = paidInvoices.reduce((s, i) => s + (parseFloat(i.total) || 0), 0);
     const revenueThisMonth = paidInvoices
-      .filter(i => i.paid_at >= thisMonthStart || i.created_at >= thisMonthStart)
-      .reduce((sum, i) => sum + (parseFloat(i.total) || 0), 0);
+      .filter(i => (i.paid_at && i.paid_at >= thisMonthStart) || i.created_at >= thisMonthStart)
+      .reduce((s, i) => s + (parseFloat(i.total) || 0), 0);
 
-    // Recent leads (last 5)
-    const { data: recentLeadsRaw } = await db
-      .from('leads')
-      .select('id, name, email, company, package_interest, status, priority, created_at')
-      .order('created_at', { ascending: false })
-      .limit(5);
+    // Recent leads (top 5)
+    const recentLeads = leads.slice(0, 5).map((l: any) => ({
+      id: l.id, name: l.name, email: l.email, company: l.company,
+      packageInterest: l.package_interest, status: l.status,
+      priority: l.priority || "medium", createdAt: l.created_at,
+    }));
 
     // Recent activity
-    const { data: latestLeads } = await db
-      .from('leads')
-      .select('id, name, email, created_at')
-      .order('created_at', { ascending: false })
-      .limit(3);
-
-    const { data: latestChecks } = await db
-      .from('website_checks')
-      .select('id, url, score_overall, created_at')
-      .order('created_at', { ascending: false })
-      .limit(3);
-
-    const recentActivity: any[] = [
-      ...(latestLeads || []).map(l => ({ type: 'lead', id: l.id, title: l.name, subtitle: l.email, created_at: l.created_at })),
-      ...(latestChecks || []).map(c => ({ type: 'check', id: c.id, title: c.url, subtitle: c.score_overall, created_at: c.created_at })),
+    const recentActivity = [
+      ...leads.slice(0, 3).map(l => ({ type: 'lead', id: l.id, title: l.name, subtitle: l.email, created_at: l.created_at })),
+      ...checks.slice(0, 3).map(c => ({ type: 'check', id: c.id, title: c.url, subtitle: c.score_overall, created_at: c.created_at })),
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
 
-    // Calculate conversion rate
-    const totalLeads = leadsTotal || 0;
-    const wonLeads = leadsWon || 0;
-    const conversionRate = totalLeads > 0 ? Math.round((wonLeads / totalLeads) * 100) : 0;
-
-    // Historical trends for sparklines (last 7 days)
-    const trends = { leads: [] as number[], checks: [] as number[], revenue: [] as number[] };
+    // 7-day trends -- berechnen aus den bereits geladenen Daten
+    const trends = { leads: [] as number[], checks: [] as number[] };
     for (let i = 6; i >= 0; i--) {
-      const dayStart = new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      const dayEnd = new Date(Date.now() - (i - 1) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      
-      const { count: leadsDay } = await db.from('leads').select('*', { count: 'exact', head: true })
-        .gte('created_at', dayStart).lt('created_at', dayEnd);
-      const { count: checksDay } = await db.from('website_checks').select('*', { count: 'exact', head: true })
-        .gte('created_at', dayStart).lt('created_at', dayEnd);
-      
-      trends.leads.push(leadsDay || 0);
-      trends.checks.push(checksDay || 0);
+      const dayStart = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+      const dayEnd = new Date(Date.now() - (i - 1) * 86400000).toISOString().split('T')[0];
+      trends.leads.push(leads.filter(l => l.created_at >= dayStart && l.created_at < dayEnd).length);
+      trends.checks.push(checks.filter(c => c.created_at >= dayStart && c.created_at < dayEnd).length);
     }
 
     return NextResponse.json({
       leads: {
-        total: leadsTotal || 0,
-        new: leadsNew || 0,
-        contacted: leadsContacted || 0,
-        qualified: leadsQualified || 0,
-        proposal: leadsProposal || 0,
-        won: leadsWon || 0,
-        lost: leadsLost || 0,
-        thisWeek: leadsThisWeek || 0,
-        conversionRate,
+        total: leadsTotal, new: leadsNew, contacted: leadsContacted,
+        qualified: leadsQualified, proposal: leadsProposal,
+        won: leadsWon, lost: leadsLost, thisWeek: leadsThisWeek, conversionRate,
       },
-      checks: {
-        total: checksTotal || 0,
-        today: checksToday || 0,
-        thisWeek: checksThisWeek || 0,
-        avgScore,
-        topScore,
-      },
+      checks: { total: checksTotal, today: checksToday, thisWeek: checksThisWeek, avgScore, topScore },
       referrals: {
-        total: referralsTotal || 0,
-        pending: referralsPending || 0,
-        converted: referralsConverted || 0,
-        conversionRate: (referralsTotal || 0) > 0
-          ? Math.round(((referralsConverted || 0) / (referralsTotal || 0)) * 100)
-          : 0,
+        total: referralsTotal, pending: referralsPending, converted: referralsConverted,
+        conversionRate: referralsTotal > 0 ? Math.round((referralsConverted / referralsTotal) * 100) : 0,
       },
-      subscribers: {
-        total: subscribersTotal || 0,
-        confirmed: subscribersConfirmed || 0,
-        thisWeek: subscribersThisWeek || 0,
-        growthRate: 0,
-      },
-      revenue: {
-        total: revenueTotal,
-        thisMonth: revenueThisMonth,
-      },
-      recentLeads: (recentLeadsRaw || []).map((lead: any) => ({
-        id: lead.id,
-        name: lead.name,
-        email: lead.email,
-        company: lead.company,
-        packageInterest: lead.package_interest,
-        status: lead.status,
-        priority: lead.priority || "medium",
-        createdAt: lead.created_at,
-      })),
+      subscribers: { total: subscribersTotal, confirmed: subscribersConfirmed, thisWeek: subscribersThisWeek, growthRate: 0 },
+      revenue: { total: revenueTotal, thisMonth: revenueThisMonth },
+      recentLeads,
       recentActivity,
       trends,
     });
-  } catch (error) {
-    console.error("Stats error:", error);
+  } catch {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

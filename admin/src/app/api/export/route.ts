@@ -14,9 +14,15 @@ const TABLE_MAP: Record<string, string> = {
   accounting: 'accounting_transactions',
 };
 
+// Sensitive Spalten die nicht exportiert werden sollen
+const HIDDEN_COLUMNS = new Set([
+  'encrypted_password', 'password_hash', 'access_code', 'session_token',
+  'api_key', 'secret', 'token', 'portal_code',
+]);
+
 function toCsv(data: any[]): string {
   if (!data || data.length === 0) return '';
-  const headers = Object.keys(data[0]);
+  const headers = Object.keys(data[0]).filter(h => !HIDDEN_COLUMNS.has(h));
   const rows = data.map(row =>
     headers.map(h => {
       const val = row[h];
@@ -50,11 +56,19 @@ export const GET = createHandler({ auth: true }, async (_data, _ctx, request) =>
   const { data, error } = await db.from(table).select('*').order('created_at', { ascending: false });
   if (error) throw new DatabaseError(error.message);
 
+  // Sensitive Spalten aus den Daten entfernen
+  const hiddenArr = Array.from(HIDDEN_COLUMNS);
+  const cleanData = (data || []).map((row: any) => {
+    const clean = { ...row };
+    hiddenArr.forEach(col => delete clean[col]);
+    return clean;
+  });
+
   if (format === 'json') {
-    return { export: data || [], type, count: (data || []).length };
+    return { export: cleanData, type, count: cleanData.length };
   }
 
   // CSV
-  const csv = toCsv(data || []);
-  return { export: csv, type, format: 'csv', count: (data || []).length };
+  const csv = toCsv(cleanData);
+  return { export: csv, type, format: 'csv', count: cleanData.length };
 });
