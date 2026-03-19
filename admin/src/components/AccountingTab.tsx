@@ -654,6 +654,75 @@ export default function AccountingTab() {
               </div>
             </div>
           </div>
+
+          {/* Gewinn/Verlust Monatsvergleich */}
+          <div className="lg:col-span-2 p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <ChartBarIcon className="w-5 h-5 text-[#FC682C]" />
+              Gewinn/Verlust pro Monat
+            </h3>
+            <div className="flex items-end gap-1.5 h-40">
+              {stats.monthlyComparison.map((m) => {
+                const profit = m.income - m.expense;
+                const maxVal = Math.max(...stats.monthlyComparison.map((x) => Math.abs(x.income - x.expense)), 1);
+                const height = Math.max(Math.abs(profit) / maxVal * 100, 4);
+                const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+                return (
+                  <div key={m.month} className="flex-1 flex flex-col items-center gap-1" title={`${monthNames[m.month]}: ${formatCurrency(profit)}`}>
+                    <span className="text-[10px] text-white/30">{profit !== 0 ? formatCurrency(profit).replace("€", "").trim() : ""}</span>
+                    <div
+                      className={`w-full rounded-t-md transition-all ${profit >= 0 ? "bg-green-500/60" : "bg-red-500/60"}`}
+                      style={{ height: `${height}%` }}
+                    />
+                    <span className="text-[10px] text-white/30">{monthNames[m.month]}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Kategorien-Übersicht */}
+          {Object.keys(stats.categoryBreakdown).length > 0 && (
+            <div className="lg:col-span-2 p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <FunnelIcon className="w-5 h-5 text-purple-400" />
+                Kategorien-Übersicht {new Date().getFullYear()}
+              </h3>
+              <div className="space-y-3">
+                {Object.entries(stats.categoryBreakdown)
+                  .sort((a, b) => (b[1].income + b[1].expense) - (a[1].income + a[1].expense))
+                  .map(([cat, vals]) => {
+                    const total = vals.income + vals.expense;
+                    const maxCat = Math.max(...Object.values(stats.categoryBreakdown).map(v => v.income + v.expense), 1);
+                    return (
+                      <div key={cat}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-white/70">{cat}</span>
+                          <div className="flex items-center gap-3 text-xs">
+                            {vals.income > 0 && <span className="text-green-400">+{formatCurrency(vals.income)}</span>}
+                            {vals.expense > 0 && <span className="text-red-400">-{formatCurrency(vals.expense)}</span>}
+                          </div>
+                        </div>
+                        <div className="flex gap-1 h-2.5">
+                          {vals.income > 0 && (
+                            <div
+                              className="rounded-full bg-green-500/50"
+                              style={{ width: `${(vals.income / maxCat) * 100}%` }}
+                            />
+                          )}
+                          {vals.expense > 0 && (
+                            <div
+                              className="rounded-full bg-red-500/50"
+                              style={{ width: `${(vals.expense / maxCat) * 100}%` }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
