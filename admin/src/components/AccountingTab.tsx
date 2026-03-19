@@ -859,30 +859,186 @@ export default function AccountingTab() {
       )}
 
       {activeView === "reports" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { title: "EÜR " + new Date().getFullYear(), desc: "Einnahmen-Überschuss-Rechnung", icon: DocumentTextIcon, action: () => alert("EÜR Export wird generiert...") },
-            { title: "BWA " + ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"][new Date().getMonth()], desc: "Betriebswirtschaftliche Auswertung", icon: ChartBarIcon, action: () => alert("BWA Export wird generiert...") },
-            { title: "Kontosalden", desc: "Übersicht aller Konten", icon: BuildingLibraryIcon, action: () => alert("Kontosalden Export wird generiert...") },
-            { title: "Offene Posten", desc: "Unbezahlte Rechnungen", icon: ClipboardDocumentListIcon, action: () => alert("Offene Posten Export wird generiert...") },
-            { title: "Abschreibungen", desc: "AfA-Übersicht", icon: CalculatorIcon, action: () => alert("AfA Export wird generiert...") },
-            { title: "DATEV Export", desc: "Für Steuerberater", icon: DocumentArrowDownIcon, action: () => alert("DATEV Export wird generiert...") },
-          ].map((report, i) => (
-            <button
-              key={i}
-              onClick={report.action}
-              className="p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl text-left hover:bg-white/[0.04] hover:border-white/[0.1] transition-colors group"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#FC682C]/20 rounded-xl group-hover:bg-[#FC682C]/30 transition-colors">
-                  <report.icon className="w-5 h-5 text-[#FC682C]" />
+        <div className="space-y-6">
+          {/* Export Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { title: "PDF Monatsübersicht", desc: `${["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"][filter.month]} ${filter.year}`, icon: DocumentArrowDownIcon, action: exportToPDF },
+              { title: "CSV Export", desc: "Alle Buchungen als CSV", icon: ArrowDownTrayIcon, action: exportToCSV },
+              { title: "Fällige Rechnungen", desc: "Aus Abo-Verträgen generieren", icon: RecurringIcon, action: generateRecurringInvoices },
+            ].map((report, i) => (
+              <button
+                key={i}
+                onClick={report.action}
+                className="p-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl text-left hover:bg-white/[0.04] hover:border-white/[0.1] transition-colors group"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-[#FC682C]/20 rounded-xl group-hover:bg-[#FC682C]/30 transition-colors">
+                    <report.icon className="w-5 h-5 text-[#FC682C]" />
+                  </div>
+                  <PrinterIcon className="w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors ml-auto" />
                 </div>
-                <PrinterIcon className="w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors ml-auto" />
+                <h4 className="text-white font-medium mb-1">{report.title}</h4>
+                <p className="text-sm text-white/40">{report.desc}</p>
+              </button>
+            ))}
+          </div>
+
+          {/* USt-Voranmeldung Vorbereitung */}
+          <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <ReceiptPercentIcon className="w-5 h-5 text-purple-400" />
+              USt-Voranmeldung — Zusammenfassung für Finanzamt
+            </h3>
+            <div className="space-y-3">
+              {taxByQuarter.map((q, i) => {
+                const netIncome = transactions
+                  .filter(t => {
+                    const d = new Date(t.date);
+                    return d.getFullYear() === new Date().getFullYear() && q.months.includes(d.getMonth()) && t.type === "income";
+                  })
+                  .reduce((s, t) => s + t.net_amount, 0);
+                const netExpense = transactions
+                  .filter(t => {
+                    const d = new Date(t.date);
+                    return d.getFullYear() === new Date().getFullYear() && q.months.includes(d.getMonth()) && t.type === "expense";
+                  })
+                  .reduce((s, t) => s + t.net_amount, 0);
+                return (
+                  <div key={i} className="p-4 bg-white/[0.02] rounded-xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-white font-medium">{q.name}</span>
+                      <span className={`px-2.5 py-1 rounded-lg text-xs ${
+                        q.status === "open" ? "bg-yellow-500/20 text-yellow-400" :
+                        q.status === "paid" ? "bg-green-500/20 text-green-400" :
+                        "bg-white/10 text-white/40"
+                      }`}>
+                        {q.status === "open" ? "Offen" : q.status === "paid" ? "Erledigt" : "Kommend"}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-5 gap-3 text-sm">
+                      <div>
+                        <p className="text-xs text-white/30">Umsatz (netto)</p>
+                        <p className="text-white">{formatCurrency(netIncome)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/30">USt eingenommen</p>
+                        <p className="text-green-400">{formatCurrency(q.collectedTax)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/30">Ausgaben (netto)</p>
+                        <p className="text-white">{formatCurrency(netExpense)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/30">Vorsteuer</p>
+                        <p className="text-red-400">{formatCurrency(q.paidTax)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/30 font-medium">Zahllast</p>
+                        <p className="text-purple-400 font-bold">{formatCurrency(q.liability)}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                <div className="flex justify-between items-center">
+                  <span className="text-purple-400 font-medium">Gesamte USt-Zahllast {new Date().getFullYear()}</span>
+                  <span className="text-purple-400 font-bold text-lg">
+                    {formatCurrency(taxByQuarter.reduce((s, q) => s + q.liability, 0))}
+                  </span>
+                </div>
               </div>
-              <h4 className="text-white font-medium mb-1">{report.title}</h4>
-              <p className="text-sm text-white/40">{report.desc}</p>
-            </button>
-          ))}
+            </div>
+          </div>
+
+          {/* Jahresabschluss */}
+          <div className="p-6 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <BuildingLibraryIcon className="w-5 h-5 text-blue-400" />
+              Jahresabschluss-Übersicht {new Date().getFullYear()}
+            </h3>
+            <div className="grid grid-cols-2 gap-6">
+              {/* EÜR Zusammenfassung */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-white/60">Einnahmen-Überschuss-Rechnung</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between p-3 bg-white/[0.02] rounded-lg">
+                    <span className="text-white/60">Betriebseinnahmen</span>
+                    <span className="text-green-400 font-medium">{formatCurrency(stats.yearToDate.income)}</span>
+                  </div>
+                  <div className="flex justify-between p-3 bg-white/[0.02] rounded-lg">
+                    <span className="text-white/60">Betriebsausgaben</span>
+                    <span className="text-red-400 font-medium">{formatCurrency(stats.yearToDate.expenses)}</span>
+                  </div>
+                  <div className="flex justify-between p-3 bg-[#FC682C]/10 rounded-lg border border-[#FC682C]/20">
+                    <span className="text-[#FC682C] font-medium">Gewinn vor Steuern</span>
+                    <span className="text-[#FC682C] font-bold">{formatCurrency(stats.yearToDate.profit)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Kategorien */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-white/60">Top Einnahme-Kategorien</h4>
+                <div className="space-y-2">
+                  {Object.entries(stats.categoryBreakdown)
+                    .filter(([, v]) => v.income > 0)
+                    .sort((a, b) => b[1].income - a[1].income)
+                    .slice(0, 5)
+                    .map(([cat, vals]) => (
+                      <div key={cat} className="flex justify-between p-3 bg-white/[0.02] rounded-lg">
+                        <span className="text-white/60">{cat}</span>
+                        <span className="text-white font-medium">{formatCurrency(vals.income)}</span>
+                      </div>
+                    ))}
+                  {Object.entries(stats.categoryBreakdown).filter(([, v]) => v.income > 0).length === 0 && (
+                    <p className="text-white/30 text-sm p-3">Keine Einnahmen</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Monatliche Übersicht Tabelle */}
+            <div className="mt-6">
+              <h4 className="text-sm font-medium text-white/60 mb-3">Monatliche Übersicht</h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      <th className="py-2 text-left text-xs text-white/40">Monat</th>
+                      <th className="py-2 text-right text-xs text-white/40">Einnahmen</th>
+                      <th className="py-2 text-right text-xs text-white/40">Ausgaben</th>
+                      <th className="py-2 text-right text-xs text-white/40">Gewinn</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.monthlyComparison.map((m) => {
+                      const p = m.income - m.expense;
+                      const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+                      if (m.income === 0 && m.expense === 0) return null;
+                      return (
+                        <tr key={m.month} className="border-b border-white/[0.03]">
+                          <td className="py-2 text-white/70">{monthNames[m.month]}</td>
+                          <td className="py-2 text-right text-green-400">{formatCurrency(m.income)}</td>
+                          <td className="py-2 text-right text-red-400">{formatCurrency(m.expense)}</td>
+                          <td className={`py-2 text-right font-medium ${p >= 0 ? "text-[#FC682C]" : "text-red-400"}`}>{formatCurrency(p)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t border-white/[0.08]">
+                      <td className="py-2 text-white font-medium">Gesamt</td>
+                      <td className="py-2 text-right text-green-400 font-medium">{formatCurrency(stats.yearToDate.income)}</td>
+                      <td className="py-2 text-right text-red-400 font-medium">{formatCurrency(stats.yearToDate.expenses)}</td>
+                      <td className={`py-2 text-right font-bold ${stats.yearToDate.profit >= 0 ? "text-[#FC682C]" : "text-red-400"}`}>{formatCurrency(stats.yearToDate.profit)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
