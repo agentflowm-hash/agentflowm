@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
+import crypto from "crypto";
 
 // POST - Lead zu Portal-Client konvertieren
 export async function POST(
@@ -43,9 +44,9 @@ export async function POST(
       );
     }
 
-    // Zugangscode generieren
+    // Zugangscode generieren (kryptografisch sicher, 6 Zeichen)
     const prefix = lead.name.split(" ")[0].toUpperCase().slice(0, 4);
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const random = crypto.randomBytes(3).toString('hex').toUpperCase();
     let accessCode = `${prefix}-${random}`;
 
     // Sicherstellen dass Code unique ist

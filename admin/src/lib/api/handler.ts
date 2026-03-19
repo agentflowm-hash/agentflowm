@@ -62,6 +62,32 @@ type HandlerFunction<TBody, TResponse> = (
 ) => Promise<TResponse>;
 
 // ─────────────────────────────────────────────────────────────────
+// In-Memory Rate Limiter
+// ─────────────────────────────────────────────────────────────────
+
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string, config: { requests: number; windowMs: number }): boolean {
+  const now = Date.now();
+  const key = ip;
+  const entry = rateLimitStore.get(key);
+
+  // Cleanup alte Eintraege alle 100 Checks
+  if (rateLimitStore.size > 1000) {
+    const entries = Array.from(rateLimitStore.entries());
+    entries.forEach(([k, v]) => { if (v.resetAt < now) rateLimitStore.delete(k); });
+  }
+
+  if (!entry || entry.resetAt < now) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + config.windowMs });
+    return true;
+  }
+
+  entry.count++;
+  return entry.count <= config.requests;
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Utilities
 // ─────────────────────────────────────────────────────────────────
 
@@ -140,6 +166,18 @@ export function createHandler<TBody = unknown, TResponse = unknown>(
     };
 
     try {
+      // ─────────────────────────────────────────────────────────
+      // Rate Limiting
+      // ─────────────────────────────────────────────────────────
+      if (config.rateLimit && context.ip) {
+        if (!checkRateLimit(context.ip, config.rateLimit)) {
+          return NextResponse.json(
+            { success: false, error: { code: 'RATE_LIMITED', message: 'Zu viele Anfragen. Bitte warten.' } },
+            { status: 429 }
+          );
+        }
+      }
+
       // ─────────────────────────────────────────────────────────
       // Authentication Check
       // ─────────────────────────────────────────────────────────

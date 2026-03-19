@@ -41,6 +41,8 @@ interface CalendarEvent {
   project_id?: number;
   location?: string;
   google_event_id?: string;
+  assigned_to?: number;
+  assigned_name?: string;
   created_at: string;
 }
 
@@ -48,6 +50,13 @@ interface Client {
   id: number;
   name: string;
   company?: string;
+}
+
+interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  status: string;
 }
 
 type ViewMode = "month" | "week" | "list";
@@ -58,7 +67,17 @@ const EVENT_TYPES: Record<string, { label: string; color: string }> = {
   milestone: { label: "Meilenstein", color: "bg-purple-500" },
   reminder: { label: "Erinnerung", color: "bg-yellow-500" },
   client: { label: "Kundentermin", color: "bg-[#FC682C]" },
+  blocked: { label: "Geblockt", color: "bg-neutral-600" },
+  absence: { label: "Abwesend", color: "bg-rose-700" },
 };
+
+const ABSENCE_REASONS = [
+  { label: "Krank", icon: "K" },
+  { label: "Urlaub", icon: "U" },
+  { label: "Messe/Event", icon: "M" },
+  { label: "Fortbildung", icon: "F" },
+  { label: "Privat", icon: "P" },
+];
 
 const COLOR_OPTIONS = [
   { value: "#FC682C", label: "Orange" },
@@ -85,6 +104,8 @@ export default function CalendarTab() {
   const { showToast } = useToast();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [filterMember, setFilterMember] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<ViewMode>("month");
@@ -130,8 +151,20 @@ export default function CalendarTab() {
     } catch { /* ignore */ }
   }, []);
 
+  const fetchTeam = useCallback(async () => {
+    try {
+      const res = await fetch("/api/team", { credentials: "include" });
+      if (res.ok) {
+        const raw = await res.json();
+        const d = unwrapApi<{ members: TeamMember[] }>(raw);
+        setTeamMembers(d.members || []);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
   useEffect(() => { fetchClients(); }, [fetchClients]);
+  useEffect(() => { fetchTeam(); }, [fetchTeam]);
 
   // ─── Helpers ───────────────────────────────────────────────
 
@@ -140,9 +173,13 @@ export default function CalendarTab() {
 
   const eventLocalDate = (isoStr: string) => toLocalDateStr(new Date(isoStr));
 
+  const filteredEvents = filterMember === "all"
+    ? events
+    : events.filter(e => String(e.assigned_to) === filterMember);
+
   const getEventsForDay = (date: Date) => {
     const ds = toLocalDateStr(date);
-    return events.filter(e => eventLocalDate(e.start_date) === ds);
+    return filteredEvents.filter(e => eventLocalDate(e.start_date) === ds);
   };
 
   const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
@@ -203,8 +240,8 @@ export default function CalendarTab() {
   // Upcoming events
   const now = new Date();
   const todayStr = toLocalDateStr(now);
-  const todayEvents = events.filter(e => eventLocalDate(e.start_date) === todayStr);
-  const upcomingEvents = events
+  const todayEvents = filteredEvents.filter(e => eventLocalDate(e.start_date) === todayStr);
+  const upcomingEvents = filteredEvents
     .filter(e => {
       const ed = new Date(e.start_date);
       const weekLater = new Date(now.getTime() + 7 * 86400000);
@@ -214,9 +251,15 @@ export default function CalendarTab() {
 
   // Stats
   const typeCounts = Object.keys(EVENT_TYPES).reduce((acc, t) => {
-    acc[t] = events.filter(e => e.type === t).length;
+    acc[t] = filteredEvents.filter(e => e.type === t).length;
     return acc;
   }, {} as Record<string, number>);
+
+  // Abwesende heute
+  const absentToday = events.filter(e =>
+    (e.type === "absence" || e.type === "blocked") && eventLocalDate(e.start_date) <= todayStr &&
+    (!e.end_date || eventLocalDate(e.end_date) >= todayStr)
+  );
 
   // ─── Render ────────────────────────────────────────────────
 
@@ -254,6 +297,32 @@ export default function CalendarTab() {
           </button>
         </div>
       </div>
+
+      {/* Team Filter + Abwesenheiten */}
+      {teamMembers.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-xl p-1">
+            <button onClick={() => setFilterMember("all")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterMember === "all" ? "bg-[#FC682C] text-white" : "text-white/50 hover:text-white"}`}>
+              Alle
+            </button>
+            {teamMembers.map(m => (
+              <button key={m.id} onClick={() => setFilterMember(String(m.id))}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterMember === String(m.id) ? "bg-[#FC682C] text-white" : "text-white/50 hover:text-white"}`}>
+                {m.name}
+              </button>
+            ))}
+          </div>
+          {absentToday.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+              <ExclamationTriangleIcon className="w-4 h-4 text-rose-400" />
+              <span className="text-xs text-rose-400">
+                Heute abwesend: {absentToday.map(e => e.assigned_name || e.title).join(", ")}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* ── Main Area ──────────────────────────────────── */}
@@ -314,7 +383,9 @@ export default function CalendarTab() {
                                   <div key={ev.id} onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
                                     className="flex items-center gap-1 cursor-pointer hover:opacity-80">
                                     <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getEventTypeColor(ev.type)}`} />
-                                    <span className="text-[9px] text-white/60 truncate">{ev.title}</span>
+                                    <span className="text-[9px] text-white/60 truncate">
+                                      {ev.assigned_name ? `${ev.assigned_name.split(" ")[0]}: ` : ""}{ev.title}
+                                    </span>
                                   </div>
                                 ))}
                                 {dayEv.length > 3 && (
@@ -364,7 +435,7 @@ export default function CalendarTab() {
 
               {/* ── LIST VIEW ─────────────────────────── */}
               {view === "list" && (() => {
-                const sorted = events
+                const sorted = filteredEvents
                   .filter(e => new Date(e.start_date) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
                   .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
                 const grouped: Record<string, CalendarEvent[]> = {};
@@ -525,6 +596,7 @@ export default function CalendarTab() {
         <CreateEventModal
           event={editingEvent}
           clients={clients}
+          teamMembers={teamMembers}
           defaultDate={prefilledDate}
           onClose={() => { setShowCreateModal(false); setEditingEvent(null); setPrefilledDate(""); }}
           onSaved={() => { setShowCreateModal(false); setEditingEvent(null); setPrefilledDate(""); fetchEvents(); }}
@@ -621,6 +693,12 @@ function EventDetailModal({ event, onClose, onDelete, onEdit }: {
                 <span>{event.client_name}</span>
               </div>
             )}
+            {event.assigned_name && (
+              <div className="flex items-center gap-2.5 text-white/50">
+                <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+                <span>Zugewiesen: {event.assigned_name}</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-2 p-4 border-t border-white/[0.06]">
@@ -640,8 +718,8 @@ function EventDetailModal({ event, onClose, onDelete, onEdit }: {
 //                   CREATE / EDIT EVENT MODAL
 // ═══════════════════════════════════════════════════════════════
 
-function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
-  event: CalendarEvent | null; clients: Client[]; defaultDate?: string; onClose: () => void; onSaved: () => void;
+function CreateEventModal({ event, clients, teamMembers, defaultDate, onClose, onSaved }: {
+  event: CalendarEvent | null; clients: Client[]; teamMembers: TeamMember[]; defaultDate?: string; onClose: () => void; onSaved: () => void;
 }) {
   const { showToast } = useToast();
 
@@ -667,6 +745,8 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
     color: event?.color || "#FC682C",
     client_id: event?.client_id ? String(event.client_id) : "",
     client_name: event?.client_name || "",
+    assigned_to: event?.assigned_to ? String(event.assigned_to) : "",
+    absence_reason: "",
     duration: "60",
     travel_time: "0",
     use_custom_end: false,
@@ -690,8 +770,12 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
     setSaving(true);
 
     const selectedClient = clients.find(c => String(c.id) === form.client_id);
+    const selectedMember = teamMembers.find(m => String(m.id) === form.assigned_to);
+    const eventTitle = (form.type === "absence" || form.type === "blocked")
+      ? `${form.absence_reason || "Abwesend"}: ${selectedMember?.name || form.title}`
+      : form.title;
     const payload = {
-      title: form.title,
+      title: eventTitle,
       description: form.description || null,
       start_time: new Date(form.start_date).toISOString(),
       end_time: calcEndTime(),
@@ -701,6 +785,8 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
       color: form.color,
       client_id: form.client_id ? parseInt(form.client_id) : null,
       client_name: selectedClient?.name || form.client_name || null,
+      assigned_to: form.assigned_to ? parseInt(form.assigned_to) : null,
+      assigned_name: selectedMember?.name || null,
     };
 
     try {
@@ -850,7 +936,7 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
             </>
           )}
 
-          {/* Type + Client */}
+          {/* Type + Assigned */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-white/40 mb-1">Typ</label>
@@ -862,6 +948,39 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
               </select>
             </div>
             <div>
+              <label className="block text-xs text-white/40 mb-1">Zugewiesen an</label>
+              <select value={form.assigned_to} onChange={e => setForm({ ...form, assigned_to: e.target.value } as any)}
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none">
+                <option value="" className="bg-[#1a1a1f]">Niemand</option>
+                {teamMembers.map(m => (
+                  <option key={m.id} value={m.id} className="bg-[#1a1a1f]">{m.name} ({m.role === "ceo" ? "GF" : m.role})</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Absence Reason (only for absence/blocked) */}
+          {(form.type === "absence" || form.type === "blocked") && (
+            <div>
+              <label className="block text-xs text-white/40 mb-1">Grund</label>
+              <div className="flex flex-wrap gap-1.5">
+                {ABSENCE_REASONS.map(r => (
+                  <button key={r.label} type="button" onClick={() => setForm({ ...form, absence_reason: r.label })}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                      form.absence_reason === r.label
+                        ? "bg-rose-500/20 border-rose-500/40 text-rose-400"
+                        : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-400"
+                    }`}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Client (only for non-absence) */}
+          {form.type !== "absence" && form.type !== "blocked" && (
+            <div>
               <label className="block text-xs text-white/40 mb-1">Kunde</label>
               <select value={form.client_id} onChange={e => setForm({ ...form, client_id: e.target.value } as any)}
                 className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none">
@@ -871,7 +990,7 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
                 ))}
               </select>
             </div>
-          </div>
+          )}
 
           {/* Location */}
           <div>

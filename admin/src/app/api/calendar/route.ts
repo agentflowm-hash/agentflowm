@@ -97,6 +97,8 @@ export const POST = createHandler({
       location: data.location || null,
       client_name: data.client_name || null,
       all_day: data.all_day || false,
+      assigned_to: data.assigned_to || null,
+      assigned_name: data.assigned_name || null,
     })
     .select()
     .single();

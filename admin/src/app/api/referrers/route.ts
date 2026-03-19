@@ -11,6 +11,7 @@ import {
   ConflictError,
 } from '@/lib/api';
 import { z } from 'zod';
+import crypto from 'crypto';
 
 const CreateReferrerSchema = z.object({
   name: z.string().min(2).max(100).trim(),
@@ -39,7 +40,8 @@ export const GET = createHandler({
     .order('total_commission', { ascending: false });
 
   if (search) {
-    query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,company.ilike.%${search}%`);
+    const s = search.replace(/[%_\\]/g, '\\$&');
+    query = query.or(`name.ilike.%${s}%,email.ilike.%${s}%,company.ilike.%${s}%`);
   }
 
   const { data: referrers, error } = await query;
@@ -85,9 +87,9 @@ export const POST = createHandler({
     throw new ConflictError('Ein Empfehlungsgeber mit dieser E-Mail existiert bereits');
   }
 
-  // Unique referral code generieren
+  // Unique referral code generieren (kryptografisch sicher)
   const prefix = name.split(' ')[0].toUpperCase().slice(0, 4);
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const random = crypto.randomBytes(4).toString('hex').toUpperCase();
   const referralCode = `${prefix}-${random}`;
 
   const { data: referrer, error } = await db

@@ -9,9 +9,11 @@ import { createHandler } from '@/lib/api';
 
 export const GET = createHandler({ auth: true }, async (_data, _ctx, request) => {
   const q = request.nextUrl.searchParams.get('q');
-  if (!q || q.length < 2) return { results: [], total: 0 };
+  if (!q || q.length < 2 || q.length > 100) return { results: [], total: 0 };
 
-  const pattern = `%${q}%`;
+  // Escape SQL wildcards in user input
+  const escaped = q.replace(/[%_\\]/g, '\\$&');
+  const pattern = `%${escaped}%`;
   const results: { type: string; id: number; title: string; subtitle: string }[] = [];
 
   // Leads

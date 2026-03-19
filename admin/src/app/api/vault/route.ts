@@ -64,7 +64,10 @@ export const GET = createHandler({ auth: true }, async (_data, _ctx, request) =>
   if (category) query = query.eq('category', category);
   if (client_id) query = query.eq('client_id', parseInt(client_id));
   if (favorites === 'true') query = query.eq('is_favorite', true);
-  if (search) query = query.or(`title.ilike.%${search}%,username.ilike.%${search}%,url.ilike.%${search}%,notes.ilike.%${search}%`);
+  if (search) {
+    const s = search.replace(/[%_\\]/g, '\\$&');
+    query = query.or(`title.ilike.%${s}%,username.ilike.%${s}%,url.ilike.%${s}%,notes.ilike.%${s}%`);
+  }
 
   const { data: entries, error } = await query;
   if (error) throw new DatabaseError(error.message);

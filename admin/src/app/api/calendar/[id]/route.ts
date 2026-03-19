@@ -69,6 +69,8 @@ export const PATCH = createHandler({
   if (data.color !== undefined) updateData.color = data.color;
   if (data.location !== undefined) updateData.location = data.location;
   if (data.all_day !== undefined) updateData.all_day = data.all_day;
+  if (data.assigned_to !== undefined) updateData.assigned_to = data.assigned_to;
+  if (data.assigned_name !== undefined) updateData.assigned_name = data.assigned_name;
 
   const { data: event, error } = await db
     .from('calendar_events')

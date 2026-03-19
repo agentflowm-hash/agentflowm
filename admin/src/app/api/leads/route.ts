@@ -67,6 +67,7 @@ export const GET = createHandler({
 export const POST = createHandler({
   auth: false, // Public endpoint for contact forms
   schema: CreateLeadSchema,
+  rateLimit: { requests: 5, windowMs: 60 * 1000 }, // 5 pro Minute
 }, async (data: CreateLeadInput) => {
   const { name, email, company, phone, message, source, package_interest, referrer_id } = data;
 

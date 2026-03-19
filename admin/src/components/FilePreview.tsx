@@ -19,6 +19,7 @@ export default function FilePreview({ files, initialIndex = 0, onClose }: FilePr
   const currentFile = files[currentIndex];
 
   const isImage = currentFile?.type === "image";
+  const isSafeUrl = currentFile?.url && (currentFile.url.startsWith('http://') || currentFile.url.startsWith('https://') || currentFile.url.startsWith('/'));
 
   const goNext = () => {
     setCurrentIndex((i) => (i + 1) % files.length);
@@ -76,7 +77,7 @@ export default function FilePreview({ files, initialIndex = 0, onClose }: FilePr
         className="max-w-5xl max-h-[80vh] flex items-center justify-center"
         onClick={(e) => e.stopPropagation()}
       >
-        {isImage && currentFile.url ? (
+        {isImage && isSafeUrl ? (
           <img
             src={currentFile.url}
             alt={currentFile.name}

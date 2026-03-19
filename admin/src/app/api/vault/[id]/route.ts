@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { createHandler, DatabaseError, NotFoundError } from '@/lib/api';
 import { z } from 'zod';
 import crypto from 'crypto';
+import { logActivity } from '@/lib/activity';
 
 const VAULT_KEY = process.env.VAULT_ENCRYPTION_KEY || process.env.ADMIN_PASSWORD || 'FALLBACK_CHANGE_ME';
 
@@ -47,7 +48,16 @@ export const PATCH = createHandler({ auth: true, schema: UpdateEntrySchema }, as
 
 export const DELETE = createHandler({ auth: true }, async (_data, _ctx, request) => {
   const id = request.nextUrl.pathname.split('/').pop();
+
+  // Audit: Titel des Eintrags vor Loeschung erfassen
+  const { data: entry } = await db.from('vault_entries').select('title').eq('id', id).single();
+
   const { error } = await db.from('vault_entries').delete().eq('id', id);
   if (error) throw new DatabaseError(error.message);
+
+  if (entry) {
+    await logActivity('vault_entry_deleted', 'vault', Number(id), entry.title, {});
+  }
+
   return { deleted: true };
 });
