@@ -87,6 +87,7 @@ import HRTab from "@/components/HRTab";
 import GlobalSearch from "@/components/GlobalSearch";
 import PrivacyTab from "@/components/PrivacyTab";
 import ActivityTimeline from "@/components/ActivityTimeline";
+import ExportButton from "@/components/ExportButton";
 
 // ═══════════════════════════════════════════════════════════════
 //                    API RESPONSE HELPER
@@ -2537,6 +2538,61 @@ function VertriebTab() {
   const [showNewLeadModal, setShowNewLeadModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importRows, setImportRows] = useState<Record<string, string>[]>([]);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCsvFile = (file: File) => {
+    setImportFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.trim().split("\n");
+      if (lines.length < 2) { showToast("error", "CSV leer oder fehlerhaft"); return; }
+      const headers = lines[0].split(";").map(h => h.trim().toLowerCase());
+      const rows = lines.slice(1).map(line => {
+        const vals = line.split(";").map(v => v.trim());
+        const row: Record<string, string> = {};
+        headers.forEach((h, i) => { row[h] = vals[i] || ""; });
+        return row;
+      }).filter(r => r.name || r.email);
+      setImportRows(rows);
+      setShowImportModal(true);
+    };
+    reader.readAsText(file);
+  };
+
+  const executeImport = async () => {
+    setImporting(true);
+    let ok = 0;
+    let fail = 0;
+    for (const row of importRows) {
+      try {
+        const res = await fetch("/api/leads", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: row.name || "Unbekannt",
+            email: row.email || "",
+            phone: row.phone || row.telefon || null,
+            company: row.company || row.firma || null,
+            source: row.source || row.quelle || "CSV-Import",
+            message: row.message || row.nachricht || "",
+          }),
+        });
+        if (res.ok) ok++; else fail++;
+      } catch { fail++; }
+    }
+    showToast("success", `${ok} Leads importiert${fail > 0 ? `, ${fail} fehlgeschlagen` : ""}`);
+    setShowImportModal(false);
+    setImportRows([]);
+    setImportFile(null);
+    setImporting(false);
+    refreshLeads();
+  };
 
   const refreshLeads = useCallback(() => {
     fetch("/api/leads", { credentials: "include" })
@@ -2637,12 +2693,15 @@ function VertriebTab() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setShowNewLeadModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FC682C] to-[#e55a20] text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-[#FC682C]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <PlusIcon className="w-4 h-4" /> Neuer Lead
-          </button>
+          <div className="flex items-center gap-2">
+            <ExportButton type="leads" label="Export CSV" />
+            <button
+              onClick={() => setShowNewLeadModal(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FC682C] to-[#e55a20] text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-[#FC682C]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <PlusIcon className="w-4 h-4" /> Neuer Lead
+            </button>
+          </div>
         </div>
 
         {/* KPI Row */}
@@ -2952,7 +3011,7 @@ function PipelineTab({ customStages }: { customStages?: any[] } = {}) {
     <>
     <div className="space-y-4">
       {/* Add Lead Button */}
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
         <button
           onClick={() => setShowNewLeadModal(true)}
           className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#FC682C] to-[#e55a20] text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-[#FC682C]/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -3417,6 +3476,13 @@ function LeadsTab() {
             <ArrowDownTrayIcon className="w-4 h-4" /> Export{" "}
             {selectedIds.size > 0 && `(${selectedIds.size})`}
           </button>
+          <button
+            onClick={() => csvInputRef.current?.click()}
+            className="px-4 py-2 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
+          >
+            <ArrowUpTrayIcon className="w-4 h-4" /> Importieren
+          </button>
+          <input ref={csvInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCsvFile(f); e.target.value = ""; }} />
           <button
             onClick={() => setShowNewLeadModal(true)}
             className="px-4 py-2 bg-[#FC682C] text-white rounded-xl font-medium hover:bg-[#FC682C]/90 transition-colors flex items-center gap-2"
@@ -7100,13 +7166,7 @@ function ClientsTab() {
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={handleExportCSV}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white/70 flex items-center gap-1.5 transition-colors"
-            >
-              <ArrowDownTrayIcon className="w-4 h-4" />
-              Export
-            </button>
+            <ExportButton type="clients" label="Export CSV" />
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-4 py-2 bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-opacity"
