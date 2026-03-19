@@ -7,9 +7,7 @@
 import { db } from '@/lib/db';
 import {
   createHandler,
-  CreateNotificationSchema,
   DatabaseError,
-  type CreateNotificationInput,
 } from '@/lib/api';
 
 // ─────────────────────────────────────────────────────────────────
@@ -21,6 +19,7 @@ export const GET = createHandler({
 }, async (_data, _ctx, request) => {
   const searchParams = request.nextUrl.searchParams;
   const unreadOnly = searchParams.get('unread') === 'true';
+  const typeFilter = searchParams.get('type');
   const limit = parseInt(searchParams.get('limit') || '50', 10);
 
   let query = db
@@ -30,7 +29,11 @@ export const GET = createHandler({
     .limit(limit);
 
   if (unreadOnly) {
-    query = query.eq('is_read', false);
+    query = query.eq('read', false);
+  }
+
+  if (typeFilter) {
+    query = query.eq('type', typeFilter);
   }
 
   const { data: notifications, error } = await query;
@@ -41,7 +44,7 @@ export const GET = createHandler({
   const { count: unreadCount } = await db
     .from('notifications')
     .select('*', { count: 'exact', head: true })
-    .eq('is_read', false);
+    .eq('read', false);
 
   return {
     notifications: notifications || [],
@@ -55,19 +58,21 @@ export const GET = createHandler({
 
 export const POST = createHandler({
   auth: true,
-  schema: CreateNotificationSchema,
-}, async (data: CreateNotificationInput) => {
-  const { title, message, type, link, metadata } = data;
+}, async (data: any) => {
+  const { title, message, type, link } = data;
+
+  if (!title || !message) {
+    throw new DatabaseError('title and message are required');
+  }
 
   const { data: notification, error } = await db
     .from('notifications')
     .insert({
       title,
       message,
-      type,
+      type: type || 'info',
       link: link || null,
-      metadata: metadata || null,
-      is_read: false,
+      read: false,
     })
     .select()
     .single();
@@ -86,10 +91,10 @@ export const PATCH = createHandler({
 }, async () => {
   const { error } = await db
     .from('notifications')
-    .update({ is_read: true })
-    .eq('is_read', false);
+    .update({ read: true })
+    .eq('read', false);
 
   if (error) throw new DatabaseError(error.message);
 
-  return { success: true };
+  return { updated: true };
 });
