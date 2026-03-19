@@ -70,17 +70,7 @@ export default function KeyboardShortcuts({
   );
 
   const showHelp = () => {
-    // Could show a modal with shortcuts
-    console.log(`
-    Keyboard Shortcuts:
-    ⌘1 - Overview
-    ⌘2 - Messages
-    ⌘3 - Files
-    ⌘4 - Approvals
-    ⌘R - Refresh
-    ⌘P - Profile
-    Esc - Close
-    `);
+    // Shortcuts werden in der CommandPalette (Cmd+K) angezeigt
   };
 
   useEffect(() => {

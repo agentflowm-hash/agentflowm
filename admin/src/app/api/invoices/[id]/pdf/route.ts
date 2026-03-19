@@ -112,6 +112,14 @@ export async function GET(
       });
     }
 
+    // Load company settings for dynamic sender info
+    const { data: settingsRows } = await supabase
+      .from('admin_settings')
+      .select('value')
+      .eq('key', 'company')
+      .single();
+    const companySettings = settingsRows?.value || {};
+
     // Regular invoice template
     const html = generateInvoiceHTML({
       document_type: 'invoice',
@@ -133,6 +141,15 @@ export async function GET(
       payment_due: paymentDue,
       payment_terms: invoice.notes?.includes('50%') ? '50/50' : invoice.notes?.includes('70%') ? '70/30' : invoice.notes?.includes('100%') ? '100' : '50/50',
       notes: invoice.notes,
+      company_name: companySettings.name,
+      company_address: companySettings.address,
+      company_email: companySettings.email,
+      company_phone: companySettings.phone,
+      company_taxId: companySettings.taxId,
+      company_ustId: companySettings.ustId,
+      company_iban: companySettings.iban,
+      company_bic: companySettings.bic,
+      invoice_footer: companySettings.invoiceFooter,
     });
 
     if (format === "html") {

@@ -33,6 +33,17 @@ interface InvoiceData {
   payment_due: string; // "sofort" | "14 Tage" | "30 Tage"
   payment_terms?: string; // "50/50" | "70/30" | "100"
   notes?: string;
+
+  // Company (from admin_settings, optional overrides)
+  company_name?: string;
+  company_address?: string;
+  company_email?: string;
+  company_phone?: string;
+  company_taxId?: string;
+  company_ustId?: string;
+  company_iban?: string;
+  company_bic?: string;
+  invoice_footer?: string;
 }
 
 export function generateInvoiceHTML(data: InvoiceData): string {
@@ -41,6 +52,19 @@ export function generateInvoiceHTML(data: InvoiceData): string {
   const senderLabel = isOffer ? 'Anbieter' : 'Rechnungssteller';
   const recipientLabel = isOffer ? 'Angebotsempfänger' : 'Rechnungsempfänger';
   const validLabel = isOffer ? 'Gültig bis' : 'Zahlungsziel';
+
+  // Dynamic company data (with defaults)
+  const co = {
+    name: data.company_name || 'AgentFlowMarketing',
+    address: data.company_address || 'Achillesstra\u00DFe 69A, 13125 Berlin',
+    email: data.company_email || 'info@agentflowm.de',
+    phone: data.company_phone || '+49 179 949 8247',
+    taxId: data.company_taxId || '',
+    ustId: data.company_ustId || '',
+    iban: data.company_iban || 'DE89 3704 0044 0532 0130 00',
+    bic: data.company_bic || 'COBADEFFXXX',
+    footer: data.invoice_footer || '',
+  };
 
   const formatCurrency = (amount: number) =>
     amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
@@ -389,11 +413,10 @@ export function generateInvoiceHTML(data: InvoiceData): string {
       </div>
       <div class="party">
         <div class="party-label">${senderLabel}</div>
-        <div class="party-name">AgentFlowMarketing</div>
+        <div class="party-name">${co.name}</div>
         <div class="party-details">
-          Achillesstraße 69A<br>
-          13125 Berlin<br>
-          info@agentflowm.de
+          ${co.address.replace(/,\s*/g, '<br>')}<br>
+          ${co.email}
         </div>
       </div>
     </div>
@@ -469,15 +492,16 @@ export function generateInvoiceHTML(data: InvoiceData): string {
         </div>
         <div class="payment-item iban" style="grid-column: span 2;">
           <label>IBAN</label>
-          <value>DE93 1203 0000 1204 0856 49</value>
+          <value>${co.iban}</value>
         </div>
       </div>
       <div class="due-badge">Zahlbar ${data.payment_due}</div>
     </div>
     `}
-    
+    ${co.footer ? `<div style="padding:12px 40px;font-size:10px;color:#666;border-top:1px solid #e0e0e0;margin-top:16px;">${co.footer}</div>` : ''}
+
     <div class="footer">
-      AgentFlowMarketing · Achillesstraße 69A, 13125 Berlin · <a href="mailto:info@agentflowm.de">info@agentflowm.de</a>
+      ${co.name} · ${co.address} · <a href="mailto:${co.email}">${co.email}</a>${co.ustId ? ` · USt-IdNr.: ${co.ustId}` : ''}
     </div>
     
   </div>

@@ -11070,8 +11070,9 @@ function SettingsTab() {
                       {m.role !== "admin" && (
                         <button onClick={async () => {
                           if (!(await showConfirm(`"${m.name}" aus dem Team entfernen?`))) return;
-                          await fetch(`/api/team/${m.id}`, { method: "DELETE", credentials: "include" });
-                          setTeam(team.filter((t: any) => t.id !== m.id)); showToast("success", "Mitglied entfernt");
+                          const delRes = await fetch(`/api/team/${m.id}`, { method: "DELETE", credentials: "include" });
+                          if (delRes.ok) { setTeam(team.filter((t: any) => t.id !== m.id)); showToast("success", "Mitglied entfernt"); }
+                          else showToast("error", "Fehler beim Entfernen");
                         }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
                           <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
                         </button>
@@ -11109,8 +11110,9 @@ function SettingsTab() {
                 <button disabled={!newMember.name || !newMember.email} onClick={async () => {
                   const res = await fetch("/api/team", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(newMember) });
                   const data = await res.json();
-                  if (data.member) { setTeam([...team, data.member]); setNewMember({ name: "", email: "", role: "member", phone: "" }); setShowAddTeam(false); showToast("success", "Hinzugefügt!"); }
-                  else showToast("error", data.error || "Fehler");
+                  const m = data.data?.member || data.member;
+                  if (m) { setTeam([...team, m]); setNewMember({ name: "", email: "", role: "member", phone: "" }); setShowAddTeam(false); showToast("success", "Hinzugefügt!"); }
+                  else showToast("error", data.error?.message || data.error || "Fehler");
                 }} className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-xs font-medium disabled:opacity-50">Hinzufügen</button>
               </div>
             </div>
@@ -11187,8 +11189,9 @@ function SettingsTab() {
                       </button>
                       <button onClick={async () => {
                         if (!(await showConfirm(`Vorlage "${t.name}" löschen?`))) return;
-                        await fetch(`/api/templates/${t.id}`, { method: "DELETE", credentials: "include" });
-                        setTemplates(templates.filter((x: any) => x.id !== t.id)); showToast("success", "Vorlage gelöscht");
+                        const delRes = await fetch(`/api/templates/${t.id}`, { method: "DELETE", credentials: "include" });
+                        if (delRes.ok) { setTemplates(templates.filter((x: any) => x.id !== t.id)); showToast("success", "Vorlage gelöscht"); }
+                        else showToast("error", "Fehler beim Loeschen");
                       }} className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors">
                         <TrashIcon className="w-3.5 h-3.5 text-red-400/50" />
                       </button>
@@ -11227,8 +11230,9 @@ function SettingsTab() {
                     milestones: newTemplate.milestones.split(",").map(s => s.trim()).filter(Boolean), services: newTemplate.services.split(",").map(s => s.trim()).filter(Boolean) };
                   const res = await fetch("/api/templates", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) });
                   const data = await res.json();
-                  if (data.template) { setTemplates([...templates, data.template]); setNewTemplate({ name: "", package: "", default_price: 0, milestones: "", services: "", description: "" }); setShowAddTemplate(false); showToast("success", "Vorlage erstellt"); }
-                  else showToast("error", data.error || "Fehler");
+                  const tpl = data.data?.template || data.template;
+                  if (tpl) { setTemplates([...templates, tpl]); setNewTemplate({ name: "", package: "", default_price: 0, milestones: "", services: "", description: "" }); setShowAddTemplate(false); showToast("success", "Vorlage erstellt"); }
+                  else showToast("error", data.error?.message || data.error || "Fehler");
                 }} className="px-4 py-2 bg-[#FC682C] text-white rounded-xl text-xs font-medium disabled:opacity-50">Erstellen</button>
               </div>
             </div>
