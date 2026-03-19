@@ -109,7 +109,7 @@ export async function POST(
         status: "planung",
         status_label: "In Planung",
         progress: 0,
-        manager: "Mo Sul",
+        manager: "M. Ashaer",
       })
       .select()
       .single();
