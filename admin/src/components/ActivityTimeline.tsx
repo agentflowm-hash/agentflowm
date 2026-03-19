@@ -178,8 +178,8 @@ export default function ActivityTimeline({
       if (json.success) {
         setActivities(json.data.activities);
       }
-    } catch (err) {
-      console.error("[ActivityTimeline] Fetch error:", err);
+    } catch {
+      // Aktivitaeten konnten nicht geladen werden
     } finally {
       setLoading(false);
     }

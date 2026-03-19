@@ -374,11 +374,9 @@ export function Dashboard() {
           recentLeads: data.recentLeads || [],
         });
       } else {
-        console.error("Failed to fetch stats:", res.status);
         showToast("error", "Fehler beim Laden der Daten");
       }
     } catch (error) {
-      console.error("Failed to fetch stats:", error);
       showToast("error", "Verbindungsfehler");
     }
     setRefreshing(false);
@@ -403,7 +401,6 @@ export function Dashboard() {
         setUnreadCount(data.data?.unreadCount || data.unreadCount || 0);
       }
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
     }
   }, [router]);
 
@@ -1805,7 +1802,6 @@ function KommunikationTab() {
       const json = await res.json();
       if (json.success) setTemplates(json.data.templates || []);
     } catch (e) {
-      console.error('[KommunikationTab] templates fetch error:', e);
     } finally {
       setTemplatesLoading(false);
     }
@@ -3746,9 +3742,19 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
   const [converting, setConverting] = useState(false);
   const [convertResult, setConvertResult] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [assignedTo, setAssignedTo] = useState(lead.assigned_to || "");
+  const [assignedName, setAssignedName] = useState(lead.assigned_name || "");
+  const [teamMembers, setTeamMembers] = useState<{id: number; name: string; role: string}[]>([]);
+
+  useEffect(() => {
+    fetch("/api/team", { credentials: "include" }).then(r => r.json()).then(d => {
+      const td = d.data || d;
+      setTeamMembers(td.members || []);
+    }).catch(() => {});
+  }, []);
 
   const save = async () => {
-    const payload: Record<string, unknown> = { status, notes, next_follow_up: editFollowUp || null };
+    const payload: Record<string, unknown> = { status, notes, next_follow_up: editFollowUp || null, assigned_to: assignedTo || null, assigned_name: assignedName || null };
     if (isEditing) {
       payload.name = editName;
       payload.email = editEmail;
@@ -4122,6 +4128,31 @@ kontakt@agentflowm.de | +49 179 949 8247`}</p>
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Zugewiesen an */}
+              <div>
+                <label className="block text-xs text-white/40 mb-2">
+                  <UserGroupIcon className="w-3.5 h-3.5 inline mr-1" />
+                  Zugewiesen an
+                </label>
+                <select
+                  value={assignedTo}
+                  onChange={(e) => {
+                    const memberId = e.target.value;
+                    setAssignedTo(memberId as any);
+                    const member = teamMembers.find(m => String(m.id) === memberId);
+                    setAssignedName(member?.name || "");
+                  }}
+                  className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#1a1a1f]">Nicht zugewiesen</option>
+                  {teamMembers.map(m => (
+                    <option key={m.id} value={m.id} className="bg-[#1a1a1f]">
+                      {m.name} ({m.role === "admin" ? "Admin" : m.role === "manager" ? "Manager" : "Mitarbeiter"})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Follow-Up */}
@@ -4978,7 +5009,6 @@ function CheckDetailModal({
       });
       setLeadCreated(true);
     } catch (error) {
-      console.error("Failed to create lead:", error);
     } finally {
       setCreatingLead(false);
     }
@@ -6682,7 +6712,6 @@ function AnalyticsTab({ stats }: { stats: Stats | null }) {
         const json = await res.json();
         if (json.success) setAnalytics(json.data);
       } catch (e) {
-        console.error('[AnalyticsTab] fetch error:', e);
       } finally {
         setAnalyticsLoading(false);
       }
@@ -7080,7 +7109,6 @@ function ClientsTab() {
         setClients(data.data?.clients || data.clients || []);
       }
     } catch (error) {
-      console.error("Failed to fetch clients:", error);
     }
     setLoading(false);
   }, []);
@@ -8223,7 +8251,6 @@ function ClientDetailModal({
         setProjectData(data);
       }
     } catch (error) {
-      console.error("Failed to delete message:", error);
     }
   };
 
@@ -8239,7 +8266,6 @@ function ClientDetailModal({
         setApprovals(approvals.filter(a => a.id !== approvalId));
       }
     } catch (error) {
-      console.error("Failed to delete approval:", error);
     }
   };
 
@@ -8255,7 +8281,6 @@ function ClientDetailModal({
         setApprovals(data.approvals || []);
       }
     } catch (error) {
-      console.error("Failed to fetch approvals:", error);
     }
   }, [client.project_id]);
 
@@ -8264,7 +8289,7 @@ function ClientDetailModal({
       fetch(`/api/projects/${client.project_id}`, { credentials: "include" })
         .then((res) => res.json())
         .then((data) => setProjectData(data))
-        .catch(console.error);
+        .catch(() => {});
       fetchApprovals();
     }
   }, [client.project_id, fetchApprovals]);
@@ -8298,7 +8323,6 @@ function ClientDetailModal({
         ));
       }
     } catch (error) {
-      console.error("Failed to fetch client docs:", error);
     }
     setLoadingDocs(false);
   }, [client.name, client.email]);
@@ -8345,7 +8369,6 @@ function ClientDetailModal({
         fetchClientDocs();
       }
     } catch (error) {
-      console.error("Failed to create invoice:", error);
     }
     setCreatingDoc(false);
   };
@@ -8383,7 +8406,6 @@ function ClientDetailModal({
         fetchClientDocs();
       }
     } catch (error) {
-      console.error("Failed to create agreement:", error);
     }
     setCreatingDoc(false);
   };
@@ -8406,7 +8428,6 @@ function ClientDetailModal({
         setProjectData(data);
       }
     } catch (error) {
-      console.error("Failed to send message:", error);
     }
     setSendingMessage(false);
   };
@@ -8426,7 +8447,6 @@ function ClientDetailModal({
       setProjectData(data);
       onUpdate();
     } catch (error) {
-      console.error("Failed to update milestone:", error);
     }
   };
 
@@ -9130,7 +9150,6 @@ function ClientDetailModal({
                             fetchClientDocs();
                           }
                         } catch (error) {
-                          console.error("Failed to create offer:", error);
                         }
                         setCreatingDoc(false);
                       }}
@@ -9216,7 +9235,7 @@ function ClientDetailModal({
                         setShowCreateSub(false);
                         setSubForm({ plan: "Wartung & Support", amount: 150, interval: "monthly", notes: "" });
                         fetchClientDocs();
-                      } catch (err) { console.error(err); }
+                      } catch { /* Fehler bei Abo-Erstellung */ }
                       setCreatingDoc(false);
                     }}
                       className="px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl text-xs font-semibold hover:shadow-lg hover:shadow-teal-500/20 transition-all disabled:opacity-50">
@@ -9535,7 +9554,6 @@ function ClientDetailModal({
                         a.click();
                         setTimeout(() => document.body.removeChild(a), 500);
                       } catch (err) {
-                        console.error("Poster download error:", err);
                         showToast("error", "Download fehlgeschlagen: " + (err as Error).message);
                       }
                     }}
@@ -10495,7 +10513,6 @@ function ClientDetailModal({
                             fetchApprovals();
                           }
                         } catch (error) {
-                          console.error("Failed to create approval:", error);
                         }
                       }}
                       disabled={!newApproval.title.trim()}
@@ -10711,7 +10728,6 @@ function CreateClientModal({
               }),
             });
           } catch (emailErr) {
-            console.error("Onboarding email failed:", emailErr);
           }
         }
 
@@ -11501,7 +11517,6 @@ function NewLeadModal({
       onCreated();
       onClose();
     } catch (error) {
-      console.error("Failed to create lead:", error);
       showToast("error", "Lead konnte nicht angelegt werden");
     } finally {
       setLoading(false);

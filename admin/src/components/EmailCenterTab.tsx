@@ -82,8 +82,8 @@ export default function EmailCenterTab() {
         const data = raw.data || raw;
         setClients(data.clients || []);
       }
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
+    } catch {
+      // Daten konnten nicht geladen werden
     }
     setLoading(false);
   }, []);

@@ -577,6 +577,7 @@ function TaskModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { showToast } = useToast();
   const [form, setForm] = useState({
     title: task?.title || "",
     description: task?.description || "",
@@ -613,8 +614,8 @@ function TaskModal({
       if (res.ok) {
         onSaved();
       }
-    } catch (err) {
-      console.error("Failed to save task:", err);
+    } catch {
+      showToast("error", "Aufgabe konnte nicht gespeichert werden");
     }
     setSaving(false);
   };
