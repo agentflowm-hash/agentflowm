@@ -418,6 +418,16 @@ export function Dashboard() {
     };
   }, [fetchStats, fetchNotifications]);
 
+  // Listen for tab navigation events from child components
+  useEffect(() => {
+    const handleNavigateTab = (e: Event) => {
+      const tabId = (e as CustomEvent).detail;
+      if (tabId) setActiveTab(tabId);
+    };
+    window.addEventListener("navigateTab", handleNavigateTab);
+    return () => window.removeEventListener("navigateTab", handleNavigateTab);
+  }, []);
+
   // Keyboard shortcut für Command Palette
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -937,8 +947,8 @@ function NotificationDropdown({
               key={notif.id}
               type={notif.type}
               title={notif.title}
-              desc={notif.description}
-              time={notif.time}
+              desc={notif.message}
+              time={notif.created_at}
               onClick={() => onNavigate(getTabFromType(notif.type))}
             />
           ))
@@ -947,7 +957,7 @@ function NotificationDropdown({
       {notifications.length > 0 && (
         <div className="p-3 border-t border-white/[0.06]">
           <button
-            onClick={() => onNavigate("dashboard")}
+            onClick={() => onNavigate("notifications")}
             className="w-full py-2 text-sm text-[#FC682C] hover:bg-[#FC682C]/10 rounded-lg transition-colors"
           >
             Alle anzeigen

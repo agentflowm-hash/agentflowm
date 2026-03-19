@@ -105,7 +105,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
       if (filter !== "all") params.set("status", filter);
       if (filterType) params.set("type", filterType);
 
-      const res = await fetch(`/api/invoices?${params}`);
+      const res = await fetch(`/api/invoices?${params}`, { credentials: "include" });
       const data = await res.json();
       const unwrapped = unwrapApiResponse<{invoices: Invoice[], stats: typeof stats}>(data);
       setInvoices(unwrapped.invoices || []);
@@ -122,6 +122,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
       const res = await fetch("/api/invoices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
       
@@ -142,6 +143,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
       const res = await fetch(`/api/invoices/${editingInvoice.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
       
@@ -161,6 +163,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
       const res = await fetch(`/api/invoices/${id}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({}),
       });
       
@@ -177,6 +180,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
       const res = await fetch(`/api/invoices/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status: "paid" }),
       });
       
@@ -192,7 +196,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
     if (!confirm("Rechnung wirklich löschen?")) return;
     
     try {
-      const res = await fetch(`/api/invoices/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/invoices/${id}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
         fetchInvoices();
       }

@@ -50,11 +50,19 @@ export default function HRTab() {
   const handleAddContract = async () => {
     if (!contractForm.team_member_id || !contractForm.title) return;
     setSaving(true);
-    await fetch("/api/hr/contracts", { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...contractForm, team_member_id: parseInt(contractForm.team_member_id), monthly_salary: contractForm.monthly_salary ? parseFloat(contractForm.monthly_salary) : null, hourly_rate: contractForm.hourly_rate ? parseFloat(contractForm.hourly_rate) : null, weekly_hours: contractForm.weekly_hours ? parseFloat(contractForm.weekly_hours) : null }) });
-    showToast("success", "Vertrag erstellt!"); setShowAdd(false); setSaving(false);
-    setContractForm({ team_member_id: "", contract_type: "freelance", title: "", start_date: new Date().toISOString().split("T")[0], end_date: "", monthly_salary: "", hourly_rate: "", weekly_hours: "", tax_class: "", notes: "" });
-    loadData();
+    try {
+      const res = await fetch("/api/hr/contracts", { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...contractForm, team_member_id: parseInt(contractForm.team_member_id), monthly_salary: contractForm.monthly_salary ? parseFloat(contractForm.monthly_salary) : null, hourly_rate: contractForm.hourly_rate ? parseFloat(contractForm.hourly_rate) : null, weekly_hours: contractForm.weekly_hours ? parseFloat(contractForm.weekly_hours) : null }) });
+      const json = await res.json();
+      if (json.success || res.ok) {
+        showToast("success", "Vertrag erstellt!"); setShowAdd(false);
+        setContractForm({ team_member_id: "", contract_type: "freelance", title: "", start_date: new Date().toISOString().split("T")[0], end_date: "", monthly_salary: "", hourly_rate: "", weekly_hours: "", tax_class: "", notes: "" });
+        loadData();
+      } else {
+        showToast("error", json.error?.message || "Fehler beim Erstellen");
+      }
+    } catch { showToast("error", "Verbindungsfehler"); }
+    setSaving(false);
   };
 
   const handleGeneratePayroll = async () => {
@@ -78,13 +86,19 @@ export default function HRTab() {
   };
 
   const deleteContract = async (id: number) => {
-    await fetch(`/api/hr/contracts/${id}`, { credentials: "include", method: "DELETE" });
-    showToast("success", "Vertrag gelöscht"); loadData();
+    try {
+      const res = await fetch(`/api/hr/contracts/${id}`, { credentials: "include", method: "DELETE" });
+      if (res.ok) { showToast("success", "Vertrag gelöscht"); loadData(); }
+      else showToast("error", "Fehler beim Loeschen");
+    } catch { showToast("error", "Verbindungsfehler"); }
   };
 
   const updatePayrollStatus = async (id: number, status: string) => {
-    await fetch(`/api/hr/payroll/${id}`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
-    showToast("success", `Status: ${STATUS_LABELS[status]}`); loadData();
+    try {
+      const res = await fetch(`/api/hr/payroll/${id}`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+      if (res.ok) { showToast("success", `Status: ${STATUS_LABELS[status]}`); loadData(); }
+      else showToast("error", "Fehler beim Aktualisieren");
+    } catch { showToast("error", "Verbindungsfehler"); }
   };
 
   const activeContracts = contracts.filter(c => c.status === "active");

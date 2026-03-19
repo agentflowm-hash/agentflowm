@@ -67,16 +67,19 @@ export default function EmailCenterTab() {
       ]);
 
       if (templatesRes.ok) {
-        const data = await templatesRes.json();
+        const raw = await templatesRes.json();
+        const data = raw.data || raw;
         setTemplates(data.templates || []);
       }
       if (emailsRes.ok) {
-        const data = await emailsRes.json();
+        const raw = await emailsRes.json();
+        const data = raw.data || raw;
         setEmails(data.emails || []);
         setStats(data.stats || { total: 0, opened: 0, clicked: 0, openRate: 0 });
       }
       if (clientsRes.ok) {
-        const data = await clientsRes.json();
+        const raw = await clientsRes.json();
+        const data = raw.data || raw;
         setClients(data.clients || []);
       }
     } catch (error) {

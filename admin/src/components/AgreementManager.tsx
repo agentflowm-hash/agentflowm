@@ -108,7 +108,7 @@ export function AgreementManager() {
 
   const fetchAgreements = async () => {
     try {
-      const res = await fetch('/api/agreements');
+      const res = await fetch('/api/agreements', { credentials: 'include' });
       const json = await res.json();
       if (json.success) {
         setAgreements(json.data.agreements);
@@ -129,6 +129,7 @@ export function AgreementManager() {
       const res = await fetch('/api/agreements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(newAgreement),
       });
       const json = await res.json();
@@ -150,6 +151,7 @@ export function AgreementManager() {
       const res = await fetch(`/api/agreements/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status }),
       });
       const json = await res.json();
@@ -166,7 +168,7 @@ export function AgreementManager() {
     if (!confirm('Vereinbarung wirklich löschen?')) return;
     
     try {
-      const res = await fetch(`/api/agreements/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/agreements/${id}`, { method: 'DELETE', credentials: 'include' });
       const json = await res.json();
       if (json.success) {
         setAgreements(agreements.filter(a => a.id !== id));

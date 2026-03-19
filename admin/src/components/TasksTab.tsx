@@ -80,7 +80,8 @@ export default function TasksTab() {
       const res = await fetch("/api/tasks", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        setTasks(data.tasks || []);
+        const d = data.data || data;
+        setTasks(d.tasks || []);
       }
     } catch (err) {
       console.error("Failed to fetch tasks:", err);

@@ -213,9 +213,16 @@ export default function NotificationsTab() {
   const handleNotificationClick = (notif: Notification) => {
     if (!notif.read) markAsRead(notif.id);
     if (notif.link) {
-      // Internal links start with /
       if (notif.link.startsWith("/")) {
-        // Stay in-app — could navigate, but we just mark read for now
+        // Map internal links to tab navigation
+        const path = notif.link.replace(/^\//, "").split("/")[0];
+        const tabMap: Record<string, string> = {
+          leads: "vertrieb", clients: "clients", invoices: "dokumente",
+          referrals: "referrals", subscriptions: "dokumente", checks: "checks",
+        };
+        const tabId = tabMap[path] || path;
+        // Dispatch custom event that Dashboard listens to
+        window.dispatchEvent(new CustomEvent("navigateTab", { detail: tabId }));
       } else {
         window.open(notif.link, "_blank");
       }
