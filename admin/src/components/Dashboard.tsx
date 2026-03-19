@@ -84,6 +84,7 @@ import AccountingTab from "@/components/AccountingTab";
 import VaultTab from "@/components/VaultTab";
 import TasksTab from "@/components/TasksTab";
 import HRTab from "@/components/HRTab";
+import GlobalSearch from "@/components/GlobalSearch";
 import PrivacyTab from "@/components/PrivacyTab";
 import ActivityTimeline from "@/components/ActivityTimeline";
 
@@ -286,6 +287,14 @@ export function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+
+  // Cmd+K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setGlobalSearchOpen(true); } };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   // Theme: persist in localStorage + apply to <html>
   useEffect(() => {
@@ -667,9 +676,9 @@ export function Dashboard() {
               onClick={() => setCommandPaletteOpen(true)}
               className="hidden sm:flex items-center gap-2 px-3 py-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-xl transition-colors"
             >
-              <MagnifyingGlassIcon className="w-4 h-4 text-white/40" />
-              <span className="text-sm text-white/40">Suchen...</span>
-              <kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-[10px] text-white/30">
+              <MagnifyingGlassIcon className="w-4 h-4 text-white/40" onClick={() => setGlobalSearchOpen(true)} />
+              <span className="text-sm text-white/40" onClick={() => setGlobalSearchOpen(true)}>Suchen...</span>
+              <kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-[10px] text-white/30" onClick={() => setGlobalSearchOpen(true)}>
                 ⌘K
               </kbd>
             </button>
@@ -780,6 +789,14 @@ export function Dashboard() {
           {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "settings" && <SettingsTab />}
         </div>
+
+        {/* Global Search Modal */}
+        <GlobalSearch isOpen={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} onSelect={(type, id) => {
+          if (type === "lead") setActiveTab("vertrieb");
+          else if (type === "client") setActiveTab("clients");
+          else if (type === "invoice") setActiveTab("dokumente");
+          else if (type === "vault") setActiveTab("vault");
+        }} />
 
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-[#111827]/95 backdrop-blur-xl border-t border-white/[0.08] safe-area-bottom">
