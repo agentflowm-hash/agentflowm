@@ -7,10 +7,8 @@
 import { db } from '@/lib/db';
 import {
   createHandler,
-  UpdateEventSchema,
   NotFoundError,
   DatabaseError,
-  type UpdateEventInput,
 } from '@/lib/api';
 
 // ─────────────────────────────────────────────────────────────────
@@ -24,18 +22,7 @@ export const GET = createHandler({
 
   const { data: event, error } = await db
     .from('calendar_events')
-    .select(`
-      *,
-      portal_clients (
-        id,
-        name,
-        company
-      ),
-      portal_projects (
-        id,
-        name
-      )
-    `)
+    .select('*')
     .eq('id', id)
     .single();
 
@@ -52,11 +39,10 @@ export const GET = createHandler({
 
 export const PATCH = createHandler({
   auth: true,
-  schema: UpdateEventSchema,
-}, async (data: UpdateEventInput, _ctx, request) => {
+}, async (_data, _ctx, request) => {
   const id = request.nextUrl.pathname.split('/').pop();
+  const body = await request.json();
 
-  // Check if event exists
   const { data: existing } = await db
     .from('calendar_events')
     .select('id')
@@ -67,21 +53,23 @@ export const PATCH = createHandler({
     throw new NotFoundError('Event');
   }
 
-  const updateData: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
-  };
+  const updateData: Record<string, unknown> = {};
 
-  // Only include defined fields
-  const fields = [
-    'title', 'description', 'start_time', 'end_time',
-    'client_id', 'project_id', 'event_type', 'color'
-  ] as const;
-  
-  for (const field of fields) {
-    if (data[field] !== undefined) {
-      updateData[field] = data[field];
-    }
-  }
+  // Map frontend field names to DB column names
+  if (body.title !== undefined) updateData.title = body.title;
+  if (body.description !== undefined) updateData.description = body.description;
+  if (body.start_time !== undefined) updateData.start_date = body.start_time;
+  if (body.start_date !== undefined) updateData.start_date = body.start_date;
+  if (body.end_time !== undefined) updateData.end_date = body.end_time;
+  if (body.end_date !== undefined) updateData.end_date = body.end_date;
+  if (body.event_type !== undefined) updateData.type = body.event_type;
+  if (body.type !== undefined) updateData.type = body.type;
+  if (body.client_id !== undefined) updateData.client_id = body.client_id;
+  if (body.client_name !== undefined) updateData.client_name = body.client_name;
+  if (body.project_id !== undefined) updateData.project_id = body.project_id;
+  if (body.color !== undefined) updateData.color = body.color;
+  if (body.location !== undefined) updateData.location = body.location;
+  if (body.all_day !== undefined) updateData.all_day = body.all_day;
 
   const { data: event, error } = await db
     .from('calendar_events')

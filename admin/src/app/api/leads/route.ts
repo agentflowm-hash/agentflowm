@@ -108,7 +108,7 @@ export const POST = createHandler({
     message: `${name} hat eine Anfrage gesendet`,
     type: 'info',
     link: `/leads/${lead.id}`,
-    is_read: false,
+    read: false,
   });
 
   // Empfehlungsgeber: Counter erhöhen + Dankes-E-Mail senden

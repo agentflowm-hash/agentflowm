@@ -12,6 +12,7 @@ import {
   DatabaseError,
   type UpdateReferralInput,
 } from '@/lib/api';
+import { logActivity } from '@/lib/activity';
 
 // ─────────────────────────────────────────────────────────────────
 // GET /api/referrals/[id] - Get single referral
@@ -81,7 +82,7 @@ export const PATCH = createHandler({
         message: 'Eine Empfehlung wurde erfolgreich konvertiert',
         type: 'success',
         link: `/referrals/${id}`,
-        is_read: false,
+        read: false,
       });
     }
   }
@@ -102,6 +103,10 @@ export const PATCH = createHandler({
     .single();
 
   if (error) throw new DatabaseError(error.message);
+
+  if (data.status) {
+    await logActivity('referral_status_changed', 'referral', Number(id), referral.referred_name || '', { status: data.status });
+  }
 
   return { referral };
 });

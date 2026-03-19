@@ -63,7 +63,7 @@ export const PATCH = createHandler({
   // Check if invoice exists with full data
   const { data: existing } = await db
     .from('invoices')
-    .select('id, status, client_id, total, invoice_number, referrer_id, commission_id')
+    .select('id, status, client_id, client_name, total, invoice_number, referrer_id, commission_id')
     .eq('id', id)
     .single();
 
@@ -105,6 +105,22 @@ export const PATCH = createHandler({
   // Log status change activity
   if (data.status !== undefined && data.status !== existing.status) {
     await logActivity('invoice_status_changed', 'invoice', Number(id), existing.invoice_number, { old_status: existing.status, new_status: data.status });
+
+    // Notification: Rechnung bezahlt
+    if (data.status === 'paid') {
+      let clientName = '';
+      if (existing.client_id) {
+        const { data: cl } = await db.from('portal_clients').select('name').eq('id', existing.client_id).single();
+        clientName = cl?.name || '';
+      }
+      await db.from('notifications').insert({
+        title: 'Rechnung bezahlt',
+        message: `${existing.invoice_number || '#' + id}: ${existing.total ? Number(existing.total).toLocaleString('de-DE') + ' EUR' : ''} von ${clientName} erhalten`,
+        type: 'success',
+        link: `/invoices`,
+        read: false,
+      });
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -185,7 +201,7 @@ export const PATCH = createHandler({
               title: 'Provision automatisch erstellt',
               message: `${commissionAmount.toLocaleString('de-DE')}€ Provision für ${referrer.name} (Rechnung ${existing.invoice_number || '#' + id})`,
               type: 'info',
-              is_read: false,
+              read: false,
             });
           }
         }

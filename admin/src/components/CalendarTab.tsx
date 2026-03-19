@@ -62,12 +62,12 @@ const EVENT_TYPES: Record<string, { label: string; color: string }> = {
 const COLOR_OPTIONS = [
   { value: "#FC682C", label: "Orange" },
   { value: "#3B82F6", label: "Blau" },
-  { value: "#22C55E", label: "Gruen" },
+  { value: "#22C55E", label: "Grün" },
   { value: "#8B5CF6", label: "Lila" },
   { value: "#EF4444", label: "Rot" },
 ];
 
-const MONTH_NAMES = ["Januar", "Februar", "Maerz", "April", "Mai", "Juni",
+const MONTH_NAMES = ["Januar", "Februar", "März", "April", "Mai", "Juni",
   "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const DAY_NAMES = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -90,6 +90,7 @@ export default function CalendarTab() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [prefilledDate, setPrefilledDate] = useState<string>("");
 
   // ─── Fetch ─────────────────────────────────────────────────
 
@@ -230,7 +231,7 @@ export default function CalendarTab() {
               </button>
             ))}
           </div>
-          <button onClick={() => { setEditingEvent(null); setShowCreateModal(true); }}
+          <button onClick={() => { setEditingEvent(null); setPrefilledDate(""); setShowCreateModal(true); }}
             className="px-4 py-2 bg-[#FC682C] hover:bg-[#e55d27] text-white rounded-xl text-sm font-medium flex items-center gap-2 transition-colors">
             <PlusIcon className="w-4 h-4" />Event
           </button>
@@ -371,7 +372,7 @@ export default function CalendarTab() {
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm font-medium text-white/90 truncate">{ev.title}</div>
                                 <div className="text-xs text-white/40">
-                                  {ev.all_day ? "Ganztaegig" : fmtTime(ev.start_date)}
+                                  {ev.all_day ? "Ganztägig" : fmtTime(ev.start_date)}
                                   {ev.client_name && ` -- ${ev.client_name}`}
                                 </div>
                               </div>
@@ -421,7 +422,7 @@ export default function CalendarTab() {
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <ClockIcon className="w-4 h-4 text-blue-400" />
-              <h3 className="text-sm font-semibold text-white">Naechste 7 Tage</h3>
+              <h3 className="text-sm font-semibold text-white">Nächste 7 Tage</h3>
               <span className="text-xs text-white/30">{upcomingEvents.length}</span>
             </div>
             {upcomingEvents.length === 0 ? (
@@ -469,8 +470,8 @@ export default function CalendarTab() {
             </p>
             <button disabled
               className="w-full py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-xs text-white/30 cursor-not-allowed"
-              title="Demnachst verfuegbar">
-              Verbinden (bald verfuegbar)
+              title="Demnächst verfügbar">
+              Verbinden (bald verfügbar)
             </button>
           </div>
         </div>
@@ -483,7 +484,12 @@ export default function CalendarTab() {
           events={getEventsForDay(selectedDay)}
           onClose={() => setSelectedDay(null)}
           onSelectEvent={setSelectedEvent}
-          onCreateEvent={() => { setEditingEvent(null); setShowCreateModal(true); }}
+          onCreateEvent={() => {
+            setEditingEvent(null);
+            const d = selectedDay || new Date();
+            setPrefilledDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}T09:00`);
+            setShowCreateModal(true);
+          }}
         />
       )}
 
@@ -502,8 +508,9 @@ export default function CalendarTab() {
         <CreateEventModal
           event={editingEvent}
           clients={clients}
-          onClose={() => { setShowCreateModal(false); setEditingEvent(null); }}
-          onSaved={() => { setShowCreateModal(false); setEditingEvent(null); fetchEvents(); }}
+          defaultDate={prefilledDate}
+          onClose={() => { setShowCreateModal(false); setEditingEvent(null); setPrefilledDate(""); }}
+          onSaved={() => { setShowCreateModal(false); setEditingEvent(null); setPrefilledDate(""); fetchEvents(); }}
         />
       )}
     </div>
@@ -542,7 +549,7 @@ function DayPanel({ date, events, onClose, onSelectEvent, onCreateEvent }: {
                   <div className={`w-2 h-2 rounded-full ${EVENT_TYPES[ev.type]?.color || "bg-[#FC682C]"}`} />
                   <span className="text-sm font-medium text-white/90">{ev.title}</span>
                 </div>
-                <div className="text-xs text-white/40">{ev.all_day ? "Ganztaegig" : fmtTime(ev.start_date)}</div>
+                <div className="text-xs text-white/40">{ev.all_day ? "Ganztägig" : fmtTime(ev.start_date)}</div>
               </div>
             ))}
           </div>
@@ -604,7 +611,7 @@ function EventDetailModal({ event, onClose, onDelete, onEdit }: {
             <PencilIcon className="w-3.5 h-3.5" />Bearbeiten
           </button>
           <button onClick={onDelete} className="flex-1 py-2 bg-red-500/15 hover:bg-red-500/25 text-red-400 rounded-xl text-sm flex items-center justify-center gap-1.5 transition-colors">
-            <TrashIcon className="w-3.5 h-3.5" />Loeschen
+            <TrashIcon className="w-3.5 h-3.5" />Löschen
           </button>
         </div>
       </div>
@@ -616,13 +623,13 @@ function EventDetailModal({ event, onClose, onDelete, onEdit }: {
 //                   CREATE / EDIT EVENT MODAL
 // ═══════════════════════════════════════════════════════════════
 
-function CreateEventModal({ event, clients, onClose, onSaved }: {
-  event: CalendarEvent | null; clients: Client[]; onClose: () => void; onSaved: () => void;
+function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
+  event: CalendarEvent | null; clients: Client[]; defaultDate?: string; onClose: () => void; onSaved: () => void;
 }) {
   const [form, setForm] = useState({
     title: event?.title || "",
     description: event?.description || "",
-    start_date: event ? event.start_date.slice(0, 16) : new Date().toISOString().slice(0, 16),
+    start_date: event ? event.start_date.slice(0, 16) : (defaultDate || new Date().toISOString().slice(0, 16)),
     end_date: event?.end_date ? event.end_date.slice(0, 16) : "",
     type: event?.type || "meeting",
     all_day: event?.all_day || false,
@@ -668,7 +675,7 @@ function CreateEventModal({ event, clients, onClose, onSaved }: {
     setSaving(false);
   };
 
-  const TITLE_CHIPS = ["Erstgespraech", "Design-Review", "Go-Live", "Follow-Up", "Monatsmeeting", "Kundentermin"];
+  const TITLE_CHIPS = ["Erstgespräch", "Design-Review", "Go-Live", "Follow-Up", "Monatsmeeting", "Kundentermin"];
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -713,7 +720,7 @@ function CreateEventModal({ event, clients, onClose, onSaved }: {
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.all_day} onChange={e => setForm({ ...form, all_day: e.target.checked })}
               className="w-4 h-4 rounded border-white/20 bg-white/[0.04] text-[#FC682C] focus:ring-[#FC682C]/50" />
-            <span className="text-xs text-white/50">Ganztaegig</span>
+            <span className="text-xs text-white/50">Ganztägig</span>
           </label>
 
           {/* Type + Client */}
@@ -743,7 +750,7 @@ function CreateEventModal({ event, clients, onClose, onSaved }: {
           <div>
             <label className="block text-xs text-white/40 mb-1">Ort</label>
             <input type="text" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })}
-              placeholder="z.B. Zoom, Buero, Google Meet Link..."
+              placeholder="z.B. Zoom, Büro, Google Meet Link..."
               className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" />
           </div>
 

@@ -34,7 +34,7 @@ export const GET = createHandler({
     query = query.gte('start_date', startDate);
   }
   if (endDate) {
-    query = query.lte('end_date', endDate);
+    query = query.lte('start_date', endDate);
   }
   if (clientId) {
     query = query.eq('client_id', clientId);

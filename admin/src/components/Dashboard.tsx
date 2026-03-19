@@ -385,14 +385,17 @@ export function Dashboard() {
 
   const fetchNotifications = useCallback(async () => {
     try {
+      // Check for new client messages and auto-create notifications
+      fetch("/api/messages/check-unread", { credentials: "include" }).catch(() => {});
+
       const res = await fetch("/api/notifications", { credentials: "include" });
-      
+
       // Handle 401 - redirect to login
       if (res.status === 401) {
         router.push("/login");
         return;
       }
-      
+
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.data?.notifications || data.notifications || []);

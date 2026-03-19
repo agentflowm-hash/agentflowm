@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       title: 'Neue Empfehlung eingegangen',
       message: `${name} wurde von ${referrer.name} empfohlen`,
       type: 'info',
-      is_read: false,
+      read: false,
     });
 
     // Send thank-you email to referrer

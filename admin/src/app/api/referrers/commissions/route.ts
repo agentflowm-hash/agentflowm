@@ -201,7 +201,7 @@ export const PATCH = createHandler({
       title: 'Provision genehmigt',
       message: `${amount.toLocaleString('de-DE')}€ Provision für ${referrer?.name} wurde genehmigt`,
       type: 'info',
-      is_read: false,
+      read: false,
     });
   }
 
@@ -290,7 +290,7 @@ export const PATCH = createHandler({
       title: 'Provision ausgezahlt',
       message: `${parseFloat(String(commission.commission_amount)).toLocaleString('de-DE')}€ an ${referrer?.name} ausgezahlt`,
       type: 'success',
-      is_read: false,
+      read: false,
     });
   }
 

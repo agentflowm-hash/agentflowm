@@ -12,6 +12,8 @@ import {
   DatabaseError,
   type CreateClientInput,
 } from '@/lib/api';
+import { logActivity } from '@/lib/activity';
+import { notify } from '@/lib/notify';
 
 // ─────────────────────────────────────────────────────────────────
 // GET /api/clients - List all clients with projects
@@ -170,6 +172,9 @@ export const POST = createHandler({
       sort_order: m.sort_order,
     }))
   );
+
+  await logActivity('client_created', 'client', client.id, name, { email, package: packageType });
+  await notify('Neuer Kunde erstellt', `${name} wurde als Kunde angelegt`, 'success', '/clients');
 
   return {
     client: {
