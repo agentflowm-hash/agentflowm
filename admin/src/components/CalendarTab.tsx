@@ -21,6 +21,7 @@ import {
   FlagIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
+import { useToast } from "@/components";
 
 // ═══════════════════════════════════════════════════════════════
 //                         TYPES
@@ -81,6 +82,7 @@ function unwrapApi<T>(res: unknown): T {
 // ═══════════════════════════════════════════════════════════════
 
 export default function CalendarTab() {
+  const { showToast } = useToast();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,7 +153,16 @@ export default function CalendarTab() {
   const goToToday = () => setCurrentDate(new Date());
 
   const deleteEvent = async (id: number) => {
-    await fetch(`/api/calendar/${id}`, { method: "DELETE", credentials: "include" });
+    try {
+      const res = await fetch(`/api/calendar/${id}`, { method: "DELETE", credentials: "include" });
+      if (res.ok) {
+        showToast("success", "Event gelöscht");
+      } else {
+        showToast("error", "Fehler beim Löschen");
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler");
+    }
     setSelectedEvent(null);
     fetchEvents();
   };
@@ -626,6 +637,7 @@ function EventDetailModal({ event, onClose, onDelete, onEdit }: {
 function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
   event: CalendarEvent | null; clients: Client[]; defaultDate?: string; onClose: () => void; onSaved: () => void;
 }) {
+  const { showToast } = useToast();
   const [form, setForm] = useState({
     title: event?.title || "",
     description: event?.description || "",
@@ -668,9 +680,17 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
         credentials: "include",
         body: JSON.stringify(payload),
       });
-      if (res.ok) onSaved();
+      if (res.ok) {
+        showToast("success", event ? "Event aktualisiert" : "Event erstellt");
+        onSaved();
+      } else {
+        const errData = await res.json().catch(() => null);
+        console.error("API Error:", res.status, errData);
+        showToast("error", errData?.error?.message || `Fehler ${res.status}: Event konnte nicht gespeichert werden`);
+      }
     } catch (err) {
       console.error("Failed to save event:", err);
+      showToast("error", "Verbindungsfehler — bitte prüfe deine Internetverbindung");
     }
     setSaving(false);
   };
