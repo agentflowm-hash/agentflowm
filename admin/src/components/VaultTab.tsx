@@ -467,8 +467,16 @@ export default function VaultTab() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="lg:col-span-2">
               <label className="block text-[10px] text-white/40 mb-1">Titel *</label>
+              <div className="flex flex-wrap gap-1 mb-1">
+                {["WordPress Admin", "Hosting Panel", "E-Mail Konto", "Domain Registrar", "Social Media Login", "API Key", "FTP/SFTP Zugang", "Datenbank"].map(t => (
+                  <button key={t} type="button" onClick={() => setForm({ ...form, title: form.title ? form.title + " — " + t : t })}
+                    className="px-1.5 py-0.5 bg-white/[0.04] hover:bg-[#FC682C]/10 border border-white/[0.06] hover:border-[#FC682C]/30 rounded text-[8px] text-white/40 hover:text-[#FC682C] transition-all">
+                    {t}
+                  </button>
+                ))}
+              </div>
               <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="z.B. WordPress Admin" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" />
+                placeholder="z.B. WordPress Admin — musterfirma.de" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none" />
             </div>
             <div>
               <label className="block text-[10px] text-white/40 mb-1">Kategorie</label>
@@ -546,7 +554,7 @@ export default function VaultTab() {
             <div className={form.category === 'snippet' ? "lg:col-span-4" : "lg:col-span-3"}>
               <label className="block text-[10px] text-white/40 mb-1">Notizen</label>
               <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Zusätzliche Infos..." rows={2}
+                placeholder="z.B. 2FA aktiviert, Recovery-Codes in Ordner X, Vertrag läuft bis 12/2026..." rows={2}
                 className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 outline-none resize-none" />
             </div>
             {form.category !== 'snippet' && (

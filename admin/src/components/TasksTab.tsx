@@ -622,13 +622,21 @@ function TaskModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-xs text-white/40 mb-1.5">Titel *</label>
+            <label className="block text-xs text-white/40 mb-1">Titel *</label>
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              {["Follow-Up Kunde", "Design-Review", "Content erstellen", "SEO-Check", "Bug fixen", "Meeting vorbereiten", "Rechnung senden", "Onboarding"].map(t => (
+                <button key={t} type="button" onClick={() => setForm({ ...form, title: t })}
+                  className="px-2 py-0.5 bg-white/[0.04] hover:bg-[#FC682C]/10 border border-white/[0.06] hover:border-[#FC682C]/30 rounded text-[9px] text-white/40 hover:text-[#FC682C] transition-all">
+                  {t}
+                </button>
+              ))}
+            </div>
             <input
               type="text"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none"
-              placeholder="Aufgabe eingeben..."
+              placeholder="z.B. Follow-Up mit Musterfirma GmbH — Angebot nachfassen"
               required
             />
           </div>
@@ -641,7 +649,7 @@ function TaskModal({
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={3}
               className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none resize-none"
-              placeholder="Optional: Beschreibung hinzufügen..."
+              placeholder="z.B. Kunde hat Angebot erhalten, nach 3 Tagen nochmal anrufen. Entscheider ist Herr Müller (CEO)."
             />
           </div>
 
@@ -691,7 +699,7 @@ function TaskModal({
                 value={form.assignee}
                 onChange={(e) => setForm({ ...form, assignee: e.target.value })}
                 className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none"
-                placeholder="Name eingeben..."
+                placeholder="z.B. Mo, Team, Freelancer..."
               />
             </div>
           </div>

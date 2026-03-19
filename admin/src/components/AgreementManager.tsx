@@ -549,19 +549,37 @@ export function AgreementManager() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-zinc-400 mb-1">Zahlungsbedingungen</label>
+                    <div className="flex flex-wrap gap-1 mb-1.5">
+                      {["100% bei Vertragsstart", "50% Start, 50% Abschluss", "70% Start, 30% Abgabe", "30/30/40 in 3 Phasen"].map(t => (
+                        <button key={t} type="button" onClick={() => setNewAgreement({ ...newAgreement, payment_terms: t })}
+                          className={`px-2 py-0.5 rounded text-[9px] transition-all border ${newAgreement.payment_terms === t ? "bg-orange-500/20 border-orange-500/40 text-orange-400" : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:bg-orange-500/10 hover:border-orange-500/30 hover:text-orange-400"}`}>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
                     <input
                       type="text"
                       value={newAgreement.payment_terms}
                       onChange={(e) => setNewAgreement({ ...newAgreement, payment_terms: e.target.value })}
+                      placeholder="Oder individuelle Bedingungen..."
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                     />
                   </div>
                   <div>
                     <label className="block text-sm text-zinc-400 mb-1">Projektdauer</label>
+                    <div className="flex flex-wrap gap-1 mb-1.5">
+                      {["1 Woche", "2 Wochen", "4 Wochen", "6 Wochen", "8 Wochen", "3 Monate"].map(d => (
+                        <button key={d} type="button" onClick={() => setNewAgreement({ ...newAgreement, project_duration: d })}
+                          className={`px-2 py-0.5 rounded text-[9px] transition-all border ${newAgreement.project_duration === d ? "bg-orange-500/20 border-orange-500/40 text-orange-400" : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:bg-orange-500/10 hover:border-orange-500/30 hover:text-orange-400"}`}>
+                          {d}
+                        </button>
+                      ))}
+                    </div>
                     <input
                       type="text"
                       value={newAgreement.project_duration}
                       onChange={(e) => setNewAgreement({ ...newAgreement, project_duration: e.target.value })}
+                      placeholder="Oder individuelle Dauer..."
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                     />
                   </div>
@@ -586,6 +604,7 @@ export function AgreementManager() {
                     value={newAgreement.notes}
                     onChange={(e) => setNewAgreement({ ...newAgreement, notes: e.target.value })}
                     rows={2}
+                    placeholder="z.B. Sonderwünsche, Revision-Runden, besondere Absprachen, Lieferformat..."
                     className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                   />
                 </div>
