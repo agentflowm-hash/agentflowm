@@ -86,7 +86,7 @@ export default function PrivacyTab() {
       const cl = unwrap<any>(cd);
       setClients((cl.clients || []).map((c: any) => ({ id: c.id, name: c.name, email: c.email, company: c.company })));
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch(() => { setLoading(false); showToast("error", "Datenschutz-Daten konnten nicht geladen werden"); });
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);

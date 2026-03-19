@@ -18,6 +18,7 @@ export default function VoiceRecorder({
   const [duration, setDuration] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [sending, setSending] = useState(false);
+  const [micError, setMicError] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,8 +59,9 @@ export default function VoiceRecorder({
           return d + 1;
         });
       }, 1000);
-    } catch (err) {
-      console.error("Mikrofon-Zugriff verweigert:", err);
+    } catch {
+      setMicError(true);
+      setTimeout(() => setMicError(false), 3000);
     }
   };
 
@@ -86,8 +88,8 @@ export default function VoiceRecorder({
       await onSend(audioBlob, duration);
       setAudioBlob(null);
       setDuration(0);
-    } catch (err) {
-      console.error("Senden fehlgeschlagen:", err);
+    } catch {
+      // Senden fehlgeschlagen
     } finally {
       setSending(false);
     }
@@ -141,6 +143,14 @@ export default function VoiceRecorder({
   }
 
   // Default state
+  if (micError) {
+    return (
+      <div className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-xl">
+        <span className="text-xs text-red-400">Mikrofon-Zugriff verweigert</span>
+      </div>
+    );
+  }
+
   return (
     <button
       onClick={startRecording}

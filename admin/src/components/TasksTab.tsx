@@ -14,6 +14,7 @@ import {
   PencilSquareIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
+import { useToast } from "@/components";
 
 // ═══════════════════════════════════════════════════════════════
 //                         TYPES
@@ -61,6 +62,7 @@ const KANBAN_COLUMNS: { key: Task["status"]; label: string }[] = [
 // ═══════════════════════════════════════════════════════════════
 
 export default function TasksTab() {
+  const { showToast } = useToast();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("kanban");
@@ -83,8 +85,8 @@ export default function TasksTab() {
         const d = data.data || data;
         setTasks(d.tasks || []);
       }
-    } catch (err) {
-      console.error("Failed to fetch tasks:", err);
+    } catch {
+      showToast("error", "Aufgaben konnten nicht geladen werden");
     }
     setLoading(false);
   }, []);
@@ -96,6 +98,11 @@ export default function TasksTab() {
   // ─── Actions ───────────────────────────────────────────────
 
   const updateTaskStatus = async (taskId: number, newStatus: Task["status"]) => {
+    const oldTasks = [...tasks];
+    // Optimistic update
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus, updated_at: new Date().toISOString() } : t))
+    );
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
@@ -103,17 +110,18 @@ export default function TasksTab() {
         credentials: "include",
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) {
-        setTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? { ...t, status: newStatus, updated_at: new Date().toISOString() } : t))
-        );
+      if (!res.ok) {
+        setTasks(oldTasks); // Rollback
+        showToast("error", "Status konnte nicht geaendert werden");
       }
-    } catch (err) {
-      console.error("Failed to update task:", err);
+    } catch {
+      setTasks(oldTasks); // Rollback
+      showToast("error", "Verbindungsfehler");
     }
   };
 
   const deleteTask = async (taskId: number) => {
+    if (!confirm("Aufgabe wirklich loeschen?")) return;
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: "DELETE",
@@ -121,9 +129,12 @@ export default function TasksTab() {
       });
       if (res.ok) {
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
+        showToast("success", "Aufgabe geloescht");
+      } else {
+        showToast("error", "Loeschen fehlgeschlagen");
       }
-    } catch (err) {
-      console.error("Failed to delete task:", err);
+    } catch {
+      showToast("error", "Verbindungsfehler");
     }
   };
 

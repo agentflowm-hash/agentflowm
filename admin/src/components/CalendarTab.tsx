@@ -113,8 +113,8 @@ export default function CalendarTab() {
         const d = unwrapApi<{ events: CalendarEvent[] }>(raw);
         setEvents(d.events || []);
       }
-    } catch (err) {
-      console.error("Failed to fetch events:", err);
+    } catch {
+      showToast("error", "Kalender konnte nicht geladen werden");
     }
     setLoading(false);
   }, [currentDate]);
@@ -717,11 +717,9 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
         onSaved();
       } else {
         const errData = await res.json().catch(() => null);
-        console.error("API Error:", res.status, errData);
         showToast("error", errData?.error?.message || `Fehler ${res.status}: Event konnte nicht gespeichert werden`);
       }
-    } catch (err) {
-      console.error("Failed to save event:", err);
+    } catch {
       showToast("error", "Verbindungsfehler");
     }
     setSaving(false);

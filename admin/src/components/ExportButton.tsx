@@ -30,7 +30,7 @@ export default function ExportButton({ type, label = "Export" }: ExportButtonPro
       a.click();
       URL.revokeObjectURL(url);
       showToast("success", `${unwrapped?.count || 0} Einträge exportiert`);
-    } catch { showToast("error", "Export fehlgeschlagen"); }
+    } catch { showToast("error", "Export fehlgeschlagen -- bitte Verbindung pruefen"); }
     setLoading(false);
   };
 

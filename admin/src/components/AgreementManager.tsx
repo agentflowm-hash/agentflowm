@@ -15,6 +15,7 @@ import {
   ClockIcon,
   DocumentCheckIcon,
 } from '@heroicons/react/24/outline';
+import { useToast } from '@/components';
 
 interface Agreement {
   id: number;
@@ -77,6 +78,7 @@ const statusConfig = {
 };
 
 export function AgreementManager() {
+  const { showToast } = useToast();
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +87,7 @@ export function AgreementManager() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [saving, setSaving] = useState(false);
   const [newService, setNewService] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   
   const [newAgreement, setNewAgreement] = useState<NewAgreement>({
     client_name: '',
@@ -114,8 +117,8 @@ export function AgreementManager() {
         setAgreements(json.data.agreements);
         setStats(json.data.stats);
       }
-    } catch (error) {
-      console.error('Failed to fetch agreements:', error);
+    } catch {
+      // Fehler beim Laden -- wird durch leere Liste sichtbar
     } finally {
       setLoading(false);
     }
@@ -139,8 +142,8 @@ export function AgreementManager() {
         resetForm();
         fetchAgreements(); // Refresh stats
       }
-    } catch (error) {
-      console.error('Failed to create agreement:', error);
+    } catch {
+      showToast('error', 'Vereinbarung konnte nicht erstellt werden');
     } finally {
       setSaving(false);
     }
@@ -159,23 +162,28 @@ export function AgreementManager() {
         setAgreements(agreements.map(a => a.id === id ? json.data.agreement : a));
         fetchAgreements(); // Refresh stats
       }
-    } catch (error) {
-      console.error('Failed to update status:', error);
+    } catch {
+      showToast('error', 'Status konnte nicht aktualisiert werden');
     }
   };
 
   const deleteAgreement = async (id: number) => {
-    if (!confirm('Vereinbarung wirklich löschen?')) return;
-    
+    setDeleteTarget(id);
+  };
+
+  const confirmDeleteAgreement = async () => {
+    if (!deleteTarget) return;
+    setDeleteTarget(null);
     try {
-      const res = await fetch(`/api/agreements/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`/api/agreements/${deleteTarget}`, { method: 'DELETE', credentials: 'include' });
       const json = await res.json();
       if (json.success) {
-        setAgreements(agreements.filter(a => a.id !== id));
-        fetchAgreements(); // Refresh stats
+        setAgreements(agreements.filter(a => a.id !== deleteTarget));
+        fetchAgreements();
+        showToast('success', 'Vereinbarung geloescht');
       }
-    } catch (error) {
-      console.error('Failed to delete agreement:', error);
+    } catch {
+      showToast('error', 'Loeschen fehlgeschlagen');
     }
   };
 
@@ -631,6 +639,23 @@ export function AgreementManager() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Confirmation */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <TrashIcon className="w-6 h-6 text-red-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Vereinbarung loeschen?</h3>
+            <p className="text-sm text-white/50 mb-6">Diese Aktion kann nicht rueckgaengig gemacht werden.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/70 text-sm font-medium transition-colors">Abbrechen</button>
+              <button onClick={confirmDeleteAgreement} className="flex-1 py-3 bg-red-500 hover:bg-red-600 rounded-xl text-white text-sm font-medium transition-colors">Loeschen</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

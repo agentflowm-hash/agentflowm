@@ -17,6 +17,7 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
+import { useToast } from "@/components";
 
 // Helper to handle both wrapped {success, data} and direct API responses
 function unwrapApiResponse<T>(response: unknown): T {
@@ -73,6 +74,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
 };
 
 export default function InvoiceManager({ filterType }: { filterType?: "invoice" | "offer" } = {}) {
+  const { showToast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [stats, setStats] = useState<InvoiceStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +83,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: number | null; bulk: boolean }>({ id: null, bulk: false });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -110,14 +113,17 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
       const unwrapped = unwrapApiResponse<{invoices: Invoice[], stats: typeof stats}>(data);
       setInvoices(unwrapped.invoices || []);
       setStats(unwrapped.stats);
-    } catch (error) {
-      console.error("Error fetching invoices:", error);
+    } catch {
+      showToast("error", "Rechnungen konnten nicht geladen werden");
     } finally {
       setLoading(false);
     }
   };
 
   const createInvoice = async () => {
+    if (!formData.client_name.trim()) { showToast("error", "Kundenname ist Pflichtfeld"); return; }
+    if (!formData.items.some(i => i.description.trim())) { showToast("error", "Mindestens eine Position erforderlich"); return; }
+
     try {
       const res = await fetch("/api/invoices", {
         method: "POST",
@@ -125,20 +131,24 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
         credentials: "include",
         body: JSON.stringify(formData),
       });
-      
+
       if (res.ok) {
+        showToast("success", "Rechnung erstellt");
         setShowModal(false);
         resetForm();
         fetchInvoices();
+      } else {
+        const err = await res.json();
+        showToast("error", err?.error || "Fehler beim Erstellen");
       }
-    } catch (error) {
-      console.error("Error creating invoice:", error);
+    } catch {
+      showToast("error", "Verbindungsfehler beim Erstellen");
     }
   };
 
   const updateInvoice = async () => {
     if (!editingInvoice) return;
-    
+
     try {
       const res = await fetch(`/api/invoices/${editingInvoice.id}`, {
         method: "PUT",
@@ -146,15 +156,18 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
         credentials: "include",
         body: JSON.stringify(formData),
       });
-      
+
       if (res.ok) {
+        showToast("success", "Rechnung aktualisiert");
         setShowModal(false);
         setEditingInvoice(null);
         resetForm();
         fetchInvoices();
+      } else {
+        showToast("error", "Aktualisierung fehlgeschlagen");
       }
-    } catch (error) {
-      console.error("Error updating invoice:", error);
+    } catch {
+      showToast("error", "Verbindungsfehler");
     }
   };
 
@@ -166,12 +179,16 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
         credentials: "include",
         body: JSON.stringify({}),
       });
-      
+
       if (res.ok) {
+        showToast("success", "Rechnung per E-Mail versendet");
         fetchInvoices();
+      } else {
+        const err = await res.json();
+        showToast("error", err?.error || "Versand fehlgeschlagen");
       }
-    } catch (error) {
-      console.error("Error sending invoice:", error);
+    } catch {
+      showToast("error", "E-Mail-Versand fehlgeschlagen");
     }
   };
 
@@ -183,25 +200,44 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
         credentials: "include",
         body: JSON.stringify({ status: "paid" }),
       });
-      
+
       if (res.ok) {
+        showToast("success", "Als bezahlt markiert");
         fetchInvoices();
       }
-    } catch (error) {
-      console.error("Error updating invoice:", error);
+    } catch {
+      showToast("error", "Status konnte nicht geaendert werden");
     }
   };
 
   const deleteInvoice = async (id: number) => {
-    if (!confirm("Rechnung wirklich löschen?")) return;
-    
-    try {
-      const res = await fetch(`/api/invoices/${id}`, { method: "DELETE", credentials: "include" });
-      if (res.ok) {
-        fetchInvoices();
+    setDeleteConfirm({ id, bulk: false });
+  };
+
+  const confirmDelete = async () => {
+    const { id, bulk } = deleteConfirm;
+    setDeleteConfirm({ id: null, bulk: false });
+
+    if (bulk) {
+      const ids = Array.from(selectedIds);
+      for (const delId of ids) {
+        await fetch(`/api/invoices/${delId}`, { credentials: "include", method: "DELETE" });
       }
-    } catch (error) {
-      console.error("Error deleting invoice:", error);
+      showToast("success", `${ids.length} Dokument(e) geloescht`);
+      setSelectedIds(new Set());
+      fetchInvoices();
+    } else if (id) {
+      try {
+        const res = await fetch(`/api/invoices/${id}`, { method: "DELETE", credentials: "include" });
+        if (res.ok) {
+          showToast("success", "Rechnung geloescht");
+          fetchInvoices();
+        } else {
+          showToast("error", "Loeschen fehlgeschlagen");
+        }
+      } catch {
+        showToast("error", "Verbindungsfehler");
+      }
     }
   };
 
@@ -376,15 +412,7 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
             <div className="flex items-center justify-between p-3 mb-3 bg-[#FC682C]/10 border border-[#FC682C]/20 rounded-xl">
               <span className="text-sm text-[#FC682C] font-medium">{selectedIds.size} ausgewählt</span>
               <div className="flex items-center gap-2">
-                <button onClick={async () => {
-                  if (!confirm(`${selectedIds.size} Dokument(e) endgültig löschen?`)) return;
-                  const ids = Array.from(selectedIds);
-                  for (let i = 0; i < ids.length; i++) {
-                    await fetch(`/api/invoices/${ids[i]}`, { credentials: "include", method: "DELETE" });
-                  }
-                  setSelectedIds(new Set());
-                  fetchInvoices();
-                }} className="px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 rounded-lg text-xs font-medium hover:bg-red-500/25">
+                <button onClick={() => setDeleteConfirm({ id: null, bulk: true })} className="px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 rounded-lg text-xs font-medium hover:bg-red-500/25">
                   <TrashIcon className="w-3.5 h-3.5 inline mr-1" />Löschen
                 </button>
                 <button onClick={() => setSelectedIds(new Set())} className="px-3 py-1.5 bg-white/[0.04] text-white/50 rounded-lg text-xs">
@@ -722,6 +750,37 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
               >
                 {editingInvoice ? "Speichern" : "Erstellen"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {(deleteConfirm.id || deleteConfirm.bulk) && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl w-full max-w-sm p-6">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrashIcon className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                {deleteConfirm.bulk ? `${selectedIds.size} Dokument(e) loeschen?` : "Rechnung loeschen?"}
+              </h3>
+              <p className="text-sm text-white/50 mb-6">Diese Aktion kann nicht rueckgaengig gemacht werden.</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteConfirm({ id: null, bulk: false })}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/70 text-sm font-medium transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 py-3 bg-red-500 hover:bg-red-600 rounded-xl text-white text-sm font-medium transition-colors"
+                >
+                  Loeschen
+                </button>
+              </div>
             </div>
           </div>
         </div>
