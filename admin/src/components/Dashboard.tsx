@@ -2306,9 +2306,9 @@ function DokumenteTab() {
       </div>
 
       {/* ── Tab Content ─────────────────────────────────── */}
-      {docView === "rechnungen" && <InvoiceManager />}
+      {docView === "rechnungen" && <InvoiceManager filterType="invoice" />}
 
-      {docView === "angebote" && <InvoiceManager />}
+      {docView === "angebote" && <InvoiceManager filterType="offer" />}
 
       {docView === "vereinbarungen" && <AgreementManager />}
 

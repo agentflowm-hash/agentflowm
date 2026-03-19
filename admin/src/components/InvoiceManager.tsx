@@ -72,7 +72,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
   cancelled: { label: "Storniert", color: "bg-gray-400", icon: XMarkIcon },
 };
 
-export default function InvoiceManager() {
+export default function InvoiceManager({ filterType }: { filterType?: "invoice" | "offer" } = {}) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [stats, setStats] = useState<InvoiceStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,7 +103,8 @@ export default function InvoiceManager() {
     try {
       const params = new URLSearchParams();
       if (filter !== "all") params.set("status", filter);
-      
+      if (filterType) params.set("type", filterType);
+
       const res = await fetch(`/api/invoices?${params}`);
       const data = await res.json();
       const unwrapped = unwrapApiResponse<{invoices: Invoice[], stats: typeof stats}>(data);

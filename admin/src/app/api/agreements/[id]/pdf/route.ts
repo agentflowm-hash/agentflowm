@@ -238,24 +238,35 @@ function generateAgreementHTML(agreement: Record<string, unknown>): string {
       text-align: center;
     }
     
-    .print-btn {
+    .toolbar {
       position: fixed;
       top: 20px;
       right: 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+    .toolbar button {
       background: #f97316;
       color: white;
       border: none;
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+      font-family: inherit;
     }
-    .print-btn:hover { background: #ea580c; }
+    .toolbar button:hover { background: #ea580c; }
+    .toolbar button.secondary { background: #0f172a; }
+    .toolbar button.secondary:hover { background: #1e293b; }
   </style>
 </head>
 <body>
-  <button class="print-btn no-print" onclick="window.print()">PDF Drucken</button>
+  <div class="toolbar no-print">
+    <button onclick="window.print()">Als PDF speichern</button>
+    <button class="secondary" onclick="window.close()">Schließen</button>
+  </div>
   
   <div class="page">
     <div class="header">
