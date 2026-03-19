@@ -135,9 +135,14 @@ export default function CalendarTab() {
 
   // ─── Helpers ───────────────────────────────────────────────
 
+  const toLocalDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  const eventLocalDate = (isoStr: string) => toLocalDateStr(new Date(isoStr));
+
   const getEventsForDay = (date: Date) => {
-    const ds = date.toISOString().split("T")[0];
-    return events.filter(e => e.start_date.split("T")[0] === ds);
+    const ds = toLocalDateStr(date);
+    return events.filter(e => eventLocalDate(e.start_date) === ds);
   };
 
   const isToday = (date: Date) => date.toDateString() === new Date().toDateString();
@@ -197,12 +202,13 @@ export default function CalendarTab() {
 
   // Upcoming events
   const now = new Date();
-  const todayEvents = events.filter(e => e.start_date.split("T")[0] === now.toISOString().split("T")[0]);
+  const todayStr = toLocalDateStr(now);
+  const todayEvents = events.filter(e => eventLocalDate(e.start_date) === todayStr);
   const upcomingEvents = events
     .filter(e => {
       const ed = new Date(e.start_date);
       const weekLater = new Date(now.getTime() + 7 * 86400000);
-      return ed >= now && ed <= weekLater;
+      return ed >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) && ed <= weekLater;
     })
     .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
 
@@ -359,11 +365,11 @@ export default function CalendarTab() {
               {/* ── LIST VIEW ─────────────────────────── */}
               {view === "list" && (() => {
                 const sorted = events
-                  .filter(e => new Date(e.start_date) >= new Date())
+                  .filter(e => new Date(e.start_date) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
                   .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
                 const grouped: Record<string, CalendarEvent[]> = {};
                 sorted.forEach(e => {
-                  const dk = e.start_date.split("T")[0];
+                  const dk = eventLocalDate(e.start_date);
                   if (!grouped[dk]) grouped[dk] = [];
                   grouped[dk].push(e);
                 });
@@ -638,19 +644,45 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
   event: CalendarEvent | null; clients: Client[]; defaultDate?: string; onClose: () => void; onSaved: () => void;
 }) {
   const { showToast } = useToast();
+
+  // Local datetime string helper (no UTC shift)
+  const toLocalDT = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const getDefaultStart = () => {
+    if (event) return toLocalDT(new Date(event.start_date));
+    if (defaultDate) return defaultDate;
+    return toLocalDT(new Date());
+  };
+
   const [form, setForm] = useState({
     title: event?.title || "",
     description: event?.description || "",
-    start_date: event ? event.start_date.slice(0, 16) : (defaultDate || new Date().toISOString().slice(0, 16)),
-    end_date: event?.end_date ? event.end_date.slice(0, 16) : "",
+    start_date: getDefaultStart(),
     type: event?.type || "meeting",
     all_day: event?.all_day || false,
     location: event?.location || "",
     color: event?.color || "#FC682C",
     client_id: event?.client_id ? String(event.client_id) : "",
     client_name: event?.client_name || "",
+    duration: "60",
+    travel_time: "0",
+    use_custom_end: false,
+    custom_end: event?.end_date ? toLocalDT(new Date(event.end_date)) : "",
   });
   const [saving, setSaving] = useState(false);
+
+  // Calculate end time from start + duration + travel
+  const calcEndTime = (): string | null => {
+    if (form.all_day) return null;
+    if (form.use_custom_end && form.custom_end) return new Date(form.custom_end).toISOString();
+    const totalMin = parseInt(form.duration) + parseInt(form.travel_time);
+    if (totalMin <= 0) return null;
+    const start = new Date(form.start_date);
+    return new Date(start.getTime() + totalMin * 60000).toISOString();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -662,7 +694,7 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
       title: form.title,
       description: form.description || null,
       start_time: new Date(form.start_date).toISOString(),
-      end_time: form.end_date ? new Date(form.end_date).toISOString() : null,
+      end_time: calcEndTime(),
       event_type: form.type,
       all_day: form.all_day,
       location: form.location || null,
@@ -690,12 +722,40 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
       }
     } catch (err) {
       console.error("Failed to save event:", err);
-      showToast("error", "Verbindungsfehler — bitte prüfe deine Internetverbindung");
+      showToast("error", "Verbindungsfehler");
     }
     setSaving(false);
   };
 
   const TITLE_CHIPS = ["Erstgespräch", "Design-Review", "Go-Live", "Follow-Up", "Monatsmeeting", "Kundentermin"];
+  const DURATION_CHIPS = [
+    { label: "30 Min", value: "30" },
+    { label: "1 Std", value: "60" },
+    { label: "1,5 Std", value: "90" },
+    { label: "2 Std", value: "120" },
+    { label: "3 Std", value: "180" },
+    { label: "Halber Tag", value: "240" },
+  ];
+  const TRAVEL_CHIPS = [
+    { label: "Keine", value: "0" },
+    { label: "+15 Min", value: "15" },
+    { label: "+30 Min", value: "30" },
+    { label: "+45 Min", value: "45" },
+    { label: "+1 Std", value: "60" },
+  ];
+
+  // Preview end time
+  const endPreview = (() => {
+    if (form.all_day) return "Ganztägig";
+    if (form.use_custom_end && form.custom_end) {
+      return new Date(form.custom_end).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    }
+    const totalMin = parseInt(form.duration) + parseInt(form.travel_time);
+    const start = new Date(form.start_date);
+    const end = new Date(start.getTime() + totalMin * 60000);
+    const travelNote = parseInt(form.travel_time) > 0 ? ` (inkl. ${form.travel_time} Min Fahrzeit)` : "";
+    return `bis ${end.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}${travelNote}`;
+  })();
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -722,18 +782,11 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
               className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/90 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" />
           </div>
 
-          {/* Date/Time */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-white/40 mb-1">Start *</label>
-              <input type="datetime-local" required value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none" />
-            </div>
-            <div>
-              <label className="block text-xs text-white/40 mb-1">Ende</label>
-              <input type="datetime-local" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none" />
-            </div>
+          {/* Start Date/Time */}
+          <div>
+            <label className="block text-xs text-white/40 mb-1">Datum & Uhrzeit *</label>
+            <input type="datetime-local" required value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })}
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none" />
           </div>
 
           {/* All Day Toggle */}
@@ -742,6 +795,62 @@ function CreateEventModal({ event, clients, defaultDate, onClose, onSaved }: {
               className="w-4 h-4 rounded border-white/20 bg-white/[0.04] text-[#FC682C] focus:ring-[#FC682C]/50" />
             <span className="text-xs text-white/50">Ganztägig</span>
           </label>
+
+          {/* Duration + Travel (only when not all-day) */}
+          {!form.all_day && (
+            <>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs text-white/40">Dauer</label>
+                  <button type="button" onClick={() => setForm({ ...form, use_custom_end: !form.use_custom_end })}
+                    className="text-[9px] text-[#FC682C] hover:underline">
+                    {form.use_custom_end ? "Dauer-Chips nutzen" : "Manuell Ende eingeben"}
+                  </button>
+                </div>
+                {form.use_custom_end ? (
+                  <input type="datetime-local" value={form.custom_end} onChange={e => setForm({ ...form, custom_end: e.target.value })}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none" />
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {DURATION_CHIPS.map(d => (
+                      <button key={d.value} type="button" onClick={() => setForm({ ...form, duration: d.value })}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                          form.duration === d.value
+                            ? "bg-[#FC682C]/20 border-[#FC682C]/40 text-[#FC682C]"
+                            : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:bg-[#FC682C]/10 hover:border-[#FC682C]/30 hover:text-[#FC682C]"
+                        }`}>
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {!form.use_custom_end && (
+                <div>
+                  <label className="block text-xs text-white/40 mb-1">Fahrzeit (wird zur Dauer addiert)</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {TRAVEL_CHIPS.map(t => (
+                      <button key={t.value} type="button" onClick={() => setForm({ ...form, travel_time: t.value })}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                          form.travel_time === t.value
+                            ? "bg-blue-500/20 border-blue-500/40 text-blue-400"
+                            : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:bg-blue-500/10 hover:border-blue-500/30 hover:text-blue-400"
+                        }`}>
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* End Time Preview */}
+              <div className="px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-xs text-white/50">
+                <ClockIcon className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+                {endPreview}
+              </div>
+            </>
+          )}
 
           {/* Type + Client */}
           <div className="grid grid-cols-2 gap-3">
