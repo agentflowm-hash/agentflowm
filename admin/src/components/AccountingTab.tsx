@@ -41,8 +41,6 @@ interface Transaction {
   created_at: string;
 }
 
-const STORAGE_KEY = "agentflow_accounting_transactions";
-
 const CATEGORIES = {
   income: [
     "Website-Projekte",
@@ -68,48 +66,10 @@ const CATEGORIES = {
 
 const TAX_RATES = [0, 7, 19];
 
-const INITIAL_TRANSACTIONS: Transaction[] = [
-  {
-    id: 1,
-    date: "2026-02-28",
-    description: "Website Launch - SonnenscheinPraxis",
-    category: "Website-Projekte",
-    type: "income",
-    amount: 5390,
-    tax_rate: 19,
-    tax_amount: 860.18,
-    net_amount: 4529.82,
-    account: "Geschäftskonto",
-    reference: "INV-2026-001",
-    created_at: "2026-02-28T10:00:00Z",
-  },
-  {
-    id: 2,
-    date: "2026-02-25",
-    description: "Vercel Pro Subscription",
-    category: "Hosting & Server",
-    type: "expense",
-    amount: 20,
-    tax_rate: 0,
-    tax_amount: 0,
-    net_amount: 20,
-    account: "Geschäftskonto",
-    created_at: "2026-02-25T10:00:00Z",
-  },
-  {
-    id: 3,
-    date: "2026-02-20",
-    description: "Figma Subscription",
-    category: "Software & Tools",
-    type: "expense",
-    amount: 15,
-    tax_rate: 0,
-    tax_amount: 0,
-    net_amount: 15,
-    account: "Geschäftskonto",
-    created_at: "2026-02-20T10:00:00Z",
-  },
-];
+function unwrapApi<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as any).data;
+  return res as T;
+}
 
 export default function AccountingTab() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -140,28 +100,20 @@ export default function AccountingTab() {
     notes: "",
   });
 
-  // Load transactions from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setTransactions(JSON.parse(stored));
-      } catch {
-        setTransactions(INITIAL_TRANSACTIONS);
-      }
-    } else {
-      setTransactions(INITIAL_TRANSACTIONS);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_TRANSACTIONS));
-    }
-    setLoading(false);
+  // Load transactions from Supabase API
+  const fetchTransactions = useCallback(() => {
+    setLoading(true);
+    fetch("/api/accounting", { credentials: "include" })
+      .then(r => r.json())
+      .then(data => {
+        const d = unwrapApi<{ transactions: Transaction[] }>(data);
+        setTransactions(d.transactions || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  // Save transactions to localStorage whenever they change
-  useEffect(() => {
-    if (!loading && transactions.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-    }
-  }, [transactions, loading]);
+  useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
 
   // Calculate stats from transactions
   const stats = useMemo(() => {
@@ -252,44 +204,24 @@ export default function AccountingTab() {
     const taxAmount = (amount * formData.tax_rate) / (100 + formData.tax_rate);
     const netAmount = amount - taxAmount;
 
+    const payload = {
+      date: formData.date, description: formData.description, category: formData.category,
+      type: formData.type, amount, tax_rate: formData.tax_rate,
+      account: formData.account, reference: formData.reference, notes: formData.notes,
+    };
+
     if (editMode && selectedTransaction) {
-      // Update existing
-      setTransactions(transactions.map(t => 
-        t.id === selectedTransaction.id 
-          ? {
-              ...t,
-              date: formData.date,
-              description: formData.description,
-              category: formData.category,
-              type: formData.type,
-              amount,
-              tax_rate: formData.tax_rate,
-              tax_amount: Math.round(taxAmount * 100) / 100,
-              net_amount: Math.round(netAmount * 100) / 100,
-              account: formData.account,
-              reference: formData.reference,
-              notes: formData.notes,
-            }
-          : t
-      ));
+      fetch(`/api/accounting/${selectedTransaction.id}`, {
+        credentials: "include", method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).then(() => fetchTransactions());
     } else {
-      // Create new
-      const newTransaction: Transaction = {
-        id: Date.now(),
-        date: formData.date,
-        description: formData.description,
-        category: formData.category,
-        type: formData.type,
-        amount,
-        tax_rate: formData.tax_rate,
-        tax_amount: Math.round(taxAmount * 100) / 100,
-        net_amount: Math.round(netAmount * 100) / 100,
-        account: formData.account,
-        reference: formData.reference,
-        notes: formData.notes,
-        created_at: new Date().toISOString(),
-      };
-      setTransactions([newTransaction, ...transactions]);
+      fetch("/api/accounting", {
+        credentials: "include", method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).then(() => fetchTransactions());
     }
 
     setShowModal(false);
@@ -341,7 +273,8 @@ export default function AccountingTab() {
 
   const deleteTransaction = () => {
     if (selectedTransaction) {
-      setTransactions(transactions.filter(t => t.id !== selectedTransaction.id));
+      fetch(`/api/accounting/${selectedTransaction.id}`, { credentials: "include", method: "DELETE" })
+        .then(() => fetchTransactions());
       setShowDeleteConfirm(false);
       setShowDetailModal(false);
       setSelectedTransaction(null);
