@@ -72,6 +72,7 @@ export default function TasksTab() {
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [filterAssignee, setFilterAssignee] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<{id: number; name: string; role: string}[]>([]);
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
 
   // ─── Fetch ─────────────────────────────────────────────────
@@ -93,6 +94,10 @@ export default function TasksTab() {
 
   useEffect(() => {
     fetchTasks();
+    fetch("/api/team", { credentials: "include" }).then(r => r.json()).then(d => {
+      const td = d.data || d;
+      setTeamMembers(td.members || []);
+    }).catch(() => {});
   }, [fetchTasks]);
 
   // ─── Actions ───────────────────────────────────────────────
@@ -402,6 +407,7 @@ export default function TasksTab() {
           task={editingTask}
           onClose={() => { setShowCreateModal(false); setEditingTask(null); }}
           onSaved={() => { setShowCreateModal(false); setEditingTask(null); fetchTasks(); }}
+          teamMembers={teamMembers}
         />
       )}
     </div>
@@ -572,10 +578,12 @@ function TaskModal({
   task,
   onClose,
   onSaved,
+  teamMembers = [],
 }: {
   task: Task | null;
   onClose: () => void;
   onSaved: () => void;
+  teamMembers?: {id: number; name: string; role: string}[];
 }) {
   const { showToast } = useToast();
   const [form, setForm] = useState({
@@ -707,13 +715,18 @@ function TaskModal({
             </div>
             <div>
               <label className="block text-xs text-white/40 mb-1.5">Zuweisen an</label>
-              <input
-                type="text"
+              <select
                 value={form.assignee}
-                onChange={(e) => setForm({ ...form, assignee: e.target.value })}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none"
-                placeholder="z.B. Mo, Team, Freelancer..."
-              />
+                onChange={(e) => setForm({ ...form, assignee: e.target.value as any })}
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 focus:border-[#FC682C]/50 focus:outline-none cursor-pointer"
+              >
+                <option value="" className="bg-[#1a1a1f]">Nicht zugewiesen</option>
+                {teamMembers.map(m => (
+                  <option key={m.id} value={m.name} className="bg-[#1a1a1f]">
+                    {m.name} ({m.role === "admin" ? "Admin" : m.role === "manager" ? "Manager" : "Mitarbeiter"})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

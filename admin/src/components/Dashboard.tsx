@@ -240,6 +240,8 @@ interface Lead {
   estimatedValue: number | null;
   nextFollowUp: string | null;
   tags: string | null;
+  assigned_to: number | null;
+  assigned_name: string | null;
   createdAt: string;
   updatedAt: string;
 }

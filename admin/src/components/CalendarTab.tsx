@@ -186,6 +186,18 @@ export default function CalendarTab() {
 
   const getEventTypeColor = (type: string) => EVENT_TYPES[type]?.color || "bg-[#FC682C]";
 
+  // Get actual display color for an event (custom color takes priority)
+  const getEventDotStyle = (ev: CalendarEvent) => {
+    if (ev.color && ev.color !== "#FC682C") {
+      return { backgroundColor: ev.color };
+    }
+    return undefined;
+  };
+  const getEventDotClass = (ev: CalendarEvent) => {
+    if (ev.color && ev.color !== "#FC682C") return "";
+    return getEventTypeColor(ev.type);
+  };
+
   const fmtTime = (d: string) => new Date(d).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
   const fmtDate = (d: string) => new Date(d).toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
   const fmtDateLong = (d: string) => new Date(d).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -382,9 +394,9 @@ export default function CalendarTab() {
                                 {dayEv.slice(0, 3).map(ev => (
                                   <div key={ev.id} onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
                                     className="flex items-center gap-1 cursor-pointer hover:opacity-80">
-                                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getEventTypeColor(ev.type)}`} />
+                                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getEventDotClass(ev)}`} style={getEventDotStyle(ev)} />
                                     <span className="text-[9px] text-white/60 truncate">
-                                      {ev.assigned_name ? `${ev.assigned_name.split(" ")[0]}: ` : ""}{ev.title}
+                                      {ev.assigned_name ? `${ev.assigned_name.split(".")[1]?.trim().charAt(0) || ev.assigned_name.charAt(0)}: ` : ""}{ev.title}
                                     </span>
                                   </div>
                                 ))}
@@ -419,7 +431,7 @@ export default function CalendarTab() {
                             <div key={ev.id} onClick={() => setSelectedEvent(ev)}
                               className="p-2 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] cursor-pointer transition-colors">
                               <div className="flex items-center gap-1.5 mb-1">
-                                <div className={`w-2 h-2 rounded-full ${getEventTypeColor(ev.type)}`} />
+                                <div className={`w-2 h-2 rounded-full ${getEventDotClass(ev)}`} style={getEventDotStyle(ev)} />
                                 <span className="text-[10px] text-white/80 font-medium truncate">{ev.title}</span>
                               </div>
                               <div className="text-[9px] text-white/30">{fmtTime(ev.start_date)}</div>
@@ -456,7 +468,7 @@ export default function CalendarTab() {
                           {evts.map(ev => (
                             <div key={ev.id} onClick={() => setSelectedEvent(ev)}
                               className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] cursor-pointer transition-colors">
-                              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getEventTypeColor(ev.type)}`} />
+                              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getEventDotClass(ev)}`} style={getEventDotStyle(ev)} />
                               <div className="flex-1 min-w-0">
                                 <div className="text-sm font-medium text-white/90 truncate">{ev.title}</div>
                                 <div className="text-xs text-white/40">
@@ -495,7 +507,7 @@ export default function CalendarTab() {
                 {todayEvents.map(ev => (
                   <div key={ev.id} onClick={() => setSelectedEvent(ev)}
                     className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] cursor-pointer transition-colors">
-                    <div className={`w-2 h-2 rounded-full ${getEventTypeColor(ev.type)}`} />
+                    <div className={`w-2 h-2 rounded-full ${getEventDotClass(ev)}`} style={getEventDotStyle(ev)} />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-medium text-white/80 truncate">{ev.title}</div>
                       <div className="text-[10px] text-white/30">{fmtTime(ev.start_date)}</div>
@@ -520,7 +532,7 @@ export default function CalendarTab() {
                 {upcomingEvents.slice(0, 8).map(ev => (
                   <div key={ev.id} onClick={() => setSelectedEvent(ev)}
                     className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] cursor-pointer transition-colors">
-                    <div className={`w-2 h-2 rounded-full ${getEventTypeColor(ev.type)}`} />
+                    <div className={`w-2 h-2 rounded-full ${getEventDotClass(ev)}`} style={getEventDotStyle(ev)} />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-medium text-white/80 truncate">{ev.title}</div>
                       <div className="text-[10px] text-white/30">{fmtDate(ev.start_date)} {fmtTime(ev.start_date)}</div>
