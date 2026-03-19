@@ -84,6 +84,7 @@ import AccountingTab from "@/components/AccountingTab";
 import VaultTab from "@/components/VaultTab";
 import TasksTab from "@/components/TasksTab";
 import PrivacyTab from "@/components/PrivacyTab";
+import ActivityTimeline from "@/components/ActivityTimeline";
 
 // ═══════════════════════════════════════════════════════════════
 //                    API RESPONSE HELPER
@@ -5763,53 +5764,66 @@ function SubscriberStatusBadge({ status }: { status: string }) {
 }
 
 function AnalyticsTab({ stats }: { stats: Stats | null }) {
-  if (!stats) return <LoadingState />;
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
-  // Echte Daten aus stats.trends (von /api/stats)
-  const revenueTrend = stats.trends?.revenue?.length ? stats.trends.revenue : [];
-  const leadsTrend = stats.trends?.leads?.length ? stats.trends.leads : [];
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/analytics/dashboard');
+        const json = await res.json();
+        if (json.success) setAnalytics(json.data);
+      } catch (e) {
+        console.error('[AnalyticsTab] fetch error:', e);
+      } finally {
+        setAnalyticsLoading(false);
+      }
+    })();
+  }, []);
 
-  const currentRevenue = revenueTrend.length > 0 ? revenueTrend : [stats.revenue.thisMonth || 0];
-  const currentLeads = leadsTrend.length > 0 ? leadsTrend : [stats.leads.total || 0];
-  const currentLabels = currentRevenue.map((_, i) => `${i + 1}`);
-  const maxRevenue = Math.max(...currentRevenue, 1);
-  const maxLeads = Math.max(...currentLeads, 1);
+  if (analyticsLoading || !analytics) return <LoadingState />;
 
-  const totalRevenue = stats.revenue.total || 0;
-  const totalLeads = stats.leads.total || 0;
-  const avgRevenue = currentRevenue.length > 0 ? Math.round(currentRevenue.reduce((a, b) => a + b, 0) / currentRevenue.length) : 0;
-  const conversionRate =
-    stats.leads.total > 0
-      ? Math.round((stats.leads.qualified / stats.leads.total) * 100)
-      : 0;
-  const hasChartData = revenueTrend.length > 1 || leadsTrend.length > 1;
+  const { leadsMonthly, revenueMonthly, topSources, funnel, activeClients } = analytics;
+
+  const maxLeadsMonth = Math.max(...leadsMonthly.map((m: any) => m.count), 1);
+  const maxRevenueMonth = Math.max(...revenueMonthly.map((m: any) => m.total), 1);
+  const maxSourceCount = topSources.length > 0 ? topSources[0].count : 1;
+
+  const totalLeads = leadsMonthly.reduce((s: number, m: any) => s + m.count, 0);
+  const totalRevenue = revenueMonthly.reduce((s: number, m: any) => s + m.total, 0);
+  const funnelTotal = funnel.neu + funnel.kontaktiert + funnel.qualifiziert + funnel.angebot + funnel.gewonnen + funnel.verloren;
+  const conversionRate = funnelTotal > 0 ? Math.round((funnel.gewonnen / funnelTotal) * 100) : 0;
+
+  const monthLabel = (m: string) => {
+    const names = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    const idx = parseInt(m.split('-')[1], 10) - 1;
+    return names[idx] || m;
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Übersicht & Trends</h2>
+        <h2 className="text-lg font-semibold text-white">Analytics Dashboard</h2>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-gradient-to-br from-[#FC682C]/20 to-[#FC682C]/5 border border-[#FC682C]/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">Gesamt-Umsatz</span>
+            <span className="text-sm text-white/50">Umsatz (6 Mon.)</span>
             <CurrencyEuroIcon className="w-5 h-5 text-[#FC682C]" />
           </div>
           <p className="text-2xl font-bold text-white">
-            €{(totalRevenue / 1000).toFixed(1)}k
+            €{totalRevenue >= 1000 ? `${(totalRevenue / 1000).toFixed(1)}k` : totalRevenue.toLocaleString()}
           </p>
-          <p className="text-xs text-white/30 mt-1">Gesamt</p>
         </div>
         <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">Neue Leads</span>
+            <span className="text-sm text-white/50">Leads (6 Mon.)</span>
             <UsersIcon className="w-5 h-5 text-blue-400" />
           </div>
           <p className="text-2xl font-bold text-white">{totalLeads}</p>
-          <p className="text-xs text-white/30 mt-1">{stats.leads.new} neue</p>
         </div>
         <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20">
           <div className="flex items-center justify-between mb-2">
@@ -5817,234 +5831,158 @@ function AnalyticsTab({ stats }: { stats: Stats | null }) {
             <ArrowTrendingUpIcon className="w-5 h-5 text-purple-400" />
           </div>
           <p className="text-2xl font-bold text-white">{conversionRate}%</p>
-          <p className="text-xs text-white/30 mt-1">{stats.leads.qualified} qualifiziert</p>
         </div>
         <div className="p-5 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">Ø Umsatz</span>
+            <span className="text-sm text-white/50">Aktive Kunden</span>
             <ChartBarIcon className="w-5 h-5 text-green-400" />
           </div>
-          <p className="text-2xl font-bold text-white">
-            €{avgRevenue.toLocaleString()}
-          </p>
-          <p className="text-xs text-white/30 mt-1">Durchschnitt</p>
+          <p className="text-2xl font-bold text-white">{activeClients}</p>
         </div>
       </div>
 
+      {/* Charts Row */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
-        <GlassCard title="Umsatz-Entwicklung" icon={CurrencyEuroIcon}>
-          <div className="h-64 relative">
-            {/* Y-Axis Labels */}
-            <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-white/30">
-              <span>€{(maxRevenue / 1000).toFixed(0)}k</span>
-              <span>€{(maxRevenue / 2000).toFixed(0)}k</span>
-              <span>€0</span>
-            </div>
-            {/* Chart Area */}
-            <div className="ml-14 h-full pb-8">
-              <svg
-                className="w-full h-full"
-                viewBox={`0 0 ${currentRevenue.length * 50} 200`}
-                preserveAspectRatio="none"
-              >
-                {/* Grid Lines */}
-                <line
-                  x1="0"
-                  y1="100"
-                  x2="100%"
-                  y2="100"
-                  stroke="rgba(255,255,255,0.05)"
-                  strokeDasharray="4"
+        {/* Leads pro Monat — Bar Chart */}
+        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <h3 className="text-sm font-semibold text-white mb-4">Leads pro Monat</h3>
+          <div className="flex items-end gap-2 h-48">
+            {leadsMonthly.map((m: any) => (
+              <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                <span className="text-[11px] text-white/40">{m.count}</span>
+                <div
+                  className="w-full rounded-t-md bg-[#FC682C] transition-all duration-500"
+                  style={{ height: `${Math.max((m.count / maxLeadsMonth) * 100, 4)}%` }}
                 />
-                <line
-                  x1="0"
-                  y1="50"
-                  x2="100%"
-                  y2="50"
-                  stroke="rgba(255,255,255,0.05)"
-                  strokeDasharray="4"
-                />
-                {/* Area */}
-                <defs>
-                  <linearGradient
-                    id="revenueGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="0%" stopColor="#FC682C" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#FC682C" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d={`M0,200 ${currentRevenue.map((v, i) => `L${i * 50 + 25},${200 - (v / maxRevenue) * 180}`).join(" ")} L${currentRevenue.length * 50},200 Z`}
-                  fill="url(#revenueGradient)"
-                />
-                {/* Line */}
-                <path
-                  d={`M25,${200 - (currentRevenue[0] / maxRevenue) * 180} ${currentRevenue
-                    .slice(1)
-                    .map(
-                      (v, i) =>
-                        `L${(i + 1) * 50 + 25},${200 - (v / maxRevenue) * 180}`,
-                    )
-                    .join(" ")}`}
-                  fill="none"
-                  stroke="#FC682C"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {/* Dots */}
-                {currentRevenue.map((v, i) => (
-                  <circle
-                    key={i}
-                    cx={i * 50 + 25}
-                    cy={200 - (v / maxRevenue) * 180}
-                    r="4"
-                    fill="#FC682C"
-                    stroke="#0f0f12"
-                    strokeWidth="2"
-                  />
-                ))}
-              </svg>
-              {/* X-Axis Labels */}
-              <div className="flex justify-between text-xs text-white/30 mt-2">
-                {currentLabels.map((label, i) => (
-                  <span
-                    key={i}
-                    className="text-center"
-                    style={{ width: `${100 / currentLabels.length}%` }}
-                  >
-                    {label}
-                  </span>
-                ))}
+                <span className="text-[10px] text-white/30 mt-1">{monthLabel(m.month)}</span>
               </div>
-            </div>
+            ))}
           </div>
-        </GlassCard>
+        </div>
 
-        {/* Leads Chart */}
-        <GlassCard title="Lead-Entwicklung" icon={UsersIcon}>
-          <div className="h-64 relative">
-            {/* Y-Axis Labels */}
-            <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-xs text-white/30">
-              <span>{maxLeads}</span>
-              <span>{Math.round(maxLeads / 2)}</span>
-              <span>0</span>
-            </div>
-            {/* Chart Area */}
-            <div className="ml-14 h-full pb-8">
-              <svg
-                className="w-full h-full"
-                viewBox={`0 0 ${currentLeads.length * 50} 200`}
-                preserveAspectRatio="none"
-              >
-                {/* Grid Lines */}
-                <line
-                  x1="0"
-                  y1="100"
-                  x2="100%"
-                  y2="100"
-                  stroke="rgba(255,255,255,0.05)"
-                  strokeDasharray="4"
+        {/* Revenue pro Monat — Bar Chart */}
+        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <h3 className="text-sm font-semibold text-white mb-4">Umsatz pro Monat</h3>
+          <div className="flex items-end gap-2 h-48">
+            {revenueMonthly.map((m: any) => (
+              <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                <span className="text-[11px] text-white/40">
+                  €{m.total >= 1000 ? `${(m.total / 1000).toFixed(1)}k` : m.total}
+                </span>
+                <div
+                  className="w-full rounded-t-md bg-gradient-to-t from-[#FC682C]/60 to-[#FC682C] transition-all duration-500"
+                  style={{ height: `${Math.max((m.total / maxRevenueMonth) * 100, 4)}%` }}
                 />
-                <line
-                  x1="0"
-                  y1="50"
-                  x2="100%"
-                  y2="50"
-                  stroke="rgba(255,255,255,0.05)"
-                  strokeDasharray="4"
-                />
-                {/* Bars */}
-                {currentLeads.map((v, i) => (
-                  <rect
-                    key={i}
-                    x={i * 50 + 10}
-                    y={200 - (v / maxLeads) * 180}
-                    width="30"
-                    height={(v / maxLeads) * 180}
-                    rx="4"
-                    fill="url(#barGradient)"
-                  />
-                ))}
-                <defs>
-                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#9D65C9" />
-                    <stop offset="100%" stopColor="#9D65C9" stopOpacity="0.3" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              {/* X-Axis Labels */}
-              <div className="flex justify-between text-xs text-white/30 mt-2">
-                {currentLabels.map((label, i) => (
-                  <span
-                    key={i}
-                    className="text-center"
-                    style={{ width: `${100 / currentLabels.length}%` }}
-                  >
-                    {label}
-                  </span>
-                ))}
+                <span className="text-[10px] text-white/30 mt-1">{monthLabel(m.month)}</span>
               </div>
-            </div>
+            ))}
           </div>
-        </GlassCard>
+        </div>
       </div>
 
+      {/* Bottom Row */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Lead Status */}
-        <GlassCard title="Lead-Status" icon={FunnelIcon}>
-          <div className="space-y-4">
-            <SourceBar label="Neu" value={stats.leads.total > 0 ? Math.round((stats.leads.new / stats.leads.total) * 100) : 0} color="blue" />
-            <SourceBar label="Qualifiziert" value={stats.leads.total > 0 ? Math.round((stats.leads.qualified / stats.leads.total) * 100) : 0} color="purple" />
-            <SourceBar label="Gewonnen" value={stats.leads.total > 0 ? Math.round((stats.leads.won / stats.leads.total) * 100) : 0} color="orange" />
-            <SourceBar label="Verloren" value={stats.leads.total > 0 ? Math.round((stats.leads.lost / stats.leads.total) * 100) : 0} color="gray" />
+        {/* Top Lead-Quellen */}
+        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <h3 className="text-sm font-semibold text-white mb-4">Top Lead-Quellen</h3>
+          <div className="space-y-3">
+            {topSources.length === 0 && (
+              <p className="text-xs text-white/30">Keine Daten</p>
+            )}
+            {topSources.map((s: any) => (
+              <div key={s.source}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-white/70 truncate">{s.source}</span>
+                  <span className="text-xs text-white/40 ml-2">{s.count}</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#FC682C] transition-all duration-500"
+                    style={{ width: `${(s.count / maxSourceCount) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
-        </GlassCard>
+        </div>
 
         {/* Conversion Funnel */}
-        <GlassCard title="Conversion Funnel" icon={FunnelIcon}>
+        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <h3 className="text-sm font-semibold text-white mb-4">Conversion Funnel</h3>
           <div className="space-y-3">
-            <FunnelStep
-              label="Gesamt Leads"
-              value={stats.leads.total}
-              percentage={100}
-              color="blue"
-            />
-            <FunnelStep
-              label="Qualifiziert"
-              value={stats.leads.qualified}
-              percentage={stats.leads.total > 0 ? Math.round((stats.leads.qualified / stats.leads.total) * 100) : 0}
-              color="purple"
-            />
-            <FunnelStep
-              label="Gewonnen"
-              value={stats.leads.won}
-              percentage={stats.leads.total > 0 ? Math.round((stats.leads.won / stats.leads.total) * 100) : 0}
-              color="orange"
-            />
-            <FunnelStep
-              label="Umsatz"
-              value={stats.revenue.total}
-              percentage={stats.leads.won > 0 ? 100 : 0}
-              color="green"
-            />
+            {([
+              { label: 'Neu', value: funnel.neu, color: 'bg-blue-500' },
+              { label: 'Kontaktiert', value: funnel.kontaktiert, color: 'bg-cyan-500' },
+              { label: 'Qualifiziert', value: funnel.qualifiziert, color: 'bg-purple-500' },
+              { label: 'Angebot', value: funnel.angebot, color: 'bg-amber-500' },
+              { label: 'Gewonnen', value: funnel.gewonnen, color: 'bg-emerald-500' },
+            ] as const).map((step) => {
+              const pct = funnelTotal > 0 ? Math.round((step.value / funnelTotal) * 100) : 0;
+              return (
+                <div key={step.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-white/70">{step.label}</span>
+                    <span className="text-xs text-white/40">{step.value} ({pct}%)</span>
+                  </div>
+                  <div className="h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${step.color} transition-all duration-500`}
+                      style={{ width: `${Math.max(pct, 2)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+            {funnel.verloren > 0 && (
+              <div className="pt-2 border-t border-white/[0.06]">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/40">Verloren</span>
+                  <span className="text-xs text-red-400/70">{funnel.verloren}</span>
+                </div>
+              </div>
+            )}
           </div>
-        </GlassCard>
+        </div>
 
-        {/* Kennzahlen */}
-        <GlassCard title="Kennzahlen" icon={StarIcon}>
-          <div className="space-y-3">
-            <PackageRow name="Website-Checks" count={stats.checks.total} revenue={0} />
-            <PackageRow name="Empfehlungen" count={stats.referrals.total} revenue={0} />
-            <PackageRow name="Subscriber" count={stats.subscribers.total} revenue={0} />
-            <PackageRow name="Ø Check-Score" count={stats.checks.avgScore} revenue={0} />
+        {/* Aktive Kunden + Übersicht */}
+        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+          <h3 className="text-sm font-semibold text-white mb-4">Kennzahlen</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-white/50">Aktive Kunden</span>
+              <span className="text-sm font-semibold text-white">{activeClients}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-white/50">Gesamt Leads</span>
+              <span className="text-sm font-semibold text-white">{funnelTotal}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-white/50">Gewonnen</span>
+              <span className="text-sm font-semibold text-emerald-400">{funnel.gewonnen}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-white/50">Verloren</span>
+              <span className="text-sm font-semibold text-red-400">{funnel.verloren}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-white/50">Conversion</span>
+              <span className="text-sm font-semibold text-[#FC682C]">{conversionRate}%</span>
+            </div>
+            {stats && (
+              <>
+                <div className="pt-2 border-t border-white/[0.06]" />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/50">Website-Checks</span>
+                  <span className="text-sm font-semibold text-white">{stats.checks.total}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/50">Empfehlungen</span>
+                  <span className="text-sm font-semibold text-white">{stats.referrals.total}</span>
+                </div>
+              </>
+            )}
           </div>
-        </GlassCard>
+        </div>
       </div>
     </div>
   );
@@ -7260,11 +7198,11 @@ function ClientDetailModal({
   client: PortalClient;
   onClose: () => void;
   onUpdate: () => void;
-  initialTab?: "details" | "project" | "messages" | "approvals" | "dokumente";
+  initialTab?: "details" | "project" | "messages" | "approvals" | "dokumente" | "activity";
 }) {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<
-    "details" | "project" | "messages" | "approvals" | "dokumente"
+    "details" | "project" | "messages" | "approvals" | "dokumente" | "activity"
   >(initialTab || "details");
   const [projectData, setProjectData] = useState<any>(null);
   const [newMessage, setNewMessage] = useState("");
@@ -7654,7 +7592,7 @@ function ClientDetailModal({
 
         {/* Tabs */}
         <div className="flex border-b border-white/[0.06] overflow-x-auto">
-          {["details", "dokumente", "project", "messages", "approvals"].map((tab) => (
+          {["details", "dokumente", "project", "messages", "approvals", "activity"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as typeof activeTab)}
@@ -7668,7 +7606,9 @@ function ClientDetailModal({
                     ? "Projekt"
                     : tab === "messages"
                       ? "Nachrichten"
-                      : "Freigaben"}
+                      : tab === "approvals"
+                        ? "Freigaben"
+                        : "Aktivität"}
               {tab === "approvals" &&
                 approvals.filter((a) => a.status === "pending").length > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 text-white text-[10px] rounded-full flex items-center justify-center">
@@ -9808,6 +9748,10 @@ function ClientDetailModal({
                 </div>
               )}
             </div>
+          )}
+
+          {activeTab === "activity" && (
+            <ActivityTimeline entityType="client" entityId={client.id} />
           )}
         </div>
       </div>

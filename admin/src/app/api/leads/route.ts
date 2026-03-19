@@ -13,6 +13,7 @@ import {
   type CreateLeadInput,
 } from '@/lib/api';
 import nodemailer from 'nodemailer';
+import { logActivity } from '@/lib/activity';
 
 // ─────────────────────────────────────────────────────────────────
 // GET /api/leads - List all leads
@@ -156,6 +157,8 @@ export const POST = createHandler({
       }
     }
   }
+
+  await logActivity('lead_created', 'lead', lead.id, name, { source, email });
 
   return { lead };
 });

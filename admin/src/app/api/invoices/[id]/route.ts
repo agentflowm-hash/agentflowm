@@ -12,6 +12,7 @@ import {
   DatabaseError,
   type UpdateInvoiceInput,
 } from '@/lib/api';
+import { logActivity } from '@/lib/activity';
 
 // ─────────────────────────────────────────────────────────────────
 // GET /api/invoices/[id] - Get single invoice
@@ -100,6 +101,11 @@ export const PATCH = createHandler({
     .single();
 
   if (error) throw new DatabaseError(error.message);
+
+  // Log status change activity
+  if (data.status !== undefined && data.status !== existing.status) {
+    await logActivity('invoice_status_changed', 'invoice', Number(id), existing.invoice_number, { old_status: existing.status, new_status: data.status });
+  }
 
   // ═══════════════════════════════════════════════════════════
   // AUTO-PROVISION: Wenn Rechnung auf "paid" → Provision erstellen

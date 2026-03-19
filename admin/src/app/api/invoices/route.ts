@@ -12,6 +12,7 @@ import {
   DatabaseError,
   type CreateInvoiceInput,
 } from '@/lib/api';
+import { logActivity } from '@/lib/activity';
 
 // ─────────────────────────────────────────────────────────────────
 // GET /api/invoices - List all invoices
@@ -186,6 +187,8 @@ export const POST = createHandler({
       throw new DatabaseError(`Failed to create invoice items: ${itemsError.message}`);
     }
   }
+
+  await logActivity('invoice_created', 'invoice', invoice.id, invoiceNumber, { total, client_name: clientName });
 
   return { invoice };
 });

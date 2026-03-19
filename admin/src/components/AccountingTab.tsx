@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useToast } from "@/components";
 import {
+  ArrowPathIcon as RecurringIcon,
   CalculatorIcon,
   BanknotesIcon,
   ArrowTrendingUpIcon,
@@ -86,6 +88,8 @@ export default function AccountingTab() {
   });
   const [editMode, setEditMode] = useState(false);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
+  const [generatingInvoices, setGeneratingInvoices] = useState(false);
+  const { showToast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -281,6 +285,31 @@ export default function AccountingTab() {
     }
   };
 
+  const generateRecurringInvoices = async () => {
+    setGeneratingInvoices(true);
+    try {
+      const res = await fetch("/api/subscriptions/generate-invoices", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const raw = await res.json();
+        const data = unwrapApi<{ generated: number; invoices: any[] }>(raw);
+        if (data.generated > 0) {
+          showToast("success", `${data.generated} Rechnung${data.generated > 1 ? "en" : ""} generiert`);
+          fetchTransactions();
+        } else {
+          showToast("info", "Keine fälligen Abos gefunden");
+        }
+      } else {
+        showToast("error", "Fehler beim Generieren der Rechnungen");
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler");
+    }
+    setGeneratingInvoices(false);
+  };
+
   const exportToCSV = () => {
     setExportStatus("Exportiere...");
     
@@ -399,7 +428,15 @@ export default function AccountingTab() {
         </div>
 
         <div className="flex gap-2">
-          <button 
+          <button
+            onClick={generateRecurringInvoices}
+            disabled={generatingInvoices}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2 transition-colors disabled:opacity-40"
+          >
+            <RecurringIcon className={`w-4 h-4 ${generatingInvoices ? "animate-spin" : ""}`} />
+            {generatingInvoices ? "Generiere..." : "Fällige Rechnungen"}
+          </button>
+          <button
             onClick={exportToCSV}
             className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2 transition-colors"
           >
