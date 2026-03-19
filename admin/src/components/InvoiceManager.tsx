@@ -551,6 +551,7 @@ export default function InvoiceManager() {
                     type="text"
                     value={formData.client_name}
                     onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                    placeholder="Max Mustermann"
                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-orange-500/50 focus:outline-none"
                     required
                   />
@@ -561,6 +562,7 @@ export default function InvoiceManager() {
                     type="email"
                     value={formData.client_email}
                     onChange={(e) => setFormData({ ...formData, client_email: e.target.value })}
+                    placeholder="max@musterfirma.de"
                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-orange-500/50 focus:outline-none"
                     required
                   />
@@ -571,6 +573,7 @@ export default function InvoiceManager() {
                     type="text"
                     value={formData.client_company}
                     onChange={(e) => setFormData({ ...formData, client_company: e.target.value })}
+                    placeholder="Musterfirma GmbH"
                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-orange-500/50 focus:outline-none"
                   />
                 </div>
@@ -601,13 +604,25 @@ export default function InvoiceManager() {
                 <div className="space-y-2">
                   {formData.items.map((item, index) => (
                     <div key={index} className="flex gap-2 items-start">
-                      <input
-                        type="text"
-                        placeholder="Beschreibung"
-                        value={item.description}
-                        onChange={(e) => updateItem(index, "description", e.target.value)}
-                        className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-orange-500/50 focus:outline-none"
-                      />
+                      <div className="flex-1">
+                        {index === 0 && (
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {["Website-Entwicklung", "SEO-Optimierung", "Hosting & Domain", "Beratung", "Wartung & Support", "Logo & Branding"].map(t => (
+                              <button key={t} type="button" onClick={() => updateItem(index, "description", item.description ? item.description + "\n" + t : t)}
+                                className="px-1.5 py-0.5 bg-white/[0.04] hover:bg-orange-500/10 border border-white/[0.06] hover:border-orange-500/30 rounded text-[8px] text-white/40 hover:text-orange-400 transition-all">
+                                {t}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        <input
+                          type="text"
+                          placeholder="z.B. Business Website mit CMS, SEO & Responsive Design"
+                          value={item.description}
+                          onChange={(e) => updateItem(index, "description", e.target.value)}
+                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-orange-500/50 focus:outline-none"
+                        />
+                      </div>
                       <input
                         type="number"
                         placeholder="Menge"
@@ -684,7 +699,7 @@ export default function InvoiceManager() {
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:border-orange-500/50 focus:outline-none resize-none h-20"
-                  placeholder="Zusätzliche Hinweise für die Rechnung..."
+                  placeholder="z.B. Zahlungsziel: 14 Tage netto. Bei Fragen: info@agentflowm.de. Bankverbindung siehe Fußzeile."
                 />
               </div>
             </div>

@@ -11490,12 +11490,20 @@ function NewLeadModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-white/40 mb-2">Budget</label>
+              <label className="block text-xs text-white/40 mb-1">Budget</label>
+              <div className="flex flex-wrap gap-1 mb-1.5">
+                {["€1.000–3.000", "€3.000–8.000", "€8.000–15.000", "€15.000+"].map(b => (
+                  <button key={b} type="button" onClick={() => setForm({ ...form, budget: b })}
+                    className={`px-2 py-0.5 rounded text-[9px] transition-all border ${form.budget === b ? "bg-[#FC682C]/20 border-[#FC682C]/40 text-[#FC682C]" : "bg-white/[0.04] border-white/[0.06] text-white/40 hover:bg-[#FC682C]/10 hover:border-[#FC682C]/30 hover:text-[#FC682C]"}`}>
+                    {b}
+                  </button>
+                ))}
+              </div>
               <input
                 type="text"
                 value={form.budget}
                 onChange={(e) => setForm({ ...form, budget: e.target.value })}
-                placeholder="z.B. 5.000€"
+                placeholder="Oder individuellen Betrag eingeben..."
                 className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none"
               />
             </div>
@@ -11695,7 +11703,7 @@ function NewLeadModal({
             <textarea
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
-              placeholder="Details zum Projekt..."
+              placeholder="z.B. Wir brauchen eine Business-Website mit Buchungssystem. Timeline: 4 Wochen. Budget steht fest."
               rows={3}
               className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white placeholder:text-white/30 focus:border-[#FC682C]/50 outline-none resize-none"
             />

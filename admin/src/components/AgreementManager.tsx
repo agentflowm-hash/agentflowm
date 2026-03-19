@@ -419,6 +419,7 @@ export function AgreementManager() {
                       type="text"
                       value={newAgreement.client_name}
                       onChange={(e) => setNewAgreement({ ...newAgreement, client_name: e.target.value })}
+                      placeholder="Max Mustermann"
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                     />
                   </div>
@@ -428,6 +429,7 @@ export function AgreementManager() {
                       type="text"
                       value={newAgreement.client_company}
                       onChange={(e) => setNewAgreement({ ...newAgreement, client_company: e.target.value })}
+                      placeholder="Musterfirma GmbH"
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                     />
                   </div>
@@ -437,6 +439,7 @@ export function AgreementManager() {
                       type="email"
                       value={newAgreement.client_email}
                       onChange={(e) => setNewAgreement({ ...newAgreement, client_email: e.target.value })}
+                      placeholder="max@musterfirma.de"
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                     />
                   </div>
@@ -446,6 +449,7 @@ export function AgreementManager() {
                       type="text"
                       value={newAgreement.client_address}
                       onChange={(e) => setNewAgreement({ ...newAgreement, client_address: e.target.value })}
+                      placeholder="Musterstraße 1, 10115 Berlin"
                       className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                     />
                   </div>
@@ -469,6 +473,7 @@ export function AgreementManager() {
                     value={newAgreement.project_description}
                     onChange={(e) => setNewAgreement({ ...newAgreement, project_description: e.target.value })}
                     rows={2}
+                    placeholder="z.B. Entwicklung einer modernen Business-Website mit CMS, SEO-Optimierung und responsivem Design inkl. 3 Monate Support."
                     className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                   />
                 </div>
@@ -476,13 +481,21 @@ export function AgreementManager() {
                 {/* Services */}
                 <div>
                   <label className="block text-sm text-zinc-400 mb-1">Leistungen</label>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {["Website-Design & Entwicklung", "SEO-Optimierung", "CMS-Integration", "Responsive Design", "Hosting-Setup", "Admin-Portal", "Analytics-Integration", "E-Mail-Setup", "Social-Media-Anbindung", "3 Monate Support"].map(s => (
+                      <button key={s} type="button" onClick={() => { if (!newAgreement.services.includes(s)) setNewAgreement({ ...newAgreement, services: [...newAgreement.services, s] }); }}
+                        className={`px-2 py-0.5 rounded text-[9px] transition-all border ${newAgreement.services.includes(s) ? "bg-orange-500/20 border-orange-500/40 text-orange-400" : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:bg-orange-500/10 hover:border-orange-500/30 hover:text-orange-400"}`}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
                   <div className="flex gap-2 mb-2">
                     <input
                       type="text"
                       value={newService}
                       onChange={(e) => setNewService(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addService())}
-                      placeholder="Leistung hinzufügen..."
+                      placeholder="Oder eigene Leistung eingeben..."
                       className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                     />
                     <button
