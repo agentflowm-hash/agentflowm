@@ -172,7 +172,7 @@ export default function ActivityTimeline({
       if (entityId) params.set("entity_id", String(entityId));
       params.set("limit", String(limit));
 
-      const res = await fetch(`/api/activity?${params.toString()}`);
+      const res = await fetch(`/api/activity?${params.toString()}`, { credentials: "include" });
       const json = await res.json();
 
       if (json.success) {

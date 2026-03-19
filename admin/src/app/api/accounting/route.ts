@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { createHandler } from '@/lib/api';
+import { createHandler, DatabaseError } from '@/lib/api';
 
 // GET /api/accounting
 export const GET = createHandler({ auth: true }, async (_data, _ctx, request) => {
@@ -12,16 +12,17 @@ export const GET = createHandler({ auth: true }, async (_data, _ctx, request) =>
   if (month) {
     const [year, m] = month.split('-');
     const start = `${year}-${m}-01`;
-    const end = new Date(parseInt(year), parseInt(m), 0).toISOString().split('T')[0];
+    const lastDay = new Date(parseInt(year), parseInt(m), 0).getDate();
+    const end = `${year}-${m}-${String(lastDay).padStart(2, '0')}`;
     query = query.gte('date', start).lte('date', end);
   }
 
   const { data, error } = await query;
-  if (error) return { transactions: [], error: error.message };
+  if (error) throw new DatabaseError(error.message);
 
   const transactions = data || [];
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+  const totalIncome = transactions.filter((t: any) => t.type === 'income').reduce((s: number, t: any) => s + Number(t.amount), 0);
+  const totalExpenses = transactions.filter((t: any) => t.type === 'expense').reduce((s: number, t: any) => s + Number(t.amount), 0);
 
   return {
     transactions,
@@ -37,7 +38,13 @@ export const GET = createHandler({ auth: true }, async (_data, _ctx, request) =>
 // POST /api/accounting
 export const POST = createHandler({ auth: true }, async (data) => {
   const { date, description, category, type, amount, tax_rate, account, reference, notes, invoice_id, client_id } = data as any;
-  const taxAmount = Math.round((amount * tax_rate) / (100 + tax_rate) * 100) / 100;
+
+  if (!description || !type || !amount || typeof amount !== 'number') {
+    throw new DatabaseError('Pflichtfelder: description, type, amount');
+  }
+
+  const rate = tax_rate || 19;
+  const taxAmount = Math.round((amount * rate) / (100 + rate) * 100) / 100;
   const netAmount = Math.round((amount - taxAmount) * 100) / 100;
 
   const { data: transaction, error } = await db
@@ -45,7 +52,7 @@ export const POST = createHandler({ auth: true }, async (data) => {
     .insert({
       date: date || new Date().toISOString().split('T')[0],
       description, category, type,
-      amount, tax_rate: tax_rate || 19,
+      amount, tax_rate: rate,
       tax_amount: taxAmount, net_amount: netAmount,
       account: account || 'Geschäftskonto',
       reference, notes, invoice_id, client_id,
@@ -53,6 +60,6 @@ export const POST = createHandler({ auth: true }, async (data) => {
     .select()
     .single();
 
-  if (error) return { error: error.message };
+  if (error) throw new DatabaseError(error.message);
   return { transaction };
 });

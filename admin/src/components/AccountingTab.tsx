@@ -16,7 +16,6 @@ import {
   ReceiptPercentIcon,
   BuildingLibraryIcon,
   ClipboardDocumentListIcon,
-  CheckCircleIcon,
   ExclamationTriangleIcon,
   XMarkIcon,
   PencilIcon,
@@ -68,11 +67,6 @@ const CATEGORIES = {
 
 const TAX_RATES = [0, 7, 19];
 
-function unwrapApi<T>(res: unknown): T {
-  if (res && typeof res === 'object' && 'data' in res) return (res as any).data;
-  return res as T;
-}
-
 export default function AccountingTab() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,17 +99,24 @@ export default function AccountingTab() {
   });
 
   // Load transactions from Supabase API
-  const fetchTransactions = useCallback(() => {
+  const fetchTransactions = useCallback(async () => {
     setLoading(true);
-    fetch("/api/accounting", { credentials: "include" })
-      .then(r => r.json())
-      .then(data => {
-        const d = unwrapApi<{ transactions: Transaction[] }>(data);
-        setTransactions(d.transactions || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+    try {
+      const res = await fetch("/api/accounting", { credentials: "include" });
+      const data = await res.json();
+      if (data.success) {
+        setTransactions(data.data.transactions || []);
+      } else {
+        showToast("error", "Fehler beim Laden der Buchungen");
+        setTransactions([]);
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler beim Laden");
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
 
   useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
 
@@ -228,8 +229,6 @@ export default function AccountingTab() {
     e.preventDefault();
     
     const amount = parseFloat(formData.amount) || 0;
-    const taxAmount = (amount * formData.tax_rate) / (100 + formData.tax_rate);
-    const netAmount = amount - taxAmount;
 
     const payload = {
       date: formData.date, description: formData.description, category: formData.category,
@@ -253,15 +252,14 @@ export default function AccountingTab() {
       if (json.success) {
         showToast("success", editMode ? "Buchung aktualisiert" : "Buchung erstellt");
         fetchTransactions();
+        setShowModal(false);
+        resetForm();
       } else {
         showToast("error", json.error?.message || "Fehler beim Speichern");
       }
     } catch {
       showToast("error", "Verbindungsfehler");
     }
-
-    setShowModal(false);
-    resetForm();
   };
 
   const resetForm = () => {
@@ -336,7 +334,7 @@ export default function AccountingTab() {
       });
       if (res.ok) {
         const raw = await res.json();
-        const data = unwrapApi<{ generated: number; invoices: any[] }>(raw);
+        const data = raw.success ? raw.data : raw;
         if (data.generated > 0) {
           showToast("success", `${data.generated} Rechnung${data.generated > 1 ? "en" : ""} generiert`);
           fetchTransactions();
@@ -365,8 +363,10 @@ export default function AccountingTab() {
           printWindow.document.close();
           printWindow.focus();
           setTimeout(() => printWindow.print(), 500);
+          showToast("success", "PDF Export geöffnet");
+        } else {
+          showToast("error", "Pop-up blockiert — bitte Pop-ups erlauben");
         }
-        showToast("success", "PDF Export geöffnet");
       } else {
         showToast("error", "PDF Export fehlgeschlagen");
       }

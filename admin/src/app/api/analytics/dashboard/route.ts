@@ -17,24 +17,27 @@ import { createHandler, DatabaseError } from '@/lib/api';
 export const GET = createHandler({
   auth: true,
 }, async () => {
-  // a) Leads pro Monat (letzte 6 Monate)
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  const { data: leadsRaw, error: leadsErr } = await db
+  // Single query for all lead data (instead of 3 separate queries)
+  const { data: allLeads, error: leadsErr } = await db
     .from('leads')
-    .select('created_at')
-    .gte('created_at', sixMonthsAgo.toISOString());
+    .select('created_at, source, status');
 
   if (leadsErr) throw new DatabaseError(leadsErr.message);
 
+  const leads = allLeads || [];
+
+  // a) Leads pro Monat (letzte 6 Monate)
   const leadsPerMonth: Record<string, number> = {};
-  (leadsRaw || []).forEach((l: any) => {
-    const month = new Date(l.created_at).toISOString().slice(0, 7);
-    leadsPerMonth[month] = (leadsPerMonth[month] || 0) + 1;
+  leads.forEach((l: any) => {
+    if (new Date(l.created_at) >= sixMonthsAgo) {
+      const month = new Date(l.created_at).toISOString().slice(0, 7);
+      leadsPerMonth[month] = (leadsPerMonth[month] || 0) + 1;
+    }
   });
 
-  // Generate last 6 months labels
   const months: string[] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date();
@@ -67,15 +70,9 @@ export const GET = createHandler({
     total: revenuePerMonth[m] || 0,
   }));
 
-  // c) Top Lead-Quellen
-  const { data: allLeads, error: srcErr } = await db
-    .from('leads')
-    .select('source');
-
-  if (srcErr) throw new DatabaseError(srcErr.message);
-
+  // c) Top Lead-Quellen (from same query)
   const sourceCounts: Record<string, number> = {};
-  (allLeads || []).forEach((l: any) => {
+  leads.forEach((l: any) => {
     const src = l.source || 'Unbekannt';
     sourceCounts[src] = (sourceCounts[src] || 0) + 1;
   });
@@ -85,15 +82,9 @@ export const GET = createHandler({
     .slice(0, 10)
     .map(([source, count]) => ({ source, count }));
 
-  // d) Conversion Funnel
-  const { data: statusLeads, error: statusErr } = await db
-    .from('leads')
-    .select('status');
-
-  if (statusErr) throw new DatabaseError(statusErr.message);
-
+  // d) Conversion Funnel (from same query)
   const statusCounts: Record<string, number> = {};
-  (statusLeads || []).forEach((l: any) => {
+  leads.forEach((l: any) => {
     const s = l.status || 'neu';
     statusCounts[s] = (statusCounts[s] || 0) + 1;
   });

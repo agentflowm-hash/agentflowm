@@ -9,7 +9,9 @@
 
 import { db } from '@/lib/db';
 import { createHandler, DatabaseError } from '@/lib/api';
-import { NextResponse } from 'next/server';
+
+const escapeHtml = (s: string) =>
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const MONTH_NAMES = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -58,8 +60,8 @@ export const GET = createHandler({
   const tableRows = rows.map((t: any) => `
     <tr>
       <td>${fmtDate(t.date)}</td>
-      <td>${t.description}</td>
-      <td>${t.category}</td>
+      <td>${escapeHtml(t.description)}</td>
+      <td>${escapeHtml(t.category)}</td>
       <td style="color: ${t.type === 'income' ? '#16a34a' : '#dc2626'}">${t.type === 'income' ? 'Einnahme' : 'Ausgabe'}</td>
       <td class="num">${fmt(t.net_amount)}</td>
       <td class="num">${fmt(t.tax_amount)} (${t.tax_rate}%)</td>

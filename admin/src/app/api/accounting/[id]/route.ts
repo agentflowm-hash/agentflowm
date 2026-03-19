@@ -36,6 +36,10 @@ export const PUT = createHandler({
   const id = parseInt(request.nextUrl.pathname.split('/').pop()!, 10);
   const { date, description, category, type, amount, tax_rate, account, reference, notes } = data;
 
+  if (!amount || typeof amount !== 'number' || amount <= 0) {
+    throw new DatabaseError('Betrag muss eine positive Zahl sein');
+  }
+
   const rate = tax_rate ?? 19;
   const taxAmount = Math.round((amount * rate) / (100 + rate) * 100) / 100;
   const netAmount = Math.round((amount - taxAmount) * 100) / 100;
