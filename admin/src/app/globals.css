@@ -45,6 +45,11 @@ html.light .bg-\[\#111827\]\/95 { background: rgba(255,255,255,0.95) !important;
 html.light .bg-\[\#0F1629\] { background: #f8f9fc !important; }
 html.light .bg-\[\#1a2235\],
 html.light .bg-\[\#1a2235\] { background: #ffffff !important; }
+html.light .bg-\[\#1a1a1f\] { background: #ffffff !important; }
+html.light .bg-\[\#0d1117\] { background: #ffffff !important; }
+html.light .bg-\[\#1a2033\] { background: #ffffff !important; }
+html.light .bg-\[\#0f0f12\] { background: #ffffff !important; }
+html.light .bg-\[\#0a0a0f\] { background: #f8f9fc !important; }
 
 /* === Sidebar === */
 html.light aside,
@@ -55,24 +60,33 @@ html.light .bg-black\/60 { background: rgba(0,0,0,0.2) !important; }
 html.light .bg-black\/70 { background: rgba(0,0,0,0.25) !important; }
 html.light .bg-black\/80 { background: rgba(0,0,0,0.3) !important; }
 
-/* === Text === */
+/* === Text — ALLE Opacitaets-Stufen === */
 html.light .text-white { color: #1a1a2e !important; }
-html.light .text-white\/20 { color: rgba(26,26,46,0.12) !important; }
-html.light .text-white\/25 { color: rgba(26,26,46,0.18) !important; }
-html.light .text-white\/30 { color: rgba(26,26,46,0.28) !important; }
+html.light .text-white\/10 { color: rgba(26,26,46,0.08) !important; }
+html.light .text-white\/15 { color: rgba(26,26,46,0.12) !important; }
+html.light .text-white\/20 { color: rgba(26,26,46,0.15) !important; }
+html.light .text-white\/25 { color: rgba(26,26,46,0.2) !important; }
+html.light .text-white\/30 { color: rgba(26,26,46,0.3) !important; }
+html.light .text-white\/35 { color: rgba(26,26,46,0.38) !important; }
 html.light .text-white\/40 { color: rgba(26,26,46,0.45) !important; }
+html.light .text-white\/45 { color: rgba(26,26,46,0.5) !important; }
 html.light .text-white\/50 { color: rgba(26,26,46,0.55) !important; }
-html.light .text-white\/60 { color: rgba(26,26,46,0.6) !important; }
-html.light .text-white\/70 { color: rgba(26,26,46,0.7) !important; }
+html.light .text-white\/60 { color: rgba(26,26,46,0.65) !important; }
+html.light .text-white\/70 { color: rgba(26,26,46,0.75) !important; }
+html.light .text-white\/80 { color: rgba(26,26,46,0.85) !important; }
+html.light .text-white\/90 { color: rgba(26,26,46,0.92) !important; }
 
-/* === Borders === */
+/* === Borders — ALLE Stufen === */
+html.light .border-white\/\[0\.03\],
 html.light .border-white\/\[0\.04\],
 html.light .border-white\/\[0\.06\],
 html.light .border-white\/5 { border-color: rgba(0,0,0,0.06) !important; }
 html.light .border-white\/\[0\.08\],
-html.light .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-white\/10 { border-color: rgba(0,0,0,0.1) !important; }
 html.light .border-white\/\[0\.12\],
+html.light .border-white\/15,
 html.light .border-white\/20 { border-color: rgba(0,0,0,0.12) !important; }
+html.light .border-white\/30 { border-color: rgba(0,0,0,0.15) !important; }
 
 /* === Semi-transparent backgrounds === */
 html.light .bg-white\/\[0\.02\],
@@ -86,16 +100,23 @@ html.light .bg-white\/10 { background: rgba(0,0,0,0.05) !important; }
 html.light .bg-white\/20 { background: rgba(0,0,0,0.06) !important; }
 
 /* === Hover states === */
+html.light .hover\:bg-white\/\[0\.03\]:hover { background: rgba(0,0,0,0.025) !important; }
+html.light .hover\:bg-white\/\[0\.04\]:hover { background: rgba(0,0,0,0.035) !important; }
 html.light .hover\:bg-white\/5:hover { background: rgba(0,0,0,0.04) !important; }
 html.light .hover\:bg-white\/\[0\.02\]:hover { background: rgba(0,0,0,0.03) !important; }
+html.light .hover\:bg-white\/\[0\.05\]:hover { background: rgba(0,0,0,0.04) !important; }
 html.light .hover\:bg-white\/\[0\.06\]:hover { background: rgba(0,0,0,0.05) !important; }
 html.light .hover\:bg-white\/\[0\.08\]:hover { background: rgba(0,0,0,0.06) !important; }
 html.light .hover\:bg-white\/\[0\.1\]:hover,
 html.light .hover\:bg-white\/10:hover { background: rgba(0,0,0,0.07) !important; }
 html.light .hover\:bg-white\/20:hover { background: rgba(0,0,0,0.1) !important; }
+html.light .hover\:bg-white\/30:hover { background: rgba(0,0,0,0.12) !important; }
 html.light .hover\:text-white:hover { color: #1a1a2e !important; }
+html.light .hover\:text-white\/50:hover { color: rgba(26,26,46,0.55) !important; }
+html.light .hover\:text-white\/80:hover { color: rgba(26,26,46,0.85) !important; }
 html.light .hover\:border-white\/10:hover,
 html.light .hover\:border-white\/\[0\.15\]:hover { border-color: rgba(0,0,0,0.15) !important; }
+html.light .hover\:border-white\/\[0\.1\]:hover { border-color: rgba(0,0,0,0.12) !important; }
 
 /* === Gradients on stat cards === */
 html.light .from-\[\#FC682C\]\/20 { --tw-gradient-from: rgba(252,104,44,0.12) !important; }
@@ -246,6 +267,107 @@ html.light .border-t-transparent { border-top-color: transparent !important; }
 
 /* === Ring colors === */
 html.light .ring-red-500\/20 { --tw-ring-color: rgba(239,68,68,0.15) !important; }
+html.light .ring-\[\#111827\] { --tw-ring-color: #ffffff !important; }
+
+/* === Date input color scheme === */
+html.light input[type="date"],
+html.light input[type="datetime-local"],
+html.light input[type="time"] {
+    color-scheme: light !important;
+}
+
+/* === Placeholder text in light mode === */
+html.light .placeholder\:text-white\/20::placeholder { color: rgba(26,26,46,0.2) !important; }
+html.light .placeholder\:text-white\/25::placeholder { color: rgba(26,26,46,0.25) !important; }
+html.light .placeholder\:text-white\/30::placeholder { color: rgba(26,26,46,0.35) !important; }
+html.light .placeholder\:text-white\/40::placeholder { color: rgba(26,26,46,0.4) !important; }
+
+/* === Focus states === */
+html.light .focus\:border-\[\#FC682C\]\/50:focus { border-color: rgba(252,104,44,0.5) !important; }
+html.light .focus\:border-white\/20:focus { border-color: rgba(0,0,0,0.15) !important; }
+
+/* === Gradient active nav items === */
+html.light .from-\[\#FC682C\]\/15 { --tw-gradient-from: rgba(252,104,44,0.1) !important; }
+html.light .from-\[\#FC682C\]\/8 { --tw-gradient-from: rgba(252,104,44,0.06) !important; }
+html.light .via-\[\#FC682C\]\/10 { --tw-gradient-via: rgba(252,104,44,0.07) !important; }
+html.light .via-\[\#FC682C\]\/8 { --tw-gradient-via: rgba(252,104,44,0.05) !important; }
+
+/* === Emerald/success backgrounds === */
+html.light .bg-emerald-500\/20 { background: rgba(16,185,129,0.12) !important; }
+html.light .bg-emerald-500\/10 { background: rgba(16,185,129,0.08) !important; }
+html.light .text-emerald-400 { color: #059669 !important; }
+html.light .border-emerald-500\/30 { border-color: rgba(16,185,129,0.25) !important; }
+html.light .border-emerald-500\/20 { border-color: rgba(16,185,129,0.2) !important; }
+
+/* === Orange status backgrounds === */
+html.light .bg-orange-500\/15 { background: rgba(249,115,22,0.1) !important; }
+html.light .bg-orange-500\/10 { background: rgba(249,115,22,0.08) !important; }
+html.light .border-orange-500\/20 { border-color: rgba(249,115,22,0.2) !important; }
+html.light .border-orange-500\/40 { border-color: rgba(249,115,22,0.35) !important; }
+
+/* === Neutral backgrounds === */
+html.light .bg-neutral-500\/20 { background: rgba(115,115,115,0.12) !important; }
+html.light .text-neutral-400 { color: #737373 !important; }
+html.light .border-neutral-500\/30 { border-color: rgba(115,115,115,0.25) !important; }
+
+/* === Teal backgrounds === */
+html.light .bg-teal-500\/20 { background: rgba(20,184,166,0.12) !important; }
+html.light .bg-teal-500\/10 { background: rgba(20,184,166,0.08) !important; }
+
+/* === Gray status backgrounds === */
+html.light .bg-gray-500\/20 { background: rgba(107,114,128,0.12) !important; }
+html.light .text-gray-400 { color: #6b7280 !important; }
+html.light .border-gray-500\/30 { border-color: rgba(107,114,128,0.25) !important; }
+
+/* === Red backgrounds for delete/error === */
+html.light .bg-red-500\/10 { background: rgba(239,68,68,0.08) !important; }
+html.light .bg-red-500\/5 { background: rgba(239,68,68,0.04) !important; }
+html.light .hover\:bg-red-500\/10:hover { background: rgba(239,68,68,0.1) !important; }
+html.light .text-red-400\/60 { color: rgba(220,38,38,0.6) !important; }
+html.light .hover\:text-red-400:hover { color: #dc2626 !important; }
+html.light .hover\:text-red-300:hover { color: #ef4444 !important; }
+
+/* === FC682C hover states === */
+html.light .hover\:bg-\[\#FC682C\]\/20:hover { background: rgba(252,104,44,0.15) !important; }
+html.light .hover\:bg-\[\#FC682C\]\/10:hover { background: rgba(252,104,44,0.1) !important; }
+html.light .hover\:border-\[\#FC682C\]\/30:hover { border-color: rgba(252,104,44,0.35) !important; }
+
+/* === Kanban specific === */
+html.light .bg-\[\#FC682C\]\/\[0\.03\] { background: rgba(252,104,44,0.03) !important; }
+html.light .bg-\[\#FC682C\]\/5 { background: rgba(252,104,44,0.04) !important; }
+html.light .bg-\[\#FC682C\]\/8 { background: rgba(252,104,44,0.06) !important; }
+html.light .border-\[\#FC682C\]\/10 { border-color: rgba(252,104,44,0.12) !important; }
+html.light .border-\[\#FC682C\]\/15 { border-color: rgba(252,104,44,0.18) !important; }
+
+/* === Blue accent hover/focus === */
+html.light .bg-blue-500\/8 { background: rgba(59,130,246,0.06) !important; }
+html.light .bg-blue-500\/5 { background: rgba(59,130,246,0.04) !important; }
+html.light .bg-blue-500\/15 { background: rgba(59,130,246,0.1) !important; }
+html.light .border-blue-500\/30 { border-color: rgba(59,130,246,0.3) !important; }
+
+/* === Purple accent === */
+html.light .bg-purple-500\/8 { background: rgba(139,92,246,0.06) !important; }
+html.light .bg-purple-500\/5 { background: rgba(139,92,246,0.04) !important; }
+html.light .bg-purple-500\/15 { background: rgba(139,92,246,0.1) !important; }
+html.light .border-purple-500\/30 { border-color: rgba(139,92,246,0.3) !important; }
+
+/* === Yellow/warning === */
+html.light .bg-yellow-500\/10 { background: rgba(234,179,8,0.08) !important; }
+html.light .border-yellow-500\/20 { border-color: rgba(234,179,8,0.2) !important; }
+html.light .border-yellow-500\/30 { border-color: rgba(234,179,8,0.25) !important; }
+
+/* === Green specifics === */
+html.light .bg-green-500\/5 { background: rgba(34,197,94,0.04) !important; }
+html.light .bg-green-500\/8 { background: rgba(34,197,94,0.06) !important; }
+html.light .bg-green-500\/30 { background: rgba(34,197,94,0.15) !important; }
+html.light .hover\:bg-green-500\/20:hover { background: rgba(34,197,94,0.15) !important; }
+html.light .hover\:bg-green-500\/30:hover { background: rgba(34,197,94,0.2) !important; }
+html.light .border-green-500\/10 { border-color: rgba(34,197,94,0.12) !important; }
+html.light .border-green-500\/30 { border-color: rgba(34,197,94,0.3) !important; }
+
+/* === Violet accent (AI) === */
+html.light .bg-violet-500\/20 { background: rgba(139,92,246,0.12) !important; }
+html.light .text-violet-400 { color: #7c3aed !important; }
 
 * {
     box-sizing: border-box;
