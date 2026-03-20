@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   HomeIcon,
   UsersIcon,
@@ -450,11 +451,19 @@ export function Dashboard() {
 
   const navSections = [
     {
-      label: "CRM & Vertrieb",
+      label: "",
       items: [
         { id: "dashboard" as Tab, label: "Dashboard", icon: HomeIcon, badge: null },
         { id: "vertrieb" as Tab, label: "Vertrieb", icon: FunnelIcon, badge: stats?.leads.new, hot: true },
         { id: "clients" as Tab, label: "Kunden", icon: UserGroupIcon, badge: null },
+      ],
+    },
+    {
+      label: "Workspace",
+      items: [
+        { id: "tasks" as Tab, label: "Aufgaben", icon: ClipboardDocumentCheckIcon, badge: null },
+        { id: "calendar" as Tab, label: "Kalender", icon: CalendarDaysIcon, badge: null },
+        { id: "kommunikation" as Tab, label: "Kommunikation", icon: EnvelopeOpenIcon, badge: null },
       ],
     },
     {
@@ -463,31 +472,23 @@ export function Dashboard() {
         { id: "dokumente" as Tab, label: "Dokumente", icon: DocumentTextIcon, badge: null },
         { id: "accounting" as Tab, label: "Buchhaltung", icon: CalculatorIcon, badge: null },
         { id: "vault" as Tab, label: "Datentresor", icon: LockClosedIcon, badge: null },
-        { id: "tasks" as Tab, label: "Aufgaben", icon: ClipboardDocumentCheckIcon, badge: null },
-        { id: "hr" as Tab, label: "Personal", icon: UserGroupIcon, badge: null },
       ],
     },
     {
       label: "Marketing",
       items: [
-        { id: "kommunikation" as Tab, label: "Kommunikation", icon: EnvelopeOpenIcon, badge: null },
         { id: "checks" as Tab, label: "Website-Checks", icon: GlobeAltIcon, badge: stats?.checks.today },
         { id: "referrals" as Tab, label: "Empfehlungen", icon: StarIcon, badge: stats?.referrals.pending },
-      ],
-    },
-    {
-      label: "Analyse & System",
-      items: [
         { id: "analytics" as Tab, label: "Analytics", icon: ChartBarIcon, badge: null },
-        { id: "notifications" as Tab, label: "Benachrichtigungen", icon: BellIcon, badge: unreadCount > 0 ? unreadCount : null },
-        { id: "calendar" as Tab, label: "Kalender", icon: CalendarDaysIcon, badge: null },
       ],
     },
     {
-      label: "Verwaltung",
+      label: "System",
       items: [
-        { id: "settings" as Tab, label: "Einstellungen", icon: Cog6ToothIcon, badge: null },
+        { id: "hr" as Tab, label: "Personal", icon: UserGroupIcon, badge: null },
+        { id: "notifications" as Tab, label: "Benachrichtigungen", icon: BellIcon, badge: unreadCount > 0 ? unreadCount : null },
         { id: "privacy" as Tab, label: "Datenschutz", icon: ShieldCheckIcon, badge: null },
+        { id: "settings" as Tab, label: "Einstellungen", icon: Cog6ToothIcon, badge: null },
       ],
     },
   ];
@@ -518,7 +519,7 @@ export function Dashboard() {
       {/* Sidebar */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z-50 bg-[#111827] border-r border-white/[0.06] transform transition-all duration-300 ease-in-out flex flex-col h-screen
+        fixed inset-y-0 left-0 z-50 bg-[#111827] border-r border-white/[0.06] transform transition-[width,transform] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col h-screen
         ${sidebarCollapsed ? "w-[72px]" : "w-64"}
         lg:sticky lg:top-0 lg:translate-x-0
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -561,39 +562,35 @@ export function Dashboard() {
           </button>
         </div>
 
-        {/* Quick Stats Mini */}
-        {!sidebarCollapsed && (
-          <div className="shrink-0 p-3 border-b border-white/[0.06]">
-            <div className="grid grid-cols-2 gap-2">
-              <MiniStatCard
-                value={stats?.leads.total || 0}
-                label="Leads"
-                trend={stats?.leads.new || 0}
-              />
-              <MiniStatCard
-                value={`€${((stats?.revenue.thisMonth || 0) / 1000).toFixed(1)}k`}
-                label="Umsatz"
-                trend={stats?.revenue.thisMonth || 0}
-              />
-            </div>
-          </div>
-        )}
+        {/* Search Trigger */}
+        <button
+          onClick={() => setCommandPaletteOpen(true)}
+          className={`shrink-0 mx-3 my-2 flex items-center gap-2.5 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all group ${sidebarCollapsed ? "mx-2 justify-center" : ""}`}
+        >
+          <MagnifyingGlassIcon className="w-4 h-4 text-white/30 group-hover:text-white/50 flex-shrink-0" />
+          {!sidebarCollapsed && (
+            <>
+              <span className="flex-1 text-left text-[13px] text-white/25">Suche...</span>
+              <kbd className="text-[10px] text-white/15 bg-white/[0.05] px-1.5 py-0.5 rounded font-mono">Cmd+K</kbd>
+            </>
+          )}
+        </button>
 
         {/* Nav - Scrollable */}
         <nav
           className="flex-1 min-h-0 p-2 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
         >
           {navSections.map((section, sIdx) => (
-            <div key={section.label} className={sIdx > 0 ? "mt-4" : ""}>
-              {!sidebarCollapsed && (
-                <div className="px-3 mb-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/25">
+            <div key={section.label || `section-${sIdx}`} className={sIdx > 0 ? "mt-3" : ""}>
+              {!sidebarCollapsed && section.label && (
+                <div className="px-3 mb-1.5 mt-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-white/20">
                     {section.label}
                   </span>
                 </div>
               )}
               {sidebarCollapsed && sIdx > 0 && (
-                <div className="mx-3 mb-2 border-t border-white/[0.06]" />
+                <div className="mx-3 mb-2 border-t border-white/[0.04]" />
               )}
               <div className="space-y-0.5">
                 {section.items.map((item) => (
@@ -605,16 +602,25 @@ export function Dashboard() {
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all group relative ${
                       activeTab === item.id
-                        ? "bg-gradient-to-r from-[#FC682C]/20 via-[#FC682C]/10 to-transparent text-[#FC682C] font-semibold"
-                        : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+                        ? "bg-gradient-to-r from-[#FC682C]/15 via-[#FC682C]/8 to-transparent text-[#FC682C] font-semibold"
+                        : "text-white/45 hover:text-white/80 hover:bg-white/[0.04]"
                     }`}
                   >
                     {activeTab === item.id && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full" />
+                      <motion.div
+                        layoutId="sidebar-active"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full"
+                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                      />
                     )}
-                    <item.icon
-                      className={`w-[18px] h-[18px] flex-shrink-0 ${activeTab === item.id ? "text-[#FC682C]" : ""}`}
-                    />
+                    <div className="relative flex-shrink-0">
+                      <item.icon
+                        className={`w-[18px] h-[18px] ${activeTab === item.id ? "text-[#FC682C]" : ""}`}
+                      />
+                      {sidebarCollapsed && item.badge != null && item.badge > 0 && (
+                        <span className="absolute -top-1 -right-1.5 w-2 h-2 bg-[#FC682C] rounded-full ring-2 ring-[#111827]" />
+                      )}
+                    </div>
                     {!sidebarCollapsed && (
                       <>
                         <span className="flex-1 text-left truncate">{item.label}</span>
@@ -623,14 +629,20 @@ export function Dashboard() {
                             HOT
                           </span>
                         )}
-                        {item.badge !== null &&
-                          item.badge !== undefined &&
-                          item.badge > 0 && (
-                            <span className="min-w-[18px] h-[18px] px-1 text-[10px] bg-[#FC682C] text-white rounded-full font-medium flex items-center justify-center">
-                              {item.badge}
-                            </span>
-                          )}
+                        {item.badge != null && item.badge > 0 && (
+                          <span className="min-w-[18px] h-[18px] px-1 text-[10px] bg-[#FC682C] text-white rounded-full font-medium flex items-center justify-center">
+                            {item.badge}
+                          </span>
+                        )}
                       </>
+                    )}
+                    {sidebarCollapsed && (
+                      <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#1a2033] border border-white/[0.08] rounded-lg text-[12px] text-white/80 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-xl z-50">
+                        {item.label}
+                        {item.badge != null && item.badge > 0 && (
+                          <span className="ml-1.5 text-[#FC682C] font-semibold">{item.badge}</span>
+                        )}
+                      </div>
                     )}
                   </button>
                 ))}
@@ -639,15 +651,42 @@ export function Dashboard() {
           ))}
         </nav>
 
-        {/* Bottom Section */}
-        <div className="shrink-0 p-2 border-t border-white/[0.06]">
+        {/* Theme Toggle */}
+        <div className={`shrink-0 px-3 py-1.5 border-t border-white/[0.04] ${sidebarCollapsed ? "px-2" : ""}`}>
           <button
-            onClick={handleLogout}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-red-400/60 hover:text-red-400 hover:bg-red-500/10 transition-colors ${sidebarCollapsed ? "justify-center" : ""}`}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[12px] text-white/25 hover:text-white/50 hover:bg-white/[0.03] transition-all ${sidebarCollapsed ? "justify-center" : ""}`}
           >
-            <ArrowRightStartOnRectangleIcon className="w-[18px] h-[18px]" />
-            {!sidebarCollapsed && <span>Abmelden</span>}
+            {theme === "dark" ? <SunIcon className="w-4 h-4 flex-shrink-0" /> : <MoonIcon className="w-4 h-4 flex-shrink-0" />}
+            {!sidebarCollapsed && <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>}
           </button>
+        </div>
+
+        {/* User Profile Card */}
+        <div className="shrink-0 p-2 border-t border-white/[0.06]">
+          <div className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg ${sidebarCollapsed ? "justify-center" : ""}`}>
+            <div className="relative flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FC682C] to-[#9D65C9] flex items-center justify-center text-white text-xs font-bold">
+                MA
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#111827]" />
+            </div>
+            {!sidebarCollapsed && (
+              <>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-medium text-white/70 truncate">M. Ashaer</div>
+                  <div className="text-[10px] text-white/25">Admin</div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-1.5 hover:bg-red-500/10 rounded-lg text-white/20 hover:text-red-400 transition-colors"
+                  title="Abmelden"
+                >
+                  <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </aside>
 
