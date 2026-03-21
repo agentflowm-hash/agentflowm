@@ -3328,6 +3328,7 @@ function LeadsTab() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [showNewLeadModal, setShowNewLeadModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showImportModal, setShowImportModal] = useState(false);
   const [importRows, setImportRows] = useState<Record<string, string>[]>([]);
@@ -3405,7 +3406,8 @@ function LeadsTab() {
       l.email.toLowerCase().includes(search.toLowerCase()) ||
       (l.company?.toLowerCase().includes(search.toLowerCase()) ?? false);
     const matchStatus = statusFilter === "all" || l.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchSource = sourceFilter === "all" || l.source === sourceFilter;
+    return matchSearch && matchStatus && matchSource;
   });
 
   const toggleSelect = (id: number) => {
@@ -3506,6 +3508,18 @@ function LeadsTab() {
             <option value="won">Gewonnen</option>
             <option value="lost">Verloren</option>
           </select>
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            className="px-4 py-3 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none cursor-pointer"
+          >
+            <option value="all">Alle Quellen</option>
+            <option value="lead-generator">Lead-Generator</option>
+            <option value="kontaktformular">Kontaktformular</option>
+            <option value="website">Website</option>
+            <option value="Empfehlung">Empfehlung</option>
+            <option value="CSV-Import">CSV-Import</option>
+          </select>
         </div>
         <div className="flex gap-2">
           {selectedIds.size > 0 && (
@@ -3577,6 +3591,9 @@ function LeadsTab() {
                 Paket
               </th>
               <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">
+                Quelle
+              </th>
+              <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">
                 Status
               </th>
               <th className="px-5 py-4 text-left text-xs font-medium text-white/40 uppercase">
@@ -3588,7 +3605,7 @@ function LeadsTab() {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-16 text-center">
+                <td colSpan={8} className="px-5 py-16 text-center">
                   <UsersIcon className="w-12 h-12 text-white/10 mx-auto mb-3" />
                   <p className="text-white/40">Keine Leads gefunden</p>
                 </td>
@@ -3651,6 +3668,22 @@ function LeadsTab() {
                     className="px-5 py-4 cursor-pointer"
                     onClick={() => setSelectedLead(lead)}
                   >
+                    {lead.source === "lead-generator" ? (
+                      <span className="px-2.5 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-xs font-medium">Lead-Generator</span>
+                    ) : lead.source === "kontaktformular" ? (
+                      <span className="px-2.5 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs font-medium">Kontaktformular</span>
+                    ) : lead.source === "Empfehlung" || lead.source === "referral" ? (
+                      <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium">Empfehlung</span>
+                    ) : lead.source === "CSV-Import" ? (
+                      <span className="px-2.5 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">CSV-Import</span>
+                    ) : (
+                      <span className="px-2.5 py-1 bg-white/10 text-white/50 rounded-lg text-xs font-medium">{lead.source || "Website"}</span>
+                    )}
+                  </td>
+                  <td
+                    className="px-5 py-4 cursor-pointer"
+                    onClick={() => setSelectedLead(lead)}
+                  >
                     <StatusBadge status={lead.status} />
                   </td>
                   <td
@@ -3680,7 +3713,8 @@ function LeadsTab() {
           </span>
           <span className="text-white/30">
             {leads.filter((l) => l.status === "new").length} neue,{" "}
-            {leads.filter((l) => l.status === "won").length} gewonnen
+            {leads.filter((l) => l.status === "won").length} gewonnen,{" "}
+            {leads.filter((l) => l.source === "lead-generator").length} via Generator
           </span>
         </div>
       )}
