@@ -88,7 +88,6 @@ export async function GET(
       files: files || [],
     });
   } catch (error) {
-    console.error("Project GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -230,7 +229,6 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, project: updated });
   } catch (error) {
-    console.error("Project PATCH error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -281,7 +279,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Project DELETE error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

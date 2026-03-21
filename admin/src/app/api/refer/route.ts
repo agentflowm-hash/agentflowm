@@ -106,7 +106,6 @@ export async function POST(request: NextRequest) {
       referrer_name: referrer.name,
     });
   } catch (error) {
-    console.error('Public referral error:', error);
     return NextResponse.json({ error: 'Server-Fehler' }, { status: 500 });
   }
 }

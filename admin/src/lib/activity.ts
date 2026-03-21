@@ -41,7 +41,6 @@ export async function logActivity(
       user_name: userName,
     });
   } catch (error) {
-    // Log but don't throw — activity logging should never break the main operation
-    console.error('[ActivityLog] Failed to log activity:', error);
+    // Activity logging should never break the main operation
   }
 }

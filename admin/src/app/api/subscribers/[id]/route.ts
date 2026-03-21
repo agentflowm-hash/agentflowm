@@ -36,7 +36,6 @@ export async function GET(
 
     return NextResponse.json({ subscriber });
   } catch (error) {
-    console.error("Error fetching subscriber:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -115,7 +114,6 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error updating subscriber:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -167,7 +165,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting subscriber:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

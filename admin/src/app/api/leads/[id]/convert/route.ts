@@ -80,7 +80,6 @@ export async function POST(
       .single();
 
     if (clientError || !newClient) {
-      console.error("Client insert error:", clientError);
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
@@ -116,7 +115,6 @@ export async function POST(
       .single();
 
     if (projectError || !newProject) {
-      console.error("Project insert error:", projectError);
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
@@ -169,7 +167,6 @@ export async function POST(
       message: `Portal-Client erfolgreich erstellt. Zugangscode: ${accessCode}`,
     });
   } catch (error) {
-    console.error("Lead convert error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

@@ -232,7 +232,7 @@ export async function POST(
       message: `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} per E-Mail an ${recipientEmail} gesendet`,
       invoice: updatedInvoice,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: `E-Mail-Versand fehlgeschlagen: ${error.message}` }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: `E-Mail-Versand fehlgeschlagen: ${err?.message || 'Unbekannter Fehler'}` }, { status: 500 });
   }
 }

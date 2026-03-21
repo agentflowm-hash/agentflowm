@@ -71,7 +71,6 @@ Wenn du nichts findest, gib zurück: {"error": "Keine Zugangsdaten gefunden"}`,
 
     if (!response.ok) {
       const err = await response.text();
-      console.error('Groq API error:', err);
       return NextResponse.json({ error: 'AI-Erkennung fehlgeschlagen' }, { status: 500 });
     }
 
@@ -114,7 +113,6 @@ Wenn du nichts findest, gib zurück: {"error": "Keine Zugangsdaten gefunden"}`,
       });
     }
   } catch (error) {
-    console.error('Vault scan error:', error);
     return NextResponse.json({ error: 'Server-Fehler beim Scannen' }, { status: 500 });
   }
 }

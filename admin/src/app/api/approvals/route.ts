@@ -134,7 +134,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ approvals: enrichedApprovals });
     }
   } catch (error) {
-    console.error("Approvals GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -226,7 +225,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, approval });
   } catch (error) {
-    console.error("Approvals POST error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -276,7 +274,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Approvals DELETE error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

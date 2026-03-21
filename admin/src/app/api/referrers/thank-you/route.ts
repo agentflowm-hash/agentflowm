@@ -97,7 +97,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Thank-you email error:', error);
     return NextResponse.json({ error: 'Email konnte nicht gesendet werden' }, { status: 500 });
   }
 }

@@ -874,7 +874,7 @@ export default function Dashboard() {
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ message: `[Sprachnachricht ${duration}s] ${audioUrl || ""}` }),
                     });
-                    await refreshData();
+                    await fetchData();
                     showToast("success", "Sprachnachricht gesendet");
                   } catch {
                     showToast("error", "Sprachnachricht konnte nicht gesendet werden");
@@ -1524,6 +1524,7 @@ function ApprovalsTab({
   onUpdate: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const { showToast } = useToast();
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [feedbackText, setFeedbackText] = useState<{ [key: number]: string }>(
     {},

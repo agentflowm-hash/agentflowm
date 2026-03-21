@@ -38,7 +38,6 @@ export async function GET(
 
     return NextResponse.json({ messages: messages || [] });
   } catch (error) {
-    console.error("Messages GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

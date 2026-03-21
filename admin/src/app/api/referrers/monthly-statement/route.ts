@@ -235,8 +235,7 @@ export const POST = createHandler({
 
       // Update payout status to sent
       await db.from('referrer_payouts').update({ status: 'sent' }).eq('id', payout.id);
-    } catch (e) {
-      console.error('Monthly statement email error:', e);
+    } catch {
     }
   }
 

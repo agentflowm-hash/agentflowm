@@ -33,7 +33,6 @@ export async function GET(
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Approval GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -106,7 +105,6 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, approval: data });
   } catch (error) {
-    console.error("Approval PATCH error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -135,13 +133,11 @@ export async function DELETE(
       .eq("id", approvalId);
 
     if (error) {
-      console.error("Delete approval error:", error);
       return NextResponse.json({ error: "Failed to delete approval" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Approval DELETE error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

@@ -83,7 +83,6 @@ export async function GET(
 
     return NextResponse.json({ tracked: true });
   } catch (error) {
-    console.error("Tracking error:", error);
     // Fail silently - return transparent gif
     return new NextResponse(TRANSPARENT_GIF, {
       headers: { "Content-Type": "image/gif" },

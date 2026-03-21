@@ -28,7 +28,6 @@ async function sendTelegramMessage(
     const data = await res.json();
     return data.ok === true;
   } catch (error) {
-    console.error("Telegram send error:", error);
     return false;
   }
 }
@@ -100,7 +99,6 @@ Dein AgentFlow Team`;
     const sent = await sendTelegramMessage(client.telegram_id, message);
 
     if (sent) {
-      console.log(`✅ Access code sent to client #${clientId} via Telegram`);
       return NextResponse.json({
         success: true,
         message: "Zugangscode wurde per Telegram gesendet",
@@ -115,7 +113,6 @@ Dein AgentFlow Team`;
       );
     }
   } catch (error) {
-    console.error("Send code error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

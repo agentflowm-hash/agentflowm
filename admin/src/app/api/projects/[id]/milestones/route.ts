@@ -39,7 +39,6 @@ export async function GET(
 
     return NextResponse.json({ milestones: milestones || [] });
   } catch (error) {
-    console.error("Milestones GET error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -168,7 +167,6 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, milestone: updated });
   } catch (error) {
-    console.error("Milestone PATCH error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }
@@ -251,7 +249,6 @@ export async function POST(
       milestone: newMilestone,
     });
   } catch (error) {
-    console.error("Milestone POST error:", error);
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

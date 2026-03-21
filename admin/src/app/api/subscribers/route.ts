@@ -19,7 +19,6 @@ export async function GET() {
 
     return NextResponse.json({ subscribers });
   } catch (error) {
-    console.error('Subscribers error:', error);
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
 }

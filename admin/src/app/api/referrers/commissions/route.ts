@@ -280,8 +280,7 @@ export const PATCH = createHandler({
             <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:24px;">Beste Grüße,<br>Das AgentFlowMarketing Team</p>
           </div>`,
         });
-      } catch (e) {
-        console.error('Payout email failed:', e);
+      } catch {
       }
     }
 

@@ -166,7 +166,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error("Email DB error:", dbError);
       return NextResponse.json({ error: "Database error: " + dbError.message }, { status: 500 });
     }
 
@@ -193,7 +192,6 @@ export async function POST(request: NextRequest) {
           message_id: result.messageId
         });
       } catch (sendError) {
-        console.error("SMTP send error:", sendError);
         await db
           .from("portal_emails")
           .update({ status: "failed" })
@@ -205,7 +203,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "SMTP nicht konfiguriert" }, { status: 500 });
     }
   } catch (error) {
-    console.error("Email POST error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

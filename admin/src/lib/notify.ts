@@ -36,7 +36,7 @@ export async function notify(
     // 2. Fire webhook if configured
     fireWebhook(title, message, type, link).catch(() => {});
   } catch (error) {
-    console.error('[Notify] Failed to create notification:', error);
+    // Notification-Fehler soll nie die Hauptoperation blockieren
   }
 }
 
