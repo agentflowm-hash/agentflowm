@@ -102,10 +102,25 @@ export async function POST(request: NextRequest) {
     let emailHtml = html;
     let emailSubject = subject;
 
+    // Client-Daten laden fuer Platzhalter-Ersetzung
+    let clientVars: Record<string, string> = {};
+    if (client_id) {
+      const { data: client } = await db.from('portal_clients').select('name, email, company').eq('id', client_id).single();
+      if (client) {
+        clientVars = {
+          name: client.name || '',
+          firma: client.company || '',
+          email: client.email || '',
+        };
+      }
+    }
+    // Manuelle Variablen ueberschreiben Client-Daten
+    const allVars: Record<string, string> = { ...clientVars, ...(variables || {}) };
+
     // Template laden wenn angegeben
     if (template_id) {
       const { data: template } = await db
-        .from("portal_email_templates")
+        .from("email_templates")
         .select("*")
         .eq("id", template_id)
         .single();
@@ -113,14 +128,14 @@ export async function POST(request: NextRequest) {
       if (template) {
         emailHtml = template.body;
         emailSubject = template.subject;
+      }
+    }
 
-        // Variablen ersetzen
-        if (variables) {
-          for (const [key, value] of Object.entries(variables)) {
-            emailHtml = emailHtml.replace(new RegExp(`{{${key}}}`, "g"), value as string);
-            emailSubject = emailSubject.replace(new RegExp(`{{${key}}}`, "g"), value as string);
-          }
-        }
+    // Platzhalter in Body + Subject ersetzen
+    for (const [key, value] of Object.entries(allVars)) {
+      if (value) {
+        emailHtml = emailHtml.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
+        emailSubject = emailSubject.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
       }
     }
 

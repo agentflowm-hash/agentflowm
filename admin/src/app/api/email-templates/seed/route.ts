@@ -5,7 +5,7 @@
 
 import { db } from '@/lib/db';
 import { createHandler } from '@/lib/api';
-import { PREMIUM_TEMPLATES, wrapEmailHTML } from '@/lib/email-templates';
+import { PREMIUM_TEMPLATES } from '@/lib/email-templates';
 
 export const POST = createHandler({ auth: true }, async () => {
   let inserted = 0;
@@ -24,13 +24,11 @@ export const POST = createHandler({ auth: true }, async () => {
       continue;
     }
 
-    // Template mit Premium-Wrapper einfuegen
-    const wrappedBody = wrapEmailHTML(tmpl.body);
-
+    // Template OHNE Wrapper speichern — Wrapper wird beim Senden angewendet
     await db.from('email_templates').insert({
       name: tmpl.name,
       subject: tmpl.subject,
-      body: wrappedBody,
+      body: tmpl.body,
       category: tmpl.category,
       variables: tmpl.variables,
       usage_count: 0,

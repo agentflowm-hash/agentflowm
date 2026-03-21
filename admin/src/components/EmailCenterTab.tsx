@@ -146,11 +146,26 @@ export default function EmailCenterTab() {
   const applyTemplate = (templateId: string) => {
     const template = templates.find(t => t.id === parseInt(templateId));
     if (template) {
+      // Kundendaten fuer Platzhalter-Vorschau
+      const selectedClient = clients.find(c => c.id === parseInt(compose.client_id));
+      let body = template.body;
+      let subj = template.subject;
+      if (selectedClient) {
+        const vars: Record<string, string> = {
+          name: selectedClient.name || '',
+          firma: (selectedClient as any).company || '',
+          email: selectedClient.email || '',
+        };
+        for (const [k, v] of Object.entries(vars)) {
+          body = body.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+          subj = subj.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+        }
+      }
       setCompose({
         ...compose,
         template_id: templateId,
-        subject: template.subject,
-        body: template.body,
+        subject: subj,
+        body: body,
       });
     }
   };
@@ -158,10 +173,24 @@ export default function EmailCenterTab() {
   const selectClient = (clientId: string) => {
     const client = clients.find(c => c.id === parseInt(clientId));
     if (client) {
+      let body = compose.body;
+      let subj = compose.subject;
+      // Platzhalter mit Kundendaten ersetzen
+      const vars: Record<string, string> = {
+        name: client.name || '',
+        firma: (client as any).company || '',
+        email: client.email || '',
+      };
+      for (const [k, v] of Object.entries(vars)) {
+        body = body.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+        subj = subj.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v);
+      }
       setCompose({
         ...compose,
         client_id: clientId,
         to: client.email,
+        body,
+        subject: subj,
       });
     }
   };
