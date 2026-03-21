@@ -30,6 +30,7 @@ interface SentEmail {
   id: number;
   to_email: string;
   subject: string;
+  body?: string;
   status: string;
   sent_at: string;
   opened_at: string | null;
@@ -59,6 +60,7 @@ export default function EmailCenterTab() {
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+  const [previewEmailId, setPreviewEmailId] = useState<number | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -545,33 +547,70 @@ export default function EmailCenterTab() {
             ) : (
               <div className="space-y-2">
                 {emails.map(email => (
-                  <div key={email.id} className="p-4 bg-white/[0.03] hover:bg-white/[0.05] rounded-xl transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-white truncate">{email.subject}</h4>
-                          <span className={`px-2 py-0.5 rounded text-xs ${getStatusBadge(email.status)}`}>
-                            {email.status}
-                          </span>
-                        </div>
-                        <p className="text-sm text-white/50 truncate">{email.to_email}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs text-white/40">
-                          <span>{new Date(email.sent_at).toLocaleString("de-DE")}</span>
-                          {email.opened_at && (
-                            <span className="flex items-center gap-1 text-blue-400">
-                              <EyeIcon className="w-3 h-3" />
-                              Geöffnet ({email.open_count}x)
+                  <div key={email.id} className="rounded-xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors overflow-hidden">
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-white truncate">{email.subject}</h4>
+                            <span className={`px-2 py-0.5 rounded text-xs flex-shrink-0 ${getStatusBadge(email.status)}`}>
+                              {email.status === 'sent' ? 'Gesendet' : email.status === 'opened' ? 'Geoeffnet' : email.status}
                             </span>
-                          )}
-                          {email.clicked_at && (
-                            <span className="flex items-center gap-1 text-purple-400">
-                              <CursorArrowRaysIcon className="w-3 h-3" />
-                              Geklickt ({email.click_count}x)
-                            </span>
-                          )}
+                          </div>
+                          <p className="text-sm text-white/50 truncate">{email.to_email}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-white/40">
+                            <span>{new Date(email.sent_at).toLocaleString("de-DE")}</span>
+                            {email.opened_at && (
+                              <span className="flex items-center gap-1 text-blue-400">
+                                <EyeIcon className="w-3 h-3" />
+                                Geoeffnet ({email.open_count}x)
+                              </span>
+                            )}
+                            {email.clicked_at && (
+                              <span className="flex items-center gap-1 text-purple-400">
+                                <CursorArrowRaysIcon className="w-3 h-3" />
+                                Geklickt ({email.click_count}x)
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        <button
+                          onClick={() => setPreviewEmailId(previewEmailId === email.id ? null : email.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors flex-shrink-0 ${
+                            previewEmailId === email.id
+                              ? 'bg-[#FC682C]/20 text-[#FC682C] border border-[#FC682C]/30'
+                              : 'bg-white/[0.05] text-white/50 hover:bg-white/[0.1] hover:text-white'
+                          }`}
+                        >
+                          <EyeIcon className="w-3.5 h-3.5" />
+                          {previewEmailId === email.id ? 'Schliessen' : 'Vorschau'}
+                        </button>
                       </div>
                     </div>
+
+                    {/* E-Mail Vorschau — exakt wie der Empfaenger sie sieht */}
+                    {previewEmailId === email.id && email.body && (
+                      <div className="border-t border-white/[0.06]">
+                        <div className="px-4 py-2 bg-white/[0.02] flex items-center justify-between">
+                          <span className="text-[10px] text-white/30 uppercase tracking-wider">So sieht die E-Mail beim Empfaenger aus</span>
+                          <button
+                            onClick={() => {
+                              const w = window.open('', '_blank', 'width=700,height=800');
+                              if (w) { w.document.write(email.body || ''); w.document.close(); }
+                            }}
+                            className="text-[10px] text-[#FC682C] hover:text-[#FC682C]/80 font-medium"
+                          >
+                            In neuem Fenster oeffnen
+                          </button>
+                        </div>
+                        <iframe
+                          srcDoc={email.body}
+                          className="w-full h-[500px] bg-white"
+                          title={`Vorschau: ${email.subject}`}
+                          sandbox=""
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
