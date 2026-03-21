@@ -259,6 +259,15 @@ export default function VaultTab() {
     setNewFolder({ name: "", color: "#FC682C" }); setShowAddFolder(false); setSaving(false); loadData();
   };
 
+  const renameFolder = async (folderId: number, newName: string) => {
+    if (!newName.trim()) return;
+    try {
+      await fetch(`/api/vault/folders`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: folderId, name: newName.trim() }) });
+      showToast("success", "Ordner umbenannt");
+      loadData();
+    } catch { showToast("error", "Fehler beim Umbenennen"); }
+  };
+
   const toggleFav = async (e: VaultEntry) => {
     await fetch(`/api/vault/${e.id}`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ is_favorite: !e.is_favorite }) });
     loadData();
@@ -428,6 +437,11 @@ export default function VaultTab() {
           <button onClick={() => setSelectedFolder(null)} className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${!selectedFolder ? "bg-[#FC682C] text-white" : "bg-white/[0.04] text-white/50 hover:bg-white/[0.08]"}`}>Alle</button>
           {folders.map(f => (
             <button key={f.id} onClick={() => setSelectedFolder(f.id === selectedFolder ? null : f.id)}
+              onDoubleClick={() => {
+                const newName = prompt("Ordner umbenennen:", f.name);
+                if (newName && newName !== f.name) renameFolder(f.id, newName);
+              }}
+              title="Doppelklick zum Umbenennen"
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${f.id === selectedFolder ? "bg-[#FC682C] text-white" : "bg-white/[0.04] text-white/50 hover:bg-white/[0.08]"}`}>
               <FolderIcon className="w-3.5 h-3.5" /> {f.name}
             </button>

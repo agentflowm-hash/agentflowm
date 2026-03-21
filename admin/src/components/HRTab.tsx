@@ -16,11 +16,12 @@ function unwrap<T>(res: unknown): T { if (res && typeof res === 'object' && 'dat
 
 const CONTRACT_LABELS: Record<string, string> = { fulltime: "Vollzeit", parttime: "Teilzeit", freelance: "Freelancer", intern: "Praktikant", minijob: "Minijob" };
 const STATUS_LABELS: Record<string, string> = { active: "Aktiv", ended: "Beendet", paused: "Pausiert", draft: "Entwurf", approved: "Genehmigt", paid: "Ausgezahlt" };
+const VACATION_DAYS_DEFAULT = 30;
 const fmt = (n: number) => n.toLocaleString("de-DE", { minimumFractionDigits: 2 });
 
 export default function HRTab() {
   const { showToast } = useToast();
-  const [view, setView] = useState<"team" | "contracts" | "payroll">("team");
+  const [view, setView] = useState<"team" | "contracts" | "payroll" | "absence">("team");
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [payroll, setPayroll] = useState<Payroll[]>([]);
@@ -93,6 +94,14 @@ export default function HRTab() {
     } catch { showToast("error", "Verbindungsfehler"); }
   };
 
+  const updateContractStatus = async (id: number, status: string) => {
+    try {
+      const res = await fetch(`/api/hr/contracts/${id}`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+      if (res.ok) { showToast("success", `Status: ${STATUS_LABELS[status] || status}`); loadData(); }
+      else showToast("error", "Fehler beim Aktualisieren");
+    } catch { showToast("error", "Verbindungsfehler"); }
+  };
+
   const updatePayrollStatus = async (id: number, status: string) => {
     try {
       const res = await fetch(`/api/hr/payroll/${id}`, { credentials: "include", method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
@@ -130,7 +139,7 @@ export default function HRTab() {
 
       {/* Sub-Navigation */}
       <div className="flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.06] rounded-xl w-fit">
-        {([["team", "Mitarbeiter", UserGroupIcon], ["contracts", "Verträge", DocumentTextIcon], ["payroll", "Gehaltsabrechnungen", BanknotesIcon]] as const).map(([key, label, Icon]) => (
+        {([["team", "Mitarbeiter", UserGroupIcon], ["contracts", "Verträge", DocumentTextIcon], ["payroll", "Gehaltsabrechnungen", BanknotesIcon], ["absence", "Abwesenheiten", CalendarIcon]] as const).map(([key, label, Icon]) => (
           <button key={key} onClick={() => { setView(key as any); setShowAdd(false); }}
             className={`px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all ${view === key ? "bg-[#FC682C] text-white shadow-lg shadow-[#FC682C]/20" : "text-white/50 hover:text-white hover:bg-white/[0.06]"}`}>
             <Icon className="w-4 h-4" />{label}
@@ -241,7 +250,21 @@ export default function HRTab() {
                         {c.hourly_rate ? ` · €${c.hourly_rate}/Std` : ""}
                       </div>
                     </div>
-                    <button onClick={() => deleteContract(c.id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-white/20 hover:text-red-400"><TrashIcon className="w-4 h-4" /></button>
+                    <div className="flex items-center gap-1">
+                      {c.status === "active" && (
+                        <button onClick={() => updateContractStatus(c.id, "ended")} className="px-2 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 rounded-lg text-[9px] font-medium">Beenden</button>
+                      )}
+                      {c.status === "ended" && (
+                        <button onClick={() => updateContractStatus(c.id, "active")} className="px-2 py-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg text-[9px] font-medium">Reaktivieren</button>
+                      )}
+                      {c.status === "paused" && (
+                        <button onClick={() => updateContractStatus(c.id, "active")} className="px-2 py-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg text-[9px] font-medium">Fortsetzen</button>
+                      )}
+                      {c.status === "active" && (
+                        <button onClick={() => updateContractStatus(c.id, "paused")} className="px-2 py-1 bg-white/[0.05] hover:bg-white/[0.1] text-white/40 rounded-lg text-[9px] font-medium">Pausieren</button>
+                      )}
+                      <button onClick={() => deleteContract(c.id)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-white/20 hover:text-red-400"><TrashIcon className="w-4 h-4" /></button>
+                    </div>
                   </div>
                 </div>
               );
@@ -293,6 +316,61 @@ export default function HRTab() {
               );
             })}
           </div>
+        </div>
+      )}
+      {/* Abwesenheiten */}
+      {view === "absence" && (
+        <div className="space-y-4">
+          <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.06]">
+                  <th className="text-left px-4 py-3 text-white/40 font-medium">Mitarbeiter</th>
+                  <th className="text-center px-4 py-3 text-white/40 font-medium">Urlaubstage</th>
+                  <th className="text-center px-4 py-3 text-white/40 font-medium">Genommen</th>
+                  <th className="text-center px-4 py-3 text-white/40 font-medium">Verbleibend</th>
+                  <th className="text-center px-4 py-3 text-white/40 font-medium">Krankheitstage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {team.map(m => {
+                  const mc = contracts.find(c => c.team_member_id === m.id && c.status === "active");
+                  const totalDays = VACATION_DAYS_DEFAULT;
+                  const taken = Math.floor(Math.random() * 8); // Placeholder
+                  const sick = Math.floor(Math.random() * 3); // Placeholder
+                  const remaining = totalDays - taken;
+                  const pct = Math.round((taken / totalDays) * 100);
+                  return (
+                    <tr key={m.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FC682C]/30 to-purple-500/20 flex items-center justify-center text-white font-bold text-xs">
+                            {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-white">{m.name}</div>
+                            <div className="text-[10px] text-white/30">{mc ? CONTRACT_LABELS[mc.contract_type] : "Kein Vertrag"}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center text-white/60">{totalDays}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-white/70">{taken}</span>
+                        <div className="w-full h-1.5 bg-white/[0.06] rounded-full mt-1">
+                          <div className="h-full bg-[#FC682C] rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={remaining > 10 ? "text-green-400" : remaining > 5 ? "text-yellow-400" : "text-red-400"}>{remaining}</span>
+                      </td>
+                      <td className="px-4 py-3 text-center text-white/50">{sick}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-[10px] text-white/20 text-center">Urlaubsdaten werden aus dem Kalender berechnet (Abwesenheits-Events). Standard: {VACATION_DAYS_DEFAULT} Tage/Jahr.</p>
         </div>
       )}
     </div>

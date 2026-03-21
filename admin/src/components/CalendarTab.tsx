@@ -114,6 +114,7 @@ export default function CalendarTab() {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [prefilledDate, setPrefilledDate] = useState<string>("");
+  const [draggedEventId, setDraggedEventId] = useState<number | null>(null);
 
   // ─── Fetch ─────────────────────────────────────────────────
 
@@ -205,6 +206,21 @@ export default function CalendarTab() {
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const goToToday = () => setCurrentDate(new Date());
+
+  const moveEventToDate = async (eventId: number, newDate: Date) => {
+    const ev = events.find(e => e.id === eventId);
+    if (!ev) return;
+    const oldDate = new Date(ev.start_date);
+    const newStart = new Date(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), oldDate.getHours(), oldDate.getMinutes());
+    try {
+      await fetch(`/api/calendar/${eventId}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" }, credentials: "include",
+        body: JSON.stringify({ start_time: newStart.toISOString() }),
+      });
+      showToast("success", "Event verschoben");
+      fetchEvents();
+    } catch { showToast("error", "Fehler beim Verschieben"); }
+  };
 
   const deleteEvent = async (id: number) => {
     try {
@@ -378,6 +394,14 @@ export default function CalendarTab() {
                       return (
                         <div key={idx}
                           onClick={() => date && setSelectedDay(date)}
+                          onDragOver={e => { if (date) e.preventDefault(); }}
+                          onDrop={e => {
+                            e.preventDefault();
+                            if (date && draggedEventId) {
+                              moveEventToDate(draggedEventId, date);
+                              setDraggedEventId(null);
+                            }
+                          }}
                           className={`min-h-[90px] p-1.5 rounded-lg transition-colors cursor-pointer ${
                             !date ? "bg-transparent" :
                             isToday(date) ? "bg-white/[0.02] border-2 border-[#FC682C]/50" :
@@ -392,8 +416,11 @@ export default function CalendarTab() {
                               </div>
                               <div className="space-y-0.5">
                                 {dayEv.slice(0, 3).map(ev => (
-                                  <div key={ev.id} onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
-                                    className="flex items-center gap-1 cursor-pointer hover:opacity-80">
+                                  <div key={ev.id}
+                                    draggable
+                                    onDragStart={() => setDraggedEventId(ev.id)}
+                                    onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
+                                    className="flex items-center gap-1 cursor-grab active:cursor-grabbing hover:opacity-80">
                                     <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getEventDotClass(ev)}`} style={getEventDotStyle(ev)} />
                                     <span className="text-[9px] text-white/60 truncate">
                                       {ev.assigned_name ? `${ev.assigned_name.split(".")[1]?.trim().charAt(0) || ev.assigned_name.charAt(0)}: ` : ""}{ev.title}

@@ -211,7 +211,18 @@ export default function PrivacyTab() {
       {/* ═══ DOKUMENTE ═══ */}
       {tab === "docs" && (
         <div className="space-y-4">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <button onClick={() => {
+              const content = docs.map(d => `${'='.repeat(60)}\n${d.title} (${CAT_LABELS[d.category]} | v${d.version})\n${'='.repeat(60)}\n\n${d.content}\n\n`).join('\n\n');
+              const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = `datenschutz_export_${new Date().toISOString().slice(0,10)}.txt`;
+              a.click(); URL.revokeObjectURL(url);
+              showToast("success", `${docs.length} Dokumente exportiert`);
+            }} className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 rounded-xl text-sm">
+              <ArrowDownTrayIcon className="w-4 h-4" /> Alle exportieren
+            </button>
             <button onClick={() => setShowAddDoc(true)} className="flex items-center gap-2 px-5 py-2.5 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90">
               <PlusIcon className="w-4 h-4" /> Neues Dokument
             </button>
@@ -336,7 +347,18 @@ export default function PrivacyTab() {
                     <div className="flex items-center gap-2 text-[11px] text-white/35">
                       <span>{REQ_LABELS[req.request_type] || req.request_type}</span>
                       <span>· {new Date(req.created_at).toLocaleDateString("de-DE")}</span>
-                      {req.deadline && <span>· Frist: {new Date(req.deadline).toLocaleDateString("de-DE")}</span>}
+                      {(() => {
+                        const deadline = req.deadline ? new Date(req.deadline) : new Date(new Date(req.created_at).getTime() + 30 * 86400000);
+                        const daysLeft = Math.ceil((deadline.getTime() - Date.now()) / 86400000);
+                        const isOverdue = daysLeft < 0;
+                        const isUrgent = daysLeft >= 0 && daysLeft <= 7;
+                        if (req.status === 'completed') return null;
+                        return (
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${isOverdue ? 'bg-red-500/20 text-red-400' : isUrgent ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                            {isOverdue ? `${Math.abs(daysLeft)} Tage ueberfaellig` : `${daysLeft} Tage verbleibend`}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -415,6 +437,17 @@ export default function PrivacyTab() {
                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${proc.status === 'active' ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'}`}>
                       {proc.status === 'active' ? 'Aktiv' : 'Inaktiv'}
                     </span>
+                    {(() => {
+                      const hasSensitive = (proc.data_categories || '').toLowerCase().match(/gesundheit|religion|biometrisch|genetisch|sexuell|politisch/);
+                      const hasExternal = (proc.recipients || '').toLowerCase().match(/extern|drittland|usa|cloud/);
+                      const risk = hasSensitive ? 'hoch' : hasExternal ? 'mittel' : 'niedrig';
+                      const riskColors = { hoch: 'bg-red-500/15 text-red-400', mittel: 'bg-amber-500/15 text-amber-400', niedrig: 'bg-green-500/15 text-green-400' };
+                      return (
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${riskColors[risk]}`}>
+                          Risiko: {risk}
+                        </span>
+                      );
+                    })()}
                   </div>
                   <button onClick={() => deleteItem(proc.id, 'processing')} className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/20 hover:text-red-400"><TrashIcon className="w-4 h-4" /></button>
                 </div>

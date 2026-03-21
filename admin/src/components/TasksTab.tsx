@@ -20,6 +20,19 @@ import { useToast } from "@/components";
 //                         TYPES
 // ═══════════════════════════════════════════════════════════════
 
+interface Subtask {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+interface Comment {
+  id: string;
+  text: string;
+  author: string;
+  created_at: string;
+}
+
 interface Task {
   id: number;
   title: string;
@@ -31,6 +44,8 @@ interface Task {
   linked_entity?: string;
   linked_id?: number;
   tags?: string[];
+  subtasks?: Subtask[];
+  comments?: Comment[];
   created_at: string;
   updated_at: string;
 }
@@ -594,7 +609,31 @@ function TaskModal({
     due_date: task?.due_date || "",
     assignee: task?.assignee || "",
   });
+  const [subtasks, setSubtasks] = useState<Subtask[]>(task?.subtasks || []);
+  const [comments, setComments] = useState<Comment[]>(task?.comments || []);
+  const [newSubtask, setNewSubtask] = useState("");
+  const [newComment, setNewComment] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const addSubtask = () => {
+    if (!newSubtask.trim()) return;
+    setSubtasks([...subtasks, { id: Date.now().toString(), text: newSubtask.trim(), done: false }]);
+    setNewSubtask("");
+  };
+
+  const toggleSubtask = (id: string) => {
+    setSubtasks(subtasks.map(s => s.id === id ? { ...s, done: !s.done } : s));
+  };
+
+  const removeSubtask = (id: string) => {
+    setSubtasks(subtasks.filter(s => s.id !== id));
+  };
+
+  const addComment = () => {
+    if (!newComment.trim()) return;
+    setComments([...comments, { id: Date.now().toString(), text: newComment.trim(), author: "Admin", created_at: new Date().toISOString() }]);
+    setNewComment("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -616,6 +655,8 @@ function TaskModal({
           status: form.status,
           due_date: form.due_date || null,
           assignee: form.assignee.trim() || null,
+          subtasks: subtasks.length > 0 ? subtasks : null,
+          comments: comments.length > 0 ? comments : null,
         }),
       });
 
@@ -673,6 +714,66 @@ function TaskModal({
               placeholder="z.B. Kunde hat Angebot erhalten, nach 3 Tagen nochmal anrufen. Entscheider ist Herr Müller (CEO)."
             />
           </div>
+
+          {/* Subtasks / Checkliste */}
+          <div>
+            <label className="block text-xs text-white/40 mb-1.5">Checkliste</label>
+            <div className="space-y-1 mb-2">
+              {subtasks.map(s => (
+                <div key={s.id} className="flex items-center gap-2 group">
+                  <button type="button" onClick={() => toggleSubtask(s.id)}
+                    className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${s.done ? "bg-[#FC682C] border-[#FC682C]" : "border-white/20 hover:border-[#FC682C]/50"}`}>
+                    {s.done && <CheckCircleIcon className="w-3 h-3 text-white" />}
+                  </button>
+                  <span className={`text-sm flex-1 ${s.done ? "line-through text-white/30" : "text-white/70"}`}>{s.text}</span>
+                  <button type="button" onClick={() => removeSubtask(s.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all">
+                    <XMarkIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input type="text" value={newSubtask} onChange={e => setNewSubtask(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addSubtask())}
+                placeholder="Teilaufgabe hinzufuegen..."
+                className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" />
+              <button type="button" onClick={addSubtask} className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg text-xs text-white/50">
+                <PlusIcon className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {subtasks.length > 0 && (
+              <div className="mt-1.5 text-[10px] text-white/30">
+                {subtasks.filter(s => s.done).length}/{subtasks.length} erledigt
+              </div>
+            )}
+          </div>
+
+          {/* Kommentare (nur bei Bearbeitung) */}
+          {task && (
+            <div>
+              <label className="block text-xs text-white/40 mb-1.5">Kommentare</label>
+              <div className="space-y-2 mb-2 max-h-32 overflow-y-auto">
+                {comments.map(c => (
+                  <div key={c.id} className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[10px] font-medium text-white/50">{c.author}</span>
+                      <span className="text-[9px] text-white/20">{new Date(c.created_at).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                    <p className="text-xs text-white/60">{c.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input type="text" value={newComment} onChange={e => setNewComment(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addComment())}
+                  placeholder="Kommentar schreiben..."
+                  className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-white/80 placeholder-white/20 focus:border-[#FC682C]/50 focus:outline-none" />
+                <button type="button" onClick={addComment} className="px-3 py-1.5 bg-[#FC682C]/10 hover:bg-[#FC682C]/20 border border-[#FC682C]/20 rounded-lg text-xs text-[#FC682C]">
+                  Senden
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Priority + Status Row */}
           <div className="grid grid-cols-2 gap-3">

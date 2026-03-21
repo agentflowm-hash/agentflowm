@@ -43,6 +43,7 @@ interface NotificationSettings {
   telegramAlerts?: boolean;
   webhookUrl?: string;
   dailySummary?: boolean;
+  soundEnabled?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -521,6 +522,11 @@ export default function NotificationsTab() {
                 label="Tages-Zusammenfassung"
                 enabled={!!settings.dailySummary}
                 onToggle={() => toggleSetting("dailySummary")}
+              />
+              <ToggleRow
+                label="Sound bei neuen Benachrichtigungen"
+                enabled={!!settings.soundEnabled}
+                onToggle={() => toggleSetting("soundEnabled")}
               />
             </div>
           </div>

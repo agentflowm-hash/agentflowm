@@ -12,6 +12,7 @@ import {
   DocumentTextIcon,
   ChartBarIcon,
   ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
   FunnelIcon,
   ReceiptPercentIcon,
   BuildingLibraryIcon,
@@ -23,6 +24,7 @@ import {
   EyeIcon,
   DocumentArrowDownIcon,
   PrinterIcon,
+  TagIcon,
 } from "@heroicons/react/24/outline";
 
 interface Transaction {
@@ -83,7 +85,18 @@ export default function AccountingTab() {
   const [editMode, setEditMode] = useState(false);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
   const [generatingInvoices, setGeneratingInvoices] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [customCategories, setCustomCategories] = useState<{ income: string[]; expense: string[] }>({ income: [], expense: [] });
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryType, setNewCategoryType] = useState<"income" | "expense">("income");
   const { showToast } = useToast();
+
+  // Merged categories (hardcoded + custom)
+  const allCategories = useMemo(() => ({
+    income: [...CATEGORIES.income, ...customCategories.income],
+    expense: [...CATEGORIES.expense, ...customCategories.expense],
+  }), [customCategories]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -406,6 +419,61 @@ export default function AccountingTab() {
     setTimeout(() => setExportStatus(null), 2000);
   };
 
+  const addCategory = () => {
+    if (!newCategoryName.trim()) return;
+    const updated = { ...customCategories };
+    if (!updated[newCategoryType].includes(newCategoryName.trim())) {
+      updated[newCategoryType] = [...updated[newCategoryType], newCategoryName.trim()];
+      setCustomCategories(updated);
+      showToast("success", `Kategorie "${newCategoryName}" hinzugefuegt`);
+    }
+    setNewCategoryName("");
+  };
+
+  const removeCategory = (type: "income" | "expense", cat: string) => {
+    const updated = { ...customCategories };
+    updated[type] = updated[type].filter(c => c !== cat);
+    setCustomCategories(updated);
+  };
+
+  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const text = ev.target?.result as string;
+      const lines = text.split("\n").filter(l => l.trim());
+      if (lines.length < 2) { showToast("error", "CSV ist leer"); return; }
+
+      let imported = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(";").map(c => c.replace(/"/g, "").trim());
+        if (cols.length < 5) continue;
+
+        const [date, description, category, typeStr, amountStr] = cols;
+        const type = typeStr.toLowerCase().includes("einnahme") ? "income" : "expense";
+        const amount = parseFloat(amountStr.replace(",", "."));
+        if (!description || isNaN(amount) || amount <= 0) continue;
+
+        try {
+          await fetch("/api/accounting", {
+            method: "POST", credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ date: date || new Date().toISOString().split("T")[0], description, category: category || "Sonstiges", type, amount, tax_rate: 19 }),
+          });
+          imported++;
+        } catch { /* skip failed rows */ }
+      }
+
+      showToast("success", `${imported} Buchung${imported !== 1 ? "en" : ""} importiert`);
+      setShowImportModal(false);
+      fetchTransactions();
+    };
+    reader.readAsText(file, "UTF-8");
+    e.target.value = "";
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(amount);
   };
@@ -501,6 +569,20 @@ export default function AccountingTab() {
           >
             <RecurringIcon className={`w-4 h-4 ${generatingInvoices ? "animate-spin" : ""}`} />
             {generatingInvoices ? "Generiere..." : "Fällige Rechnungen"}
+          </button>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2 transition-colors"
+          >
+            <ArrowUpTrayIcon className="w-4 h-4" />
+            Import
+          </button>
+          <button
+            onClick={() => setShowCategoryModal(true)}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white/70 flex items-center gap-2 transition-colors"
+          >
+            <TagIcon className="w-4 h-4" />
+            Kategorien
           </button>
           <button
             onClick={exportToCSV}
@@ -1126,7 +1208,7 @@ export default function AccountingTab() {
                     required
                   >
                     <option value="" className="bg-[#1a1a1f]">Auswählen...</option>
-                    {CATEGORIES[formData.type].map((cat) => (
+                    {allCategories[formData.type].map((cat) => (
                       <option key={cat} value={cat} className="bg-[#1a1a1f]">{cat}</option>
                     ))}
                   </select>
@@ -1277,6 +1359,92 @@ export default function AccountingTab() {
                   Löschen
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSV Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <ArrowUpTrayIcon className="w-5 h-5 text-[#FC682C]" />
+                CSV Import
+              </h3>
+              <button onClick={() => setShowImportModal(false)} className="p-2 hover:bg-white/10 rounded-lg">
+                <XMarkIcon className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
+            <p className="text-sm text-white/50 mb-4">
+              CSV-Format: Datum;Beschreibung;Kategorie;Typ (Einnahme/Ausgabe);Betrag
+            </p>
+            <div className="p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl mb-4">
+              <p className="text-xs text-white/30 font-mono">Datum;Beschreibung;Kategorie;Typ;Betrag</p>
+              <p className="text-xs text-white/30 font-mono">2026-03-01;Website Launch;Website-Projekte;Einnahme;2499,00</p>
+              <p className="text-xs text-white/30 font-mono">2026-03-05;Hosting;Hosting & Server;Ausgabe;29,99</p>
+            </div>
+            <label className="block w-full py-3 bg-[#FC682C] text-white rounded-xl text-sm font-medium text-center cursor-pointer hover:bg-[#FC682C]/90">
+              CSV-Datei auswaehlen
+              <input type="file" accept=".csv" className="hidden" onChange={handleCSVImport} />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Kategorie-Verwaltung Modal */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <TagIcon className="w-5 h-5 text-[#FC682C]" />
+                Kategorien verwalten
+              </h3>
+              <button onClick={() => setShowCategoryModal(false)} className="p-2 hover:bg-white/10 rounded-lg">
+                <XMarkIcon className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
+            <div className="space-y-3 mb-4">
+              <div className="flex gap-2">
+                <select value={newCategoryType} onChange={(e) => setNewCategoryType(e.target.value as any)}
+                  className="px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm outline-none">
+                  <option value="income" className="bg-[#1a1a1f]">Einnahme</option>
+                  <option value="expense" className="bg-[#1a1a1f]">Ausgabe</option>
+                </select>
+                <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addCategory()}
+                  placeholder="Neue Kategorie..."
+                  className="flex-1 px-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm outline-none" />
+                <button onClick={addCategory} className="px-3 py-2 bg-[#FC682C] text-white rounded-xl text-sm">
+                  <PlusIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              <p className="text-xs text-green-400 font-medium">Einnahme-Kategorien</p>
+              {allCategories.income.map(cat => (
+                <div key={cat} className="flex items-center justify-between px-3 py-1.5 bg-white/[0.02] rounded-lg">
+                  <span className="text-sm text-white/70">{cat}</span>
+                  {customCategories.income.includes(cat) && (
+                    <button onClick={() => removeCategory("income", cat)} className="p-1 hover:bg-red-500/20 rounded">
+                      <XMarkIcon className="w-3.5 h-3.5 text-red-400" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <p className="text-xs text-red-400 font-medium mt-2">Ausgabe-Kategorien</p>
+              {allCategories.expense.map(cat => (
+                <div key={cat} className="flex items-center justify-between px-3 py-1.5 bg-white/[0.02] rounded-lg">
+                  <span className="text-sm text-white/70">{cat}</span>
+                  {customCategories.expense.includes(cat) && (
+                    <button onClick={() => removeCategory("expense", cat)} className="p-1 hover:bg-red-500/20 rounded">
+                      <XMarkIcon className="w-3.5 h-3.5 text-red-400" />
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

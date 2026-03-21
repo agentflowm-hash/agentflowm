@@ -210,6 +210,65 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
     }
   };
 
+  const duplicateInvoice = (invoice: Invoice) => {
+    setEditingInvoice(null);
+    setFormData({
+      client_name: invoice.client_name,
+      client_email: invoice.client_email,
+      client_company: invoice.client_company || "",
+      client_address: "",
+      due_date: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
+      tax_rate: invoice.tax_rate,
+      discount_percent: invoice.discount_percent,
+      notes: invoice.notes || "",
+      items: (invoice.invoice_items && invoice.invoice_items.length > 0)
+        ? invoice.invoice_items.map(i => ({ ...i, id: undefined }))
+        : [{ description: "", quantity: 1, unit_price: 0, total: 0 }],
+    });
+    setShowModal(true);
+    showToast("info", "Rechnung dupliziert — als neuen Entwurf speichern");
+  };
+
+  const sendReminder = async (invoice: Invoice) => {
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ reminder: true }),
+      });
+      if (res.ok) {
+        showToast("success", `Zahlungserinnerung an ${invoice.client_email} gesendet`);
+      } else {
+        showToast("error", "Erinnerung konnte nicht gesendet werden");
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler");
+    }
+  };
+
+  const markPartialPayment = async (id: number) => {
+    const input = prompt("Erhaltenen Betrag eingeben (z.B. 50% Anzahlung):");
+    if (!input) return;
+    const amount = parseFloat(input.replace(",", "."));
+    if (isNaN(amount) || amount <= 0) { showToast("error", "Ungueltiger Betrag"); return; }
+
+    try {
+      const res = await fetch(`/api/invoices/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ partial_payment: amount, notes_append: `Teilzahlung: ${amount.toFixed(2)} EUR am ${new Date().toLocaleDateString("de-DE")}` }),
+      });
+      if (res.ok) {
+        showToast("success", `Teilzahlung von ${amount.toFixed(2)} EUR erfasst`);
+        fetchInvoices();
+      }
+    } catch {
+      showToast("error", "Verbindungsfehler");
+    }
+  };
+
   const deleteInvoice = async (id: number) => {
     setDeleteConfirm({ id, bulk: false });
   };
@@ -506,14 +565,41 @@ export default function InvoiceManager({ filterType }: { filterType?: "invoice" 
                         )}
                         {/* Mark as paid - for sent/overdue invoices */}
                         {(invoice.status === "sent" || isOverdue) && (
+                          <>
+                            <button
+                              onClick={() => markAsPaid(invoice.id)}
+                              className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
+                              title="Als bezahlt markieren"
+                            >
+                              <CheckCircleIcon className="w-4 h-4 text-green-400" />
+                            </button>
+                            <button
+                              onClick={() => markPartialPayment(invoice.id)}
+                              className="p-2 hover:bg-amber-500/20 rounded-lg transition-colors"
+                              title="Teilzahlung erfassen"
+                            >
+                              <CurrencyEuroIcon className="w-4 h-4 text-amber-400" />
+                            </button>
+                          </>
+                        )}
+                        {/* Reminder - for overdue invoices */}
+                        {isOverdue && (
                           <button
-                            onClick={() => markAsPaid(invoice.id)}
-                            className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
-                            title="Als bezahlt markieren"
+                            onClick={() => sendReminder(invoice)}
+                            className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                            title="Zahlungserinnerung senden"
                           >
-                            <CheckCircleIcon className="w-4 h-4 text-green-400" />
+                            <ExclamationCircleIcon className="w-4 h-4 text-red-400" />
                           </button>
                         )}
+                        {/* Duplicate */}
+                        <button
+                          onClick={() => duplicateInvoice(invoice)}
+                          className="p-2 hover:bg-purple-500/20 rounded-lg transition-colors"
+                          title="Duplizieren"
+                        >
+                          <DocumentTextIcon className="w-4 h-4 text-purple-400" />
+                        </button>
                         {/* Edit - ALWAYS available */}
                         <button
                           onClick={() => openEditModal(invoice)}

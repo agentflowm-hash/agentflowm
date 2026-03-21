@@ -14,6 +14,8 @@ import {
   CheckCircleIcon,
   ClockIcon,
   DocumentCheckIcon,
+  EnvelopeIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { useToast } from '@/components';
 
@@ -88,6 +90,7 @@ export function AgreementManager() {
   const [saving, setSaving] = useState(false);
   const [newService, setNewService] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [sendingId, setSendingId] = useState<number | null>(null);
   
   const [newAgreement, setNewAgreement] = useState<NewAgreement>({
     client_name: '',
@@ -165,6 +168,44 @@ export function AgreementManager() {
     } catch {
       showToast('error', 'Status konnte nicht aktualisiert werden');
     }
+  };
+
+  const sendAgreementByEmail = async (agreement: Agreement) => {
+    if (!agreement.client_email) {
+      showToast('error', 'Keine E-Mail-Adresse vorhanden');
+      return;
+    }
+    setSendingId(agreement.id);
+    try {
+      const pdfUrl = `/api/agreements/${agreement.id}/pdf`;
+      const res = await fetch('/api/emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          to: [agreement.client_email],
+          subject: `Vereinbarung ${agreement.agreement_number} - ${agreement.project_title}`,
+          html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#111827;color:#fff;border-radius:16px;">
+            <h2 style="color:#FC682C;">Vereinbarung ${agreement.agreement_number}</h2>
+            <p style="color:rgba(255,255,255,0.7);">Hallo ${agreement.client_name},</p>
+            <p style="color:rgba(255,255,255,0.7);">anbei finden Sie die Vereinbarung fuer das Projekt <strong>"${agreement.project_title}"</strong>.</p>
+            <p style="color:rgba(255,255,255,0.7);">Betrag: <strong style="color:#FC682C;">${parseFloat(String(agreement.total_amount)).toLocaleString('de-DE')} EUR</strong></p>
+            <p style="color:rgba(255,255,255,0.7);">Bitte pruefen und bestaetigen Sie die Vereinbarung.</p>
+            <a href="${pdfUrl}" style="display:inline-block;padding:12px 24px;background:#FC682C;color:#fff;text-decoration:none;border-radius:8px;margin-top:16px;">Vereinbarung ansehen</a>
+            <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;">AgentFlowMarketing</p>
+          </div>`,
+        }),
+      });
+      if (res.ok) {
+        showToast('success', `Vereinbarung an ${agreement.client_email} gesendet`);
+        updateStatus(agreement.id, 'sent');
+      } else {
+        showToast('error', 'E-Mail konnte nicht gesendet werden');
+      }
+    } catch {
+      showToast('error', 'Verbindungsfehler');
+    }
+    setSendingId(null);
   };
 
   const deleteAgreement = async (id: number) => {
@@ -348,11 +389,30 @@ export function AgreementManager() {
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm font-medium">€{parseFloat(String(agreement.total_amount)).toLocaleString('de-DE')}</td>
+                    <td className="px-4 py-3">
+                      <span className="text-sm font-medium">{parseFloat(String(agreement.total_amount)).toLocaleString('de-DE')} EUR</span>
+                      {agreement.status === 'sent' && agreement.sent_at && (() => {
+                        const daysSinceSent = Math.floor((Date.now() - new Date(agreement.sent_at).getTime()) / 86400000);
+                        if (daysSinceSent > 14) return (
+                          <span className="block text-[9px] text-amber-400 mt-0.5 flex items-center gap-1">
+                            <ExclamationTriangleIcon className="w-3 h-3 inline" /> Seit {daysSinceSent} Tagen offen
+                          </span>
+                        );
+                        return null;
+                      })()}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         {agreement.status === 'draft' && (
                           <>
+                            <button
+                              onClick={() => sendAgreementByEmail(agreement)}
+                              disabled={sendingId === agreement.id}
+                              title="Per E-Mail senden"
+                              className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors disabled:opacity-40"
+                            >
+                              <EnvelopeIcon className={`w-4 h-4 text-blue-400 ${sendingId === agreement.id ? 'animate-pulse' : ''}`} />
+                            </button>
                             <button
                               onClick={() => updateStatus(agreement.id, 'sent')}
                               title="Als gesendet markieren"
@@ -362,7 +422,7 @@ export function AgreementManager() {
                             </button>
                             <button
                               onClick={() => deleteAgreement(agreement.id)}
-                              title="Löschen"
+                              title="Loeschen"
                               className="p-1.5 hover:bg-zinc-700 rounded-lg transition-colors"
                             >
                               <TrashIcon className="w-4 h-4 text-red-400" />
