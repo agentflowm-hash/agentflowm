@@ -13,6 +13,7 @@ import {
   CheckIcon,
   ClockIcon,
   ExclamationCircleIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 interface EmailTemplate {
@@ -344,6 +345,32 @@ export default function EmailCenterTab() {
               />
             </div>
 
+            {/* Live Preview */}
+            {compose.body && compose.body.length > 10 && (
+              <div>
+                <button
+                  onClick={() => setPreviewTemplate(previewTemplate ? null : { id: 0, name: 'Preview', subject: compose.subject, body: compose.body, category: '', variables: [], usage_count: 0 })}
+                  className="text-xs text-[#FC682C] hover:text-[#FC682C]/80 font-medium flex items-center gap-1"
+                >
+                  <EyeIcon className="w-3.5 h-3.5" />
+                  {previewTemplate ? 'Vorschau schliessen' : 'E-Mail Vorschau'}
+                </button>
+                {previewTemplate && (
+                  <div className="mt-2 rounded-xl border border-white/[0.08] overflow-hidden bg-white">
+                    <iframe
+                      srcDoc={compose.body.startsWith('<!DOCTYPE') || compose.body.startsWith('<html')
+                        ? compose.body
+                        : `<!DOCTYPE html><html><head><style>body{font-family:sans-serif;max-width:600px;margin:24px auto;padding:24px;color:#1a1a2e;line-height:1.7;font-size:15px}h2{font-size:22px;font-weight:700;margin:0 0 20px}.highlight-box{background:#f8f9fc;border-left:4px solid #FC682C;border-radius:0 12px 12px 0;padding:20px 24px;margin:24px 0}.cta-btn{display:inline-block;background:linear-gradient(135deg,#FC682C,#FF8F5C);color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;margin:24px 0}p{margin:0 0 16px}</style></head><body>${compose.body}</body></html>`
+                      }
+                      className="w-full h-[400px] bg-white rounded-lg"
+                      title="E-Mail Vorschau"
+                      sandbox=""
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Result Message */}
             {sendResult && (
               <div className={`p-3 rounded-lg flex items-center gap-2 ${
@@ -387,16 +414,40 @@ export default function EmailCenterTab() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">Email Templates</h3>
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent("navigateTab", { detail: "kommunikation" }))}
-                className="px-3 py-1.5 bg-[#FC682C] text-white rounded-lg text-sm flex items-center gap-1.5"
-              >
-                <PlusIcon className="w-4 h-4" />
-                Neu
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch("/api/email-templates/seed", { method: "POST", credentials: "include" });
+                      if (res.ok) {
+                        const data = await res.json();
+                        const d = data.data || data;
+                        setSendResult({ success: true, message: `${d.inserted} Premium Templates geladen, ${d.skipped} uebersprungen` });
+                        fetchData();
+                      }
+                    } catch { setSendResult({ success: false, message: "Templates konnten nicht geladen werden" }); }
+                  }}
+                  className="px-3 py-1.5 bg-violet-500/20 text-violet-400 hover:bg-violet-500/30 border border-violet-500/20 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors"
+                >
+                  <SparklesIcon className="w-3.5 h-3.5" />
+                  Premium Templates laden
+                </button>
+              </div>
             </div>
+
+            {sendResult && (
+              <div className={`p-3 rounded-lg flex items-center gap-2 text-sm ${sendResult.success ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                {sendResult.success ? <CheckIcon className="w-4 h-4" /> : <ExclamationCircleIcon className="w-4 h-4" />}
+                {sendResult.message}
+              </div>
+            )}
+
             {templates.length === 0 ? (
-              <p className="text-white/40 text-center py-8">Keine Templates vorhanden</p>
+              <div className="text-center py-12">
+                <EnvelopeIcon className="w-12 h-12 text-white/15 mx-auto mb-3" />
+                <p className="text-white/40 mb-4">Keine Templates vorhanden</p>
+                <p className="text-white/25 text-sm">Klicke "Premium Templates laden" um 10 fertige Vorlagen zu installieren</p>
+              </div>
             ) : (
               <div className="grid gap-3">
                 {templates.map(template => (
@@ -429,22 +480,53 @@ export default function EmailCenterTab() {
                       </div>
                     {previewTemplate?.id === template.id && (
                       <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                        <p className="text-xs text-white/30 mb-2">Vorschau (Platzhalter werden beim Senden ersetzt):</p>
-                        <div className="p-3 bg-white/[0.02] rounded-lg text-xs text-white/50 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
-                          {template.body
-                            .replace(/\{\{name\}\}/g, 'Max Mustermann')
-                            .replace(/\{\{email\}\}/g, 'max@example.com')
-                            .replace(/\{\{company\}\}/g, 'Musterfirma GmbH')
-                            .replace(/\{\{datum\}\}/g, new Date().toLocaleDateString("de-DE"))
-                          }
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs text-white/30">Live-Vorschau (Beispieldaten):</p>
+                          {template.variables && template.variables.length > 0 && (
+                            <div className="flex gap-1 flex-wrap">
+                              {template.variables.map((v: string) => (
+                                <span key={v} className="px-1.5 py-0.5 rounded bg-[#FC682C]/10 text-[9px] text-[#FC682C] font-mono">{`{{${v}}}`}</span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        {template.variables && template.variables.length > 0 && (
-                          <div className="mt-2 flex gap-1 flex-wrap">
-                            {template.variables.map((v: string) => (
-                              <span key={v} className="px-2 py-0.5 rounded bg-[#FC682C]/10 text-[10px] text-[#FC682C]">{`{{${v}}}`}</span>
-                            ))}
-                          </div>
-                        )}
+                        <div className="rounded-xl border border-white/[0.08] overflow-hidden">
+                          <iframe
+                            srcDoc={(() => {
+                              const preview = template.body
+                                .replace(/\{\{name\}\}/g, 'Max Mustermann')
+                                .replace(/\{\{firma\}\}/g, 'Musterfirma GmbH')
+                                .replace(/\{\{email\}\}/g, 'max@example.com')
+                                .replace(/\{\{projekt\}\}/g, 'Business Website')
+                                .replace(/\{\{betrag\}\}/g, '4.990')
+                                .replace(/\{\{rechnungsnr\}\}/g, 'AFM-2026-0042')
+                                .replace(/\{\{faellig\}\}/g, new Date(Date.now() + 14 * 86400000).toLocaleDateString('de-DE'))
+                                .replace(/\{\{fortschritt\}\}/g, '75')
+                                .replace(/\{\{meilenstein\}\}/g, 'Entwicklung')
+                                .replace(/\{\{datum\}\}/g, new Date().toLocaleDateString('de-DE'))
+                                .replace(/\{\{uhrzeit\}\}/g, '10:00')
+                                .replace(/\{\{thema\}\}/g, 'Projekt-Besprechung')
+                                .replace(/\{\{paket\}\}/g, 'BUSINESS Website')
+                                .replace(/\{\{beschreibung\}\}/g, 'Der Design-Entwurf fuer Ihre Website ist fertig.')
+                                .replace(/\{\{portal_link\}\}/g, '#')
+                                .replace(/\{\{referral_link\}\}/g, '#')
+                                .replace(/\{\{link\}\}/g, '#')
+                                .replace(/\{\{cta_text\}\}/g, 'Mehr erfahren')
+                                .replace(/\{\{cta_link\}\}/g, '#')
+                                .replace(/\{\{inhalt\}\}/g, '<p>Hier kommt Ihr Inhalt...</p>')
+                                .replace(/\{\{betreff\}\}/g, 'Newsletter')
+                                .replace(/\{\{tage_ueberfaellig\}\}/g, '7');
+                              // Wrap in Premium-Design fuer Vorschau
+                              if (!preview.includes('<!DOCTYPE')) {
+                                return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:24px 16px;background:#f5f6fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}.wrapper{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.06)}.header{background:linear-gradient(135deg,#0B0F19,#1a2235);padding:32px 40px;text-align:center}.logo{font-size:22px;font-weight:800;color:#FC682C}.content{padding:40px;color:#1a1a2e;line-height:1.7;font-size:15px}.content h2{font-size:22px;font-weight:700;margin:0 0 20px}.content p{margin:0 0 16px}.highlight-box{background:#f8f9fc;border-left:4px solid #FC682C;border-radius:0 12px 12px 0;padding:20px 24px;margin:24px 0}.cta-btn{display:inline-block;background:linear-gradient(135deg,#FC682C,#FF8F5C);color:#fff!important;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;margin:24px 0}.footer{padding:24px 40px;background:#f8f9fc;text-align:center;font-size:12px;color:#999}.footer a{color:#FC682C;text-decoration:none}.signature{margin-top:24px;padding-top:16px;border-top:1px solid #eef0f5}.signature strong{color:#FC682C}</style></head><body><div class="wrapper"><div class="header"><div class="logo">AgentFlowMarketing</div></div><div class="content">${preview}<div class="signature"><p style="margin:0;font-size:14px">Mit freundlichen Gruessen,</p><p style="margin:4px 0 0;font-size:14px"><strong>M. Ashaer</strong><br><span style="color:#888;font-size:13px">AgentFlowMarketing</span></p></div></div><div class="footer"><p>AgentFlowMarketing | kontakt@agentflowm.de</p></div></div></body></html>`;
+                              }
+                              return preview;
+                            })()}
+                            className="w-full h-[450px] bg-white"
+                            title="Template Vorschau"
+                            sandbox=""
+                          />
+                        </div>
                       </div>
                     )}
                     </div>
