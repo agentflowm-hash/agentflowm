@@ -1346,13 +1346,17 @@ function DashboardTab({
             </button>
           </div>
           <div className="space-y-1.5 pt-3 border-t border-white/[0.04]">
-            <div className="flex items-center justify-between text-[11px]">
+            <div onClick={() => onNavigate?.("leads")} className="flex items-center justify-between text-[11px] cursor-pointer hover:bg-white/[0.03] rounded-lg px-2 py-1 -mx-2 transition-all">
               <span className="text-white/40">Neue Leads heute</span>
-              <span className="font-semibold text-white">{newLeadsToday.length}</span>
+              <span className={`font-semibold ${newLeadsToday.length > 0 ? 'text-[#FC682C]' : 'text-white'}`}>{newLeadsToday.length}</span>
             </div>
-            <div className="flex items-center justify-between text-[11px]">
+            <div onClick={() => onNavigate?.("checks")} className="flex items-center justify-between text-[11px] cursor-pointer hover:bg-white/[0.03] rounded-lg px-2 py-1 -mx-2 transition-all">
               <span className="text-white/40">Checks heute</span>
-              <span className="font-semibold text-white">{stats.checks.today}</span>
+              <span className={`font-semibold ${stats.checks.today > 0 ? 'text-green-400' : 'text-white'}`}>{stats.checks.today}</span>
+            </div>
+            <div onClick={() => onNavigate?.("tasks")} className="flex items-center justify-between text-[11px] cursor-pointer hover:bg-white/[0.03] rounded-lg px-2 py-1 -mx-2 transition-all">
+              <span className="text-white/40">Ueberfaellige Leads</span>
+              <span className={`font-semibold ${idleLeads.length > 0 ? 'text-red-400' : 'text-green-400'}`}>{idleLeads.length}</span>
             </div>
           </div>
         </div>
@@ -3786,6 +3790,8 @@ function LeadModal({ lead, onClose, onRefresh }: { lead: Lead; onClose: () => vo
   const [assignedTo, setAssignedTo] = useState(lead.assigned_to || "");
   const [assignedName, setAssignedName] = useState(lead.assigned_name || "");
   const [teamMembers, setTeamMembers] = useState<{id: number; name: string; role: string}[]>([]);
+  const [aiScore, setAiScore] = useState<{ score: number; label: string; reason: string; nextAction: string } | null>(null);
+  const [scoringAi, setScoringAi] = useState(false);
 
   useEffect(() => {
     fetch("/api/team", { credentials: "include" }).then(r => r.json()).then(d => {
@@ -4095,6 +4101,47 @@ kontakt@agentflowm.de | +49 179 949 8247`}</p>
                   WhatsApp
                 </a>
               </div>
+
+              {/* AI Lead Score */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    setScoringAi(true);
+                    try {
+                      const res = await fetch("/api/ai/score", {
+                        method: "POST", credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: lead.name, email: lead.email, company: lead.company, phone: lead.phone, source: lead.source, package_interest: lead.packageInterest, budget: lead.budget, message: lead.message }),
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        setAiScore(data.data || data);
+                      } else { showToast("error", "AI-Scoring fehlgeschlagen"); }
+                    } catch { showToast("error", "Verbindungsfehler"); }
+                    setScoringAi(false);
+                  }}
+                  disabled={scoringAi}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-violet-500/10 border border-violet-500/20 text-violet-400 rounded-xl text-sm font-medium hover:bg-violet-500/20 transition-all disabled:opacity-50"
+                >
+                  {scoringAi ? <div className="w-4 h-4 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin" /> : <SparklesIcon className="w-4 h-4" />}
+                  {scoringAi ? "Analysiere..." : "AI Lead-Score"}
+                </button>
+                {aiScore && (
+                  <div className={`flex-1 py-2.5 px-3 rounded-xl text-center text-sm font-bold ${
+                    aiScore.label === "hot" ? "bg-red-500/15 text-red-400 border border-red-500/20" :
+                    aiScore.label === "warm" ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20" :
+                    "bg-blue-500/15 text-blue-400 border border-blue-500/20"
+                  }`}>
+                    {aiScore.score}/100 — {aiScore.label === "hot" ? "HOT" : aiScore.label === "warm" ? "WARM" : "COLD"}
+                  </div>
+                )}
+              </div>
+              {aiScore && (
+                <div className="p-3 bg-violet-500/5 border border-violet-500/10 rounded-xl">
+                  <p className="text-xs text-white/60">{aiScore.reason}</p>
+                  <p className="text-xs text-violet-400 mt-1 font-medium">{aiScore.nextAction}</p>
+                </div>
+              )}
 
               {/* Info Grid — editierbar */}
               <div className="flex items-center justify-between mb-2">
@@ -4775,18 +4822,30 @@ function ChecksTab() {
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
-        <div className="flex items-center gap-2 p-1 bg-white/[0.04] rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 p-1 bg-white/[0.04] rounded-xl">
+            <button
+              onClick={() => setView("grid")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === "grid" ? "bg-white/10 text-white" : "text-white/50"}`}
+            >
+              <Squares2X2Icon className="w-4 h-4" /> Grid
+            </button>
+            <button
+              onClick={() => setView("list")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === "list" ? "bg-white/10 text-white" : "text-white/50"}`}
+            >
+              <ListBulletIcon className="w-4 h-4" /> Liste
+            </button>
+          </div>
           <button
-            onClick={() => setView("grid")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === "grid" ? "bg-white/10 text-white" : "text-white/50"}`}
+            onClick={() => {
+              const url = prompt("Website-URL eingeben (z.B. https://example.de):");
+              if (!url) return;
+              window.open(`https://agentflowm.de/website-check?url=${encodeURIComponent(url)}`, "_blank");
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-[#FC682C] text-white rounded-xl text-sm font-medium hover:bg-[#FC682C]/90 transition-colors"
           >
-            <Squares2X2Icon className="w-4 h-4" /> Grid
-          </button>
-          <button
-            onClick={() => setView("list")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === "list" ? "bg-white/10 text-white" : "text-white/50"}`}
-          >
-            <ListBulletIcon className="w-4 h-4" /> Liste
+            <PlusIcon className="w-4 h-4" /> Neuer Check
           </button>
         </div>
         <div className="flex gap-2">
@@ -6786,36 +6845,57 @@ function AnalyticsTab({ stats }: { stats: Stats | null }) {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-[#FC682C]/20 to-[#FC682C]/5 border border-[#FC682C]/20">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">Umsatz (6 Mon.)</span>
-            <CurrencyEuroIcon className="w-5 h-5 text-[#FC682C]" />
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FC682C]/20 to-[#FC682C]/5 border border-[#FC682C]/20">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-white/50">Umsatz (6M)</span>
+            <CurrencyEuroIcon className="w-4 h-4 text-[#FC682C]" />
           </div>
-          <p className="text-2xl font-bold text-white">
-            €{totalRevenue >= 1000 ? `${(totalRevenue / 1000).toFixed(1)}k` : totalRevenue.toLocaleString()}
+          <p className="text-xl font-bold text-white">
+            {totalRevenue >= 1000 ? `${(totalRevenue / 1000).toFixed(1)}k` : totalRevenue.toLocaleString()} EUR
           </p>
         </div>
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">Leads (6 Mon.)</span>
-            <UsersIcon className="w-5 h-5 text-blue-400" />
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-white/50">Leads (6M)</span>
+            <UsersIcon className="w-4 h-4 text-blue-400" />
           </div>
-          <p className="text-2xl font-bold text-white">{totalLeads}</p>
+          <p className="text-xl font-bold text-white">{totalLeads}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">Conversion Rate</span>
-            <ArrowTrendingUpIcon className="w-5 h-5 text-purple-400" />
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-white/50">Conversion</span>
+            <ArrowTrendingUpIcon className="w-4 h-4 text-purple-400" />
           </div>
-          <p className="text-2xl font-bold text-white">{conversionRate}%</p>
+          <p className="text-xl font-bold text-white">{conversionRate}%</p>
         </div>
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-white/50">Aktive Kunden</span>
-            <ChartBarIcon className="w-5 h-5 text-green-400" />
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-white/50">Aktive Kunden</span>
+            <ChartBarIcon className="w-4 h-4 text-green-400" />
           </div>
-          <p className="text-2xl font-bold text-white">{activeClients}</p>
+          <p className="text-xl font-bold text-white">{activeClients}</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/5 border border-yellow-500/20">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-white/50">Avg. Deal</span>
+            <BanknotesIcon className="w-4 h-4 text-yellow-400" />
+          </div>
+          <p className="text-xl font-bold text-white">
+            {funnel.gewonnen > 0 ? `${Math.round(totalRevenue / funnel.gewonnen).toLocaleString("de-DE")} EUR` : "---"}
+          </p>
+        </div>
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-teal-500/20 to-teal-600/5 border border-teal-500/20">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-white/50">CAC</span>
+            <CalculatorIcon className="w-4 h-4 text-teal-400" />
+          </div>
+          <p className="text-xl font-bold text-white">
+            {funnel.gewonnen > 0 && totalLeads > 0
+              ? `${Math.round((totalRevenue * 0.35) / funnel.gewonnen).toLocaleString("de-DE")} EUR`
+              : "---"}
+          </p>
+          <p className="text-[9px] text-white/25 mt-0.5">Kosten pro Neukunde</p>
         </div>
       </div>
 
@@ -11427,6 +11507,22 @@ function SettingsTab() {
                   className="flex-1 px-3 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-white text-sm focus:border-[#FC682C]/50 outline-none placeholder:text-white/20" />
                 <button onClick={() => saveSettings("notifications", notifSettings)} disabled={saving}
                   className="px-4 py-2.5 bg-[#FC682C] text-white rounded-xl text-xs font-medium disabled:opacity-50">Speichern</button>
+                {notifSettings.webhookUrl && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(notifSettings.webhookUrl, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ event: "test", title: "Webhook Test", message: "Dies ist ein Test von AgentFlowMarketing", timestamp: new Date().toISOString(), source: "AgentFlowMarketing" }),
+                        });
+                        if (res.ok) showToast("success", "Webhook erfolgreich getestet!");
+                        else showToast("error", `Webhook Fehler: HTTP ${res.status}`);
+                      } catch { showToast("error", "Webhook nicht erreichbar"); }
+                    }}
+                    className="px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-white/60 rounded-xl text-xs font-medium transition-colors"
+                  >Test</button>
+                )}
               </div>
               <p className="text-[10px] text-white/25 mt-1.5">JSON-POST an diese URL bei jedem Event (neuer Lead, Rechnungszahlung, etc.)</p>
             </div>

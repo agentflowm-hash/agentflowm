@@ -53,9 +53,11 @@ export default function EmailCenterTab() {
     body: "",
     template_id: "",
     client_id: "",
+    scheduled_at: "",
   });
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -128,7 +130,7 @@ export default function EmailCenterTab() {
 
       if (res.ok) {
         setSendResult({ success: true, message: "Email erfolgreich gesendet!" });
-        setCompose({ to: "", subject: "", body: "", template_id: "", client_id: "" });
+        setCompose({ to: "", subject: "", body: "", template_id: "", client_id: "", scheduled_at: "" });
         fetchData();
       } else {
         const err = await res.json();
@@ -323,6 +325,22 @@ export default function EmailCenterTab() {
               </div>
             )}
 
+            {/* Schedule */}
+            <div>
+              <label className="block text-sm text-white/60 mb-1">Geplanter Versand (optional)</label>
+              <input
+                type="datetime-local"
+                value={compose.scheduled_at}
+                onChange={(e) => setCompose({ ...compose, scheduled_at: e.target.value })}
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-white focus:border-[#FC682C]/50 outline-none [color-scheme:dark]"
+              />
+              {compose.scheduled_at && (
+                <p className="text-[11px] text-[#FC682C] mt-1">
+                  Wird gesendet am: {new Date(compose.scheduled_at).toLocaleString("de-DE")}
+                </p>
+              )}
+            </div>
+
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handleSend}
@@ -330,7 +348,7 @@ export default function EmailCenterTab() {
                 className="px-6 py-2.5 bg-gradient-to-r from-[#FC682C] to-[#FF8F5C] text-white rounded-xl text-sm font-medium flex items-center gap-2 disabled:opacity-50"
               >
                 <PaperAirplaneIcon className="w-4 h-4" />
-                {sending ? "Senden..." : "Jetzt senden"}
+                {sending ? "Senden..." : compose.scheduled_at ? "Planen" : "Jetzt senden"}
               </button>
             </div>
           </div>
@@ -363,15 +381,43 @@ export default function EmailCenterTab() {
                           <span className="text-xs text-white/40">{template.usage_count}x verwendet</span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => {
-                          setCompose({ ...compose, template_id: String(template.id), subject: template.subject, body: template.body });
-                          setActiveSection("compose");
-                        }}
-                        className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white transition-colors"
-                      >
-                        Verwenden
-                      </button>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setPreviewTemplate(previewTemplate?.id === template.id ? null : template)}
+                          className="px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-white/60 transition-colors"
+                        >
+                          {previewTemplate?.id === template.id ? "Schliessen" : "Vorschau"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCompose({ ...compose, template_id: String(template.id), subject: template.subject, body: template.body });
+                            setActiveSection("compose");
+                          }}
+                          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white transition-colors"
+                        >
+                          Verwenden
+                        </button>
+                      </div>
+                    {previewTemplate?.id === template.id && (
+                      <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                        <p className="text-xs text-white/30 mb-2">Vorschau (Platzhalter werden beim Senden ersetzt):</p>
+                        <div className="p-3 bg-white/[0.02] rounded-lg text-xs text-white/50 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto">
+                          {template.body
+                            .replace(/\{\{name\}\}/g, 'Max Mustermann')
+                            .replace(/\{\{email\}\}/g, 'max@example.com')
+                            .replace(/\{\{company\}\}/g, 'Musterfirma GmbH')
+                            .replace(/\{\{datum\}\}/g, new Date().toLocaleDateString("de-DE"))
+                          }
+                        </div>
+                        {template.variables && template.variables.length > 0 && (
+                          <div className="mt-2 flex gap-1 flex-wrap">
+                            {template.variables.map((v: string) => (
+                              <span key={v} className="px-2 py-0.5 rounded bg-[#FC682C]/10 text-[10px] text-[#FC682C]">{`{{${v}}}`}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     </div>
                   </div>
                 ))}
