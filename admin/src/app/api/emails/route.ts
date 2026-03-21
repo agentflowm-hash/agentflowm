@@ -96,6 +96,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "To and subject required" }, { status: 400 });
     }
 
+    // Importiere Premium-Wrapper
+    const { wrapEmailHTML } = await import('@/lib/email-templates');
+
     let emailHtml = html;
     let emailSubject = subject;
 
@@ -121,7 +124,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Tracking Pixel einfügen
+    // Premium-Wrapper anwenden wenn Body kein vollstaendiges HTML ist
+    if (emailHtml && !emailHtml.trim().startsWith('<!DOCTYPE') && !emailHtml.trim().startsWith('<html')) {
+      emailHtml = wrapEmailHTML(emailHtml);
+    }
+
+    // Tracking Pixel einfuegen
     const trackingId = `email-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     if (track_opens !== false && emailHtml) {
       emailHtml += `<img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://admin.agentflowm.de'}/api/emails/track/${trackingId}/open" width="1" height="1" style="display:none" />`;
