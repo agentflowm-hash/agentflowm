@@ -390,7 +390,7 @@ export default function EmailCenterTab() {
                 type="datetime-local"
                 value={compose.scheduled_at}
                 onChange={(e) => setCompose({ ...compose, scheduled_at: e.target.value })}
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-white focus:border-[#FC682C]/50 outline-none [color-scheme:dark]"
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-white focus:border-[#FC682C]/50 outline-none"
               />
               {compose.scheduled_at && (
                 <p className="text-[11px] text-[#FC682C] mt-1">

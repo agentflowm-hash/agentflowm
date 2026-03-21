@@ -332,6 +332,78 @@ html.light .hover\:bg-\[\#FC682C\]\/20:hover { background: rgba(252,104,44,0.15)
 html.light .hover\:bg-\[\#FC682C\]\/10:hover { background: rgba(252,104,44,0.1) !important; }
 html.light .hover\:border-\[\#FC682C\]\/30:hover { border-color: rgba(252,104,44,0.35) !important; }
 
+/* === Missing modal backgrounds === */
+html.light .bg-\[\#141418\] { background: #ffffff !important; }
+html.light .bg-\[\#1a1a2e\] { background: #ffffff !important; }
+
+/* === Zinc palette (AgreementManager) === */
+html.light .bg-zinc-900,
+html.light .bg-zinc-900\/50 { background: #ffffff !important; }
+html.light .bg-zinc-800,
+html.light .bg-zinc-800\/50,
+html.light .bg-zinc-800\/30 { background: rgba(0,0,0,0.02) !important; }
+html.light .border-zinc-800 { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-zinc-700 { border-color: rgba(0,0,0,0.12) !important; }
+html.light .divide-zinc-800 > :not(:last-child) { border-color: rgba(0,0,0,0.06) !important; }
+html.light .text-zinc-300 { color: rgba(26,26,46,0.7) !important; }
+html.light .text-zinc-400 { color: rgba(26,26,46,0.55) !important; }
+html.light .text-zinc-500 { color: rgba(26,26,46,0.4) !important; }
+html.light .hover\:bg-zinc-700:hover { background: rgba(0,0,0,0.06) !important; }
+html.light .hover\:bg-zinc-600:hover { background: rgba(0,0,0,0.08) !important; }
+html.light .hover\:bg-zinc-800\/30:hover { background: rgba(0,0,0,0.04) !important; }
+
+/* === Gray text === */
+html.light .text-gray-500 { color: #4b5563 !important; }
+
+/* === Amber/warning extras === */
+html.light .text-amber-400 { color: #d97706 !important; }
+html.light .bg-amber-500\/20 { background: rgba(245,158,11,0.12) !important; }
+html.light .bg-amber-500\/15 { background: rgba(245,158,11,0.1) !important; }
+html.light .border-amber-500\/20 { border-color: rgba(245,158,11,0.2) !important; }
+
+/* === Cyan accent (Notifications) === */
+html.light .text-cyan-400 { color: #0891b2 !important; }
+html.light .bg-cyan-500\/20 { background: rgba(6,182,212,0.12) !important; }
+
+/* === Sky accent === */
+html.light .text-sky-400 { color: #0284c7 !important; }
+html.light .bg-sky-500\/20 { background: rgba(14,165,233,0.12) !important; }
+
+/* === Pink accent (Activity) === */
+html.light .text-pink-400 { color: #db2777 !important; }
+html.light .bg-pink-500\/20 { background: rgba(236,72,153,0.12) !important; }
+
+/* === Indigo accent === */
+html.light .text-indigo-400 { color: #4f46e5 !important; }
+html.light .bg-indigo-500\/20 { background: rgba(99,102,241,0.12) !important; }
+
+/* === Gradient button overrides (orange) === */
+html.light [class*="from-orange-500"][class*="to-orange-600"] {
+    color: #ffffff !important;
+}
+html.light [class*="from-orange-500"][class*="to-orange-600"] * {
+    color: #ffffff !important;
+}
+html.light .bg-orange-500 { background: #f97316 !important; color: #fff !important; }
+html.light .bg-orange-500 * { color: #fff !important; }
+html.light .hover\:bg-orange-600:hover { background: #ea580c !important; }
+
+/* === Red button overrides === */
+html.light .hover\:bg-red-500\/20:hover { background: rgba(239,68,68,0.15) !important; }
+html.light .hover\:bg-red-600:hover { background: #dc2626 !important; }
+html.light .bg-red-500 { background: #ef4444 !important; color: #fff !important; }
+html.light .bg-red-500 * { color: #fff !important; }
+
+/* === Purple hover === */
+html.light .hover\:bg-purple-500\/20:hover { background: rgba(139,92,246,0.15) !important; }
+html.light .hover\:bg-amber-500\/20:hover { background: rgba(245,158,11,0.15) !important; }
+html.light .hover\:bg-blue-500\/20:hover { background: rgba(59,130,246,0.15) !important; }
+
+/* === Divide colors === */
+html.light .divide-white\/5 > :not(:last-child) { border-color: rgba(0,0,0,0.04) !important; }
+html.light .divide-white\/\[0\.06\] > :not(:last-child) { border-color: rgba(0,0,0,0.06) !important; }
+html.light .divide-white\/\[0\.04\] > :not(:last-child) { border-color: rgba(0,0,0,0.04) !important; }
+
 /* === Kanban specific === */
 html.light .bg-\[\#FC682C\]\/\[0\.03\] { background: rgba(252,104,44,0.03) !important; }
 html.light .bg-\[\#FC682C\]\/5 { background: rgba(252,104,44,0.04) !important; }
