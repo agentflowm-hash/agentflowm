@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { generateInvoiceHTML } from "@/lib/invoice-template";
 import { generateOfferHTML, PACKAGE_TEMPLATES } from "@/lib/offer-template";
+import { htmlToPdf, pdfResponse } from "@/lib/pdf";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -104,12 +105,14 @@ export async function GET(
       if (format === "html") {
         return new NextResponse(offerHtml, { headers: { "Content-Type": "text/html; charset=utf-8" } });
       }
-      return new NextResponse(offerHtml, {
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          "Content-Disposition": `inline; filename="Angebot-${invoice.invoice_number}.html"`,
-        },
-      });
+      // Echtes PDF generieren
+      try {
+        const pdf = await htmlToPdf(offerHtml, { margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' } });
+        return pdfResponse(pdf, `Angebot-${invoice.invoice_number}.pdf`);
+      } catch {
+        // Fallback: HTML wenn PDF-Generierung fehlschlaegt
+        return new NextResponse(offerHtml, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      }
     }
 
     // Load company settings for dynamic sender info
@@ -160,16 +163,17 @@ export async function GET(
       });
     }
 
-    // For PDF, we return HTML with print instructions
-    // In production, you'd use Puppeteer or similar
-    return new NextResponse(html, {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Content-Disposition": `inline; filename="${isOffer ? 'Angebot' : 'Rechnung'}-${invoice.invoice_number}.html"`,
-      },
-    });
+    // Echtes PDF generieren
+    try {
+      const pdf = await htmlToPdf(html);
+      return pdfResponse(pdf, `Rechnung-${invoice.invoice_number}.pdf`);
+    } catch {
+      // Fallback: HTML wenn PDF-Generierung fehlschlaegt
+      return new NextResponse(html, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
   } catch (error: any) {
-    console.error("Error generating invoice PDF:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
