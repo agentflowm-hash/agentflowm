@@ -8715,7 +8715,17 @@ function ClientDetailModal({
                   <div className="grid grid-cols-3 gap-2">
                     <div className="p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
                       <div className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Zugangscode</div>
-                      <div className="text-sm font-mono font-bold text-[#FC682C]">{client.access_code}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-mono font-bold text-[#FC682C]">{client.access_code}</div>
+                        <a
+                          href={`${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://portal.agentflowm.de'}/login/${client.access_code}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2 py-0.5 text-[9px] bg-[#FC682C]/10 text-[#FC682C] hover:bg-[#FC682C]/20 rounded-md font-medium transition-colors"
+                        >
+                          Portal oeffnen
+                        </a>
+                      </div>
                     </div>
                     <div className="p-3 bg-white/[0.02] rounded-xl border border-white/[0.04]">
                       <div className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Erstellt</div>

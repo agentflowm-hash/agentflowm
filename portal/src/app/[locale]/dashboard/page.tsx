@@ -833,8 +833,23 @@ export default function Dashboard() {
               <VoiceRecorder
                 disabled={sending}
                 onSend={async (audioBlob, duration) => {
-                  // TODO: Upload voice message to API
-                  showToast("info", `🎤 Voice message (${duration}s) - Coming soon!`);
+                  try {
+                    const formData = new FormData();
+                    formData.append("file", audioBlob, `voice_${Date.now()}.webm`);
+                    const uploadRes = await fetch("/api/files", { method: "POST", credentials: "include", body: formData });
+                    if (!uploadRes.ok) { showToast("error", "Upload fehlgeschlagen"); return; }
+                    const uploadData = await uploadRes.json();
+                    const audioUrl = uploadData.file?.url;
+                    await fetch("/api/messages", {
+                      method: "POST", credentials: "include",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ message: `[Sprachnachricht ${duration}s] ${audioUrl || ""}` }),
+                    });
+                    await refreshData();
+                    showToast("success", "Sprachnachricht gesendet");
+                  } catch {
+                    showToast("error", "Sprachnachricht konnte nicht gesendet werden");
+                  }
                 }}
               />
               <button
