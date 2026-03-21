@@ -49,7 +49,18 @@ import {
   useToast,
 } from "@/components";
 
-type Tab = "overview" | "messages" | "files" | "approvals" | "preview";
+type Tab = "overview" | "messages" | "files" | "approvals" | "invoices" | "preview";
+
+interface PortalInvoice {
+  id: number;
+  invoice_number: string;
+  type: string;
+  status: string;
+  issue_date: string;
+  due_date: string;
+  total: number;
+  pdf_available: boolean;
+}
 
 interface ProjectData {
   client: { id: number; name: string; email: string; company: string | null };
@@ -118,6 +129,7 @@ export default function Dashboard() {
   // Next-Level state
   const [showConfetti, setShowConfetti] = useState(false);
   const [previewFile, setPreviewFile] = useState<number | null>(null);
+  const [invoices, setInvoices] = useState<PortalInvoice[]>([]);
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: "", company: "", phone: "" });
   const [savingProfile, setSavingProfile] = useState(false);
@@ -155,9 +167,20 @@ export default function Dashboard() {
     }
   }, [router, tError]);
 
+  const fetchInvoices = useCallback(async () => {
+    try {
+      const res = await fetch("/api/invoices", { credentials: "include" });
+      if (res.ok) {
+        const json = await res.json();
+        setInvoices(json.invoices || []);
+      }
+    } catch { /* silent */ }
+  }, []);
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchInvoices();
+  }, [fetchData, fetchInvoices]);
 
   // Real-time polling for updates every 30 seconds
   useEffect(() => {
@@ -379,6 +402,7 @@ export default function Dashboard() {
       badge: files.length,
     },
     { id: "approvals" as Tab, label: tNav("approvals"), icon: CheckCircleIcon },
+    { id: "invoices" as Tab, label: "Dokumente", icon: DocumentIcon, badge: invoices.length },
     ...(project.previewEnabled
       ? [{ id: "preview" as Tab, label: tNav("preview"), icon: EyeIcon }]
       : []),
@@ -1062,6 +1086,67 @@ export default function Dashboard() {
             onUpdate={fetchData}
             t={tApprovals}
           />
+        )}
+
+        {activeTab === "invoices" && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">Dokumente & Rechnungen</h3>
+            {invoices.length === 0 ? (
+              <div className="text-center py-12 text-white/30">
+                <DocumentIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>Noch keine Dokumente vorhanden</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {invoices.map((inv) => {
+                  const statusStyles: Record<string, string> = {
+                    draft: "bg-white/10 text-white/50",
+                    sent: "bg-blue-500/20 text-blue-400",
+                    paid: "bg-green-500/20 text-green-400",
+                    overdue: "bg-red-500/20 text-red-400",
+                    cancelled: "bg-white/10 text-white/30",
+                  };
+                  const statusLabels: Record<string, string> = {
+                    draft: "Entwurf", sent: "Offen", paid: "Bezahlt", overdue: "Ueberfaellig", cancelled: "Storniert",
+                  };
+                  return (
+                    <div key={inv.id} className="flex items-center justify-between p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl hover:bg-white/[0.05] transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-[#FC682C]/10 flex items-center justify-center">
+                          <DocumentTextIcon className="w-5 h-5 text-[#FC682C]" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-white">{inv.invoice_number}</span>
+                            <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${statusStyles[inv.status] || statusStyles.draft}`}>
+                              {statusLabels[inv.status] || inv.status}
+                            </span>
+                          </div>
+                          <div className="text-xs text-white/40 mt-0.5">
+                            {inv.type === "offer" ? "Angebot" : "Rechnung"} vom {new Date(inv.issue_date).toLocaleDateString("de-DE")}
+                            {inv.due_date && ` — faellig bis ${new Date(inv.due_date).toLocaleDateString("de-DE")}`}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg font-bold text-white">{Number(inv.total).toLocaleString("de-DE", { minimumFractionDigits: 2 })} EUR</span>
+                        {inv.pdf_available && (
+                          <a
+                            href={`/api/invoices/${inv.id}/pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 text-xs bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded-lg text-white/60 hover:text-white transition-all"
+                          >
+                            PDF
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === "preview" &&

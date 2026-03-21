@@ -10,6 +10,127 @@
   --color-accent-dark: #e55a1f;
 }
 
+/* ==========================================
+   LIGHT MODE — Portal Premium Theme
+   ========================================== */
+html.light {
+  --color-bg: #f5f6fa;
+  --color-card: #ffffff;
+  --color-accent: #FC682C;
+  --color-accent-light: #FF8F5C;
+  --color-accent-dark: #e55a1f;
+}
+
+html.light, html.light body { background: #f5f6fa; color: #1a1a2e; }
+
+/* Core backgrounds */
+html.light .bg-\[\#09090b\] { background: #f5f6fa !important; }
+html.light .bg-\[\#09090b\]\/80 { background: rgba(245,246,250,0.85) !important; }
+html.light .bg-\[\#0f0f12\] { background: #ffffff !important; }
+
+/* Text */
+html.light .text-white { color: #1a1a2e !important; }
+html.light .text-white\/10 { color: rgba(26,26,46,0.08) !important; }
+html.light .text-white\/15 { color: rgba(26,26,46,0.12) !important; }
+html.light .text-white\/20 { color: rgba(26,26,46,0.15) !important; }
+html.light .text-white\/25 { color: rgba(26,26,46,0.2) !important; }
+html.light .text-white\/30 { color: rgba(26,26,46,0.3) !important; }
+html.light .text-white\/35 { color: rgba(26,26,46,0.38) !important; }
+html.light .text-white\/40 { color: rgba(26,26,46,0.45) !important; }
+html.light .text-white\/50 { color: rgba(26,26,46,0.55) !important; }
+html.light .text-white\/60 { color: rgba(26,26,46,0.65) !important; }
+html.light .text-white\/70 { color: rgba(26,26,46,0.75) !important; }
+html.light .text-white\/80 { color: rgba(26,26,46,0.85) !important; }
+html.light .text-white\/90 { color: rgba(26,26,46,0.92) !important; }
+
+/* Borders */
+html.light .border-white\/\[0\.04\],
+html.light .border-white\/\[0\.06\],
+html.light .border-white\/\[0\.08\],
+html.light .border-white\/5,
+html.light .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-white\/\[0\.12\],
+html.light .border-white\/\[0\.15\],
+html.light .border-white\/20 { border-color: rgba(0,0,0,0.12) !important; }
+html.light .border-white\/30 { border-color: rgba(0,0,0,0.15) !important; }
+
+/* Semi-transparent backgrounds */
+html.light .bg-white\/\[0\.02\],
+html.light .bg-white\/\[0\.03\] { background: rgba(0,0,0,0.015) !important; }
+html.light .bg-white\/\[0\.04\],
+html.light .bg-white\/\[0\.05\] { background: rgba(0,0,0,0.025) !important; }
+html.light .bg-white\/\[0\.06\],
+html.light .bg-white\/\[0\.08\] { background: rgba(0,0,0,0.04) !important; }
+html.light .bg-white\/5 { background: rgba(0,0,0,0.03) !important; }
+html.light .bg-white\/10 { background: rgba(0,0,0,0.05) !important; }
+html.light .bg-white\/20 { background: rgba(0,0,0,0.06) !important; }
+
+/* Hover states */
+html.light .hover\:bg-white\/\[0\.02\]:hover,
+html.light .hover\:bg-white\/\[0\.04\]:hover { background: rgba(0,0,0,0.03) !important; }
+html.light .hover\:bg-white\/\[0\.05\]:hover,
+html.light .hover\:bg-white\/\[0\.06\]:hover { background: rgba(0,0,0,0.05) !important; }
+html.light .hover\:bg-white\/\[0\.1\]:hover,
+html.light .hover\:bg-white\/10:hover { background: rgba(0,0,0,0.07) !important; }
+html.light .hover\:bg-white\/\[0\.15\]:hover,
+html.light .hover\:bg-white\/20:hover { background: rgba(0,0,0,0.1) !important; }
+html.light .hover\:text-white:hover { color: #1a1a2e !important; }
+html.light .hover\:border-white\/\[0\.15\]:hover { border-color: rgba(0,0,0,0.15) !important; }
+
+/* Overlays */
+html.light .bg-black\/60 { background: rgba(0,0,0,0.2) !important; }
+html.light .bg-black\/70 { background: rgba(0,0,0,0.25) !important; }
+
+/* Inputs */
+html.light input, html.light textarea, html.light select {
+  color: #1a1a2e !important;
+  background-color: rgba(0,0,0,0.02) !important;
+}
+html.light input::placeholder, html.light textarea::placeholder {
+  color: rgba(26,26,46,0.35) !important;
+}
+html.light input[type="date"] { color-scheme: light !important; }
+
+/* Scrollbar */
+html.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
+html.light ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }
+
+/* Accent buttons always white text */
+html.light .bg-\[\#FC682C\],
+html.light .bg-gradient-to-r.from-\[\#FC682C\] { color: #fff !important; }
+html.light .bg-\[\#FC682C\] *, html.light .portal-btn { color: #fff !important; }
+html.light .text-\[\#FC682C\] { color: #fc682c !important; }
+
+/* Status badges stay vibrant */
+html.light .bg-blue-500\/20 { background: rgba(59,130,246,0.12) !important; }
+html.light .bg-green-500\/20 { background: rgba(34,197,94,0.12) !important; }
+html.light .bg-emerald-500\/20 { background: rgba(16,185,129,0.12) !important; }
+html.light .bg-amber-500\/20 { background: rgba(245,158,11,0.12) !important; }
+html.light .bg-purple-500\/20 { background: rgba(139,92,246,0.12) !important; }
+html.light .bg-red-500\/20 { background: rgba(239,68,68,0.12) !important; }
+html.light .text-blue-400 { color: #2563eb !important; }
+html.light .text-green-400 { color: #16a34a !important; }
+html.light .text-emerald-400 { color: #059669 !important; }
+html.light .text-amber-400 { color: #d97706 !important; }
+html.light .text-purple-400 { color: #7c3aed !important; }
+html.light .text-red-400 { color: #dc2626 !important; }
+
+/* Portal card in light */
+html.light .portal-card { background: #fff !important; border-color: rgba(0,0,0,0.08) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
+html.light .portal-input { color: #1a1a2e !important; background: rgba(0,0,0,0.02) !important; }
+html.light .portal-btn-secondary { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.1) !important; color: #1a1a2e !important; }
+
+/* Message bubbles */
+html.light .message-bubble-admin { background: rgba(0,0,0,0.03) !important; border-color: rgba(0,0,0,0.08) !important; }
+html.light .message-bubble-client { background: rgba(252,104,44,0.08) !important; border-color: rgba(252,104,44,0.2) !important; }
+
+/* Shadows */
+html.light .shadow-lg { box-shadow: 0 10px 15px rgba(0,0,0,0.06) !important; }
+html.light .shadow-2xl { box-shadow: 0 25px 50px rgba(0,0,0,0.08) !important; }
+
+/* Focus */
+html.light .focus-ring { --tw-ring-offset-color: #f5f6fa; }
+
 * {
   box-sizing: border-box;
   padding: 0;
