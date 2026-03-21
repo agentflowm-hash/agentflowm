@@ -8794,7 +8794,7 @@ function ClientDetailModal({
           {activeTab === "dokumente" && (
             <div className="space-y-4">
               {/* Quick Actions */}
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-6 gap-2">
                 <button
                   onClick={() => { setShowCreateInvoice(true); setShowCreateOffer(false); setShowCreateAgreement(false); setShowPosterGen(false); setShowCreateSub(false); }}
                   className="p-3 bg-gradient-to-br from-[#FC682C]/10 to-[#FC682C]/5 border border-[#FC682C]/20 rounded-xl hover:border-[#FC682C]/40 transition-colors text-center"
@@ -8830,6 +8830,24 @@ function ClientDetailModal({
                   <SparklesIcon className="w-5 h-5 text-green-400 mx-auto mb-1" />
                   <span className="text-xs font-medium text-green-400">Poster</span>
                 </button>
+                <label
+                  className="p-3 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20 rounded-xl hover:border-yellow-500/40 transition-colors text-center cursor-pointer"
+                >
+                  <ArrowUpTrayIcon className="w-5 h-5 text-yellow-400 mx-auto mb-1" />
+                  <span className="text-xs font-medium text-yellow-400">Datei</span>
+                  <input type="file" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file || !client.project_id) return;
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    try {
+                      const res = await fetch(`/api/projects/${client.project_id}/files`, { method: 'POST', credentials: 'include', body: formData });
+                      if (res.ok) showToast("success", `"${file.name}" hochgeladen`);
+                      else showToast("error", "Upload fehlgeschlagen");
+                    } catch { showToast("error", "Verbindungsfehler"); }
+                    e.target.value = "";
+                  }} />
+                </label>
               </div>
 
               {/* Create Invoice Form */}

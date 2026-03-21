@@ -14,6 +14,7 @@ import {
 } from '@/lib/api';
 import nodemailer from 'nodemailer';
 import { logActivity } from '@/lib/activity';
+import { n8nLeadWelcome } from '@/lib/n8n';
 
 // ─────────────────────────────────────────────────────────────────
 // GET /api/leads - List all leads
@@ -160,6 +161,9 @@ export const POST = createHandler({
   }
 
   await logActivity('lead_created', 'lead', lead.id, name, { source, email });
+
+  // Fire n8n webhook for welcome email
+  n8nLeadWelcome({ name, email, phone, package_interest, company });
 
   return { lead };
 });

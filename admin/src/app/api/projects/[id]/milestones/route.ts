@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { n8nMilestoneDone } from "@/lib/n8n";
 
 // Erlaubte Status-Werte für Meilensteine
 const ALLOWED_MILESTONE_STATUS = ["pending", "current", "done"] as const;
@@ -139,6 +140,30 @@ export async function PATCH(
     // Bei Status-Änderung: Projekt-Progress aktualisieren
     if (status !== undefined) {
       await updateProjectProgress(projectId);
+
+      // n8n: Meilenstein abgeschlossen → E-Mail an Kunden
+      if (status === "done") {
+        const { data: project } = await db
+          .from("portal_projects")
+          .select("name, client_id")
+          .eq("id", projectId)
+          .single();
+        if (project) {
+          const { data: client } = await db
+            .from("portal_clients")
+            .select("name, email")
+            .eq("id", project.client_id)
+            .single();
+          if (client?.email) {
+            n8nMilestoneDone({
+              milestone_title: updated.title,
+              project_name: project.name,
+              client_name: client.name,
+              client_email: client.email,
+            });
+          }
+        }
+      }
     }
 
     return NextResponse.json({ success: true, milestone: updated });

@@ -46,6 +46,7 @@ import {
   CalendarExport,
   FilePreview,
   KeyboardShortcuts,
+  ThemeToggle,
   useToast,
 } from "@/components";
 
@@ -130,6 +131,7 @@ export default function Dashboard() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [previewFile, setPreviewFile] = useState<number | null>(null);
   const [invoices, setInvoices] = useState<PortalInvoice[]>([]);
+  const [fileFilter, setFileFilter] = useState<string>("all");
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: "", company: "", phone: "" });
   const [savingProfile, setSavingProfile] = useState(false);
@@ -447,6 +449,9 @@ export default function Dashboard() {
               />
             </div>
             <div className="flex items-center gap-3 sm:gap-4">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Language Switcher (only on .com) */}
               <LanguageSwitcher />
 
@@ -973,27 +978,16 @@ export default function Dashboard() {
             {/* File Categories */}
             <div className="grid grid-cols-4 gap-2 mb-6">
               {[
-                { label: tFiles("all"), count: files.length, active: true },
-                {
-                  label: tFiles("images"),
-                  count: files.filter((f) => f.type === "image").length,
-                },
-                {
-                  label: tFiles("documents"),
-                  count: files.filter((f) => ["pdf", "doc"].includes(f.type))
-                    .length,
-                },
-                {
-                  label: tFiles("other"),
-                  count: files.filter(
-                    (f) => !["image", "pdf", "doc"].includes(f.type),
-                  ).length,
-                },
-              ].map((cat, i) => (
+                { id: "all", label: tFiles("all"), count: files.length },
+                { id: "image", label: tFiles("images"), count: files.filter((f) => f.type === "image").length },
+                { id: "docs", label: tFiles("documents"), count: files.filter((f) => ["pdf", "doc"].includes(f.type)).length },
+                { id: "other", label: tFiles("other"), count: files.filter((f) => !["image", "pdf", "doc"].includes(f.type)).length },
+              ].map((cat) => (
                 <button
-                  key={i}
+                  key={cat.id}
+                  onClick={() => setFileFilter(cat.id)}
                   className={`py-2 px-3 rounded-xl text-xs font-medium transition-colors ${
-                    cat.active
+                    fileFilter === cat.id
                       ? "bg-[#FC682C]/20 text-[#FC682C] border border-[#FC682C]/30"
                       : "bg-white/[0.02] text-white/50 border border-white/[0.06] hover:bg-white/[0.05]"
                   }`}
@@ -1013,7 +1007,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                {files.map((file, idx) => {
+                {files.filter((f) => fileFilter === "all" ? true : fileFilter === "image" ? f.type === "image" : fileFilter === "docs" ? ["pdf", "doc"].includes(f.type) : !["image", "pdf", "doc"].includes(f.type)).map((file, idx) => {
                   const fileIcon = getFileIcon(file.type);
                   const FileIcon = fileIcon.icon;
                   return (

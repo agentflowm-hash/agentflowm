@@ -192,11 +192,25 @@ export async function POST(
       return NextResponse.json({ error: "SMTP nicht konfiguriert. Bitte SMTP_HOST, SMTP_USER, SMTP_PASS in .env.local setzen." }, { status: 500 });
     }
 
+    // PDF als Attachment generieren (optional, Fehler blockiert nicht)
+    let pdfAttachment: { filename: string; content: Buffer }[] = [];
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://admin.agentflowm.de';
+      const pdfRes = await fetch(`${baseUrl}/api/invoices/${invoiceId}/pdf`);
+      if (pdfRes.ok) {
+        const pdfBuffer = Buffer.from(await pdfRes.arrayBuffer());
+        pdfAttachment = [{ filename: `${invoice.invoice_number}.pdf`, content: pdfBuffer }];
+      }
+    } catch {
+      // PDF-Generierung fehlgeschlagen, sende ohne Attachment
+    }
+
     await transporter.sendMail({
       from: `"${companyName}" <${process.env.SMTP_USER || companyEmail}>`,
       to: recipientEmail,
       subject: `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} ${invoice.invoice_number} - ${companyName}`,
       html: emailHtml,
+      attachments: pdfAttachment,
     });
 
     // Update invoice status to sent
