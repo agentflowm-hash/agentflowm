@@ -80,7 +80,7 @@
     "startRecording": "تسجيل رسالة صوتية",
     "stopRecording": "إيقاف التسجيل",
     "send": "إرسال",
-    "discard": "حذف",
+    "discard": "تجاهل",
     "recording": "جاري التسجيل...",
     "micPermission": "مطلوب إذن الميكروفون"
   },
@@ -192,7 +192,7 @@
     "inProgress": "قيد التنفيذ",
     "completed": "مكتمل",
     "pending": "معلق",
-    "onHold": "متوقف"
+    "onHold": "معلّق"
   },
   "redirect": {
     "redirecting": "جاري التحويل..."
