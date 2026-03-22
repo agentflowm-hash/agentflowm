@@ -26,12 +26,13 @@ function getTransporter() {
 // POST: Send invoice via email
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const invoiceId = parseInt(params.id);
+    const { id } = await params;
+    const invoiceId = parseInt(id);
     const body = await request.json();
-    const { email_override, message } = body;
+    const { email_override, message, reminder } = body;
 
     // Get invoice
     const { data: invoice, error } = await supabase
@@ -117,7 +118,9 @@ export async function POST(
 
           <p>Hallo ${invoice.client_name},</p>
 
-          ${message ? `<p>${message}</p>` : `<p>anbei finden Sie Ihre ${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} fuer unsere Zusammenarbeit.</p>`}
+          ${reminder
+        ? `<p>wir erlauben uns, Sie freundlich an die ausstehende Zahlung der folgenden Rechnung zu erinnern:</p>`
+        : message ? `<p>${message}</p>` : `<p>anbei finden Sie Ihre ${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} fuer unsere Zusammenarbeit.</p>`}
 
           <div class="invoice-box">
             <div class="invoice-number">${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} ${invoice.invoice_number}</div>
@@ -208,19 +211,25 @@ export async function POST(
     await transporter.sendMail({
       from: `"${companyName}" <${process.env.SMTP_USER || companyEmail}>`,
       to: recipientEmail,
-      subject: `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} ${invoice.invoice_number} - ${companyName}`,
+      subject: reminder
+        ? `Zahlungserinnerung: ${invoice.invoice_number} - ${companyName}`
+        : `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} ${invoice.invoice_number} - ${companyName}`,
       html: emailHtml,
       attachments: pdfAttachment,
     });
 
-    // Update invoice status to sent
+    // Update invoice status (don't reset to "sent" if it's a reminder)
+    const updateData: Record<string, string> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (!reminder) {
+      updateData.status = "sent";
+      updateData.sent_at = new Date().toISOString();
+    }
+
     const { data: updatedInvoice, error: updateError } = await supabase
       .from("invoices")
-      .update({
-        status: "sent",
-        sent_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", invoiceId)
       .select()
       .single();
@@ -229,7 +238,9 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} per E-Mail an ${recipientEmail} gesendet`,
+      message: reminder
+        ? `Zahlungserinnerung an ${recipientEmail} gesendet`
+        : `${invoice.type === 'offer' ? 'Angebot' : 'Rechnung'} per E-Mail an ${recipientEmail} gesendet`,
       invoice: updatedInvoice,
     });
   } catch (err: any) {

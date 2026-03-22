@@ -607,11 +607,7 @@ export function Dashboard() {
                     }`}
                   >
                     {activeTab === item.id && (
-                      <motion.div
-                        layoutId="sidebar-active"
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full"
-                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                      />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-[#FC682C] to-[#9D65C9] rounded-r-full transition-all" />
                     )}
                     <div className="relative flex-shrink-0">
                       <item.icon

@@ -70,7 +70,7 @@ export default function PortalLoginPage() {
           {/* Logo */}
           <div className="text-center mb-10">
             <img
-              src="/logo-dark.png"
+              src="/logo-compact-dark.png"
               alt="AgentFlow"
               className="h-16 w-auto mx-auto mb-6"
             />
